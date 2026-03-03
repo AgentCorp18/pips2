@@ -27,3 +27,6 @@ export {
   ROLE_LABELS,
 } from './permissions'
 export type { Permission } from './permissions'
+
+export { STEP_CONTENT, getStepForms, getRequiredForms, ALL_FORM_TYPES } from './step-content'
+export type { StepFormDef, StepContent } from './step-content'

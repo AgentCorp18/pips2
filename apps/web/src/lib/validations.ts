@@ -79,9 +79,41 @@ export const updateOrgSettingsSchema = z.object({
     .regex(/^[A-Z0-9]+$/, 'Ticket prefix must be uppercase letters and numbers only'),
 })
 
+/* ============================================================
+   Project Schemas
+   ============================================================ */
+
+export const createProjectSchema = z.object({
+  name: z
+    .string()
+    .min(3, 'Project name must be at least 3 characters')
+    .max(200, 'Project name must be less than 200 characters'),
+  description: z
+    .string()
+    .max(2000, 'Description must be less than 2000 characters')
+    .optional()
+    .or(z.literal('')),
+  target_completion_date: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine(
+      (val) => {
+        if (!val) return true
+        const date = new Date(val)
+        if (isNaN(date.getTime())) return false
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        return date >= today
+      },
+      { message: 'Target date must be today or in the future' },
+    ),
+})
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type SignupInput = z.infer<typeof signupSchema>
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 export type CreateOrgInput = z.infer<typeof createOrgSchema>
 export type UpdateOrgSettingsInput = z.infer<typeof updateOrgSettingsSchema>
+export type CreateProjectInput = z.infer<typeof createProjectSchema>
