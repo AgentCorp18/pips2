@@ -8,8 +8,8 @@ import { Plus, FolderKanban } from 'lucide-react'
 import { ExportProjectsButton } from '@/components/pips/export-projects-button'
 
 export const metadata: Metadata = {
-  title: 'Projects - PIPS',
-  description: 'Manage your PIPS improvement projects',
+  title: 'Projects',
+  description: 'Create and manage process improvement projects using the 6-step PIPS methodology.',
 }
 
 const ProjectsPage = async () => {

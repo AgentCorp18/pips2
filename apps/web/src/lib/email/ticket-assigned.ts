@@ -2,7 +2,7 @@
  * "You've been assigned a ticket" email template.
  */
 
-import { baseTemplate, ctaButton } from './base-template'
+import { baseTemplate, ctaButton, escapeHtml } from './base-template'
 
 const PRIORITY_COLORS: Record<string, string> = {
   critical: '#DC2626',
@@ -31,8 +31,13 @@ export const ticketAssignedTemplate = ({
   const priorityColor = PRIORITY_COLORS[priority.toLowerCase()] ?? '#6B7280'
   const priorityLabel = priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()
 
+  const safeName = escapeHtml(recipientName)
+  const safeTitle = escapeHtml(ticketTitle)
+  const safeId = escapeHtml(ticketId)
+  const safeProject = escapeHtml(projectName)
+
   const body = `
-    <p style="margin:0 0 16px;">Hi ${recipientName},</p>
+    <p style="margin:0 0 16px;">Hi ${safeName},</p>
 
     <p style="margin:0 0 20px;">
       A ticket has been assigned to you:
@@ -44,21 +49,21 @@ export const ticketAssignedTemplate = ({
       <tr>
         <td style="padding:20px;">
           <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1B1340;">
-            ${ticketTitle}
+            ${safeTitle}
           </p>
           <table role="presentation" cellpadding="0" cellspacing="0">
             <tr>
               <td style="padding-right:16px;font-size:13px;color:#6B7280;">
-                ID: <code style="font-family:'JetBrains Mono',monospace;font-size:12px;">${ticketId}</code>
+                ID: <code style="font-family:'JetBrains Mono',monospace;font-size:12px;">${safeId}</code>
               </td>
               <td style="padding-right:16px;font-size:13px;color:#6B7280;">
-                Project: <strong>${projectName}</strong>
+                Project: <strong>${safeProject}</strong>
               </td>
               <td style="font-size:13px;">
                 <span style="display:inline-block;padding:2px 10px;border-radius:20px;
                              background-color:${priorityColor};color:#FFFFFF;font-weight:600;
                              font-size:11px;text-transform:uppercase;">
-                  ${priorityLabel}
+                  ${escapeHtml(priorityLabel)}
                 </span>
               </td>
             </tr>
@@ -71,7 +76,7 @@ export const ticketAssignedTemplate = ({
   `
 
   return baseTemplate({
-    preheader: `Ticket assigned: ${ticketTitle}`,
+    preheader: `Ticket assigned: ${safeTitle}`,
     body,
   })
 }

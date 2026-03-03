@@ -271,7 +271,9 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
     query = query.lt('due_date', filters.due_date_before).not('due_date', 'is', null)
   }
   if (filters.search) {
-    query = query.ilike('title', `%${filters.search}%`)
+    // Escape LIKE wildcards to prevent unintended broad matching
+    const escaped = filters.search.replace(/[%_\\]/g, '\\$&')
+    query = query.ilike('title', `%${escaped}%`)
   }
 
   // Sorting

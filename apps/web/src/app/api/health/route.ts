@@ -16,8 +16,6 @@ type CheckResult = {
 type HealthResponse = {
   status: HealthStatus
   timestamp: string
-  version: string
-  uptime: number
   checks: {
     database: CheckResult
     auth: CheckResult
@@ -27,9 +25,6 @@ type HealthResponse = {
 /* ============================================================
    Helpers
    ============================================================ */
-
-const getVersion = (): string =>
-  process.env.APP_VERSION ?? process.env.npm_package_version ?? '0.1.0'
 
 const checkDatabase = async (): Promise<CheckResult> => {
   const start = performance.now()
@@ -99,8 +94,6 @@ export const GET = async () => {
   const body: HealthResponse = {
     status,
     timestamp: new Date().toISOString(),
-    version: getVersion(),
-    uptime: Math.round(process.uptime()),
     checks,
   }
 

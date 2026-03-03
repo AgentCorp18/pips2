@@ -5,11 +5,13 @@ import { Badge } from '@/components/ui/badge'
 import { StatCards } from '@/components/dashboard/stat-cards'
 import { ProjectsByStepChart } from '@/components/dashboard/projects-by-step-chart'
 import { RecentActivity } from '@/components/dashboard/recent-activity'
+import { CreateSampleProject } from './create-sample-project'
 import { getDashboardStats, getProjectsByStep, getRecentActivity } from './actions'
 
 export const metadata: Metadata = {
-  title: 'Dashboard - PIPS',
-  description: 'Your PIPS dashboard overview',
+  title: 'Dashboard',
+  description:
+    'Your PIPS dashboard — view project stats, activity, and process improvement progress at a glance.',
 }
 
 const DashboardPage = async () => {
@@ -76,6 +78,13 @@ const DashboardPage = async () => {
 
       {/* Stats cards */}
       <StatCards stats={stats} />
+
+      {/* Sample project CTA — shown when user has no projects */}
+      {stats.activeProjects === 0 && (
+        <div className="mt-6">
+          <CreateSampleProject />
+        </div>
+      )}
 
       {/* Projects by Step chart */}
       <div className="mt-8">

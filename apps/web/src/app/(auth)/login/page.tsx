@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { LoginForm } from './login-form'
 
 export const metadata: Metadata = {
-  title: 'Sign In - PIPS',
-  description: 'Sign in to your PIPS account',
+  title: 'Sign In',
+  description: 'Sign in to your PIPS account to manage process improvement projects and tickets.',
 }
 
 const LoginPage = () => {

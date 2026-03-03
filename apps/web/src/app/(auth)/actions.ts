@@ -68,7 +68,10 @@ export const signup = async (
   })
 
   if (error) {
-    return { error: error.message }
+    // Log the real error server-side but return a generic message to prevent
+    // leaking internal details (e.g., "User already registered" enables enumeration)
+    console.error('Signup error:', error.message)
+    return { error: 'Unable to create account. Please try again or use a different email.' }
   }
 
   return {
@@ -93,7 +96,9 @@ export const forgotPassword = async (
   })
 
   if (error) {
-    return { error: error.message }
+    // Log the real error server-side but return a generic message to prevent
+    // email enumeration and leaking internal error details
+    console.error('Password reset error:', error.message)
   }
 
   // Always show success to prevent email enumeration
@@ -122,7 +127,8 @@ export const resetPassword = async (
   })
 
   if (error) {
-    return { error: error.message }
+    console.error('Password reset error:', error.message)
+    return { error: 'Failed to reset password. Please try again.' }
   }
 
   redirect('/dashboard')

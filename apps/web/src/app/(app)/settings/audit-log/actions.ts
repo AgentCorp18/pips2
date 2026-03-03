@@ -67,7 +67,8 @@ export const getAuditLog = async (
     .range(offset, offset + limit - 1)
 
   if (error) {
-    return { entries: [], total: 0, page, limit, error: error.message }
+    console.error('Failed to fetch audit log:', error.message)
+    return { entries: [], total: 0, page, limit, error: 'Failed to fetch audit log' }
   }
 
   const mapped: AuditLogEntry[] = (entries ?? []).map((entry) => {

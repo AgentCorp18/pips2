@@ -26,7 +26,10 @@ const STEPS = [
 
 export const HowItWorksSection = () => {
   return (
-    <section className="relative bg-[var(--color-cloud)] px-6 py-24 md:px-8 md:py-28">
+    <section
+      id="how-it-works"
+      className="relative bg-[var(--color-cloud)] px-6 py-24 md:px-8 md:py-28"
+    >
       {/* Dot grid overlay */}
       <div
         className="pointer-events-none absolute inset-0 opacity-30"

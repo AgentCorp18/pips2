@@ -162,7 +162,10 @@ export const acceptInvitation = async (token: string): Promise<ActionResult> => 
     role: invitation.role as string,
   })
 
-  if (memberError) return { success: false, error: memberError.message }
+  if (memberError) {
+    console.error('Failed to add member to org:', memberError.message)
+    return { success: false, error: 'Failed to join the organization. Please try again.' }
+  }
 
   // Mark invitation as accepted
   await admin.from('org_invitations').update({ status: 'accepted' }).eq('id', invitation.id)
@@ -196,7 +199,10 @@ export const declineInvitation = async (token: string): Promise<ActionResult> =>
     .update({ status: 'revoked' })
     .eq('id', invitation.id)
 
-  if (error) return { success: false, error: error.message }
+  if (error) {
+    console.error('Failed to decline invitation:', error.message)
+    return { success: false, error: 'Failed to decline invitation. Please try again.' }
+  }
 
   return { success: true }
 }

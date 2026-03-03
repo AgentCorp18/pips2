@@ -78,12 +78,12 @@ describe('saveFormData', () => {
     expect(result).toEqual({ success: true })
   })
 
-  it('returns error with message when upsert fails', async () => {
+  it('returns generic error message when upsert fails (no internal details leaked)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ error: { message: 'duplicate key violation' } }]
 
     const result = await saveFormData('proj-1', 1, 'problem_statement', {})
-    expect(result).toEqual({ success: false, error: 'duplicate key violation' })
+    expect(result).toEqual({ success: false, error: 'Failed to save form data. Please try again.' })
   })
 
   it('can save different form types', async () => {

@@ -19,8 +19,9 @@ import { resolveQuickFilters } from '@/components/tickets/quick-filter-resolver'
 import type { QuickFilterKey } from '@/components/tickets/ticket-quick-filters'
 
 export const metadata: Metadata = {
-  title: 'Tickets - PIPS',
-  description: 'Manage your tickets and tasks',
+  title: 'Tickets',
+  description:
+    'Track and manage tickets, tasks, and action items across your process improvement projects.',
 }
 
 type TicketsPageProps = {

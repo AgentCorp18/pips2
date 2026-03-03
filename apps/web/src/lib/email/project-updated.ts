@@ -2,7 +2,7 @@
  * "Project step advanced" email template.
  */
 
-import { baseTemplate, ctaButton } from './base-template'
+import { baseTemplate, ctaButton, escapeHtml } from './base-template'
 
 const STEP_COLORS: Record<string, string> = {
   identify: '#3B82F6',
@@ -40,11 +40,15 @@ export const projectUpdatedTemplate = ({
   const stepNumber = STEP_NUMBERS[stepKey] ?? ''
   const stepLabel = stepNumber ? `Step ${stepNumber}: ${newStep}` : newStep
 
+  const safeName = escapeHtml(recipientName)
+  const safeProject = escapeHtml(projectName)
+  const safeStep = escapeHtml(stepLabel)
+
   const body = `
-    <p style="margin:0 0 16px;">Hi ${recipientName},</p>
+    <p style="margin:0 0 16px;">Hi ${safeName},</p>
 
     <p style="margin:0 0 20px;">
-      Project <strong>${projectName}</strong> has advanced to a new step:
+      Project <strong>${safeProject}</strong> has advanced to a new step:
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
@@ -55,7 +59,7 @@ export const projectUpdatedTemplate = ({
           <span style="display:inline-block;padding:8px 24px;border-radius:20px;
                        background-color:${stepColor};color:#FFFFFF;font-weight:700;
                        font-size:15px;letter-spacing:0.02em;">
-            ${stepLabel}
+            ${safeStep}
           </span>
         </td>
       </tr>
@@ -65,7 +69,7 @@ export const projectUpdatedTemplate = ({
   `
 
   return baseTemplate({
-    preheader: `${projectName} moved to ${stepLabel}`,
+    preheader: `${safeProject} moved to ${safeStep}`,
     body,
   })
 }

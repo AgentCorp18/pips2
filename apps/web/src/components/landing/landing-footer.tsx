@@ -5,17 +5,16 @@ const FOOTER_LINKS = {
   Product: [
     { label: 'Features', href: '#features' },
     { label: 'Methodology', href: '#methodology' },
-    { label: 'Pricing', href: '/pricing' },
+    { label: 'How It Works', href: '#how-it-works' },
   ],
-  Resources: [
-    { label: 'Documentation', href: '/docs' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Support', href: '/support' },
+  Account: [
+    { label: 'Sign Up', href: '/signup' },
+    { label: 'Sign In', href: '/login' },
+    { label: 'Dashboard', href: '/dashboard' },
   ],
-  Company: [
-    { label: 'About', href: '/about' },
-    { label: 'Privacy', href: '/privacy' },
-    { label: 'Terms', href: '/terms' },
+  Legal: [
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
   ],
 } as const
 

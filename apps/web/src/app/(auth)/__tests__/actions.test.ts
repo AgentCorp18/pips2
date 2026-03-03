@@ -212,7 +212,7 @@ describe('signup', () => {
 
   /* ---------- Supabase error path ---------- */
 
-  it('returns Supabase error message on auth failure', async () => {
+  it('returns generic error message on auth failure (no internal details leaked)', async () => {
     mockSignUp.mockResolvedValue({
       error: { message: 'User already registered' },
     })
@@ -224,7 +224,10 @@ describe('signup', () => {
     })
     const result = await signup(emptyState, fd)
 
-    expect(result.error).toBe('User already registered')
+    // Should NOT expose the raw Supabase error (prevents email enumeration)
+    expect(result.error).toBe(
+      'Unable to create account. Please try again or use a different email.',
+    )
   })
 
   /* ---------- Success path ---------- */
@@ -304,7 +307,7 @@ describe('forgotPassword', () => {
 
   /* ---------- Supabase error path ---------- */
 
-  it('returns Supabase error message on failure', async () => {
+  it('returns success even on error to prevent email enumeration', async () => {
     mockResetPasswordForEmail.mockResolvedValue({
       error: { message: 'Rate limit exceeded' },
     })
@@ -312,7 +315,11 @@ describe('forgotPassword', () => {
     const fd = buildFormData({ email: 'user@example.com' })
     const result = await forgotPassword(emptyState, fd)
 
-    expect(result.error).toBe('Rate limit exceeded')
+    // Should always return success to prevent email enumeration
+    expect(result.success).toBe(
+      'If an account exists with that email, you will receive a password reset link.',
+    )
+    expect(result.error).toBeUndefined()
   })
 
   /* ---------- Success path ---------- */
@@ -401,7 +408,7 @@ describe('resetPassword', () => {
 
   /* ---------- Supabase error path ---------- */
 
-  it('returns Supabase error message on failure', async () => {
+  it('returns generic error message on failure (no internal details leaked)', async () => {
     mockUpdateUser.mockResolvedValue({
       error: { message: 'Auth session expired' },
     })
@@ -412,7 +419,8 @@ describe('resetPassword', () => {
     })
     const result = await resetPassword(emptyState, fd)
 
-    expect(result.error).toBe('Auth session expired')
+    // Should NOT expose the raw Supabase error
+    expect(result.error).toBe('Failed to reset password. Please try again.')
   })
 
   /* ---------- Success path ---------- */

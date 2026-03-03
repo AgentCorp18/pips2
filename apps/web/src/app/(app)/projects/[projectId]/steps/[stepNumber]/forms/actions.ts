@@ -38,7 +38,8 @@ export const saveFormData = async (
   )
 
   if (error) {
-    return { success: false, error: error.message }
+    console.error('Failed to save form data:', error.message)
+    return { success: false, error: 'Failed to save form data. Please try again.' }
   }
 
   revalidatePath(`/projects/${projectId}/steps/${stepNumber}`)

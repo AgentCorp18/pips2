@@ -6,6 +6,22 @@
  * and a branded footer.
  */
 
+/* ============================================================
+   HTML escape helper — prevents XSS in email templates when
+   interpolating user-controlled strings (names, titles, etc.)
+   ============================================================ */
+
+const HTML_ESCAPE_MAP: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+}
+
+export const escapeHtml = (unsafe: string): string =>
+  unsafe.replace(/[&<>"']/g, (ch) => HTML_ESCAPE_MAP[ch] ?? ch)
+
 const BRAND = {
   primary: '#4F46E5',
   deep: '#1B1340',

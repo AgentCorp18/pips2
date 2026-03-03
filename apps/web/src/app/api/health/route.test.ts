@@ -51,8 +51,9 @@ describe('GET /api/health', () => {
     expect(body.status).toBe('ok')
     expect(body.timestamp).toBeDefined()
     expect(new Date(body.timestamp).toISOString()).toBe(body.timestamp)
-    expect(typeof body.version).toBe('string')
-    expect(typeof body.uptime).toBe('number')
+    // version and uptime intentionally removed to avoid information disclosure
+    expect(body.version).toBeUndefined()
+    expect(body.uptime).toBeUndefined()
     expect(body.checks.database.status).toBe('ok')
     expect(typeof body.checks.database.latency_ms).toBe('number')
     expect(body.checks.auth.status).toBe('ok')
@@ -170,13 +171,15 @@ describe('GET /api/health', () => {
     expect(body.checks.database.error).toBe('network timeout')
   })
 
-  it('includes version from APP_VERSION env var', async () => {
+  it('does not expose version or uptime (information disclosure prevention)', async () => {
     process.env.APP_VERSION = '2.5.0'
 
     const response = await GET()
     const body = await response.json()
 
-    expect(body.version).toBe('2.5.0')
+    // Security: version and uptime should not be exposed
+    expect(body.version).toBeUndefined()
+    expect(body.uptime).toBeUndefined()
 
     delete process.env.APP_VERSION
   })

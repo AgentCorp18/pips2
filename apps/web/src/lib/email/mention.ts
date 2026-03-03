@@ -2,7 +2,7 @@
  * "You were mentioned in a comment" email template.
  */
 
-import { baseTemplate, ctaButton } from './base-template'
+import { baseTemplate, ctaButton, escapeHtml } from './base-template'
 
 export type MentionParams = {
   recipientName: string
@@ -19,12 +19,17 @@ export const mentionTemplate = ({
   entityLabel,
   mentionUrl,
 }: MentionParams): string => {
+  const safeName = escapeHtml(recipientName)
+  const safeCommenter = escapeHtml(commenterName)
+  const safeSnippet = escapeHtml(commentSnippet)
+  const safeEntity = escapeHtml(entityLabel)
+
   const body = `
-    <p style="margin:0 0 16px;">Hi ${recipientName},</p>
+    <p style="margin:0 0 16px;">Hi ${safeName},</p>
 
     <p style="margin:0 0 20px;">
-      <strong>${commenterName}</strong> mentioned you in a comment on
-      <strong>${entityLabel}</strong>:
+      <strong>${safeCommenter}</strong> mentioned you in a comment on
+      <strong>${safeEntity}</strong>:
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
@@ -33,10 +38,10 @@ export const mentionTemplate = ({
       <tr>
         <td style="padding:16px 20px;">
           <p style="margin:0;font-size:14px;color:#374151;font-style:italic;line-height:1.5;">
-            &ldquo;${commentSnippet}&rdquo;
+            &ldquo;${safeSnippet}&rdquo;
           </p>
           <p style="margin:8px 0 0;font-size:12px;color:#6B7280;">
-            &mdash; ${commenterName}
+            &mdash; ${safeCommenter}
           </p>
         </td>
       </tr>
@@ -46,7 +51,7 @@ export const mentionTemplate = ({
   `
 
   return baseTemplate({
-    preheader: `${commenterName} mentioned you: "${commentSnippet.slice(0, 60)}..."`,
+    preheader: `${safeCommenter} mentioned you: "${escapeHtml(commentSnippet.slice(0, 60))}..."`,
     body,
   })
 }

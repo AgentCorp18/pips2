@@ -7,7 +7,7 @@ import { mentionTemplate } from '@/lib/email/mention'
 import { projectUpdatedTemplate } from '@/lib/email/project-updated'
 import { invitationTemplate } from '@/lib/email/invitation'
 import { welcomeTemplate } from '@/lib/email/welcome'
-import { baseTemplate, ctaButton } from '@/lib/email/base-template'
+import { baseTemplate, ctaButton, escapeHtml } from '@/lib/email/base-template'
 
 /* ============================================================
    Validation
@@ -119,13 +119,13 @@ const renderTemplate = (
 
     default:
       return baseTemplate({
-        preheader: title,
+        preheader: escapeHtml(title),
         body: `
-          <p style="margin:0 0 16px;">Hi ${recipientName},</p>
+          <p style="margin:0 0 16px;">Hi ${escapeHtml(recipientName)},</p>
           <p style="margin:0 0 8px;font-weight:600;font-size:17px;color:#1B1340;">
-            ${title}
+            ${escapeHtml(title)}
           </p>
-          <p style="margin:0 0 20px;">${body}</p>
+          <p style="margin:0 0 20px;">${escapeHtml(body)}</p>
           ${ctaButton('View in PIPS', entityUrl)}
         `,
       })

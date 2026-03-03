@@ -93,14 +93,16 @@ export const createTeam = async (name: string, description?: string): Promise<Ac
       if (error.code === '23505') {
         return { success: false, error: 'A team with that name already exists' }
       }
-      return { success: false, error: error.message }
+      console.error('Failed to create team:', error.message)
+      return { success: false, error: 'Failed to create team. Please try again.' }
     }
 
     revalidatePath('/teams')
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return { success: false, error: message }
+    console.error('Failed to create team:', message)
+    return { success: false, error: 'Failed to create team. Please try again.' }
   }
 }
 
@@ -126,13 +128,17 @@ export const deleteTeam = async (teamId: string): Promise<ActionResult> => {
 
     const { error } = await supabase.from('teams').delete().eq('id', teamId)
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      console.error('Failed to delete team:', error.message)
+      return { success: false, error: 'Failed to delete team. Please try again.' }
+    }
 
     revalidatePath('/teams')
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return { success: false, error: message }
+    console.error('Failed to delete team:', message)
+    return { success: false, error: 'Failed to delete team. Please try again.' }
   }
 }
 
@@ -219,14 +225,16 @@ export const addTeamMember = async (teamId: string, userId: string): Promise<Act
       if (error.code === '23505') {
         return { success: false, error: 'User is already a member of this team' }
       }
-      return { success: false, error: error.message }
+      console.error('Failed to add team member:', error.message)
+      return { success: false, error: 'Failed to add team member. Please try again.' }
     }
 
     revalidatePath(`/teams/${teamId}`)
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return { success: false, error: message }
+    console.error('Failed to add team member:', message)
+    return { success: false, error: 'Failed to add team member. Please try again.' }
   }
 }
 
@@ -256,12 +264,16 @@ export const removeTeamMember = async (teamId: string, userId: string): Promise<
       .eq('team_id', teamId)
       .eq('user_id', userId)
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      console.error('Failed to remove team member:', error.message)
+      return { success: false, error: 'Failed to remove team member. Please try again.' }
+    }
 
     revalidatePath(`/teams/${teamId}`)
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return { success: false, error: message }
+    console.error('Failed to remove team member:', message)
+    return { success: false, error: 'Failed to remove team member. Please try again.' }
   }
 }

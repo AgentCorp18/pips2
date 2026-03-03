@@ -62,7 +62,10 @@ export const changeMemberRole = async (
       .eq('id', memberId)
       .eq('org_id', orgId)
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      console.error('Failed to change member role:', error.message)
+      return { success: false, error: 'Failed to change member role. Please try again.' }
+    }
 
     revalidatePath('/settings/members')
     return { success: true }
@@ -121,7 +124,10 @@ export const removeMember = async (orgId: string, memberId: string): Promise<Act
       .eq('id', memberId)
       .eq('org_id', orgId)
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      console.error('Failed to remove member:', error.message)
+      return { success: false, error: 'Failed to remove member. Please try again.' }
+    }
 
     revalidatePath('/settings/members')
     return { success: true }
@@ -209,7 +215,10 @@ export const inviteMember = async (
       .select('token')
       .single()
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      console.error('Failed to create invitation:', error.message)
+      return { success: false, error: 'Failed to send invitation. Please try again.' }
+    }
 
     // Send invitation email (non-blocking — don't fail the action if email fails)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'

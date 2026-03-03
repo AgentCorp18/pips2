@@ -68,6 +68,22 @@ export const updateProfile = async (
 }
 
 export const updateAvatarUrl = async (avatarUrl: string): Promise<ProfileActionState> => {
+  // Validate the URL is from our Supabase storage to prevent arbitrary URL injection
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!supabaseUrl) {
+    return { error: 'Server configuration error' }
+  }
+
+  try {
+    const parsed = new URL(avatarUrl)
+    const expected = new URL(supabaseUrl)
+    if (parsed.hostname !== expected.hostname) {
+      return { error: 'Avatar URL must be from the application storage' }
+    }
+  } catch {
+    return { error: 'Invalid avatar URL' }
+  }
+
   const supabase = await createClient()
 
   const {
