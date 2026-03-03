@@ -37,6 +37,12 @@ export const middleware = async (request: NextRequest) => {
   const { supabaseResponse, user, supabase } = await updateSession(request)
   const { pathname } = request.nextUrl
 
+  // Never redirect POST/PATCH/DELETE requests — server actions handle their own auth.
+  // Redirecting a POST would drop the request body and break form submissions.
+  if (request.method !== 'GET') {
+    return supabaseResponse
+  }
+
   // Redirect unauthenticated users away from protected routes and onboarding
   if (!user && (isProtectedPath(pathname) || isOnboardingPath(pathname))) {
     const loginUrl = request.nextUrl.clone()

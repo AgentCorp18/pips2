@@ -45,8 +45,8 @@ import { middleware, config } from '../middleware'
    Helpers
    ============================================================ */
 
-const createRequest = (pathname: string): NextRequest => {
-  return new NextRequest(new URL(`http://localhost:3000${pathname}`))
+const createRequest = (pathname: string, method = 'GET'): NextRequest => {
+  return new NextRequest(new URL(`http://localhost:3000${pathname}`), { method })
 }
 
 /* ============================================================
@@ -229,6 +229,31 @@ describe('middleware', () => {
 
     it('allows access to /onboarding/step-1', async () => {
       const response = await middleware(createRequest('/onboarding/step-1'))
+      expect(response.status).toBe(200)
+    })
+  })
+
+  /* --------------------------------------------------------
+     POST requests (server actions) pass through
+     -------------------------------------------------------- */
+
+  describe('POST requests pass through without redirect', () => {
+    it('allows POST to /dashboard for unauthenticated users', async () => {
+      const response = await middleware(createRequest('/dashboard', 'POST'))
+      expect(response.status).toBe(200)
+    })
+
+    it('allows POST to /dashboard for orgless authenticated users', async () => {
+      mockUser = { id: 'user-1' }
+      mockMembership = null
+      const response = await middleware(createRequest('/dashboard', 'POST'))
+      expect(response.status).toBe(200)
+    })
+
+    it('allows POST to /onboarding for authenticated users', async () => {
+      mockUser = { id: 'user-1' }
+      mockMembership = null
+      const response = await middleware(createRequest('/onboarding', 'POST'))
       expect(response.status).toBe(200)
     })
   })

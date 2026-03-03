@@ -63,87 +63,83 @@ test.describe('Organization creation', () => {
       }
     })
 
-    // Collect failed network requests
-    const failedRequests: string[] = []
-    page.on('response', (response) => {
-      if (response.status() >= 400) {
-        failedRequests.push(`${response.status()} ${response.url()}`)
-      }
-    })
-
     // Login first
     await page.goto('/login')
     await page.locator('input[name="email"]').fill(testUser.email)
     await page.locator('input[name="password"]').fill(testUser.password)
     await page.getByRole('button', { name: 'Sign in' }).click()
 
-    // Wait for redirect to onboarding
-    await page.waitForURL(/\/(onboarding|dashboard)/, { timeout: 15000 })
+    // Wait for the page to settle — middleware redirects orgless users to /onboarding.
+    // The redirect chain may be: login → /dashboard → middleware → /onboarding.
+    // Wait specifically for /onboarding since we know this user has no org yet.
+    await page.waitForURL(/\/onboarding/, { timeout: 15000 })
 
-    if (page.url().includes('/onboarding')) {
-      // Wait for the form to be fully hydrated
-      const nameInput = page.locator('input[name="name"]')
-      await expect(nameInput).toBeVisible({ timeout: 5000 })
-      await expect(nameInput).toBeEnabled()
+    console.log(`[E2E] Post-login URL: ${page.url()}`)
 
-      // Fill org creation form
-      const orgName = `E2E Test Org ${Date.now()}`
-      await nameInput.fill(orgName)
+    // Wait for the form to be ready
+    const nameInput = page.locator('input[name="name"]')
+    await expect(nameInput).toBeVisible({ timeout: 10000 })
+    await expect(nameInput).toBeEnabled()
 
-      // Wait for slug to auto-generate and be checked
-      const slugInput = page.locator('input[name="slug"]')
-      await expect(slugInput).not.toHaveValue('', { timeout: 3000 })
+    console.log(`[E2E] Form URL: ${page.url()}`)
 
-      // Wait for slug availability check to complete (debounce + network)
-      // The check has a 400ms debounce + network time
-      await page.waitForTimeout(1500)
+    // Fill org creation form
+    const orgName = `E2E Test Org ${Date.now()}`
+    await nameInput.fill(orgName)
 
-      // Verify the submit button is enabled (not disabled by 'taken' slug)
-      const submitButton = page.getByRole('button', { name: /Create organization/i })
-      await expect(submitButton).toBeVisible()
-      await expect(submitButton).toBeEnabled({ timeout: 5000 })
+    // Wait for slug to auto-generate
+    const slugInput = page.locator('input[name="slug"]')
+    await expect(slugInput).not.toHaveValue('', { timeout: 3000 })
 
-      // Log diagnostic info before clicking
-      const slugValue = await slugInput.inputValue()
-      const nameValue = await nameInput.inputValue()
-      console.log(`[E2E] Submitting org: name="${nameValue}", slug="${slugValue}"`)
+    // Wait for slug availability check to complete (400ms debounce + network time)
+    await page.waitForTimeout(2000)
 
-      // Click submit
-      await submitButton.click()
+    // Verify the submit button is enabled (not disabled by 'taken' slug)
+    const submitButton = page.getByRole('button', { name: /Create organization/i })
+    await expect(submitButton).toBeVisible()
+    await expect(submitButton).toBeEnabled({ timeout: 5000 })
 
-      // Wait for either redirect to dashboard OR an error message to appear
-      const redirectOrError = await Promise.race([
-        page.waitForURL(/\/dashboard/, { timeout: 20000 }).then(() => 'redirected' as const),
-        page
-          .locator('[role="alert"]')
-          .waitFor({ timeout: 20000 })
-          .then(() => 'error' as const),
-      ]).catch(() => 'timeout' as const)
+    // Log diagnostic info
+    const slugValue = await slugInput.inputValue()
+    const nameValue = await nameInput.inputValue()
+    console.log(`[E2E] Submitting org: name="${nameValue}", slug="${slugValue}"`)
 
-      if (redirectOrError === 'error') {
-        const errorText = await page.locator('[role="alert"]').textContent()
-        throw new Error(
-          `Server action returned error: ${errorText}. Console errors: ${consoleErrors.join('; ')}. Failed requests: ${failedRequests.join('; ')}`,
-        )
-      }
+    // Click submit and wait for button to show pending state
+    await submitButton.click()
 
-      if (redirectOrError === 'timeout') {
-        const currentUrl = page.url()
-        const buttonText = await submitButton.textContent().catch(() => 'unknown')
-        throw new Error(
-          `Timed out waiting for redirect to /dashboard. ` +
-            `Current URL: ${currentUrl}. Button text: "${buttonText}". ` +
-            `Console errors: ${consoleErrors.join('; ')}. ` +
-            `Failed requests: ${failedRequests.join('; ')}`,
-        )
-      }
+    // The button text changes to "Creating organization..." while pending
+    const pendingButton = page.getByRole('button', { name: /Creating organization/i })
+    const wasPending = await pendingButton.isVisible({ timeout: 3000 }).catch(() => false)
+    console.log(`[E2E] Button showed pending state: ${wasPending}`)
+
+    // Wait for redirect to dashboard (org creation + redirect)
+    try {
+      await page.waitForURL(/\/dashboard/, { timeout: 30000 })
+    } catch {
+      // Capture diagnostic info on failure
+      const currentUrl = page.url()
+      const pageContent = await page.content()
+      const hasError = pageContent.includes('role="alert"')
+      const errorDiv = page.locator('form [role="alert"]')
+      const errorText = await errorDiv.textContent().catch(() => 'none')
+
+      throw new Error(
+        `Failed to redirect to /dashboard after org creation. ` +
+          `Current URL: ${currentUrl}. ` +
+          `Form error visible: ${hasError}. Error text: "${errorText}". ` +
+          `Console errors: ${consoleErrors.join('; ')}`,
+      )
     }
 
     // Verify we're on the dashboard
     expect(page.url()).toContain('/dashboard')
 
+    // Small delay for DB consistency
+    await page.waitForTimeout(500)
+
     // Verify the org was actually created in the DB
     const orgs = await getUserOrgs(testUser.id)
+    console.log(`[E2E] getUserOrgs result: ${JSON.stringify(orgs)}`)
     expect(orgs.length).toBeGreaterThan(0)
     expect(orgs[0]!.role).toBe('owner')
   })
