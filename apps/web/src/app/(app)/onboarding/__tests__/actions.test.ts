@@ -41,6 +41,15 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(() => ({
+    from: () => {
+      const idx = fromCallIndex++
+      return createChainForIndex(idx)
+    },
+  })),
+}))
+
 const mockRedirect = vi.fn()
 vi.mock('next/navigation', () => ({
   redirect: (...args: unknown[]) => {
