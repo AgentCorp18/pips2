@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withSentryConfig } from '@sentry/nextjs'
 
 const securityHeaders = [
   {
@@ -37,7 +38,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.supabase.co",
       "font-src 'self'",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io",
       "frame-ancestors 'none'",
     ].join('; '),
   },
@@ -54,4 +55,16 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withSentryConfig(nextConfig, {
+  // Sentry organization and project slugs (placeholders until configured)
+  org: 'pips-app',
+  project: 'pips-web',
+
+  // Suppress Sentry build logs in CI output
+  silent: true,
+
+  // Disable source map upload until a valid DSN and auth token are set
+  sourcemaps: {
+    disable: true,
+  },
+})
