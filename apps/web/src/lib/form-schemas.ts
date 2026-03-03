@@ -90,6 +90,26 @@ export const forceFieldSchema = z.object({
 
 export type ForceFieldData = z.infer<typeof forceFieldSchema>
 
+const checksheetCategorySchema = z.object({
+  id: z.string(),
+  label: z.string().default(''),
+})
+
+const checksheetTimePeriodSchema = z.object({
+  id: z.string(),
+  label: z.string().default(''),
+})
+
+export const checksheetSchema = z.object({
+  title: z.string().default(''),
+  categories: z.array(checksheetCategorySchema).default([]),
+  timePeriods: z.array(checksheetTimePeriodSchema).default([]),
+  tallies: z.record(z.string(), z.number()).default({}),
+  notes: z.string().default(''),
+})
+
+export type ChecksheetData = z.infer<typeof checksheetSchema>
+
 /* ============================================================
    Step 3 — Generate
    ============================================================ */
@@ -130,6 +150,32 @@ export type BrainwritingData = z.infer<typeof brainwritingSchema>
 /* ============================================================
    Step 4 — Select & Plan
    ============================================================ */
+
+const pairedOptionSchema = z.object({
+  id: z.string(),
+  label: z.string().default(''),
+})
+
+const pairedComparisonSchema = z.object({
+  optionA: z.string(),
+  optionB: z.string(),
+  winner: z.string().nullable().default(null),
+  notes: z.string().default(''),
+})
+
+const pairedResultSchema = z.object({
+  optionId: z.string(),
+  wins: z.number().default(0),
+  rank: z.number().default(0),
+})
+
+export const pairedComparisonsSchema = z.object({
+  options: z.array(pairedOptionSchema).default([]),
+  comparisons: z.array(pairedComparisonSchema).default([]),
+  results: z.array(pairedResultSchema).default([]),
+})
+
+export type PairedComparisonsData = z.infer<typeof pairedComparisonsSchema>
 
 export const criteriaMatrixSchema = z.object({
   criteria: z.array(
@@ -265,6 +311,36 @@ export const lessonsLearnedSchema = z.object({
 
 export type LessonsLearnedData = z.infer<typeof lessonsLearnedSchema>
 
+const balanceSheetGainSchema = z.object({
+  id: z.string(),
+  description: z.string().default(''),
+  impact: z.enum(['high', 'medium', 'low']).default('medium'),
+  evidence: z.string().default(''),
+})
+
+const balanceSheetLossSchema = z.object({
+  id: z.string(),
+  description: z.string().default(''),
+  impact: z.enum(['high', 'medium', 'low']).default('medium'),
+  mitigation: z.string().default(''),
+})
+
+const balanceSheetObservationSchema = z.object({
+  id: z.string(),
+  description: z.string().default(''),
+  category: z.string().default(''),
+})
+
+export const balanceSheetSchema = z.object({
+  gains: z.array(balanceSheetGainSchema).default([]),
+  losses: z.array(balanceSheetLossSchema).default([]),
+  observations: z.array(balanceSheetObservationSchema).default([]),
+  summary: z.string().default(''),
+  recommendation: z.enum(['sustain', 'modify', 'abandon', '']).default(''),
+})
+
+export type BalanceSheetData = z.infer<typeof balanceSheetSchema>
+
 /* ============================================================
    Schema Map — for dynamic lookup by form_type
    ============================================================ */
@@ -275,8 +351,10 @@ export const FORM_SCHEMAS: Record<string, z.ZodType> = {
   fishbone: fishboneSchema,
   five_why: fiveWhySchema,
   force_field: forceFieldSchema,
+  checksheet: checksheetSchema,
   brainstorming: brainstormingSchema,
   brainwriting: brainwritingSchema,
+  paired_comparisons: pairedComparisonsSchema,
   criteria_matrix: criteriaMatrixSchema,
   implementation_plan: implementationPlanSchema,
   raci: raciSchema,
@@ -285,4 +363,5 @@ export const FORM_SCHEMAS: Record<string, z.ZodType> = {
   before_after: beforeAfterSchema,
   evaluation: evaluationSchema,
   lessons_learned: lessonsLearnedSchema,
+  balance_sheet: balanceSheetSchema,
 }

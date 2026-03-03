@@ -15,8 +15,10 @@ const FORM_TYPE_TO_SLUG: Record<string, string> = {
   fishbone: 'fishbone',
   five_why: 'five_why',
   force_field: 'force_field',
+  checksheet: 'checksheet',
   brainstorming: 'brainstorming',
   brainwriting: 'brainwriting',
+  paired_comparisons: 'paired_comparisons',
   criteria_matrix: 'criteria-matrix',
   raci: 'raci',
   implementation_plan: 'implementation-plan',
@@ -25,6 +27,7 @@ const FORM_TYPE_TO_SLUG: Record<string, string> = {
   before_after: 'before-after',
   evaluation: 'evaluation',
   lessons_learned: 'lessons-learned',
+  balance_sheet: 'balance_sheet',
 }
 
 const STEP_NUMBERS: PipsStepNumber[] = [1, 2, 3, 4, 5, 6]

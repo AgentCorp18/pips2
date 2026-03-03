@@ -213,17 +213,20 @@ describe('getRequiredForms', () => {
 })
 
 describe('ALL_FORM_TYPES', () => {
-  it('contains all 15 form types', () => {
-    expect(ALL_FORM_TYPES).toHaveLength(15)
+  it('contains all 18 form types', () => {
+    expect(ALL_FORM_TYPES).toHaveLength(18)
   })
 
   it('includes form types from all steps', () => {
     expect(ALL_FORM_TYPES).toContain('problem_statement')
     expect(ALL_FORM_TYPES).toContain('fishbone')
+    expect(ALL_FORM_TYPES).toContain('checksheet')
     expect(ALL_FORM_TYPES).toContain('brainstorming')
+    expect(ALL_FORM_TYPES).toContain('paired_comparisons')
     expect(ALL_FORM_TYPES).toContain('criteria_matrix')
     expect(ALL_FORM_TYPES).toContain('milestone_tracker')
     expect(ALL_FORM_TYPES).toContain('before_after')
     expect(ALL_FORM_TYPES).toContain('lessons_learned')
+    expect(ALL_FORM_TYPES).toContain('balance_sheet')
   })
 })

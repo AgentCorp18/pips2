@@ -105,6 +105,13 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Map driving forces vs. restraining forces for change',
         required: false,
       },
+      {
+        type: 'checksheet',
+        name: 'Check Sheet',
+        description:
+          'Structured tally sheet to collect and quantify data by category over time periods',
+        required: false,
+      },
     ],
     completionCriteria: [
       'At least one root cause analysis tool has been completed',
@@ -190,6 +197,12 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         name: 'Criteria Matrix',
         description: 'Score and rank solutions against weighted criteria',
         required: true,
+      },
+      {
+        type: 'paired_comparisons',
+        name: 'Paired Comparisons',
+        description: 'Systematically compare options in pairs to produce a ranked list',
+        required: false,
       },
       {
         type: 'raci',
@@ -299,6 +312,12 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         type: 'lessons_learned',
         name: 'Lessons Learned',
         description: 'Document insights, successes, and areas for improvement',
+        required: false,
+      },
+      {
+        type: 'balance_sheet',
+        name: 'Balance Sheet',
+        description: 'Weigh gains vs. losses and decide the path forward',
         required: false,
       },
     ],

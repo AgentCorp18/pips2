@@ -6,8 +6,10 @@ import {
   fishboneSchema,
   fiveWhySchema,
   forceFieldSchema,
+  checksheetSchema,
   brainstormingSchema,
   brainwritingSchema,
+  pairedComparisonsSchema,
   criteriaMatrixSchema,
   implementationPlanSchema,
   raciSchema,
@@ -16,6 +18,7 @@ import {
   beforeAfterSchema,
   evaluationSchema,
   lessonsLearnedSchema,
+  balanceSheetSchema,
 } from '../form-schemas'
 
 /* ============================================================
@@ -29,8 +32,10 @@ describe('FORM_SCHEMAS', () => {
     'fishbone',
     'five_why',
     'force_field',
+    'checksheet',
     'brainstorming',
     'brainwriting',
+    'paired_comparisons',
     'criteria_matrix',
     'implementation_plan',
     'raci',
@@ -39,10 +44,11 @@ describe('FORM_SCHEMAS', () => {
     'before_after',
     'evaluation',
     'lessons_learned',
+    'balance_sheet',
   ]
 
-  it('has entries for all 15 form types', () => {
-    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(15)
+  it('has entries for all 18 form types', () => {
+    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(18)
   })
 
   it('contains every expected form type key', () => {
@@ -206,6 +212,37 @@ describe('forceFieldSchema', () => {
   })
 })
 
+describe('checksheetSchema', () => {
+  it('passes with valid data', () => {
+    const result = checksheetSchema.safeParse({
+      title: 'Defect Tracking',
+      categories: [
+        { id: 'c1', label: 'Scratch' },
+        { id: 'c2', label: 'Dent' },
+      ],
+      timePeriods: [
+        { id: 't1', label: 'Week 1' },
+        { id: 't2', label: 'Week 2' },
+      ],
+      tallies: { 'c1-t1': 5, 'c2-t1': 3 },
+      notes: 'Scratches are most common',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('applies defaults for empty input', () => {
+    const result = checksheetSchema.safeParse({})
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.title).toBe('')
+      expect(result.data.categories).toEqual([])
+      expect(result.data.timePeriods).toEqual([])
+      expect(result.data.tallies).toEqual({})
+      expect(result.data.notes).toBe('')
+    }
+  })
+})
+
 /* ============================================================
    Step 3 — Generate
    ============================================================ */
@@ -246,6 +283,33 @@ describe('brainwritingSchema', () => {
       allIdeas: ['idea1', 'idea2', 'idea3'],
     })
     expect(result.success).toBe(true)
+  })
+})
+
+describe('pairedComparisonsSchema', () => {
+  it('passes with valid data', () => {
+    const result = pairedComparisonsSchema.safeParse({
+      options: [
+        { id: 'o1', label: 'Option A' },
+        { id: 'o2', label: 'Option B' },
+      ],
+      comparisons: [{ optionA: 'o1', optionB: 'o2', winner: 'o1', notes: 'Better ROI' }],
+      results: [
+        { optionId: 'o1', wins: 1, rank: 1 },
+        { optionId: 'o2', wins: 0, rank: 2 },
+      ],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('applies defaults for empty input', () => {
+    const result = pairedComparisonsSchema.safeParse({})
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.options).toEqual([])
+      expect(result.data.comparisons).toEqual([])
+      expect(result.data.results).toEqual([])
+    }
   })
 })
 
@@ -450,5 +514,32 @@ describe('lessonsLearnedSchema', () => {
       keyTakeaways: 'Start with pilot, then scale',
     })
     expect(result.success).toBe(true)
+  })
+})
+
+describe('balanceSheetSchema', () => {
+  it('passes with valid data', () => {
+    const result = balanceSheetSchema.safeParse({
+      gains: [{ id: 'g1', description: 'Reduced defects', impact: 'high', evidence: 'QC reports' }],
+      losses: [
+        { id: 'l1', description: 'Training cost', impact: 'medium', mitigation: 'Phased rollout' },
+      ],
+      observations: [{ id: 'o1', description: 'Team morale improved', category: 'people' }],
+      summary: 'Net positive outcome',
+      recommendation: 'sustain',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('applies defaults for empty input', () => {
+    const result = balanceSheetSchema.safeParse({})
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.gains).toEqual([])
+      expect(result.data.losses).toEqual([])
+      expect(result.data.observations).toEqual([])
+      expect(result.data.summary).toBe('')
+      expect(result.data.recommendation).toBe('')
+    }
   })
 })

@@ -7,6 +7,7 @@ import { getProjectStats, getProjectMembers, getProjectActivity } from './overvi
 import { OverviewStats } from './overview-stats'
 import { ActivityFeed } from './activity-feed'
 import { MembersList } from './members-list'
+import { ExportPDFButton } from '@/components/export-pdf-button'
 import { Calendar, User } from 'lucide-react'
 
 const STEP_LABELS: Record<number, string> = {
@@ -87,6 +88,10 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
         }))}
         orgRole={membership?.role ?? null}
       />
+
+      <div className="flex items-center justify-end">
+        <ExportPDFButton projectId={project.id} projectName={project.name} />
+      </div>
 
       <OverviewStats
         ticketsCreated={stats.ticketsCreated}
