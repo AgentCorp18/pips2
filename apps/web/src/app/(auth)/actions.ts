@@ -35,6 +35,12 @@ export const login = async (
   })
 
   if (error) {
+    if (error.code === 'email_not_confirmed') {
+      return {
+        error:
+          'Please confirm your email address before signing in. Check your inbox for a confirmation link.',
+      }
+    }
     return { error: 'Invalid email or password' }
   }
 
@@ -61,6 +67,7 @@ export const signup = async (
     email: result.data.email,
     password: result.data.password,
     options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
       data: {
         display_name: result.data.displayName,
       },

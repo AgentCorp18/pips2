@@ -117,6 +117,19 @@ describe('login', () => {
     })
   })
 
+  it('returns email confirmation error when email is not confirmed', async () => {
+    mockSignInWithPassword.mockResolvedValue({
+      error: { message: 'Email not confirmed', code: 'email_not_confirmed' },
+    })
+
+    const fd = buildFormData({ email: 'user@example.com', password: 'password123' })
+    const result = await login(emptyState, fd)
+
+    expect(result.error).toBe(
+      'Please confirm your email address before signing in. Check your inbox for a confirmation link.',
+    )
+  })
+
   /* ---------- Success path ---------- */
 
   it('redirects to /dashboard on successful login', async () => {
@@ -249,6 +262,7 @@ describe('signup', () => {
   })
 
   it('passes display_name in options.data to signUp', async () => {
+    process.env.NEXT_PUBLIC_APP_URL = 'https://app.pips.com'
     mockSignUp.mockResolvedValue({ error: null })
 
     const fd = buildFormData({
@@ -262,6 +276,7 @@ describe('signup', () => {
       email: 'jane@example.com',
       password: 'password123',
       options: {
+        emailRedirectTo: 'https://app.pips.com/login',
         data: {
           display_name: 'Jane Doe',
         },

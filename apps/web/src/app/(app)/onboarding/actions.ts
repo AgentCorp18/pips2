@@ -57,7 +57,7 @@ export const createOrganization = async (
   // Create organization
   const { data: org, error: orgError } = await supabase
     .from('organizations')
-    .insert({ name: result.data.name, slug: result.data.slug })
+    .insert({ name: result.data.name, slug: result.data.slug, created_by: user.id })
     .select('id')
     .single()
 
