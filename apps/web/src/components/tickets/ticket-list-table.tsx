@@ -133,7 +133,7 @@ export const TicketListTable = ({
         <BulkActionsBar selectedIds={Array.from(selectedIds)} onClear={clearSelection} />
       )}
 
-      <div className="rounded-lg border border-[var(--color-border)]">
+      <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
         <Table>
           <TableHeader>
             <TableRow>

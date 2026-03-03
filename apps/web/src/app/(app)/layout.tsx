@@ -9,6 +9,8 @@ import {
   Ticket,
   Users,
   Settings,
+  Menu,
+  X,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
@@ -21,8 +23,26 @@ const NAV_ITEMS = [
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
+const MOBILE_BREAKPOINT = 768
+
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const [commandOpen, setCommandOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < MOBILE_BREAKPOINT
+      setIsMobile(mobile)
+      if (!mobile) {
+        setSidebarOpen(false)
+      }
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Global Cmd+K / Ctrl+K shortcut
   useEffect(() => {
@@ -40,25 +60,65 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     setCommandOpen(true)
   }, [])
 
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev)
+  }, [])
+
+  const closeSidebar = useCallback(() => {
+    setSidebarOpen(false)
+  }, [])
+
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-bg)]">
+      {/* Mobile sidebar backdrop */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 transition-opacity"
+          onClick={closeSidebar}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') closeSidebar()
+          }}
+          role="button"
+          tabIndex={-1}
+          aria-label="Close sidebar"
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className="flex w-[var(--sidebar-width)] flex-col border-r border-[var(--color-border)] bg-[var(--sidebar)]"
+        className={`${
+          isMobile
+            ? `fixed inset-y-0 left-0 z-50 w-[var(--sidebar-width)] transform transition-transform duration-200 ease-in-out ${
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+              }`
+            : 'flex w-[var(--sidebar-width)]'
+        } flex-col border-r border-[var(--color-border)] bg-[var(--sidebar)]`}
         style={{ color: 'var(--sidebar-foreground)' }}
       >
         {/* Logo area */}
-        <div className="flex h-[var(--topbar-height)] items-center gap-2 px-6">
-          <div className="flex items-center gap-1.5">
-            {/* Step dot pips */}
-            <span className="step-1 pip-dot pip-dot--sm" />
-            <span className="step-2 pip-dot pip-dot--sm" />
-            <span className="step-3 pip-dot pip-dot--sm" />
-            <span className="step-4 pip-dot pip-dot--sm" />
-            <span className="step-5 pip-dot pip-dot--sm" />
-            <span className="step-6 pip-dot pip-dot--sm" />
+        <div className="flex h-[var(--topbar-height)] items-center justify-between gap-2 px-6">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              {/* Step dot pips */}
+              <span className="step-1 pip-dot pip-dot--sm" />
+              <span className="step-2 pip-dot pip-dot--sm" />
+              <span className="step-3 pip-dot pip-dot--sm" />
+              <span className="step-4 pip-dot pip-dot--sm" />
+              <span className="step-5 pip-dot pip-dot--sm" />
+              <span className="step-6 pip-dot pip-dot--sm" />
+            </div>
+            <span className="text-lg font-bold tracking-wide">PIPS</span>
           </div>
-          <span className="text-lg font-bold tracking-wide">PIPS</span>
+          {isMobile && (
+            <button
+              type="button"
+              onClick={closeSidebar}
+              className="rounded-[var(--radius-md)] p-1.5 opacity-70 hover:opacity-100"
+              aria-label="Close sidebar"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <div className="step-gradient-stripe" />
@@ -71,6 +131,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <a
                 key={item.href}
                 href={item.href}
+                onClick={isMobile ? closeSidebar : undefined}
                 className="flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium opacity-70 transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100"
               >
                 <Icon size={20} />
@@ -84,21 +145,35 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-[var(--topbar-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6">
-          {/* Search trigger — opens command palette */}
-          <button
-            type="button"
-            onClick={openCommandPalette}
-            className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-1.5 transition-colors hover:border-[var(--color-primary)]"
-          >
-            <Search size={16} className="text-[var(--color-text-tertiary)]" />
-            <span className="text-sm text-[var(--color-text-tertiary)]">
-              Search projects, tickets...
-            </span>
-            <kbd className="ml-8 rounded border border-[var(--color-border)] px-1.5 py-0.5 text-xs text-[var(--color-text-tertiary)]">
-              ⌘K
-            </kbd>
-          </button>
+        <header className="flex h-[var(--topbar-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:px-6">
+          <div className="flex items-center gap-3">
+            {/* Mobile hamburger menu */}
+            {isMobile && (
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className="rounded-[var(--radius-md)] p-1.5 transition-colors hover:bg-[var(--color-surface-secondary)]"
+                aria-label="Open sidebar"
+              >
+                <Menu size={20} style={{ color: 'var(--color-text-secondary)' }} />
+              </button>
+            )}
+
+            {/* Search trigger — opens command palette */}
+            <button
+              type="button"
+              onClick={openCommandPalette}
+              className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-1.5 transition-colors hover:border-[var(--color-primary)]"
+            >
+              <Search size={16} className="text-[var(--color-text-tertiary)]" />
+              <span className="hidden text-sm text-[var(--color-text-tertiary)] sm:inline">
+                Search projects, tickets...
+              </span>
+              <kbd className="ml-2 hidden rounded border border-[var(--color-border)] px-1.5 py-0.5 text-xs text-[var(--color-text-tertiary)] sm:inline">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
 
           {/* Right side */}
           <div className="flex items-center gap-4">
@@ -112,13 +187,16 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-white">
                 U
               </div>
-              <ChevronDown size={16} className="text-[var(--color-text-tertiary)]" />
+              <ChevronDown
+                size={16}
+                className="hidden text-[var(--color-text-tertiary)] sm:block"
+              />
             </button>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
 
       {/* Command Palette (Cmd+K) */}
