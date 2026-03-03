@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback, useEffect, useState } from 'react'
 import {
   Search,
   Bell,
@@ -10,6 +11,7 @@ import {
   Users,
   Settings,
 } from 'lucide-react'
+import { CommandPalette } from '@/components/layout/command-palette'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -20,6 +22,24 @@ const NAV_ITEMS = [
 ]
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const [commandOpen, setCommandOpen] = useState(false)
+
+  // Global Cmd+K / Ctrl+K shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setCommandOpen((prev) => !prev)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const openCommandPalette = useCallback(() => {
+    setCommandOpen(true)
+  }, [])
+
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-bg)]">
       {/* Sidebar */}
@@ -65,16 +85,20 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-[var(--topbar-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6">
-          {/* Search */}
-          <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-1.5">
+          {/* Search trigger — opens command palette */}
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-1.5 transition-colors hover:border-[var(--color-primary)]"
+          >
             <Search size={16} className="text-[var(--color-text-tertiary)]" />
             <span className="text-sm text-[var(--color-text-tertiary)]">
               Search projects, tickets...
             </span>
             <kbd className="ml-8 rounded border border-[var(--color-border)] px-1.5 py-0.5 text-xs text-[var(--color-text-tertiary)]">
-              /
+              ⌘K
             </kbd>
-          </div>
+          </button>
 
           {/* Right side */}
           <div className="flex items-center gap-4">
@@ -101,6 +125,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Page content */}
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
+
+      {/* Command Palette (Cmd+K) */}
+      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
     </div>
   )
 }

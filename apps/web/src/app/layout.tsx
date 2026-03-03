@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { DM_Sans, DM_Serif_Display, JetBrains_Mono } from 'next/font/google'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const dmSans = DM_Sans({
@@ -34,6 +35,7 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
         className={`${dmSans.variable} ${dmSerifDisplay.variable} ${jetBrainsMono.variable} font-sans antialiased`}
       >
         <TooltipProvider>{children}</TooltipProvider>
+        <Toaster />
       </body>
     </html>
   )
