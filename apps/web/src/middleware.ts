@@ -6,7 +6,17 @@ import { updateSession } from '@/lib/supabase/middleware'
  * Unauthenticated visitors are redirected to /login.
  * Authenticated visitors without an org are redirected to /onboarding.
  */
-const PROTECTED_PATHS = ['/dashboard', '/projects', '/tickets', '/teams', '/settings']
+const PROTECTED_PATHS = [
+  '/dashboard',
+  '/projects',
+  '/tickets',
+  '/teams',
+  '/settings',
+  '/notifications',
+  '/my-work',
+  '/search',
+  '/profile',
+]
 
 /**
  * Routes reserved for unauthenticated users. Authenticated visitors

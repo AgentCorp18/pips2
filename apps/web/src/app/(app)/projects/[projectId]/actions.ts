@@ -35,6 +35,13 @@ export const advanceStep = async (
     return { success: false, error: 'Project not found' }
   }
 
+  // Check permission — advancing a step requires step.complete
+  try {
+    await requirePermission(project.org_id, 'step.complete')
+  } catch {
+    return { success: false, error: 'Insufficient permissions to advance steps' }
+  }
+
   if (project.current_step !== stepNumber) {
     return { success: false, error: 'Can only advance the current step' }
   }
@@ -175,6 +182,23 @@ export const updateProjectStatus = async (
 
   if (!user) {
     return { success: false, error: 'Not authenticated' }
+  }
+
+  // Verify project exists and check permissions
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id, org_id')
+    .eq('id', projectId)
+    .single()
+
+  if (!project) {
+    return { success: false, error: 'Project not found' }
+  }
+
+  try {
+    await requirePermission(project.org_id, 'project.update')
+  } catch {
+    return { success: false, error: 'Insufficient permissions to update project status' }
   }
 
   const { error } = await supabase

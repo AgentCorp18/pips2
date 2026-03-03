@@ -57,8 +57,14 @@ export const globalSearch = async (
 
   const supabase = await createClient()
 
-  // Build query string for full-text search (wrap each word in quotes, AND them)
-  const ftsQuery = trimmed
+  // Sanitize input: strip PostgREST special characters to prevent filter injection
+  const sanitized = trimmed.replace(/[%_(),.\\'"]/g, '')
+  if (!sanitized) {
+    return { groups: [], total: 0 }
+  }
+
+  // Build query string for full-text search (plain text, AND terms)
+  const ftsQuery = sanitized
     .split(/\s+/)
     .filter(Boolean)
     .map((word) => `'${word}'`)
@@ -70,7 +76,7 @@ export const globalSearch = async (
     .select('id, name, current_step, status')
     .eq('org_id', resolvedOrgId)
     .is('archived_at', null)
-    .or(`name.ilike.%${trimmed}%,search_vector.fts.${ftsQuery}`)
+    .or(`name.ilike.%${sanitized}%,search_vector.fts.${ftsQuery}`)
     .limit(LIMIT_PER_TYPE)
 
   // Search tickets: full-text search on search_vector

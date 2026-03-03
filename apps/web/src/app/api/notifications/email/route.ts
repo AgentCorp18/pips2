@@ -1,20 +1,20 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import type { NotificationType } from '@/types/notifications'
 
 /* ============================================================
-   Types
+   Validation
    ============================================================ */
 
-type EmailNotificationPayload = {
-  user_id: string
-  type: NotificationType
-  title: string
-  body: string
-  entity_type?: string
-  entity_id?: string
-}
+const emailPayloadSchema = z.object({
+  user_id: z.string().uuid(),
+  type: z.string().min(1),
+  title: z.string().min(1).max(500),
+  body: z.string().min(1).max(5000),
+  entity_type: z.string().optional(),
+  entity_id: z.string().uuid().optional(),
+})
 
 /* ============================================================
    Helpers
@@ -76,22 +76,23 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Parse request body
-  let payload: EmailNotificationPayload
+  // Parse and validate request body
+  let rawBody: unknown
   try {
-    payload = (await request.json()) as EmailNotificationPayload
+    rawBody = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { user_id, type, title, body, entity_type, entity_id } = payload
-
-  if (!user_id || !type || !title || !body) {
+  const parsed = emailPayloadSchema.safeParse(rawBody)
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Missing required fields: user_id, type, title, body' },
+      { error: 'Invalid payload', details: parsed.error.flatten().fieldErrors },
       { status: 400 },
     )
   }
+
+  const { user_id, type, title, body, entity_type, entity_id } = parsed.data
 
   // Fetch user profile to get email
   const supabase = await createClient()
