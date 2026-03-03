@@ -61,7 +61,7 @@ const TicketRow = ({ ticket }: { ticket: MyWorkTicket }) => {
             <div className="mt-0.5 flex items-center gap-2">
               {ticket.project && (
                 <span className="truncate text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {ticket.project.name}
+                  {ticket.project.title}
                 </span>
               )}
               {ticket.due_date && (

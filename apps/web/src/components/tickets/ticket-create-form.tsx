@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DatePicker } from '@/components/ui/date-picker'
 import { createTicket, type TicketActionState } from '@/app/(app)/tickets/actions'
 
 /* ============================================================
@@ -185,10 +186,9 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="due_date">Due Date</Label>
-          <Input
+          <DatePicker
             id="due_date"
             name="due_date"
-            type="date"
             aria-describedby={state.fieldErrors?.due_date ? 'due-date-error' : undefined}
           />
           {state.fieldErrors?.due_date && (

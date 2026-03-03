@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { createTicketSchema, updateTicketSchema, ticketFiltersSchema } from '@/lib/validations'
@@ -98,7 +99,7 @@ export const createTicket = async (
   }
 
   revalidatePath('/tickets')
-  return {}
+  redirect('/tickets')
 }
 
 /* ============================================================
@@ -240,7 +241,7 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
       *,
       assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url ),
       reporter:profiles!tickets_reporter_id_fkey ( id, display_name, avatar_url ),
-      project:projects!tickets_project_id_fkey ( id, name )
+      project:projects!tickets_project_id_fkey ( id, title )
     `,
       { count: 'exact' },
     )
@@ -309,7 +310,7 @@ export const getTicket = async (ticketId: string) => {
       *,
       assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url ),
       reporter:profiles!tickets_reporter_id_fkey ( id, display_name, avatar_url ),
-      project:projects!tickets_project_id_fkey ( id, name )
+      project:projects!tickets_project_id_fkey ( id, title )
     `,
     )
     .eq('id', ticketId)
@@ -347,7 +348,7 @@ export const getTicketsForBoard = async (
       *,
       assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url ),
       reporter:profiles!tickets_reporter_id_fkey ( id, display_name, avatar_url ),
-      project:projects!tickets_project_id_fkey ( id, name )
+      project:projects!tickets_project_id_fkey ( id, title )
     `,
     )
     .eq('org_id', orgId)

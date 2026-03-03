@@ -46,7 +46,7 @@ export const exportProjectsCSV = async (): Promise<ExportResult> => {
     .select(
       `
       id,
-      name,
+      title,
       status,
       current_step,
       created_at,
@@ -73,7 +73,7 @@ export const exportProjectsCSV = async (): Promise<ExportResult> => {
 
     return [
       p.id,
-      p.name,
+      p.title,
       p.status ?? '',
       String(p.current_step ?? ''),
       ownerProfile?.display_name ?? '',
@@ -109,7 +109,7 @@ export const exportTicketsCSV = async (projectId?: string): Promise<ExportResult
       due_date,
       created_at,
       assignee:profiles!tickets_assignee_id_fkey ( display_name ),
-      project:projects!tickets_project_id_fkey ( name )
+      project:projects!tickets_project_id_fkey ( title )
     `,
     )
     .eq('org_id', orgId)
@@ -143,7 +143,7 @@ export const exportTicketsCSV = async (projectId?: string): Promise<ExportResult
     const assignee = t.assignee as unknown as {
       display_name: string
     } | null
-    const project = t.project as unknown as { name: string } | null
+    const project = t.project as unknown as { title: string } | null
 
     return [
       t.id,
@@ -153,7 +153,7 @@ export const exportTicketsCSV = async (projectId?: string): Promise<ExportResult
       t.priority ?? '',
       t.type ?? '',
       assignee?.display_name ?? '',
-      project?.name ?? '',
+      project?.title ?? '',
       t.created_at ?? '',
       t.due_date ?? '',
     ]

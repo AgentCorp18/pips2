@@ -139,7 +139,7 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
   }
   const project = ticket.project as unknown as {
     id: string
-    name: string
+    title: string
   } | null
 
   const ticketData = {

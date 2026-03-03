@@ -39,7 +39,7 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
     .from('projects')
     .select(
       `
-      id, name, description, status, current_step,
+      id, title, description, status, current_step,
       target_completion_date, created_at, org_id,
       profiles!projects_owner_id_fkey ( display_name ),
       project_steps ( step_number, status ),
@@ -173,7 +173,7 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
   const currentStepDef = PIPS_STEPS.find((s) => s.number === (project.current_step ?? 1))
 
   const data: ProjectPDFData = {
-    name: project.name,
+    name: project.title as string,
     description: project.description ?? null,
     status: project.status ?? 'active',
     currentStep: project.current_step ?? 1,

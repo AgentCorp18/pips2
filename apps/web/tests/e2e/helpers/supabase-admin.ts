@@ -90,3 +90,60 @@ export const getUserOrgs = async (userId: string) => {
 
   return data ?? []
 }
+
+// ────────────────────────────────────────────────────────────
+// Query helpers — read test data for assertions
+// ────────────────────────────────────────────────────────────
+
+/**
+ * Fetch a project by ID.
+ */
+export const getProject = async (projectId: string) => {
+  const admin = getAdminClient()
+  const { data } = await admin.from('projects').select('*').eq('id', projectId).single()
+  return data
+}
+
+/**
+ * Fetch a ticket by ID.
+ */
+export const getTicket = async (ticketId: string) => {
+  const admin = getAdminClient()
+  const { data } = await admin.from('tickets').select('*').eq('id', ticketId).single()
+  return data
+}
+
+/**
+ * Fetch team members with their profile display names.
+ */
+export const getTeamMembers = async (teamId: string) => {
+  const admin = getAdminClient()
+  const { data } = await admin
+    .from('team_members')
+    .select('user_id, role, profiles(display_name)')
+    .eq('team_id', teamId)
+  return data ?? []
+}
+
+/**
+ * Fetch recent audit log entries for an org.
+ */
+export const getAuditLog = async (orgId: string, limit: number = 10) => {
+  const admin = getAdminClient()
+  const { data } = await admin
+    .from('audit_log')
+    .select('*')
+    .eq('org_id', orgId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return data ?? []
+}
+
+/**
+ * Fetch a user profile by ID.
+ */
+export const getProfileById = async (userId: string) => {
+  const admin = getAdminClient()
+  const { data } = await admin.from('profiles').select('*').eq('id', userId).single()
+  return data
+}

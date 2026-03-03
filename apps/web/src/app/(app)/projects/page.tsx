@@ -41,7 +41,7 @@ const ProjectsPage = async () => {
     .select(
       `
       id,
-      name,
+      title,
       description,
       status,
       current_step,
@@ -103,7 +103,7 @@ const ProjectsPage = async () => {
               <ProjectCard
                 key={project.id}
                 id={project.id}
-                name={project.name}
+                name={project.title as string}
                 description={project.description}
                 status={project.status ?? 'active'}
                 currentStep={project.current_step ?? 1}

@@ -75,7 +75,7 @@ type TicketData = {
   assignee_id: string | null
   due_date: string | null
   tags: string[]
-  project: { id: string; name: string } | null
+  project: { id: string; title: string } | null
   assignee: { id: string; display_name: string; avatar_url: string | null } | null
   reporter: { id: string; display_name: string; avatar_url: string | null }
   created_at: string
@@ -312,7 +312,7 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
         {ticket.project && (
           <SidebarField label="Project" icon={<FolderKanban size={14} />}>
             <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-              {ticket.project.name}
+              {ticket.project.title}
             </p>
           </SidebarField>
         )}

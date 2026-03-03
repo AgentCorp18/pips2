@@ -124,11 +124,11 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   // Fetch projects for filter dropdown
   const { data: projectsRaw } = await supabase
     .from('projects')
-    .select('id, name')
+    .select('id, title')
     .eq('org_id', membership.org_id)
-    .order('name')
+    .order('title')
 
-  const projects = (projectsRaw ?? []).map((p) => ({ id: p.id, name: p.name }))
+  const projects = (projectsRaw ?? []).map((p) => ({ id: p.id, name: p.title as string }))
 
   return (
     <div className="mx-auto max-w-full px-4">

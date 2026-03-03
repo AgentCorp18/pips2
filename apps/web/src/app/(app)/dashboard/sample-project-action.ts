@@ -36,11 +36,11 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     .from('projects')
     .insert({
       org_id: membership.org_id,
-      name: 'Parking Lot Safety Improvement',
+      title: 'Parking Lot Safety Improvement',
       description:
         'Sample project: The company parking lot has 3x more safety incidents than the industry average. This pre-filled project demonstrates the PIPS methodology with completed Steps 1 and 2.',
       owner_id: user.id,
-      current_step: 3,
+      current_step: 'generate',
       status: 'active',
     })
     .select('id')
@@ -57,7 +57,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
   const steps = [
     {
       project_id: projectId,
-      step_number: 1,
+      step: 'identify',
       status: 'completed',
       started_at: now,
       completed_at: now,
@@ -65,7 +65,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     },
     {
       project_id: projectId,
-      step_number: 2,
+      step: 'analyze',
       status: 'completed',
       started_at: now,
       completed_at: now,
@@ -73,7 +73,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     },
     {
       project_id: projectId,
-      step_number: 3,
+      step: 'generate',
       status: 'in_progress',
       started_at: now,
       completed_at: null,
@@ -81,7 +81,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     },
     {
       project_id: projectId,
-      step_number: 4,
+      step: 'select_plan',
       status: 'not_started',
       started_at: null,
       completed_at: null,
@@ -89,7 +89,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     },
     {
       project_id: projectId,
-      step_number: 5,
+      step: 'implement',
       status: 'not_started',
       started_at: null,
       completed_at: null,
@@ -97,7 +97,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     },
     {
       project_id: projectId,
-      step_number: 6,
+      step: 'evaluate',
       status: 'not_started',
       started_at: null,
       completed_at: null,
@@ -116,7 +116,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
   await supabase.from('project_members').insert({
     project_id: projectId,
     user_id: user.id,
-    role: 'owner',
+    role: 'lead',
   })
 
   // Insert pre-filled forms for Steps 1 and 2
@@ -124,8 +124,10 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     // Step 1: Problem Statement
     {
       project_id: projectId,
-      step_number: 1,
+      step: 'identify',
       form_type: 'problem_statement',
+      title: 'Parking Lot Safety — Problem Statement',
+      created_by: user.id,
       data: {
         asIs: 'The company parking lot averages 4.5 safety incidents per quarter, compared to the industry average of 1.5 incidents per quarter.',
         desired:
@@ -146,8 +148,10 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     // Step 1: Impact Assessment
     {
       project_id: projectId,
-      step_number: 1,
+      step: 'identify',
       form_type: 'impact_assessment',
+      title: 'Parking Lot Safety — Impact Assessment',
+      created_by: user.id,
       data: {
         financialImpact:
           '$50,000/year in insurance premiums, medical costs, and lost productivity from incidents.',
@@ -166,8 +170,10 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     // Step 2: Fishbone Diagram
     {
       project_id: projectId,
-      step_number: 2,
+      step: 'analyze',
       form_type: 'fishbone',
+      title: 'Parking Lot Safety — Fishbone Diagram',
+      created_by: user.id,
       data: {
         problemStatement: 'Parking lot has 3x more safety incidents than industry average',
         categories: [
@@ -231,8 +237,10 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     // Step 2: Five Why Analysis
     {
       project_id: projectId,
-      step_number: 2,
+      step: 'analyze',
       form_type: 'five_why',
+      title: 'Parking Lot Safety — Five Why Analysis',
+      created_by: user.id,
       data: {
         problemStatement: 'Parking lot has 3x more safety incidents than industry average',
         whys: [
@@ -270,8 +278,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
   const { error: formsError } = await supabase.from('project_forms').insert(forms)
 
   if (formsError) {
-    // Non-fatal — the project still exists, forms just didn't save
-    console.error('Failed to insert sample forms:', formsError.message)
+    return { error: 'Failed to create sample forms. Please try again.' }
   }
 
   return { projectId }

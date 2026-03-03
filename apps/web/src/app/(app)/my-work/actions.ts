@@ -8,7 +8,7 @@ export type MyWorkTicket = {
   status: string
   priority: string
   due_date: string | null
-  project: { id: string; name: string } | null
+  project: { id: string; title: string } | null
   sequence_number: number
 }
 
@@ -32,7 +32,7 @@ export const getMyTickets = async (userId: string, orgId: string): Promise<Group
       priority,
       due_date,
       sequence_number,
-      project:projects!tickets_project_id_fkey ( id, name )
+      project:projects!tickets_project_id_fkey ( id, title )
     `,
     )
     .eq('org_id', orgId)
@@ -62,8 +62,8 @@ export const getMyTickets = async (userId: string, orgId: string): Promise<Group
   for (const ticket of tickets) {
     const rawProject = ticket.project
     const project = Array.isArray(rawProject)
-      ? ((rawProject[0] as { id: string; name: string } | undefined) ?? null)
-      : (rawProject as { id: string; name: string } | null)
+      ? ((rawProject[0] as { id: string; title: string } | undefined) ?? null)
+      : (rawProject as { id: string; title: string } | null)
 
     const mapped: MyWorkTicket = {
       id: ticket.id,

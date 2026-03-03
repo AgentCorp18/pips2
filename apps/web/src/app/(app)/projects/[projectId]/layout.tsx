@@ -35,7 +35,7 @@ const ProjectLayout = async ({
     .select(
       `
       id,
-      name,
+      title,
       status,
       current_step,
       owner_id,
@@ -69,7 +69,7 @@ const ProjectLayout = async ({
 
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {project.name}
+            {project.title}
           </h1>
           <Badge variant="outline">{statusLabel}</Badge>
         </div>

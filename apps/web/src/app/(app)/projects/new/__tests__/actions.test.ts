@@ -7,9 +7,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 let fromCallIndex = 0
 let fromResults: Array<{ data?: unknown; error?: unknown }> = []
 
-const createChainForIndex = (idx: number) => {
+const createChainForIndex = (
+  idx: number,
+  results: Array<{ data?: unknown; error?: unknown }> = fromResults,
+) => {
   const terminal = () => {
-    const result = fromResults[idx] ?? { data: null, error: null }
+    const result = results[idx] ?? { data: null, error: null }
     return Promise.resolve(result)
   }
 
@@ -37,6 +40,19 @@ vi.mock('@/lib/supabase/server', () => ({
     from: () => {
       const idx = fromCallIndex++
       return createChainForIndex(idx)
+    },
+  })),
+}))
+
+// Admin client for project_members insert (bypasses RLS)
+let adminFromCallIndex = 0
+let adminFromResults: Array<{ data?: unknown; error?: unknown }> = []
+
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(() => ({
+    from: () => {
+      const idx = adminFromCallIndex++
+      return createChainForIndex(idx, adminFromResults)
     },
   })),
 }))
@@ -78,6 +94,8 @@ describe('createProject', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    adminFromCallIndex = 0
+    adminFromResults = []
   })
 
   /* ---------- Validation errors ---------- */
@@ -167,16 +185,16 @@ describe('createProject', () => {
       { data: { id: 'proj-new' } },
       // from('project_steps').insert() -> success
       { error: null },
-      // from('project_members').insert() -> success
-      { error: null },
     ]
+    // admin client: from('project_members').insert() -> success
+    adminFromResults = [{ error: null }]
 
     const fd = makeFormData({ name: 'My Project', description: '', target_completion_date: '' })
     await expect(createProject(emptyState, fd)).rejects.toThrow('NEXT_REDIRECT')
     expect(mockRedirect).toHaveBeenCalledWith('/projects/proj-new')
   })
 
-  it('still redirects when project member insert fails (non-critical)', async () => {
+  it('returns error and cleans up when project member insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // from('org_members') -> membership
@@ -185,27 +203,26 @@ describe('createProject', () => {
       { data: { id: 'proj-new' } },
       // from('project_steps').insert() -> success
       { error: null },
-      // from('project_members').insert() -> non-critical error
-      { error: { message: 'Member error' } },
+      // from('projects').delete().eq() -> cleanup after memberError
+      { error: null },
     ]
+    // admin client: from('project_members').insert() -> error
+    adminFromResults = [{ error: { message: 'Member error' } }]
 
     const fd = makeFormData({
       name: 'My Project',
       description: 'A great project',
       target_completion_date: '',
     })
-    await expect(createProject(emptyState, fd)).rejects.toThrow('NEXT_REDIRECT')
-    expect(mockRedirect).toHaveBeenCalledWith('/projects/proj-new')
+    const result = await createProject(emptyState, fd)
+    expect(result).toEqual({ error: 'Failed to add you as project lead. Please try again.' })
   })
 
   it('accepts valid optional description and target date', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [
-      { data: { org_id: 'org-1' } },
-      { data: { id: 'proj-new' } },
-      { error: null },
-      { error: null },
-    ]
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: { id: 'proj-new' } }, { error: null }]
+    // admin client: from('project_members').insert() -> success
+    adminFromResults = [{ error: null }]
 
     const futureDate = new Date()
     futureDate.setFullYear(futureDate.getFullYear() + 1)

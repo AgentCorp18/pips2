@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createProjectSchema } from '@/lib/validations'
 
 export type CreateProjectActionState = {
@@ -59,11 +60,11 @@ export const createProject = async (
     .from('projects')
     .insert({
       org_id: membership.org_id,
-      name: result.data.name,
+      title: result.data.name,
       description: result.data.description || null,
       owner_id: user.id,
-      target_completion_date: result.data.target_completion_date || null,
-      current_step: 1,
+      target_end: result.data.target_completion_date || null,
+      current_step: 'identify',
       status: 'active',
     })
     .select('id')
@@ -74,9 +75,17 @@ export const createProject = async (
   }
 
   // Create 6 project steps
-  const steps = Array.from({ length: 6 }, (_, i) => ({
+  const pipsSteps = [
+    'identify',
+    'analyze',
+    'generate',
+    'select_plan',
+    'implement',
+    'evaluate',
+  ] as const
+  const steps = pipsSteps.map((step, i) => ({
     project_id: project.id,
-    step_number: i + 1,
+    step,
     status: i === 0 ? 'in_progress' : 'not_started',
     started_at: i === 0 ? new Date().toISOString() : null,
   }))
@@ -89,15 +98,17 @@ export const createProject = async (
     return { error: 'Failed to initialize project steps. Please try again.' }
   }
 
-  // Add creator as project member
-  const { error: memberError } = await supabase.from('project_members').insert({
+  // Add creator as project lead (use admin client to bypass RLS chicken-and-egg)
+  const admin = createAdminClient()
+  const { error: memberError } = await admin.from('project_members').insert({
     project_id: project.id,
     user_id: user.id,
-    role: 'owner',
+    role: 'lead',
   })
 
   if (memberError) {
-    console.error('Failed to add project member:', memberError.message)
+    await supabase.from('projects').delete().eq('id', project.id)
+    return { error: 'Failed to add you as project lead. Please try again.' }
   }
 
   redirect(`/projects/${project.id}`)

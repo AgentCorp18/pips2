@@ -73,16 +73,16 @@ export const globalSearch = async (
   // Search projects: full-text search + ilike fallback on name
   const projectsPromise = supabase
     .from('projects')
-    .select('id, name, current_step, status')
+    .select('id, title, current_step, status')
     .eq('org_id', resolvedOrgId)
     .is('archived_at', null)
-    .or(`name.ilike.%${sanitized}%,search_vector.fts.${ftsQuery}`)
+    .or(`title.ilike.%${sanitized}%,search_vector.fts.${ftsQuery}`)
     .limit(LIMIT_PER_TYPE)
 
   // Search tickets: full-text search on search_vector
   const ticketsPromise = supabase
     .from('tickets')
-    .select('id, title, sequence_number, status, project:projects!tickets_project_id_fkey(name)')
+    .select('id, title, sequence_number, status, project:projects!tickets_project_id_fkey(title)')
     .eq('org_id', resolvedOrgId)
     .textSearch('search_vector', ftsQuery, { type: 'plain' })
     .limit(LIMIT_PER_TYPE)
@@ -106,7 +106,7 @@ export const globalSearch = async (
   const projectResults: SearchResult[] = (projectsResult.data ?? []).map((p) => ({
     id: p.id as string,
     type: 'project' as const,
-    title: p.name as string,
+    title: p.title as string,
     subtitle: `Step ${p.current_step}: ${PIPS_STEP_LABELS[p.current_step as number] ?? 'Unknown'}`,
     url: `/projects/${p.id}`,
   }))
@@ -115,10 +115,10 @@ export const globalSearch = async (
   const ticketResults: SearchResult[] = (ticketsResult.data ?? []).map((t) => {
     const rawProject = t.project as unknown
     const projectData = Array.isArray(rawProject)
-      ? ((rawProject[0] as { name: string } | undefined) ?? null)
-      : (rawProject as { name: string } | null)
+      ? ((rawProject[0] as { title: string } | undefined) ?? null)
+      : (rawProject as { title: string } | null)
     const subtitle = projectData
-      ? `${ticketPrefix}-${t.sequence_number} · ${projectData.name}`
+      ? `${ticketPrefix}-${t.sequence_number} · ${projectData.title}`
       : `${ticketPrefix}-${t.sequence_number}`
     return {
       id: t.id as string,

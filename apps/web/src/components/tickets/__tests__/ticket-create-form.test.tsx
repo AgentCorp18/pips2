@@ -267,11 +267,15 @@ describe('TicketCreateForm', () => {
     expect(textarea).toHaveAttribute('name', 'description')
   })
 
-  it('due date input has correct name and type attributes', () => {
+  it('due date input has correct name attribute via DatePicker hidden input', () => {
     render(<TicketCreateForm {...defaultProps} />)
-    const input = screen.getByLabelText('Due Date')
-    expect(input).toHaveAttribute('name', 'due_date')
-    expect(input).toHaveAttribute('type', 'date')
+    // DatePicker renders a hidden input with the name and a button trigger
+    const hiddenInput = document.querySelector('input[name="due_date"]') as HTMLInputElement
+    expect(hiddenInput).toBeInTheDocument()
+    expect(hiddenInput.type).toBe('hidden')
+    // The visible trigger button is linked via label
+    const trigger = screen.getByLabelText('Due Date')
+    expect(trigger).toBeInTheDocument()
   })
 
   it('tags input has correct name attribute', () => {

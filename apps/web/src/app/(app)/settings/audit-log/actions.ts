@@ -56,11 +56,11 @@ export const getAuditLog = async (
   const total = count ?? 0
   const offset = (page - 1) * limit
 
-  // Fetch audit log entries with user profile data via join
+  // Fetch audit log entries (no FK join — audit records survive user deletion)
   const { data: entries, error } = await supabase
     .from('audit_log')
     .select(
-      'id, user_id, action, entity_type, entity_id, old_data, new_data, ip_address, user_agent, created_at, profiles(full_name)',
+      'id, user_id, action, entity_type, entity_id, old_data, new_data, ip_address, user_agent, created_at',
     )
     .eq('org_id', orgId)
     .order('created_at', { ascending: false })
@@ -71,23 +71,36 @@ export const getAuditLog = async (
     return { entries: [], total: 0, page, limit, error: 'Failed to fetch audit log' }
   }
 
-  const mapped: AuditLogEntry[] = (entries ?? []).map((entry) => {
-    const profile = Array.isArray(entry.profiles) ? entry.profiles[0] : entry.profiles
+  // Fetch display names for users
+  const userIds = [...new Set((entries ?? []).map((e) => e.user_id).filter(Boolean))] as string[]
+  const profileMap = new Map<string, string>()
 
-    return {
-      id: entry.id as string,
-      user_id: entry.user_id as string | null,
-      action: entry.action as string,
-      entity_type: entry.entity_type as string,
-      entity_id: entry.entity_id as string | null,
-      old_data: entry.old_data as Record<string, unknown> | null,
-      new_data: entry.new_data as Record<string, unknown> | null,
-      ip_address: entry.ip_address as string | null,
-      user_agent: entry.user_agent as string | null,
-      created_at: entry.created_at as string,
-      user_display_name: (profile as { full_name: string } | null)?.full_name ?? null,
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', userIds)
+
+    for (const p of profiles ?? []) {
+      if (p.full_name) {
+        profileMap.set(p.id, p.full_name)
+      }
     }
-  })
+  }
+
+  const mapped: AuditLogEntry[] = (entries ?? []).map((entry) => ({
+    id: entry.id as string,
+    user_id: entry.user_id as string | null,
+    action: entry.action as string,
+    entity_type: entry.entity_type as string,
+    entity_id: entry.entity_id as string | null,
+    old_data: entry.old_data as Record<string, unknown> | null,
+    new_data: entry.new_data as Record<string, unknown> | null,
+    ip_address: entry.ip_address as string | null,
+    user_agent: entry.user_agent as string | null,
+    created_at: entry.created_at as string,
+    user_display_name: entry.user_id ? (profileMap.get(entry.user_id as string) ?? null) : null,
+  }))
 
   return { entries: mapped, total, page, limit }
 }

@@ -73,14 +73,14 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
   // Fetch projects for project selector
   const { data: projectsRaw } = await supabase
     .from('projects')
-    .select('id, name')
+    .select('id, title')
     .eq('org_id', membership.org_id)
     .is('archived_at', null)
-    .order('name')
+    .order('title')
 
   const projects = (projectsRaw ?? []).map((p) => ({
     id: p.id,
-    name: p.name,
+    name: p.title as string,
   }))
 
   return (

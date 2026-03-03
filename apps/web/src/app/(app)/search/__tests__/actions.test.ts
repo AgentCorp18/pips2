@@ -79,7 +79,7 @@ describe('globalSearch', () => {
     // Configure mockLimit to return different data based on call order
     mockLimit
       .mockResolvedValueOnce({
-        data: [{ id: 'proj-1', name: 'Defect Reduction', current_step: 1, status: 'active' }],
+        data: [{ id: 'proj-1', title: 'Defect Reduction', current_step: 1, status: 'active' }],
       })
       .mockResolvedValueOnce({
         data: [
@@ -88,7 +88,7 @@ describe('globalSearch', () => {
             title: 'Fix QC process',
             sequence_number: 42,
             status: 'todo',
-            project: { name: 'Defect Reduction' },
+            project: { title: 'Defect Reduction' },
           },
         ],
       })
@@ -113,7 +113,7 @@ describe('globalSearch', () => {
   it('returns only project group when no tickets match', async () => {
     mockLimit
       .mockResolvedValueOnce({
-        data: [{ id: 'proj-1', name: 'Test Project', current_step: 2, status: 'active' }],
+        data: [{ id: 'proj-1', title: 'Test Project', current_step: 2, status: 'active' }],
       })
       .mockResolvedValueOnce({
         data: [],

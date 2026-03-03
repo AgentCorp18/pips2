@@ -35,7 +35,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     .from('projects')
     .select(
       `
-      id, name, description, status, current_step,
+      id, title, description, status, current_step,
       target_completion_date, created_at, owner_id,
       project_steps ( id, step_number, status, started_at, completed_at ),
       project_members ( id, user_id, role ),
@@ -90,7 +90,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       />
 
       <div className="flex items-center justify-end">
-        <ExportPDFButton projectId={project.id} projectName={project.name} />
+        <ExportPDFButton projectId={project.id} projectName={project.title as string} />
       </div>
 
       <OverviewStats

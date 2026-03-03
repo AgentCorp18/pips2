@@ -115,7 +115,7 @@ describe('getAuditLog', () => {
     fromResults = [
       // count query
       { count: 2 },
-      // entries query with profiles join
+      // entries query (no profiles join)
       {
         data: [
           {
@@ -129,10 +129,13 @@ describe('getAuditLog', () => {
             ip_address: '127.0.0.1',
             user_agent: 'Mozilla/5.0',
             created_at: '2026-03-01T00:00:00Z',
-            profiles: { full_name: 'Alice' },
           },
         ],
         error: null,
+      },
+      // profiles query for user display names
+      {
+        data: [{ id: 'user-1', full_name: 'Alice' }],
       },
     ]
 
@@ -159,7 +162,7 @@ describe('getAuditLog', () => {
     expect(result.error).toBeUndefined()
   })
 
-  it('handles profiles as array (join format)', async () => {
+  it('handles profiles lookup for user display names', async () => {
     vi.mocked(getUserOrg).mockResolvedValue({
       org_id: 'org-1',
       role: 'owner',
@@ -181,10 +184,13 @@ describe('getAuditLog', () => {
             ip_address: null,
             user_agent: null,
             created_at: '2026-03-01T00:00:00Z',
-            profiles: [{ full_name: 'Bob' }],
           },
         ],
         error: null,
+      },
+      // profiles query
+      {
+        data: [{ id: 'user-1', full_name: 'Bob' }],
       },
     ]
 

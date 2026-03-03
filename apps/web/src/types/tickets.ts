@@ -75,7 +75,7 @@ export type ProfileSummary = {
 export type TicketWithRelations = Ticket & {
   assignee: ProfileSummary | null
   reporter: ProfileSummary
-  project: { id: string; name: string } | null
+  project: { id: string; title: string } | null
   comments_count: number
   org_prefix: string
 }

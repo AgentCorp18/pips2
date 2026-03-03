@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DatePicker } from '@/components/ui/date-picker'
 import { createProject, type CreateProjectActionState } from './actions'
 
 const initialState: CreateProjectActionState = {}
@@ -76,10 +77,9 @@ export const ProjectForm = () => {
           {/* Target Date */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="target_completion_date">Target completion date</Label>
-            <Input
+            <DatePicker
               id="target_completion_date"
               name="target_completion_date"
-              type="date"
               disabled={isPending}
               aria-describedby={
                 state.fieldErrors?.target_completion_date ? 'target-date-error' : undefined
