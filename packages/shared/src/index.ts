@@ -17,3 +17,13 @@ export type {
   TicketPriority,
   TicketStatus,
 } from './types'
+
+export {
+  PERMISSIONS,
+  hasPermission,
+  ROLE_HIERARCHY,
+  canManageRole,
+  ROLES_ORDERED,
+  ROLE_LABELS,
+} from './permissions'
+export type { Permission } from './permissions'

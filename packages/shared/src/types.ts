@@ -27,7 +27,7 @@ export interface UserProfile {
 }
 
 /** Organization roles */
-export type OrgRole = 'owner' | 'admin' | 'member' | 'viewer'
+export type OrgRole = 'owner' | 'admin' | 'manager' | 'member' | 'viewer'
 
 /** PIPS step number (1-6) */
 export type PipsStep = 1 | 2 | 3 | 4 | 5 | 6

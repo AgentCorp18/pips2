@@ -2,8 +2,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 /**
- * Routes that require authentication. Unauthenticated visitors
- * hitting these paths are redirected to /login.
+ * Routes that require authentication AND an org membership.
+ * Unauthenticated visitors are redirected to /login.
+ * Authenticated visitors without an org are redirected to /onboarding.
  */
 const PROTECTED_PATHS = ['/dashboard', '/projects', '/tickets', '/teams', '/settings']
 
@@ -19,12 +20,15 @@ const isProtectedPath = (pathname: string) =>
 const isAuthPath = (pathname: string) =>
   AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
 
+const isOnboardingPath = (pathname: string) =>
+  pathname === '/onboarding' || pathname.startsWith('/onboarding/')
+
 export const middleware = async (request: NextRequest) => {
-  const { supabaseResponse, user } = await updateSession(request)
+  const { supabaseResponse, user, supabase } = await updateSession(request)
   const { pathname } = request.nextUrl
 
-  // Redirect unauthenticated users away from protected routes
-  if (!user && isProtectedPath(pathname)) {
+  // Redirect unauthenticated users away from protected routes and onboarding
+  if (!user && (isProtectedPath(pathname) || isOnboardingPath(pathname))) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('next', pathname)
@@ -36,6 +40,32 @@ export const middleware = async (request: NextRequest) => {
     const dashboardUrl = request.nextUrl.clone()
     dashboardUrl.pathname = '/dashboard'
     return NextResponse.redirect(dashboardUrl)
+  }
+
+  // For authenticated users on protected or onboarding paths, check org membership
+  if (user && (isProtectedPath(pathname) || isOnboardingPath(pathname))) {
+    const { data: membership } = await supabase
+      .from('org_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+
+    const hasOrg = !!membership
+
+    // User has no org and is NOT on onboarding — redirect to onboarding
+    if (!hasOrg && !isOnboardingPath(pathname)) {
+      const onboardingUrl = request.nextUrl.clone()
+      onboardingUrl.pathname = '/onboarding'
+      return NextResponse.redirect(onboardingUrl)
+    }
+
+    // User has an org and IS on onboarding — redirect to dashboard
+    if (hasOrg && isOnboardingPath(pathname)) {
+      const dashboardUrl = request.nextUrl.clone()
+      dashboardUrl.pathname = '/dashboard'
+      return NextResponse.redirect(dashboardUrl)
+    }
   }
 
   return supabaseResponse
