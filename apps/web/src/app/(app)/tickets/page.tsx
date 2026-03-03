@@ -4,7 +4,12 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { TicketCard } from '@/components/tickets/ticket-card'
-import { Plus, Ticket } from 'lucide-react'
+import { TicketListTable } from '@/components/tickets/ticket-list-table'
+import { ViewToggle } from '@/components/tickets/view-toggle'
+import type { ViewMode } from '@/components/tickets/view-toggle'
+import type { TicketRow } from '@/components/tickets/ticket-list-table'
+import { TicketEmptyState } from '@/components/tickets/ticket-empty-state'
+import { Plus } from 'lucide-react'
 import { getTickets } from './actions'
 import { TicketListFilters } from '@/components/tickets/ticket-list-filters'
 
@@ -50,8 +55,17 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
 
   const prefix = orgSettings?.ticket_prefix ?? 'TKT'
 
+  // View mode
+  const viewParam = typeof params.view === 'string' ? params.view : 'table'
+  const view: ViewMode = viewParam === 'cards' ? 'cards' : 'table'
+
+  // Pagination / sort from params
+  const page = typeof params.page === 'string' ? Math.max(1, Number(params.page) || 1) : 1
+  const sortBy = typeof params.sort_by === 'string' ? params.sort_by : 'created_at'
+  const sortOrder = typeof params.sort_order === 'string' ? params.sort_order : 'desc'
+
   // Build filters from search params
-  const filters: Record<string, unknown> = {}
+  const filters: Record<string, unknown> = { page, sort_by: sortBy, sort_order: sortOrder }
   if (params.status) {
     filters.status = Array.isArray(params.status) ? params.status : [params.status]
   }
@@ -84,6 +98,28 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
     }
   })
 
+  // Transform tickets into table rows
+  const ticketRows: TicketRow[] = tickets.map((ticket) => {
+    const assignee = ticket.assignee as unknown as {
+      id: string
+      display_name: string
+      avatar_url: string | null
+    } | null
+
+    return {
+      id: ticket.id,
+      sequenceId: `${prefix}-${ticket.sequence_number}`,
+      title: ticket.title,
+      status: ticket.status,
+      priority: ticket.priority,
+      type: ticket.type,
+      assigneeName: assignee?.display_name ?? null,
+      assigneeAvatar: assignee?.avatar_url ?? null,
+      dueDate: ticket.due_date,
+      createdAt: ticket.created_at,
+    }
+  })
+
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
       {/* Header */}
@@ -96,74 +132,56 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
             {total} ticket{total !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button asChild className="gap-2">
-          <Link href="/tickets/new">
-            <Plus size={16} />
-            New Ticket
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <ViewToggle current={view} />
+          <Button asChild className="gap-2">
+            <Link href="/tickets/new">
+              <Plus size={16} />
+              New Ticket
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filter bar */}
       <TicketListFilters members={members} />
 
-      {/* Ticket grid */}
+      {/* Content */}
       {tickets.length > 0 ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {tickets.map((ticket) => {
-            const assignee = ticket.assignee as unknown as {
-              id: string
-              display_name: string
-              avatar_url: string | null
-            } | null
-
-            return (
+        view === 'table' ? (
+          <div className="mt-4">
+            <TicketListTable
+              tickets={ticketRows}
+              total={total}
+              page={page}
+              perPage={25}
+              sortBy={sortBy}
+              sortOrder={sortOrder as 'asc' | 'desc'}
+            />
+          </div>
+        ) : (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ticketRows.map((ticket) => (
               <TicketCard
                 key={ticket.id}
                 id={ticket.id}
-                sequenceId={`${prefix}-${ticket.sequence_number}`}
+                sequenceId={ticket.sequenceId}
                 title={ticket.title}
                 status={ticket.status}
                 priority={ticket.priority}
                 type={ticket.type}
-                assigneeName={assignee?.display_name ?? null}
-                assigneeAvatar={assignee?.avatar_url ?? null}
-                dueDate={ticket.due_date}
+                assigneeName={ticket.assigneeName}
+                assigneeAvatar={ticket.assigneeAvatar}
+                dueDate={ticket.dueDate}
               />
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        )
       ) : (
-        <EmptyState />
+        <TicketEmptyState />
       )}
     </div>
   )
 }
-
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] py-16">
-    <div
-      className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
-      style={{ backgroundColor: 'var(--color-primary-subtle)' }}
-    >
-      <Ticket size={24} style={{ color: 'var(--color-primary)' }} />
-    </div>
-    <h3 className="mb-1 text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-      No tickets yet
-    </h3>
-    <p
-      className="mb-6 max-w-sm text-center text-sm"
-      style={{ color: 'var(--color-text-secondary)' }}
-    >
-      Create your first ticket to start tracking work.
-    </p>
-    <Button asChild className="gap-2">
-      <Link href="/tickets/new">
-        <Plus size={16} />
-        Create your first ticket
-      </Link>
-    </Button>
-  </div>
-)
 
 export default TicketsPage

@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { PipsStepNumber } from '@pips/shared'
 import { StepPageClient } from './step-page-client'
+import { LinkedTickets } from '@/components/pips/linked-tickets'
 
 const isValidStepNumber = (n: number): n is PipsStepNumber =>
   n >= 1 && n <= 6 && Number.isInteger(n)
@@ -73,15 +74,41 @@ const StepDetailPage = async ({
 
   const orgRole = (membership?.role as string) ?? null
 
+  // Fetch linked tickets for Step 5 (Implement)
+  type LinkedTicket = {
+    id: string
+    title: string
+    status: string
+    priority: string
+    assignee: { display_name: string } | null
+  }
+  let linkedTickets: LinkedTicket[] = []
+
+  if (stepNumber === 5) {
+    const { data: tickets } = await supabase
+      .from('tickets')
+      .select(
+        'id, title, status, priority, assignee:profiles!tickets_assignee_id_fkey(display_name)',
+      )
+      .eq('project_id', projectId)
+      .eq('pips_step', 'implement')
+      .order('created_at', { ascending: true })
+
+    linkedTickets = (tickets ?? []) as unknown as LinkedTicket[]
+  }
+
   return (
-    <StepPageClient
-      projectId={projectId}
-      stepNumber={stepNumber}
-      stepStatus={step.status as 'not_started' | 'in_progress' | 'completed' | 'skipped'}
-      currentStep={project.current_step ?? 1}
-      formStatuses={formStatuses}
-      orgRole={orgRole}
-    />
+    <div className="space-y-6">
+      <StepPageClient
+        projectId={projectId}
+        stepNumber={stepNumber}
+        stepStatus={step.status as 'not_started' | 'in_progress' | 'completed' | 'skipped'}
+        currentStep={project.current_step ?? 1}
+        formStatuses={formStatuses}
+        orgRole={orgRole}
+      />
+      {stepNumber === 5 && <LinkedTickets projectId={projectId} tickets={linkedTickets} />}
+    </div>
   )
 }
 

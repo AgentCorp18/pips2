@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { createTicketSchema, updateTicketSchema, ticketFiltersSchema } from '@/lib/validations'
-import type { TicketStatus } from '@/types/tickets'
+import type { TicketStatus, TicketPriority } from '@/types/tickets'
 
 /* ============================================================
    Action State Types
@@ -308,4 +308,153 @@ export const getTicket = async (ticketId: string) => {
   }
 
   return data
+}
+
+/* ============================================================
+   getTicketsForBoard (no pagination — all tickets for board view)
+   ============================================================ */
+
+export const getTicketsForBoard = async (
+  orgId: string,
+  filters?: { priority?: string; assignee_id?: string; project_id?: string },
+) => {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('tickets')
+    .select(
+      `
+      *,
+      assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url ),
+      reporter:profiles!tickets_reporter_id_fkey ( id, display_name, avatar_url ),
+      project:projects!tickets_project_id_fkey ( id, name )
+    `,
+    )
+    .eq('org_id', orgId)
+    .order('created_at', { ascending: false })
+
+  if (filters?.priority) {
+    query = query.eq('priority', filters.priority)
+  }
+  if (filters?.assignee_id) {
+    query = query.eq('assignee_id', filters.assignee_id)
+  }
+  if (filters?.project_id) {
+    query = query.eq('project_id', filters.project_id)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Failed to fetch board tickets:', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
+/* ============================================================
+   bulkUpdateTickets
+   ============================================================ */
+
+export const bulkUpdateTickets = async (
+  ticketIds: string[],
+  data: { status?: TicketStatus; priority?: TicketPriority },
+): Promise<TicketActionState> => {
+  if (ticketIds.length === 0) {
+    return { error: 'No tickets selected' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'You must be signed in' }
+  }
+
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('org_id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  if (!membership) {
+    return { error: 'You must belong to an organization' }
+  }
+
+  await requirePermission(membership.org_id, 'ticket.create')
+
+  const update: Record<string, unknown> = {}
+  if (data.status) update.status = data.status
+  if (data.priority) update.priority = data.priority
+
+  if (data.status === 'in_progress' || data.status === 'in_review') {
+    update.started_at = new Date().toISOString()
+  }
+  if (data.status === 'done' || data.status === 'cancelled') {
+    update.resolved_at = new Date().toISOString()
+  }
+
+  const { error: updateError } = await supabase
+    .from('tickets')
+    .update(update)
+    .in('id', ticketIds)
+    .eq('org_id', membership.org_id)
+
+  if (updateError) {
+    console.error('Failed to bulk update tickets:', updateError.message)
+    return { error: 'Failed to update tickets. Please try again.' }
+  }
+
+  revalidatePath('/tickets')
+  return {}
+}
+
+/* ============================================================
+   bulkDeleteTickets
+   ============================================================ */
+
+export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActionState> => {
+  if (ticketIds.length === 0) {
+    return { error: 'No tickets selected' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'You must be signed in' }
+  }
+
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('org_id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  if (!membership) {
+    return { error: 'You must belong to an organization' }
+  }
+
+  await requirePermission(membership.org_id, 'ticket.create')
+
+  const { error: deleteError } = await supabase
+    .from('tickets')
+    .delete()
+    .in('id', ticketIds)
+    .eq('org_id', membership.org_id)
+
+  if (deleteError) {
+    console.error('Failed to bulk delete tickets:', deleteError.message)
+    return { error: 'Failed to delete tickets. Please try again.' }
+  }
+
+  revalidatePath('/tickets')
+  return {}
 }

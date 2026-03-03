@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Plus, Trash2, CheckSquare, Square } from 'lucide-react'
+import { Plus, Trash2, CheckSquare, Square, TicketPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormShell } from '@/components/pips/form-shell'
 import { saveFormData } from '../actions'
+import { createTicketsFromChecklist } from './checklist-ticket-actions'
 import type { ImplementationChecklistData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +24,7 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
   const [data, setData] = useState<ImplementationChecklistData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
   const [saveVersion, setSaveVersion] = useState(0)
+  const [isCreatingTickets, startTicketTransition] = useTransition()
 
   const update = (next: ImplementationChecklistData) => {
     setData(next)
@@ -79,6 +81,26 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
     })
   }
 
+  const handleCreateTickets = () => {
+    startTicketTransition(async () => {
+      const result = await createTicketsFromChecklist(
+        projectId,
+        data.items.map((item) => ({
+          text: item.text,
+          assignee: item.assignee,
+          completed: item.completed,
+        })),
+      )
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success(
+          `Created ${result.created} ticket${result.created === 1 ? '' : 's'} from checklist items`,
+        )
+      }
+    })
+  }
+
   // Group items by category
   const grouped = useMemo(() => {
     const groups: Record<string, ImplementationChecklistData['items']> = {}
@@ -92,6 +114,9 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
 
   const completedCount = data.items.filter((i) => i.completed).length
   const totalCount = data.items.length
+  const incompleteWithText = data.items.filter(
+    (i) => !i.completed && i.text.trim().length > 0,
+  ).length
 
   return (
     <FormShell
@@ -166,12 +191,26 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
           </div>
         ))}
 
-        {/* Add item */}
-        <div className="flex gap-2">
+        {/* Add item + Create tickets */}
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => addItem()}>
             <Plus className="size-4" />
             Add Item
           </Button>
+          {incompleteWithText > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCreateTickets}
+              disabled={isCreatingTickets}
+              className="gap-1.5"
+            >
+              <TicketPlus className="size-4" />
+              {isCreatingTickets
+                ? 'Creating...'
+                : `Create ${incompleteWithText} Ticket${incompleteWithText === 1 ? '' : 's'} from Checklist`}
+            </Button>
+          )}
         </div>
       </div>
     </FormShell>
