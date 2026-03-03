@@ -12,7 +12,8 @@ test.describe('Teams page structure', () => {
     await orgPage.goto('/teams')
     await orgPage.waitForLoadState('networkidle')
 
-    const heading = orgPage.getByRole('heading', { name: 'Teams' })
+    // h1 rendered by TeamsPage
+    const heading = orgPage.locator('h1', { hasText: 'Teams' })
     await expect(heading).toBeVisible()
 
     const description = orgPage.getByText('Organize members into teams for your projects')
@@ -23,7 +24,8 @@ test.describe('Teams page structure', () => {
     await orgPage.goto('/teams')
     await orgPage.waitForLoadState('networkidle')
 
-    const emptyTitle = orgPage.getByText('No teams yet')
+    // EmptyState component renders an h3 for the title
+    const emptyTitle = orgPage.locator('h3', { hasText: 'No teams yet' })
     const emptyDescription = orgPage.getByText(
       'Create your first team to start organizing members and collaborating on projects.',
     )
@@ -44,13 +46,15 @@ test.describe('Team creation', () => {
     await createButton.click()
 
     // Verify dialog opened with expected content
+    // DialogTitle renders "Create a new team"
     const dialogTitle = orgPage.getByText('Create a new team')
     await expect(dialogTitle).toBeVisible()
 
     const nameLabel = orgPage.getByText('Team name')
     await expect(nameLabel).toBeVisible()
 
-    const descriptionLabel = orgPage.getByText('Description')
+    // Label text is "Description (optional)" — match with regex
+    const descriptionLabel = orgPage.getByText(/^Description/)
     await expect(descriptionLabel).toBeVisible()
 
     // Verify Cancel and Create Team buttons in dialog footer
@@ -121,7 +125,8 @@ test.describe('Team detail page', () => {
     // Verify team detail page content
     await orgPage.waitForLoadState('networkidle')
 
-    const heading = orgPage.getByRole('heading', { name: teamName })
+    // Team detail page renders h1 with team name
+    const heading = orgPage.locator('h1', { hasText: teamName })
     await expect(heading).toBeVisible()
   })
 
@@ -146,8 +151,8 @@ test.describe('Team detail page', () => {
     await teamLink.click()
     await orgPage.waitForLoadState('networkidle')
 
-    // Verify members section heading exists
-    const membersHeading = orgPage.getByRole('heading', { name: /Members/ })
+    // TeamMembersList renders h2 "Members ({count})" — match with regex
+    const membersHeading = orgPage.locator('h2', { hasText: /Members/ })
     await expect(membersHeading).toBeVisible()
 
     // The creator should be listed as a lead member

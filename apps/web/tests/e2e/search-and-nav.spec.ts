@@ -18,18 +18,15 @@ test.describe('Command palette and global search', () => {
     await orgPage.goto('/dashboard')
     await orgPage.waitForLoadState('networkidle')
 
-    // Press Ctrl+K to open the command palette
+    // Press Ctrl+K to open the command palette (AppLayout listens for this)
     await orgPage.keyboard.press('Control+k')
 
-    // The command palette dialog should appear
-    const dialog = orgPage
-      .getByRole('dialog')
-      .or(orgPage.locator('[data-command-palette]'))
-      .or(orgPage.locator('[role="combobox"]'))
-      .or(orgPage.locator('[data-radix-popper-content-wrapper]'))
+    // CommandPalette renders inside a Dialog with a Command.Input
+    // The input has placeholder="Search projects, tickets..."
+    const searchInput = orgPage.getByPlaceholder(/Search projects/i)
 
-    // Also check for a search input that appears in the palette
-    const searchInput = orgPage.getByPlaceholder(/Search|Type a command/i)
+    // The dialog should become visible
+    const dialog = orgPage.getByRole('dialog')
 
     await expect(dialog.first().or(searchInput)).toBeVisible({ timeout: 5000 })
   })
@@ -41,14 +38,15 @@ test.describe('Command palette and global search', () => {
     // Open command palette
     await orgPage.keyboard.press('Control+k')
 
-    // Wait for the palette to render
-    const searchInput = orgPage.getByPlaceholder(/Search|Type a command/i)
+    // Wait for the palette to render — Command.Input has placeholder "Search projects, tickets..."
+    const searchInput = orgPage.getByPlaceholder(/Search projects/i)
     await expect(searchInput.first()).toBeVisible({ timeout: 5000 })
 
-    // Quick actions should be visible without typing anything
-    const createProjectAction = orgPage.getByText(/Create Project/i)
-    const createTicketAction = orgPage.getByText(/Create Ticket/i)
-    const goToDashboardAction = orgPage.getByText(/Go to Dashboard|Dashboard/i)
+    // QUICK_ACTIONS labels: "Create Project", "Create Ticket", "Go to Dashboard"
+    // These render as Command.Item children when no query is typed
+    const createProjectAction = orgPage.getByText('Create Project')
+    const createTicketAction = orgPage.getByText('Create Ticket')
+    const goToDashboardAction = orgPage.getByText('Go to Dashboard')
 
     // At least the create actions should appear
     await expect(
@@ -69,34 +67,27 @@ test.describe('Command palette and global search', () => {
       // Open command palette
       await orgPage.keyboard.press('Control+k')
 
-      const searchInput = orgPage.getByPlaceholder(/Search|Type a command/i)
+      const searchInput = orgPage.getByPlaceholder(/Search projects/i)
       await expect(searchInput.first()).toBeVisible({ timeout: 5000 })
 
       // Type "E2E" which should match the factory-created project and ticket titles
       await searchInput.first().fill('E2E')
 
-      // Wait for search results to load
-      await orgPage.waitForTimeout(1000)
+      // Wait for debounced search (DEBOUNCE_MS = 300) plus server response
+      await orgPage.waitForTimeout(1500)
 
-      // Results should be grouped by type — look for group headings or result items
-      const projectsGroup = orgPage.getByText(/Projects/i)
-      const ticketsGroup = orgPage.getByText(/Tickets/i)
-      const resultItems = orgPage.locator(
-        '[data-command-item], [role="option"], [data-search-result]',
-      )
+      // Results are grouped by type via Command.Group with heading={group.label}
+      // cmdk renders group headings as [cmdk-group-heading]
+      const groupHeadings = orgPage.locator('[cmdk-group-heading]')
+      // Also check for Command.Item elements (rendered as [cmdk-item])
+      const resultItems = orgPage.locator('[cmdk-item]')
 
-      // Either group headings or individual result items should appear
-      const hasProjectGroup = await projectsGroup
-        .first()
-        .isVisible()
-        .catch(() => false)
-      const hasTicketGroup = await ticketsGroup
-        .first()
-        .isVisible()
-        .catch(() => false)
+      const headingCount = await groupHeadings.count().catch(() => 0)
       const resultCount = await resultItems.count().catch(() => 0)
 
-      expect(hasProjectGroup || hasTicketGroup || resultCount > 0).toBe(true)
+      // Either group headings or individual result items should appear
+      // (search might find data from the factory-created org or from empty state)
+      expect(headingCount > 0 || resultCount > 0).toBe(true)
     } finally {
       await cleanupTestOrg(org.id)
     }
@@ -113,18 +104,15 @@ test.describe('Command palette and global search', () => {
       // Open command palette
       await orgPage.keyboard.press('Control+k')
 
-      const searchInput = orgPage.getByPlaceholder(/Search|Type a command/i)
+      const searchInput = orgPage.getByPlaceholder(/Search projects/i)
       await expect(searchInput.first()).toBeVisible({ timeout: 5000 })
 
       // Search for the test project
       await searchInput.first().fill('E2E Test Project')
-      await orgPage.waitForTimeout(1000)
+      await orgPage.waitForTimeout(1500)
 
-      // Click the first result that looks like a project
-      const resultItem = orgPage
-        .locator('[data-command-item], [role="option"], [data-search-result]')
-        .first()
-        .or(orgPage.getByText(/E2E Test Project/).first())
+      // Click the first cmdk item result
+      const resultItem = orgPage.locator('[cmdk-item]').first()
 
       const hasResult = await resultItem.isVisible().catch(() => false)
 
@@ -145,16 +133,8 @@ test.describe('Command palette and global search', () => {
     await orgPage.goto('/dashboard')
     await orgPage.waitForLoadState('networkidle')
 
-    // Look for the notification bell in the header/navbar area
-    const bellIcon = orgPage
-      .getByRole('button', { name: /Notification/i })
-      .or(orgPage.locator('[data-testid="notification-bell"]'))
-      .or(
-        orgPage
-          .locator('button')
-          .filter({ has: orgPage.locator('svg[class*="bell"], .lucide-bell') }),
-      )
-      .or(orgPage.getByLabel(/Notification/i))
+    // NotificationBell renders a <button> with aria-label="Notifications" or "Notifications (X unread)"
+    const bellIcon = orgPage.getByLabel(/Notifications/i)
 
     await expect(bellIcon.first()).toBeVisible({ timeout: 5000 })
   })

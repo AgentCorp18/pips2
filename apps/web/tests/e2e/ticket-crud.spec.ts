@@ -21,8 +21,8 @@ test.describe('Ticket CRUD', () => {
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
 
-    // Fill only the required title field
-    await page.locator('input[name="title"]').fill(uniqueTitle)
+    // Fill only the required title field (label is "Title *", placeholder is "Brief summary of the ticket")
+    await page.getByLabel('Title').fill(uniqueTitle)
 
     // Submit the form
     await page.getByRole('button', { name: 'Create Ticket' }).click()
@@ -47,7 +47,7 @@ test.describe('Ticket CRUD', () => {
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
     const projectName = `E2E Proj for Ticket ${Date.now()}`
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
     await page.getByRole('button', { name: 'Create project' }).click()
     await page.waitForURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
 
@@ -56,10 +56,10 @@ test.describe('Ticket CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill title and description
-    await page.locator('input[name="title"]').fill(uniqueTitle)
-    await page.locator('textarea[name="description"]').fill(description)
+    await page.getByLabel('Title').fill(uniqueTitle)
+    await page.getByLabel('Description').fill(description)
 
-    // Select Type = bug
+    // Select Type = bug (using the SelectTrigger with aria-label="Type")
     await page.locator('[aria-label="Type"]').click()
     await page.getByRole('option', { name: 'Bug' }).click()
 
@@ -81,7 +81,7 @@ test.describe('Ticket CRUD', () => {
     await page.getByRole('option', { name: projectName }).click()
 
     // Fill tags
-    await page.locator('input[name="tags"]').fill('e2e,test,automated')
+    await page.getByLabel('Tags').fill('e2e,test,automated')
 
     // Submit
     await page.getByRole('button', { name: 'Create Ticket' }).click()
@@ -106,7 +106,7 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Detail View ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="title"]').fill(uniqueTitle)
+    await page.getByLabel('Title').fill(uniqueTitle)
     await page.getByRole('button', { name: 'Create Ticket' }).click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
@@ -142,7 +142,7 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Comment Test ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="title"]').fill(uniqueTitle)
+    await page.getByLabel('Title').fill(uniqueTitle)
     await page.getByRole('button', { name: 'Create Ticket' }).click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
@@ -182,7 +182,7 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Edit Title ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="title"]').fill(uniqueTitle)
+    await page.getByLabel('Title').fill(uniqueTitle)
     await page.getByRole('button', { name: 'Create Ticket' }).click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
@@ -218,7 +218,7 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Board Check ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="title"]').fill(uniqueTitle)
+    await page.getByLabel('Title').fill(uniqueTitle)
 
     // Set status to todo so it appears in "To Do" column
     await page.locator('[aria-label="Status"]').click()
@@ -250,8 +250,8 @@ test.describe('Ticket CRUD', () => {
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
 
-    await page.locator('input[name="title"]').fill(uniqueTitle)
-    await page.locator('input[name="tags"]').fill('urgent,frontend,v2')
+    await page.getByLabel('Title').fill(uniqueTitle)
+    await page.getByLabel('Tags').fill('urgent,frontend,v2')
 
     await page.getByRole('button', { name: 'Create Ticket' }).click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
@@ -278,7 +278,7 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Count Badge ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="title"]').fill(uniqueTitle)
+    await page.getByLabel('Title').fill(uniqueTitle)
     await page.getByRole('button', { name: 'Create Ticket' }).click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')

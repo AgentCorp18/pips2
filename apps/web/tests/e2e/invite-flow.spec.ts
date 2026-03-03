@@ -18,15 +18,16 @@ test.describe('Invite dialog from Settings', () => {
     await orgPage.goto('/settings/members')
     await orgPage.waitForLoadState('networkidle')
 
-    // Click the Invite Member button
-    const inviteButton = orgPage.getByRole('button', { name: 'Invite Member' })
+    // InviteDialog trigger button has text "Invite Member" with UserPlus icon
+    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
     await expect(inviteButton).toBeVisible()
     await inviteButton.click()
 
-    // Verify the dialog opened
+    // DialogTitle renders "Invite a new member"
     const dialogTitle = orgPage.getByText('Invite a new member')
     await expect(dialogTitle).toBeVisible()
 
+    // DialogDescription renders this exact text
     const dialogDescription = orgPage.getByText(
       'Enter the email address of the person you want to invite.',
     )
@@ -38,31 +39,33 @@ test.describe('Invite dialog from Settings', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // Open the dialog
-    const inviteButton = orgPage.getByRole('button', { name: 'Invite Member' })
+    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
     await inviteButton.click()
 
-    // Verify email field
+    // InviteDialog has <Label htmlFor="invite-email">Email address</Label>
     const emailLabel = orgPage.getByText('Email address')
     await expect(emailLabel).toBeVisible()
 
+    // <Input id="invite-email" type="email" placeholder="colleague@company.com" />
     const emailInput = orgPage.locator('input#invite-email')
     await expect(emailInput).toBeVisible()
     await expect(emailInput).toHaveAttribute('type', 'email')
     await expect(emailInput).toHaveAttribute('placeholder', 'colleague@company.com')
 
-    // Verify role field
+    // <Label htmlFor="invite-role">Role</Label>
     const roleLabel = orgPage.getByText('Role').first()
     await expect(roleLabel).toBeVisible()
 
-    // The role selector is a Select component with a trigger button
+    // shadcn Select renders a SelectTrigger which is a <button> with role="combobox"
     const roleSelect = orgPage.locator('button[role="combobox"]')
     await expect(roleSelect).toBeVisible()
 
-    // Verify action buttons
+    // Dialog footer buttons
     const cancelButton = orgPage.getByRole('button', { name: 'Cancel' })
     await expect(cancelButton).toBeVisible()
 
-    const sendButton = orgPage.getByRole('button', { name: 'Send Invite' })
+    // Submit button says "Send Invite" (or "Inviting..." while loading)
+    const sendButton = orgPage.getByRole('button', { name: /Send Invite/i })
     await expect(sendButton).toBeVisible()
   })
 
@@ -71,11 +74,12 @@ test.describe('Invite dialog from Settings', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // Open the dialog
-    const inviteButton = orgPage.getByRole('button', { name: 'Invite Member' })
+    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
     await inviteButton.click()
 
-    // The Send Invite button should be disabled when email is empty
-    const sendButton = orgPage.getByRole('button', { name: 'Send Invite' })
+    // The Send Invite button is disabled when email is empty
+    // InviteDialog: disabled={loading || !email.trim()}
+    const sendButton = orgPage.getByRole('button', { name: /Send Invite/i })
     await expect(sendButton).toBeDisabled()
 
     // Fill in an email to enable the button

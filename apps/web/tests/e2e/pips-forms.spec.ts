@@ -29,17 +29,12 @@ test.describe('PIPS step forms', () => {
       const project = await createTestProject(org.id, testUser.id)
 
       try {
-        await orgPage.goto(`/projects/${project.id}`)
+        // Navigate directly to step 1 page
+        await orgPage.goto(`/projects/${project.id}/steps/1`)
         await orgPage.waitForLoadState('networkidle')
 
-        // Click on Step 1 (Identify) in the stepper
-        const stepButton = orgPage
-          .getByRole('button', { name: /Identify/i })
-          .or(orgPage.getByText('Identify').first())
-        await stepButton.click()
-        await orgPage.waitForLoadState('networkidle')
-
-        // Should see Problem Statement and Impact Assessment form links
+        // StepView renders form links with names from STEP_CONTENT
+        // Step 1 forms: "Problem Statement", "Impact Assessment"
         const problemStatementLink = orgPage.getByText('Problem Statement')
         const impactAssessmentLink = orgPage.getByText('Impact Assessment')
 
@@ -58,10 +53,11 @@ test.describe('PIPS step forms', () => {
         await orgPage.goto(`/projects/${project.id}/steps/1/forms/problem_statement`)
         await orgPage.waitForLoadState('networkidle')
 
-        // Verify the 4 key form fields exist
-        const asIsField = orgPage.getByText('As-Is')
+        // ProblemStatementForm renders FormTextarea labels:
+        //   "Current State (As-Is)", "Desired State", "Gap Analysis", "Problem Statement"
+        const asIsField = orgPage.getByText(/Current State.*As-Is/i)
         const desiredStateField = orgPage.getByText('Desired State')
-        const gapField = orgPage.getByText('Gap')
+        const gapField = orgPage.getByText('Gap Analysis')
         const problemStatementField = orgPage.getByText('Problem Statement')
 
         await expect(asIsField.first()).toBeVisible()
@@ -93,8 +89,8 @@ test.describe('PIPS step forms', () => {
           await textarea.fill('E2E auto-save test data')
         }
 
-        // After typing, an unsaved/saving indicator should appear
-        const saveIndicator = orgPage.getByText(/(Unsaved changes|Saving\.\.\.|Saved|Auto-saved)/)
+        // FormShell's SaveIndicator shows "Unsaved changes", "Saving...", or "Saved"
+        const saveIndicator = orgPage.getByText(/(Unsaved changes|Saving\.\.\.|Saved)/)
         await expect(saveIndicator.first()).toBeVisible({ timeout: 5000 })
       } finally {
         await cleanupTestOrg(org.id)
@@ -117,16 +113,17 @@ test.describe('PIPS step forms', () => {
           await textarea.fill('E2E save test data')
         }
 
-        // Click the Save button
-        const saveButton = orgPage.getByRole('button', { name: /Save/i })
+        // FormShell renders a "Save" button (variant="outline", size="sm")
+        const saveButton = orgPage.getByRole('button', { name: /^Save$/i })
         await expect(saveButton).toBeVisible()
         await saveButton.click()
 
-        // After save, look for a success indicator ("Saved", checkmark, or the button returning to normal)
-        const savedIndicator = orgPage.getByText(/(Saved|All changes saved|Save successful)/)
-        const buttonReady = orgPage.getByRole('button', { name: /Save/i })
+        // After save, FormShell's SaveIndicator shows "Saved"
+        // or a toast "Saved" appears, or the button is ready again
+        const savedIndicator = orgPage.getByText('Saved')
+        const buttonReady = orgPage.getByRole('button', { name: /^Save$/i })
 
-        // Either a "Saved" message appears or the Save button is still available (not in loading state)
+        // Either a "Saved" indicator appears or the Save button is still available
         await expect(savedIndicator.first().or(buttonReady)).toBeVisible({ timeout: 10000 })
       } finally {
         await cleanupTestOrg(org.id)
@@ -140,19 +137,14 @@ test.describe('PIPS step forms', () => {
       const project = await createTestProject(org.id, testUser.id)
 
       try {
-        await orgPage.goto(`/projects/${project.id}`)
+        // Navigate directly to step 2 page (stepper buttons for non-current steps are disabled)
+        await orgPage.goto(`/projects/${project.id}/steps/2`)
         await orgPage.waitForLoadState('networkidle')
 
-        // Navigate to Step 2
-        const stepButton = orgPage
-          .getByRole('button', { name: /Analyze/i })
-          .or(orgPage.getByText('Analyze').first())
-        await stepButton.click()
-        await orgPage.waitForLoadState('networkidle')
-
-        // Should see Fishbone and 5-Why form links
+        // StepView renders form links from STEP_CONTENT[2].forms:
+        //   "Fishbone Diagram", "5 Why Analysis", "Force Field Analysis", "Check Sheet"
         const fishboneLink = orgPage.getByText(/Fishbone/i)
-        const fiveWhyLink = orgPage.getByText(/5.Why/i).or(orgPage.getByText(/Five.Why/i))
+        const fiveWhyLink = orgPage.getByText(/5 Why/i)
 
         await expect(fishboneLink.first()).toBeVisible()
         await expect(fiveWhyLink.first()).toBeVisible()
@@ -201,16 +193,11 @@ test.describe('PIPS step forms', () => {
       const project = await createTestProject(org.id, testUser.id)
 
       try {
-        await orgPage.goto(`/projects/${project.id}`)
+        // Navigate directly to step 4 page (stepper only allows current step click)
+        await orgPage.goto(`/projects/${project.id}/steps/4`)
         await orgPage.waitForLoadState('networkidle')
 
-        // Navigate to Step 4
-        const stepButton = orgPage
-          .getByRole('button', { name: /Select/i })
-          .or(orgPage.getByText('Select').first())
-        await stepButton.click()
-        await orgPage.waitForLoadState('networkidle')
-
+        // STEP_CONTENT[4].forms includes "Criteria Matrix"
         const criteriaMatrixLink = orgPage.getByText(/Criteria Matrix/i)
         await expect(criteriaMatrixLink.first()).toBeVisible()
       } finally {
@@ -225,16 +212,11 @@ test.describe('PIPS step forms', () => {
       const project = await createTestProject(org.id, testUser.id)
 
       try {
-        await orgPage.goto(`/projects/${project.id}`)
+        // Navigate directly to step 5 page
+        await orgPage.goto(`/projects/${project.id}/steps/5`)
         await orgPage.waitForLoadState('networkidle')
 
-        // Navigate to Step 5
-        const stepButton = orgPage
-          .getByRole('button', { name: /Implement/i })
-          .or(orgPage.getByText('Implement').first())
-        await stepButton.click()
-        await orgPage.waitForLoadState('networkidle')
-
+        // STEP_CONTENT[5].forms includes "Milestone Tracker"
         const milestoneTrackerLink = orgPage.getByText(/Milestone Tracker/i)
         await expect(milestoneTrackerLink.first()).toBeVisible()
       } finally {
@@ -249,16 +231,11 @@ test.describe('PIPS step forms', () => {
       const project = await createTestProject(org.id, testUser.id)
 
       try {
-        await orgPage.goto(`/projects/${project.id}`)
+        // Navigate directly to step 6 page
+        await orgPage.goto(`/projects/${project.id}/steps/6`)
         await orgPage.waitForLoadState('networkidle')
 
-        // Navigate to Step 6
-        const stepButton = orgPage
-          .getByRole('button', { name: /Evaluate/i })
-          .or(orgPage.getByText('Evaluate').first())
-        await stepButton.click()
-        await orgPage.waitForLoadState('networkidle')
-
+        // STEP_CONTENT[6].forms includes "Evaluation Summary"
         const evaluationLink = orgPage.getByText(/Evaluation/i)
         await expect(evaluationLink.first()).toBeVisible()
       } finally {
@@ -277,15 +254,14 @@ test.describe('PIPS step forms', () => {
         await orgPage.goto(`/projects/${project.id}/steps/1/forms/problem_statement`)
         await orgPage.waitForLoadState('networkidle')
 
-        // Click the "Back to step" link
-        const backLink = orgPage
-          .getByText(/Back to step/i)
-          .or(orgPage.getByRole('link', { name: /Back/i }))
+        // FormShell renders a Link with text "Back to step" and href to the step page
+        const backLink = orgPage.getByText('Back to step')
         await expect(backLink.first()).toBeVisible()
         await backLink.first().click()
         await orgPage.waitForLoadState('networkidle')
 
         // Should navigate back to the step page (not the form page)
+        // URL should end with /steps/{number} without /forms/ suffix
         await expect(orgPage).toHaveURL(/\/projects\/[a-f0-9-]+\/steps\/\d+$/)
       } finally {
         await cleanupTestOrg(org.id)

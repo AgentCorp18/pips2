@@ -46,7 +46,7 @@ test.describe('Kanban Board', () => {
     // Create a ticket via the UI with default status (backlog)
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="title"]').fill(uniqueTitle)
+    await page.getByLabel('Title').fill(uniqueTitle)
     await page.getByRole('button', { name: 'Create Ticket' }).click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
 

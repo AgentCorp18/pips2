@@ -22,15 +22,16 @@ test.describe('Settings General tab', () => {
     await orgPage.goto('/settings')
     await orgPage.waitForLoadState('networkidle')
 
-    // Verify page heading
-    const heading = orgPage.getByRole('heading', { name: 'Settings' })
+    // Verify page heading (h1 rendered by SettingsPage)
+    const heading = orgPage.locator('h1', { hasText: 'Settings' })
     await expect(heading).toBeVisible()
 
-    // Verify General tab is active (it is the default tab at /settings)
+    // Verify General tab is active in the SettingsNav (Link components rendered as <a> tags)
     const generalTab = orgPage.locator('a[href="/settings"]').filter({ hasText: 'General' })
     await expect(generalTab).toBeVisible()
 
     // Verify the org name input is present with a value
+    // OrgSettingsForm renders <Input id="name" name="name" />
     const nameInput = orgPage.locator('input#name')
     await expect(nameInput).toBeVisible()
     const nameValue = await nameInput.inputValue()
@@ -49,14 +50,14 @@ test.describe('Settings General tab', () => {
     await nameInput.clear()
     await nameInput.fill(newName)
 
-    // Click Save
-    const saveButton = orgPage.getByRole('button', { name: 'Save changes' })
+    // Click Save — button says "Save changes" or "Saving..."
+    const saveButton = orgPage.getByRole('button', { name: /Save changes/i })
     await saveButton.click()
 
-    // Wait for the success message
+    // Wait for the success message or page to settle
     await orgPage.waitForLoadState('networkidle')
+    await orgPage.waitForTimeout(1000)
 
-    // Verify the name input reflects the new value after page settles
     // Reload the page to confirm persistence
     await orgPage.goto('/settings')
     await orgPage.waitForLoadState('networkidle')
@@ -72,18 +73,19 @@ test.describe('Settings Members tab', () => {
     await orgPage.goto('/settings/members')
     await orgPage.waitForLoadState('networkidle')
 
-    // Verify Members heading
-    const heading = orgPage.getByRole('heading', { name: 'Members' })
+    // MembersPage renders h1 "Members" (text-2xl font-bold)
+    const heading = orgPage.locator('h1', { hasText: 'Members' })
     await expect(heading).toBeVisible()
 
     // Verify the members table exists
     const nameHeader = orgPage.getByRole('columnheader', { name: 'Name' })
     await expect(nameHeader).toBeVisible()
 
-    // The test user should appear in the table with role "Owner" and "(you)" indicator
+    // The test user should appear in the table with "(you)" indicator
     const youIndicator = orgPage.getByText('(you)')
     await expect(youIndicator).toBeVisible()
 
+    // Role badge uses ROLE_LABELS which renders "Owner"
     const ownerBadge = orgPage.getByText('Owner')
     await expect(ownerBadge.first()).toBeVisible()
   })
@@ -92,7 +94,8 @@ test.describe('Settings Members tab', () => {
     await orgPage.goto('/settings/members')
     await orgPage.waitForLoadState('networkidle')
 
-    const inviteButton = orgPage.getByRole('button', { name: 'Invite Member' })
+    // InviteDialog renders a trigger button with text "Invite Member"
+    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
     await expect(inviteButton).toBeVisible()
   })
 })
@@ -102,28 +105,28 @@ test.describe('Settings Notifications tab', () => {
     await orgPage.goto('/settings/notifications')
     await orgPage.waitForLoadState('networkidle')
 
-    // Verify notifications heading
-    const heading = orgPage.getByRole('heading', { name: 'Notification Preferences' })
+    // NotificationPreferencesPage renders h1 "Notification Preferences"
+    const heading = orgPage.locator('h1', { hasText: 'Notification Preferences' })
     await expect(heading).toBeVisible()
 
-    // Verify in-app notification section exists
+    // NotificationPreferencesForm has a Card with CardTitle "In-app notifications"
     const inAppTitle = orgPage.getByText('In-app notifications')
     await expect(inAppTitle).toBeVisible()
 
-    // Verify that Switch toggles are present
-    // There are 5 in-app notification preferences + 1 email toggle = 6 total
+    // There are 5 in-app notification Switch toggles + 1 email toggle = 6 total
+    // shadcn Switch renders as <button role="switch">
     const switches = orgPage.locator('button[role="switch"]')
     const switchCount = await switches.count()
     expect(switchCount).toBeGreaterThanOrEqual(5)
 
-    // Verify specific preference labels exist
+    // Verify specific preference labels from IN_APP_PREFERENCES
     const ticketAssigned = orgPage.getByText('Ticket assigned')
     await expect(ticketAssigned).toBeVisible()
 
     const mentions = orgPage.getByText('Mentions')
     await expect(mentions).toBeVisible()
 
-    // Verify email notifications section
+    // Email notifications card title
     const emailTitle = orgPage.getByText('Email notifications')
     await expect(emailTitle).toBeVisible()
   })
@@ -134,11 +137,11 @@ test.describe('Settings Audit Log tab', () => {
     await orgPage.goto('/settings/audit-log')
     await orgPage.waitForLoadState('networkidle')
 
-    // Verify audit log heading
-    const heading = orgPage.getByRole('heading', { name: 'Audit Log' })
+    // AuditLogPage renders h1 "Audit Log"
+    const heading = orgPage.locator('h1', { hasText: 'Audit Log' })
     await expect(heading).toBeVisible()
 
-    // Verify "Activity History" card title
+    // Card has CardTitle "Activity History"
     const cardTitle = orgPage.getByText('Activity History')
     await expect(cardTitle).toBeVisible()
 
@@ -157,17 +160,9 @@ test.describe('Settings Audit Log tab', () => {
     await orgPage.goto('/settings/audit-log')
     await orgPage.waitForLoadState('networkidle')
 
-    // Check for total count display
+    // CardDescription renders "{total} total {entry|entries}"
     const totalText = orgPage.getByText(/\d+ total (entry|entries)/)
     await expect(totalText).toBeVisible()
-
-    // Check for Previous and Next buttons (they exist even if disabled)
-    const prevButton = orgPage
-      .getByRole('button', { name: 'Previous' })
-      .or(orgPage.getByRole('link', { name: 'Previous' }))
-    const nextButton = orgPage
-      .getByRole('button', { name: 'Next' })
-      .or(orgPage.getByRole('link', { name: 'Next' }))
 
     // Pagination controls are shown only when totalPages > 1.
     // If there are entries, the table should be visible
@@ -180,6 +175,11 @@ test.describe('Settings Audit Log tab', () => {
       const hasPagination = await pageInfo.isVisible().catch(() => false)
 
       if (hasPagination) {
+        // Previous/Next buttons may be rendered as <a> or <span> (disabled state)
+        // wrapped in a Button component
+        const prevButton = orgPage.getByText('Previous')
+        const nextButton = orgPage.getByText('Next')
+
         await expect(prevButton.first()).toBeVisible()
         await expect(nextButton.first()).toBeVisible()
       }

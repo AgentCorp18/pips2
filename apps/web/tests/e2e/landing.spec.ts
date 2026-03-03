@@ -4,20 +4,23 @@ test.describe('Landing page', () => {
   test('loads with the correct title', async ({ page }) => {
     await page.goto('/')
 
-    await expect(page).toHaveTitle(/PIPS/)
+    // The landing page title is "Process Improvement Made Simple | PIPS — ..."
+    await expect(page).toHaveTitle(/Process Improvement Made Simple/)
   })
 
-  test('displays the PIPS 2.0 heading', async ({ page }) => {
+  test('displays the hero heading', async ({ page }) => {
     await page.goto('/')
 
-    const heading = page.locator('h1', { hasText: 'PIPS 2.0' })
+    // The actual h1 in hero-section.tsx reads "Process Improvement Made Simple"
+    const heading = page.locator('h1', { hasText: 'Process Improvement Made Simple' })
     await expect(heading).toBeVisible()
   })
 
   test('displays the product description', async ({ page }) => {
     await page.goto('/')
 
-    const description = page.locator('text=6-step process improvement methodology')
+    // The overline span contains "6-Step Process Improvement Methodology" (capitalized)
+    const description = page.getByText('6-Step Process Improvement Methodology')
     await expect(description).toBeVisible()
   })
 })

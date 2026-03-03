@@ -22,22 +22,23 @@ test.describe('Profile page content', () => {
     await orgPage.goto('/profile')
     await orgPage.waitForLoadState('networkidle')
 
-    // Verify profile heading
-    const heading = orgPage.getByRole('heading', { name: 'Profile' })
+    // ProfilePage renders h1 "Profile"
+    const heading = orgPage.locator('h1', { hasText: 'Profile' })
     await expect(heading).toBeVisible()
 
-    // Verify description text
+    // Description below heading
     const description = orgPage.getByText('Manage your personal information and profile photo')
     await expect(description).toBeVisible()
 
-    // Verify the display name input exists with its label
+    // ProfileForm renders <Label htmlFor="display_name">Display name</Label>
     const displayNameLabel = orgPage.getByText('Display name')
     await expect(displayNameLabel.first()).toBeVisible()
 
+    // Input with id="display_name" name="display_name"
     const displayNameInput = orgPage.locator('input#display_name')
     await expect(displayNameInput).toBeVisible()
 
-    // Verify the helper text
+    // Helper text below the display name input
     const helperText = orgPage.getByText('This is how your name appears across the app')
     await expect(helperText).toBeVisible()
   })
@@ -54,8 +55,8 @@ test.describe('Profile page content', () => {
     await displayNameInput.clear()
     await displayNameInput.fill(newDisplayName)
 
-    // Click save
-    const saveButton = orgPage.getByRole('button', { name: 'Save changes' })
+    // Click save — ProfileForm button says "Save changes" or "Saving..."
+    const saveButton = orgPage.getByRole('button', { name: /Save changes/i })
     await saveButton.click()
 
     // Wait for the action to complete
@@ -74,7 +75,7 @@ test.describe('Profile page content', () => {
     await orgPage.goto('/profile')
     await orgPage.waitForLoadState('networkidle')
 
-    // Verify the "Profile Photo" card section exists
+    // ProfileForm has a Card with CardTitle "Profile Photo"
     const photoTitle = orgPage.getByText('Profile Photo')
     await expect(photoTitle).toBeVisible()
 

@@ -21,7 +21,7 @@ test.describe('Project CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill the required name field
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
 
     // Submit the form
     await page.getByRole('button', { name: 'Create project' }).click()
@@ -46,10 +46,10 @@ test.describe('Project CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill name
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
 
     // Fill description
-    await page.locator('textarea[name="description"]').fill(description)
+    await page.getByLabel('Description').fill(description)
 
     // Open the date picker and select a date
     // If the DatePicker renders as a button trigger, click it
@@ -91,13 +91,13 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Stepper Test ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
     await page.getByRole('button', { name: 'Create project' }).click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
     // Stepper should show all 6 PIPS step names
-    const stepNames = ['Identify', 'Analyze', 'Generate', 'Select', 'Implement', 'Evaluate']
+    const stepNames = ['Identify', 'Analyze', 'Generate', 'Select & Plan', 'Implement', 'Evaluate']
     for (const name of stepNames) {
       const stepElement = page.getByText(name, { exact: false })
       await expect(stepElement.first()).toBeVisible({ timeout: 10000 })
@@ -113,7 +113,7 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Progress Card ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
     await page.getByRole('button', { name: 'Create project' }).click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
@@ -140,7 +140,7 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Step Click ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
     await page.getByRole('button', { name: 'Create project' }).click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
@@ -167,7 +167,7 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Step Sections ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
     await page.getByRole('button', { name: 'Create project' }).click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
@@ -202,7 +202,7 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E List Card ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.locator('input[name="name"]').fill(projectName)
+    await page.getByLabel('Project name').fill(projectName)
     await page.getByRole('button', { name: 'Create project' }).click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
 
