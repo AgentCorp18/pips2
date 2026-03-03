@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Search,
-  Bell,
   ChevronDown,
   LayoutDashboard,
   FolderKanban,
@@ -12,6 +11,7 @@ import {
   Settings,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
+import { NotificationBell } from '@/components/layout/notification-bell'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -102,12 +102,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
           {/* Right side */}
           <div className="flex items-center gap-4">
-            <button
-              type="button"
-              className="relative rounded-[var(--radius-md)] p-2 hover:bg-[var(--color-surface-secondary)]"
-            >
-              <Bell size={20} className="text-[var(--color-text-secondary)]" />
-            </button>
+            <NotificationBell />
 
             {/* User avatar placeholder */}
             <button
