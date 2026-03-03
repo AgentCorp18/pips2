@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { ProjectCard } from '@/components/pips/project-card'
 import { Plus, FolderKanban } from 'lucide-react'
+import { ExportProjectsButton } from '@/components/pips/export-projects-button'
 
 export const metadata: Metadata = {
   title: 'Projects - PIPS',
@@ -68,12 +69,15 @@ const ProjectsPage = async () => {
             Manage your process improvement projects
           </p>
         </div>
-        <Button asChild className="gap-2">
-          <Link href="/projects/new">
-            <Plus size={16} />
-            New Project
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <ExportProjectsButton />
+          <Button asChild className="gap-2">
+            <Link href="/projects/new">
+              <Plus size={16} />
+              New Project
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Step stripe */}

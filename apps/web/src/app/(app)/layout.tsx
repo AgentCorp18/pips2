@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Search,
-  ChevronDown,
   LayoutDashboard,
   FolderKanban,
   Ticket,
@@ -14,6 +13,8 @@ import {
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
+import { UserMenu } from '@/components/layout/user-menu'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -140,6 +141,11 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             )
           })}
         </nav>
+
+        {/* Theme toggle */}
+        <div className="border-t border-[var(--sidebar-border)] px-3 py-3">
+          <ThemeToggle />
+        </div>
       </aside>
 
       {/* Main content area */}
@@ -179,19 +185,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center gap-4">
             <NotificationBell />
 
-            {/* User avatar placeholder */}
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-[var(--radius-md)] px-2 py-1.5 hover:bg-[var(--color-surface-secondary)]"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-white">
-                U
-              </div>
-              <ChevronDown
-                size={16}
-                className="hidden text-[var(--color-text-tertiary)] sm:block"
-              />
-            </button>
+            <UserMenu />
           </div>
         </header>
 

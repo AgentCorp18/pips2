@@ -10,6 +10,7 @@ import type { ViewMode } from '@/components/tickets/view-toggle'
 import type { TicketRow } from '@/components/tickets/ticket-list-table'
 import { TicketEmptyState } from '@/components/tickets/ticket-empty-state'
 import { Plus } from 'lucide-react'
+import { ExportTicketsButton } from '@/components/tickets/export-tickets-button'
 import { getTickets } from './actions'
 import { TicketListFilters } from '@/components/tickets/ticket-list-filters'
 
@@ -133,6 +134,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <ExportTicketsButton />
           <ViewToggle current={view} />
           <Button asChild className="gap-2">
             <Link href="/tickets/new">

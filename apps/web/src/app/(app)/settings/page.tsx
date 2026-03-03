@@ -18,7 +18,7 @@ const SettingsPage = async () => {
   const canEdit = data.role === 'owner' || data.role === 'admin'
 
   return (
-    <div className="mx-auto max-w-[var(--content-max-width)]">
+    <div>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           Settings
