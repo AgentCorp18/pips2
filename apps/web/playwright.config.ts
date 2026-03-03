@@ -1,8 +1,13 @@
-import { config } from 'dotenv'
 import { resolve } from 'path'
 import { defineConfig, devices } from '@playwright/test'
 
-config({ path: resolve(__dirname, '.env.local') })
+// Load .env.local for Supabase credentials in E2E tests
+// Uses Node.js built-in (no external dependency)
+try {
+  process.loadEnvFile(resolve(__dirname, '.env.local'))
+} catch {
+  // .env.local may not exist in CI — env vars are set externally
+}
 
 export default defineConfig({
   testDir: './tests/e2e',

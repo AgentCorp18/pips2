@@ -87,7 +87,7 @@ test.describe('Organization creation', () => {
     // Verify the org was actually created in the DB
     const orgs = await getUserOrgs(testUser.id)
     expect(orgs.length).toBeGreaterThan(0)
-    expect(orgs[0].role).toBe('owner')
+    expect(orgs[0]!.role).toBe('owner')
   })
 })
 
