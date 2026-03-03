@@ -1,4 +1,8 @@
+import { config } from 'dotenv'
+import { resolve } from 'path'
 import { defineConfig, devices } from '@playwright/test'
+
+config({ path: resolve(__dirname, '.env.local') })
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -9,7 +13,7 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
   },
