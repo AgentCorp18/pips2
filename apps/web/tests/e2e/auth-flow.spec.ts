@@ -55,6 +55,22 @@ test.describe('Login with confirmed email', () => {
 
 test.describe('Organization creation', () => {
   test('creates an org and lands on dashboard', async ({ page }) => {
+    // Collect console errors for diagnostics
+    const consoleErrors: string[] = []
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text())
+      }
+    })
+
+    // Collect failed network requests
+    const failedRequests: string[] = []
+    page.on('response', (response) => {
+      if (response.status() >= 400) {
+        failedRequests.push(`${response.status()} ${response.url()}`)
+      }
+    })
+
     // Login first
     await page.goto('/login')
     await page.locator('input[name="email"]').fill(testUser.email)
@@ -65,20 +81,62 @@ test.describe('Organization creation', () => {
     await page.waitForURL(/\/(onboarding|dashboard)/, { timeout: 15000 })
 
     if (page.url().includes('/onboarding')) {
+      // Wait for the form to be fully hydrated
+      const nameInput = page.locator('input[name="name"]')
+      await expect(nameInput).toBeVisible({ timeout: 5000 })
+      await expect(nameInput).toBeEnabled()
+
       // Fill org creation form
       const orgName = `E2E Test Org ${Date.now()}`
-      await page.locator('input[name="name"]').fill(orgName)
+      await nameInput.fill(orgName)
 
-      // Wait for slug to auto-generate
-      await page.waitForTimeout(500)
+      // Wait for slug to auto-generate and be checked
+      const slugInput = page.locator('input[name="slug"]')
+      await expect(slugInput).not.toHaveValue('', { timeout: 3000 })
 
-      // Submit
+      // Wait for slug availability check to complete (debounce + network)
+      // The check has a 400ms debounce + network time
+      await page.waitForTimeout(1500)
+
+      // Verify the submit button is enabled (not disabled by 'taken' slug)
       const submitButton = page.getByRole('button', { name: /Create organization/i })
       await expect(submitButton).toBeVisible()
+      await expect(submitButton).toBeEnabled({ timeout: 5000 })
+
+      // Log diagnostic info before clicking
+      const slugValue = await slugInput.inputValue()
+      const nameValue = await nameInput.inputValue()
+      console.log(`[E2E] Submitting org: name="${nameValue}", slug="${slugValue}"`)
+
+      // Click submit
       await submitButton.click()
 
-      // Should redirect to dashboard
-      await page.waitForURL(/\/dashboard/, { timeout: 15000 })
+      // Wait for either redirect to dashboard OR an error message to appear
+      const redirectOrError = await Promise.race([
+        page.waitForURL(/\/dashboard/, { timeout: 20000 }).then(() => 'redirected' as const),
+        page
+          .locator('[role="alert"]')
+          .waitFor({ timeout: 20000 })
+          .then(() => 'error' as const),
+      ]).catch(() => 'timeout' as const)
+
+      if (redirectOrError === 'error') {
+        const errorText = await page.locator('[role="alert"]').textContent()
+        throw new Error(
+          `Server action returned error: ${errorText}. Console errors: ${consoleErrors.join('; ')}. Failed requests: ${failedRequests.join('; ')}`,
+        )
+      }
+
+      if (redirectOrError === 'timeout') {
+        const currentUrl = page.url()
+        const buttonText = await submitButton.textContent().catch(() => 'unknown')
+        throw new Error(
+          `Timed out waiting for redirect to /dashboard. ` +
+            `Current URL: ${currentUrl}. Button text: "${buttonText}". ` +
+            `Console errors: ${consoleErrors.join('; ')}. ` +
+            `Failed requests: ${failedRequests.join('; ')}`,
+        )
+      }
     }
 
     // Verify we're on the dashboard
