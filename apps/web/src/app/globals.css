@@ -1,0 +1,666 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   PIPS 2.0 — Design Token System
+   Source: BRAND_GUIDE_V2.md Section 8
+   ============================================================ */
+
+/* ============================================================
+   TAILWIND v4 THEME CONFIGURATION
+   ============================================================ */
+@theme inline {
+  /* Colors — Primary */
+  --color-pips-deep: #1b1340;
+  --color-pips-primary: #4f46e5;
+  --color-pips-primary-hover: #4338ca;
+  --color-pips-primary-active: #3730a3;
+  --color-pips-primary-light: #818cf8;
+  --color-pips-accent: #7c3aed;
+  --color-pips-accent-hover: #6d28d9;
+  --color-pips-accent-light: #a78bfa;
+
+  /* Colors — Secondary */
+  --color-pips-warm-slate: #3d3654;
+  --color-pips-cloud: #f0edfa;
+  --color-pips-ink: #1e1b2e;
+
+  /* Colors — Signal / Semantic */
+  --color-pips-amber: #f59e0b;
+  --color-pips-red: #ef4444;
+  --color-pips-emerald: #10b981;
+
+  /* Colors — Step Colors */
+  --color-step-1: #2563eb;
+  --color-step-2: #d97706;
+  --color-step-3: #059669;
+  --color-step-4: #4338ca;
+  --color-step-5: #ca8a04;
+  --color-step-6: #0891b2;
+
+  /* Colors — Neutrals (violet-tinted) */
+  --color-neutral-50: #fafafb;
+  --color-neutral-100: #f3f2f7;
+  --color-neutral-200: #e4e2ed;
+  --color-neutral-300: #c9c6d9;
+  --color-neutral-400: #9a96b3;
+  --color-neutral-500: #6e6989;
+  --color-neutral-600: #504b68;
+  --color-neutral-700: #3d3654;
+  --color-neutral-800: #2a2440;
+  --color-neutral-900: #1e1b2e;
+  --color-neutral-950: #110f1c;
+
+  /* Typography */
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-serif: 'DM Serif Display', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 20px;
+
+  /* Shadows (violet-tinted) */
+  --shadow-subtle: 0 1px 3px rgba(27, 19, 64, 0.04), 0 1px 2px rgba(27, 19, 64, 0.03);
+  --shadow-low: 0 2px 8px rgba(27, 19, 64, 0.06), 0 1px 3px rgba(27, 19, 64, 0.04);
+  --shadow-medium: 0 4px 16px rgba(27, 19, 64, 0.08), 0 2px 6px rgba(27, 19, 64, 0.04);
+  --shadow-high: 0 8px 30px rgba(27, 19, 64, 0.12), 0 4px 10px rgba(27, 19, 64, 0.06);
+  --shadow-highest: 0 16px 50px rgba(27, 19, 64, 0.16), 0 8px 16px rgba(27, 19, 64, 0.06);
+
+  /* Animation */
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --duration-slower: 350ms;
+
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES — FULL TOKEN SYSTEM
+   ============================================================ */
+:root {
+  /* ============================================
+     COLORS — PRIMARY
+     ============================================ */
+  --color-primary-deep: #1b1340;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-active: #3730a3;
+  --color-primary-light: #818cf8;
+  --color-primary-subtle: rgba(79, 70, 229, 0.1);
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
+  --color-accent-light: #a78bfa;
+  --color-accent-subtle: rgba(124, 58, 237, 0.1);
+
+  /* ============================================
+     COLORS — SECONDARY
+     ============================================ */
+  --color-warm-slate: #3d3654;
+  --color-cloud: #f0edfa;
+  --color-ink: #1e1b2e;
+
+  /* ============================================
+     COLORS — SIGNAL / SEMANTIC
+     ============================================ */
+  --color-signal-amber: #f59e0b;
+  --color-signal-amber-subtle: rgba(245, 158, 11, 0.1);
+  --color-signal-red: #ef4444;
+  --color-signal-red-subtle: rgba(239, 68, 68, 0.1);
+  --color-signal-emerald: #10b981;
+  --color-signal-emerald-subtle: rgba(16, 185, 129, 0.1);
+
+  --color-success: #059669;
+  --color-success-light: #d1fae5;
+  --color-success-subtle: rgba(5, 150, 105, 0.1);
+  --color-warning: #d97706;
+  --color-warning-light: #fef3c7;
+  --color-warning-subtle: rgba(217, 119, 6, 0.1);
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-subtle: rgba(239, 68, 68, 0.1);
+  --color-info: #4f46e5;
+  --color-info-light: #eef2ff;
+  --color-info-subtle: rgba(79, 70, 229, 0.1);
+
+  /* ============================================
+     COLORS — NEUTRALS (violet-tinted)
+     ============================================ */
+  --color-neutral-50: #fafafb;
+  --color-neutral-100: #f3f2f7;
+  --color-neutral-200: #e4e2ed;
+  --color-neutral-300: #c9c6d9;
+  --color-neutral-400: #9a96b3;
+  --color-neutral-500: #6e6989;
+  --color-neutral-600: #504b68;
+  --color-neutral-700: #3d3654;
+  --color-neutral-800: #2a2440;
+  --color-neutral-900: #1e1b2e;
+  --color-neutral-950: #110f1c;
+
+  /* ============================================
+     COLORS — PIPS STEP COLORS
+     ============================================ */
+  --color-step-1: #2563eb; /* Identify — Signal Blue */
+  --color-step-1-subtle: rgba(37, 99, 235, 0.12);
+  --color-step-2: #d97706; /* Analyze — Insight Amber */
+  --color-step-2-subtle: rgba(217, 119, 6, 0.12);
+  --color-step-3: #059669; /* Generate — Spark Green */
+  --color-step-3-subtle: rgba(5, 150, 105, 0.12);
+  --color-step-4: #4338ca; /* Select & Plan — Blueprint Indigo */
+  --color-step-4-subtle: rgba(67, 56, 202, 0.12);
+  --color-step-5: #ca8a04; /* Implement — Action Gold */
+  --color-step-5-subtle: rgba(202, 138, 4, 0.12);
+  --color-step-6: #0891b2; /* Evaluate — Loop Teal */
+  --color-step-6-subtle: rgba(8, 145, 178, 0.12);
+
+  /* ============================================
+     COLORS — SURFACE (Semantic aliases)
+     ============================================ */
+  --color-bg: var(--color-neutral-50);
+  --color-bg-secondary: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-secondary: var(--color-neutral-100);
+  --color-surface-tinted: var(--color-cloud);
+  --color-border: var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-300);
+  --color-text-primary: var(--color-neutral-800);
+  --color-text-secondary: var(--color-neutral-500);
+  --color-text-tertiary: var(--color-neutral-400);
+  --color-text-inverse: #ffffff;
+  --color-text-link: var(--color-primary);
+  --color-text-link-hover: var(--color-primary-hover);
+
+  /* ============================================
+     TYPOGRAPHY
+     ============================================ */
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'DM Serif Display', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+
+  /* Font sizes */
+  --text-display: 3.25rem; /* 52px */
+  --text-h1: 2.25rem; /* 36px */
+  --text-h2: 1.75rem; /* 28px */
+  --text-h3: 1.375rem; /* 22px */
+  --text-h4: 1.125rem; /* 18px */
+  --text-h5: 1rem; /* 16px */
+  --text-h6: 0.875rem; /* 14px */
+  --text-body-lg: 1.125rem; /* 18px */
+  --text-body: 1rem; /* 16px */
+  --text-body-sm: 0.875rem; /* 14px */
+  --text-caption: 0.75rem; /* 12px */
+  --text-overline: 0.6875rem; /* 11px */
+
+  /* Font weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Line heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.2;
+  --leading-normal: 1.4;
+  --leading-relaxed: 1.5;
+  --leading-loose: 1.6;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.025em;
+  --tracking-tight: -0.015em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.01em;
+  --tracking-wider: 0.02em;
+  --tracking-widest: 0.08em;
+
+  /* ============================================
+     SPACING
+     ============================================ */
+  --space-0: 0px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ============================================
+     BORDER RADIUS
+     ============================================ */
+  --radius-none: 0px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 20px;
+  --radius-full: 9999px;
+
+  /* ============================================
+     SHADOWS (violet-tinted)
+     ============================================ */
+  --shadow-none: none;
+  --shadow-subtle: 0 1px 3px rgba(27, 19, 64, 0.04), 0 1px 2px rgba(27, 19, 64, 0.03);
+  --shadow-low: 0 2px 8px rgba(27, 19, 64, 0.06), 0 1px 3px rgba(27, 19, 64, 0.04);
+  --shadow-medium: 0 4px 16px rgba(27, 19, 64, 0.08), 0 2px 6px rgba(27, 19, 64, 0.04);
+  --shadow-high: 0 8px 30px rgba(27, 19, 64, 0.12), 0 4px 10px rgba(27, 19, 64, 0.06);
+  --shadow-highest: 0 16px 50px rgba(27, 19, 64, 0.16), 0 8px 16px rgba(27, 19, 64, 0.06);
+
+  /* ============================================
+     ANIMATION
+     ============================================ */
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --duration-slower: 350ms;
+  --duration-step-advance: 500ms;
+
+  --ease-default: ease;
+  --ease-in-out: ease-in-out;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ============================================
+     LAYOUT
+     ============================================ */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 60px;
+  --topbar-height: 56px;
+  --content-max-width: 960px;
+  --text-max-width: 720px;
+  --marketing-max-width: 1200px;
+
+  /* ============================================
+     Z-INDEX SCALE
+     ============================================ */
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-sidebar: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+  --z-tooltip: 70;
+
+  /* ============================================
+     PIP DOT SIZES (signature element)
+     ============================================ */
+  --pip-sm: 6px;
+  --pip-md: 8px;
+  --pip-lg: 12px;
+  --pip-xl: 16px;
+  /* ============================================
+     shadcn/ui tokens — PIPS brand overrides
+     ============================================ */
+  --radius: 0.625rem;
+  --background: #fafafb;
+  --foreground: #2a2440;
+  --card: #ffffff;
+  --card-foreground: #2a2440;
+  --popover: #ffffff;
+  --popover-foreground: #2a2440;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f0edfa;
+  --secondary-foreground: #2a2440;
+  --muted: #f3f2f7;
+  --muted-foreground: #6e6989;
+  --accent: #f0edfa;
+  --accent-foreground: #2a2440;
+  --destructive: #ef4444;
+  --border: #e4e2ed;
+  --input: #e4e2ed;
+  --ring: #4f46e5;
+  --chart-1: #2563eb;
+  --chart-2: #d97706;
+  --chart-3: #059669;
+  --chart-4: #4338ca;
+  --chart-5: #ca8a04;
+  --sidebar: #1b1340;
+  --sidebar-foreground: #f3f2f7;
+  --sidebar-primary: #4f46e5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3d3654;
+  --sidebar-accent-foreground: #f3f2f7;
+  --sidebar-border: #3d3654;
+  --sidebar-ring: #4f46e5;
+}
+
+/* ============================================================
+   DARK MODE OVERRIDES
+   ============================================================ */
+.dark {
+  --color-bg: var(--color-neutral-950);
+  --color-bg-secondary: var(--color-neutral-900);
+  --color-surface: var(--color-neutral-800);
+  --color-surface-secondary: var(--color-neutral-900);
+  --color-surface-tinted: rgba(79, 70, 229, 0.08);
+  --color-border: var(--color-neutral-700);
+  --color-border-strong: var(--color-neutral-600);
+  --color-text-primary: var(--color-neutral-100);
+  --color-text-secondary: var(--color-neutral-400);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-inverse: var(--color-neutral-900);
+  --color-text-link: var(--color-primary-light);
+  --color-text-link-hover: var(--color-accent-light);
+
+  /* Semantic color overrides */
+  --color-success: #34d399;
+  --color-success-light: rgba(52, 211, 153, 0.15);
+  --color-warning: #fbbf24;
+  --color-warning-light: rgba(251, 191, 36, 0.15);
+  --color-error: #fca5a5;
+  --color-error-light: rgba(252, 165, 165, 0.15);
+  --color-info: #818cf8;
+  --color-info-light: rgba(129, 140, 248, 0.15);
+
+  /* Step color overrides (brightened for dark BG) */
+  --color-step-1: #60a5fa;
+  --color-step-1-subtle: rgba(96, 165, 250, 0.15);
+  --color-step-2: #fbbf24;
+  --color-step-2-subtle: rgba(251, 191, 36, 0.15);
+  --color-step-3: #34d399;
+  --color-step-3-subtle: rgba(52, 211, 153, 0.15);
+  --color-step-4: #818cf8;
+  --color-step-4-subtle: rgba(129, 140, 248, 0.15);
+  --color-step-5: #facc15;
+  --color-step-5-subtle: rgba(250, 204, 21, 0.15);
+  --color-step-6: #22d3ee;
+  --color-step-6-subtle: rgba(34, 211, 238, 0.15);
+
+  /* Shadow overrides (increased opacity for dark) */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-low: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+  --shadow-high: 0 8px 30px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+  --shadow-highest: 0 16px 50px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2);
+  /* shadcn/ui dark tokens — PIPS brand overrides */
+  --background: #110f1c;
+  --foreground: #f3f2f7;
+  --card: #2a2440;
+  --card-foreground: #f3f2f7;
+  --popover: #2a2440;
+  --popover-foreground: #f3f2f7;
+  --primary: #818cf8;
+  --primary-foreground: #110f1c;
+  --secondary: #3d3654;
+  --secondary-foreground: #f3f2f7;
+  --muted: #3d3654;
+  --muted-foreground: #9a96b3;
+  --accent: #3d3654;
+  --accent-foreground: #f3f2f7;
+  --destructive: #fca5a5;
+  --border: #3d3654;
+  --input: #504b68;
+  --ring: #818cf8;
+  --chart-1: #60a5fa;
+  --chart-2: #fbbf24;
+  --chart-3: #34d399;
+  --chart-4: #818cf8;
+  --chart-5: #facc15;
+  --sidebar: #110f1c;
+  --sidebar-foreground: #f3f2f7;
+  --sidebar-primary: #818cf8;
+  --sidebar-primary-foreground: #110f1c;
+  --sidebar-accent: #2a2440;
+  --sidebar-accent-foreground: #f3f2f7;
+  --sidebar-border: #3d3654;
+  --sidebar-ring: #818cf8;
+}
+
+/* ============================================================
+   SIGNATURE ELEMENTS
+   ============================================================ */
+
+/* Step Gradient Stripe — hard edge (product UI) */
+.step-gradient-stripe {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    var(--color-step-1) 0%,
+    var(--color-step-1) 16.67%,
+    var(--color-step-2) 16.67%,
+    var(--color-step-2) 33.33%,
+    var(--color-step-3) 33.33%,
+    var(--color-step-3) 50%,
+    var(--color-step-4) 50%,
+    var(--color-step-4) 66.67%,
+    var(--color-step-5) 66.67%,
+    var(--color-step-5) 83.33%,
+    var(--color-step-6) 83.33%,
+    var(--color-step-6) 100%
+  );
+}
+
+/* Step Gradient Stripe — smooth (marketing) */
+.step-gradient-stripe-smooth {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    var(--color-step-1),
+    var(--color-step-2),
+    var(--color-step-3),
+    var(--color-step-4),
+    var(--color-step-5),
+    var(--color-step-6)
+  );
+}
+
+/* Dot Grid Pattern */
+.dot-grid {
+  background-image: radial-gradient(
+    circle at center,
+    var(--color-primary) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 32px 32px;
+  opacity: 0.06;
+}
+
+/* Pip Dot — step indicator */
+.pip-dot {
+  width: var(--pip-md);
+  height: var(--pip-md);
+  border-radius: var(--radius-full);
+  background-color: var(--step-color);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.pip-dot--sm {
+  width: var(--pip-sm);
+  height: var(--pip-sm);
+}
+.pip-dot--lg {
+  width: var(--pip-lg);
+  height: var(--pip-lg);
+}
+.pip-dot--xl {
+  width: var(--pip-xl);
+  height: var(--pip-xl);
+}
+
+/* Pip dot with glow (active step) */
+.pip-dot--active {
+  width: var(--pip-xl);
+  height: var(--pip-xl);
+  box-shadow: 0 0 0 4px var(--step-color-subtle);
+  animation: pip-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pip-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px var(--step-color-subtle);
+  }
+  50% {
+    box-shadow: 0 0 0 8px var(--step-color-subtle);
+  }
+}
+
+/* Loading animation — pip dots cycling */
+.pip-loading {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pip-loading .pip-dot {
+  animation: pip-load 1.2s ease-in-out infinite;
+}
+
+.pip-loading .pip-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+.pip-loading .pip-dot:nth-child(2) {
+  animation-delay: 100ms;
+}
+.pip-loading .pip-dot:nth-child(3) {
+  animation-delay: 200ms;
+}
+.pip-loading .pip-dot:nth-child(4) {
+  animation-delay: 300ms;
+}
+.pip-loading .pip-dot:nth-child(5) {
+  animation-delay: 400ms;
+}
+.pip-loading .pip-dot:nth-child(6) {
+  animation-delay: 500ms;
+}
+
+@keyframes pip-load {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.3;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+/* Typography utilities */
+.text-display {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+/* Step color utilities */
+.step-1 {
+  --step-color: var(--color-step-1);
+  --step-color-subtle: var(--color-step-1-subtle);
+}
+.step-2 {
+  --step-color: var(--color-step-2);
+  --step-color-subtle: var(--color-step-2-subtle);
+}
+.step-3 {
+  --step-color: var(--color-step-3);
+  --step-color-subtle: var(--color-step-3-subtle);
+}
+.step-4 {
+  --step-color: var(--color-step-4);
+  --step-color-subtle: var(--color-step-4-subtle);
+}
+.step-5 {
+  --step-color: var(--color-step-5);
+  --step-color-subtle: var(--color-step-5-subtle);
+}
+.step-6 {
+  --step-color: var(--color-step-6);
+  --step-color-subtle: var(--color-step-6-subtle);
+}
+
+/* Transition utilities */
+.transition-colors {
+  transition:
+    color var(--duration-normal) var(--ease-default),
+    background-color var(--duration-normal) var(--ease-default),
+    border-color var(--duration-normal) var(--ease-default);
+}
+
+.transition-shadow {
+  transition: box-shadow var(--duration-normal) var(--ease-default);
+}
+
+.transition-transform {
+  transition: transform var(--duration-normal) var(--ease-spring);
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
