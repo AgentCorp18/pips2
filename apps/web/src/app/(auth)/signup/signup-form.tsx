@@ -1,0 +1,121 @@
+'use client'
+
+import { useActionState } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { signup, type AuthActionState } from '../actions'
+
+const initialState: AuthActionState = {}
+
+export const SignupForm = () => {
+  const [state, formAction, isPending] = useActionState(signup, initialState)
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-center text-xl">Create an account</CardTitle>
+        <CardDescription className="text-center">
+          Get started with PIPS process improvement
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        <form action={formAction} className="flex flex-col gap-4">
+          {state.error && (
+            <div
+              className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
+              style={{
+                backgroundColor: 'var(--color-error-subtle)',
+                color: 'var(--color-error)',
+              }}
+            >
+              {state.error}
+            </div>
+          )}
+
+          {state.success && (
+            <div
+              className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
+              style={{
+                backgroundColor: 'var(--color-success-subtle)',
+                color: 'var(--color-success)',
+              }}
+            >
+              {state.success}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="displayName">Full name</Label>
+            <Input
+              id="displayName"
+              name="displayName"
+              type="text"
+              placeholder="Jane Smith"
+              autoComplete="name"
+              required
+              disabled={isPending}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              required
+              disabled={isPending}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+              minLength={8}
+              required
+              disabled={isPending}
+            />
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+              Must be at least 8 characters
+            </p>
+          </div>
+
+          <Button type="submit" className="mt-2 w-full" disabled={isPending}>
+            {isPending ? 'Creating account...' : 'Create account'}
+          </Button>
+        </form>
+      </CardContent>
+
+      <CardFooter className="justify-center">
+        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          Already have an account?{' '}
+          <Link
+            href="/login"
+            className="font-medium hover:underline"
+            style={{ color: 'var(--color-text-link)' }}
+          >
+            Sign in
+          </Link>
+        </p>
+      </CardFooter>
+    </Card>
+  )
+}

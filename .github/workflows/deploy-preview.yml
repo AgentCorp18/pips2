@@ -1,0 +1,45 @@
+name: Deploy Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview-comment:
+    name: Preview Deployment Status
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- vercel-preview -->'
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            <!-- vercel-preview -->
+            ## Vercel Preview Deployment
+
+            Vercel automatically deploys preview builds for this PR via their GitHub integration.
+
+            **Preview URL:** Check the Vercel bot comment below or the deployment status checks.
+
+            | Check | Status |
+            |-------|--------|
+            | CI | ${{ github.event.pull_request.head.sha && '...' || 'Pending' }} |
+            | Preview Deploy | Managed by Vercel |
+
+            > This comment is updated automatically on each push.
