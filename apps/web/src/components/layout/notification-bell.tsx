@@ -161,7 +161,7 @@ export const NotificationBell = () => {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="relative rounded-[var(--radius-md)] p-2 hover:bg-[var(--color-surface-secondary)] focus:outline-none"
+          className="relative rounded-[var(--radius-md)] p-2 hover:bg-[var(--color-surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
         >
           <Bell size={20} className="text-[var(--color-text-secondary)]" />
@@ -185,9 +185,10 @@ export const NotificationBell = () => {
                 e.stopPropagation()
                 void handleMarkAllAsRead()
               }}
-              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] focus:outline-none"
+              aria-label="Mark all notifications as read"
+              className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             >
-              <CheckCheck size={12} />
+              <CheckCheck size={12} aria-hidden="true" />
               Mark all read
             </button>
           )}
@@ -197,9 +198,12 @@ export const NotificationBell = () => {
 
         {/* Notification list */}
         <DropdownMenuGroup>
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto" aria-live="polite" aria-busy={isLoading}>
             {isLoading && notifications.length === 0 && (
-              <div className="px-3 py-6 text-center text-sm text-[var(--color-text-tertiary)]">
+              <div
+                className="px-3 py-6 text-center text-sm text-[var(--color-text-tertiary)]"
+                aria-busy="true"
+              >
                 Loading...
               </div>
             )}

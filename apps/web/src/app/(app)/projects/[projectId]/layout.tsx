@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
+import { ProjectTabs } from '@/components/pips/project-tabs'
 import { ArrowLeft } from 'lucide-react'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -82,6 +83,11 @@ const ProjectLayout = async ({
 
       {/* Step stripe */}
       <div className="step-gradient-stripe mb-6 rounded-full" />
+
+      {/* Tab navigation */}
+      <div className="mb-6">
+        <ProjectTabs projectId={projectId} />
+      </div>
 
       {/* Page content */}
       {children}

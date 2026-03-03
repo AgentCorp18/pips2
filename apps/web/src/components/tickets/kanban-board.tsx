@@ -122,17 +122,27 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div
+        className="flex gap-4 overflow-x-auto pb-4"
+        role="region"
+        aria-label="Kanban board — drag tickets between columns to change status"
+      >
         {BOARD_COLUMNS.map((col) => {
           const tickets = columns[col.id]
 
           return (
-            <div key={col.id} className="flex w-[280px] flex-shrink-0 flex-col">
+            <div
+              key={col.id}
+              className="flex w-[280px] flex-shrink-0 flex-col"
+              role="group"
+              aria-label={`${col.label} column, ${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`}
+            >
               {/* Column header */}
               <div className="mb-3 flex items-center gap-2">
                 <span
                   className="inline-block h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: col.color }}
+                  aria-hidden="true"
                 />
                 <h3
                   className="text-sm font-semibold"
@@ -146,6 +156,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
                     backgroundColor: 'var(--color-surface)',
                     color: 'var(--color-text-secondary)',
                   }}
+                  aria-label={`${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`}
                 >
                   {tickets.length}
                 </span>
@@ -171,6 +182,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
                             ref={dragProvided.innerRef}
                             {...dragProvided.draggableProps}
                             {...dragProvided.dragHandleProps}
+                            aria-label={`${ticket.sequenceId}: ${ticket.title}, priority ${ticket.priority}, in ${col.label}`}
                           >
                             <KanbanCard
                               id={ticket.id}

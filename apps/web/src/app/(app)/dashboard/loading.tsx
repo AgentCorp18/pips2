@@ -3,7 +3,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 const DashboardLoading = () => {
   return (
-    <div className="mx-auto max-w-[var(--content-max-width)]">
+    <div
+      className="mx-auto max-w-[var(--content-max-width)]"
+      aria-busy="true"
+      aria-label="Loading dashboard"
+    >
       {/* Welcome header skeleton */}
       <div className="mb-8">
         <div className="flex items-center gap-3">

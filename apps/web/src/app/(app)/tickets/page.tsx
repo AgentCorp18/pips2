@@ -13,6 +13,10 @@ import { Plus } from 'lucide-react'
 import { ExportTicketsButton } from '@/components/tickets/export-tickets-button'
 import { getTickets } from './actions'
 import { TicketListFilters } from '@/components/tickets/ticket-list-filters'
+import { TicketQuickFilters } from '@/components/tickets/ticket-quick-filters'
+import { TicketFilterPanel } from '@/components/tickets/ticket-filter-panel'
+import { resolveQuickFilters } from '@/components/tickets/quick-filter-resolver'
+import type { QuickFilterKey } from '@/components/tickets/ticket-quick-filters'
 
 export const metadata: Metadata = {
   title: 'Tickets - PIPS',
@@ -79,9 +83,26 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
   if (typeof params.assignee_id === 'string') {
     filters.assignee_id = params.assignee_id
   }
+  if (typeof params.project_id === 'string') {
+    filters.project_id = params.project_id
+  }
   if (typeof params.search === 'string') {
     filters.search = params.search
   }
+
+  // Resolve quick filters and merge into filters
+  const quickRaw = Array.isArray(params.quick) ? params.quick : params.quick ? [params.quick] : []
+  const quickKeys = quickRaw.filter((v): v is QuickFilterKey =>
+    ['my_open', 'overdue', 'created_by_me', 'unassigned', 'high_priority'].includes(v as string),
+  )
+  const resolved = resolveQuickFilters(quickKeys, user.id)
+
+  if (resolved.status && !filters.status) filters.status = resolved.status
+  if (resolved.priority && !filters.priority) filters.priority = resolved.priority
+  if (resolved.assignee_id && !filters.assignee_id) filters.assignee_id = resolved.assignee_id
+  if (resolved.reporter_id) filters.reporter_id = resolved.reporter_id
+  if (resolved.unassigned) filters.unassigned = true
+  if (resolved.due_date_before) filters.due_date_before = resolved.due_date_before
 
   const { tickets, total } = await getTickets(membership.org_id, filters)
 
@@ -98,6 +119,15 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       display_name: profile?.display_name ?? 'Unknown',
     }
   })
+
+  // Fetch projects for filter dropdown
+  const { data: projectsRaw } = await supabase
+    .from('projects')
+    .select('id, name')
+    .eq('org_id', membership.org_id)
+    .order('name')
+
+  const projects = (projectsRaw ?? []).map((p) => ({ id: p.id, name: p.name }))
 
   // Transform tickets into table rows
   const ticketRows: TicketRow[] = tickets.map((ticket) => {
@@ -145,8 +175,18 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
         </div>
       </div>
 
-      {/* Filter bar */}
+      {/* Quick filters */}
+      <div className="mb-3">
+        <TicketQuickFilters />
+      </div>
+
+      {/* Search + basic filters */}
       <TicketListFilters members={members} />
+
+      {/* Advanced filter panel */}
+      <div className="mt-3">
+        <TicketFilterPanel members={members} projects={projects} />
+      </div>
 
       {/* Content */}
       {tickets.length > 0 ? (

@@ -20,7 +20,7 @@ export const STATUS_CONFIG: Record<TicketStatus, StatusConfig> = {
   in_review: { label: 'In Review', className: 'bg-purple-100 text-purple-700' },
   blocked: { label: 'Blocked', className: 'bg-red-100 text-red-700' },
   done: { label: 'Done', className: 'bg-green-100 text-green-700' },
-  cancelled: { label: 'Cancelled', className: 'bg-gray-100 text-gray-500' },
+  cancelled: { label: 'Cancelled', className: 'bg-gray-100 text-gray-600' },
 }
 
 /* ============================================================

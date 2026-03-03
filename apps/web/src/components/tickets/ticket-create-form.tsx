@@ -31,6 +31,7 @@ type Project = {
 type TicketCreateFormProps = {
   members: OrgMember[]
   projects: Project[]
+  parentId?: string
 }
 
 /* ============================================================
@@ -39,13 +40,16 @@ type TicketCreateFormProps = {
 
 const initialState: TicketActionState = {}
 
-export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) => {
+export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFormProps) => {
   const [state, formAction, pending] = useActionState(createTicket, initialState)
 
   return (
     <form action={formAction} className="space-y-5">
+      {parentId && <input type="hidden" name="parent_id" value={parentId} />}
+
       {state.error && (
         <div
+          role="alert"
           className="rounded-md border px-4 py-3 text-sm"
           style={{
             borderColor: 'var(--color-error)',
@@ -65,10 +69,12 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
           name="title"
           placeholder="Brief summary of the ticket"
           aria-invalid={!!state.fieldErrors?.title}
+          aria-describedby={state.fieldErrors?.title ? 'title-error' : undefined}
+          aria-required="true"
           required
         />
         {state.fieldErrors?.title && (
-          <p className="text-xs" style={{ color: 'var(--color-error)' }}>
+          <p id="title-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
             {state.fieldErrors.title}
           </p>
         )}
@@ -81,10 +87,11 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
           id="description"
           name="description"
           placeholder="Detailed description..."
+          aria-describedby={state.fieldErrors?.description ? 'description-error' : undefined}
           rows={4}
         />
         {state.fieldErrors?.description && (
-          <p className="text-xs" style={{ color: 'var(--color-error)' }}>
+          <p id="description-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
             {state.fieldErrors.description}
           </p>
         )}
@@ -93,9 +100,9 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
       {/* Row: Type + Priority + Status */}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <Label htmlFor="type">Type</Label>
+          <Label>Type</Label>
           <Select name="type" defaultValue="general">
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Type">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -109,9 +116,9 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="priority">Priority</Label>
+          <Label>Priority</Label>
           <Select name="priority" defaultValue="medium">
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Priority">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -125,9 +132,9 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="status">Status</Label>
+          <Label>Status</Label>
           <Select name="status" defaultValue="backlog">
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Status">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -142,9 +149,9 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
       {/* Row: Assignee + Project */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="assignee_id">Assignee</Label>
+          <Label>Assignee</Label>
           <Select name="assignee_id">
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Assignee">
               <SelectValue placeholder="Unassigned" />
             </SelectTrigger>
             <SelectContent>
@@ -158,9 +165,9 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="project_id">Project</Label>
+          <Label>Project</Label>
           <Select name="project_id">
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Project">
               <SelectValue placeholder="None" />
             </SelectTrigger>
             <SelectContent>
@@ -178,9 +185,14 @@ export const TicketCreateForm = ({ members, projects }: TicketCreateFormProps) =
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="due_date">Due Date</Label>
-          <Input id="due_date" name="due_date" type="date" />
+          <Input
+            id="due_date"
+            name="due_date"
+            type="date"
+            aria-describedby={state.fieldErrors?.due_date ? 'due-date-error' : undefined}
+          />
           {state.fieldErrors?.due_date && (
-            <p className="text-xs" style={{ color: 'var(--color-error)' }}>
+            <p id="due-date-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
               {state.fieldErrors.due_date}
             </p>
           )}

@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/email/send'
+import { ticketAssignedTemplate } from '@/lib/email/ticket-assigned'
+import { mentionTemplate } from '@/lib/email/mention'
+import { projectUpdatedTemplate } from '@/lib/email/project-updated'
+import { invitationTemplate } from '@/lib/email/invitation'
+import { welcomeTemplate } from '@/lib/email/welcome'
+import { baseTemplate, ctaButton } from '@/lib/email/base-template'
 
 /* ============================================================
    Validation
@@ -14,6 +20,8 @@ const emailPayloadSchema = z.object({
   body: z.string().min(1).max(5000),
   entity_type: z.string().optional(),
   entity_id: z.string().uuid().optional(),
+  /** Extra metadata used by branded templates */
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 /* ============================================================
@@ -27,6 +35,7 @@ const NOTIFICATION_SUBJECTS: Record<string, string> = {
   ticket_updated: 'PIPS — Ticket Updated',
   ticket_commented: 'PIPS — New Comment on Ticket',
   invitation: 'PIPS — You Have Been Invited',
+  welcome: 'PIPS — Welcome to PIPS',
   system: 'PIPS — System Notification',
 }
 
@@ -47,23 +56,85 @@ const buildEntityUrl = (entityType?: string, entityId?: string): string => {
   }
 }
 
-const buildEmailText = (title: string, body: string, entityUrl: string): string => {
-  return [
-    title,
-    '',
-    body,
-    '',
-    `View in PIPS: ${entityUrl}`,
-    '',
-    '---',
-    'You received this email because you have notifications enabled in PIPS.',
-    'To unsubscribe, update your notification preferences in Settings.',
-  ].join('\n')
+const str = (value: unknown, fallback: string): string =>
+  typeof value === 'string' && value.length > 0 ? value : fallback
+
+/* ============================================================
+   Template renderer
+   Selects the branded template based on notification type,
+   falling back to a generic layout for unknown types.
+   ============================================================ */
+
+const renderTemplate = (
+  type: string,
+  title: string,
+  body: string,
+  entityUrl: string,
+  recipientName: string,
+  recipientEmail: string,
+  meta: Record<string, unknown>,
+): string => {
+  switch (type) {
+    case 'ticket_assigned':
+      return ticketAssignedTemplate({
+        recipientName,
+        ticketTitle: str(meta.ticket_title, title),
+        ticketId: str(meta.ticket_id, '—'),
+        projectName: str(meta.project_name, 'Unknown project'),
+        priority: str(meta.priority, 'medium'),
+        ticketUrl: entityUrl,
+      })
+
+    case 'mention':
+      return mentionTemplate({
+        recipientName,
+        commenterName: str(meta.commenter_name, 'Someone'),
+        commentSnippet: str(meta.comment_snippet, body),
+        entityLabel: str(meta.entity_label, 'a conversation'),
+        mentionUrl: entityUrl,
+      })
+
+    case 'project_updated':
+      return projectUpdatedTemplate({
+        recipientName,
+        projectName: str(meta.project_name, 'Your project'),
+        newStep: str(meta.new_step, 'next step'),
+        projectUrl: entityUrl,
+      })
+
+    case 'invitation':
+      return invitationTemplate({
+        recipientEmail,
+        orgName: str(meta.org_name, 'an organization'),
+        role: str(meta.role, 'Member'),
+        inviterName: str(meta.inviter_name, 'A team member'),
+        acceptUrl: str(meta.accept_url, entityUrl),
+      })
+
+    case 'welcome':
+      return welcomeTemplate({
+        recipientName,
+        dashboardUrl: entityUrl,
+      })
+
+    default:
+      return baseTemplate({
+        preheader: title,
+        body: `
+          <p style="margin:0 0 16px;">Hi ${recipientName},</p>
+          <p style="margin:0 0 8px;font-weight:600;font-size:17px;color:#1B1340;">
+            ${title}
+          </p>
+          <p style="margin:0 0 20px;">${body}</p>
+          ${ctaButton('View in PIPS', entityUrl)}
+        `,
+      })
+  }
 }
 
 /* ============================================================
    POST /api/notifications/email
-   Sends a notification email via Resend.
+   Sends a branded notification email via Resend.
    Guarded by a shared secret header.
    ============================================================ */
 
@@ -92,7 +163,7 @@ export const POST = async (request: Request) => {
     )
   }
 
-  const { user_id, type, title, body, entity_type, entity_id } = parsed.data
+  const { user_id, type, title, body, entity_type, entity_id, metadata } = parsed.data
 
   // Fetch user profile to get email
   const supabase = await createClient()
@@ -106,41 +177,37 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
-  // Check if Resend API key is configured
-  const resendApiKey = process.env.RESEND_API_KEY
-  if (!resendApiKey) {
-    console.error('RESEND_API_KEY is not configured')
-    return NextResponse.json({ error: 'Email service not configured' }, { status: 503 })
-  }
-
   // Build email content
   const subject = NOTIFICATION_SUBJECTS[type] ?? 'PIPS — Notification'
   const entityUrl = buildEntityUrl(entity_type, entity_id)
-  const text = buildEmailText(title, body, entityUrl)
+  const recipientName = profile.display_name || 'there'
+  const html = renderTemplate(
+    type,
+    title,
+    body,
+    entityUrl,
+    recipientName,
+    profile.email,
+    metadata ?? {},
+  )
 
-  // Send email via Resend
-  const resend = new Resend(resendApiKey)
+  // Send email via the sendEmail helper
+  const result = await sendEmail({ to: profile.email, subject, html })
 
-  const { error: sendError } = await resend.emails.send({
-    from: process.env.NOTIFICATION_FROM_EMAIL ?? 'PIPS <notifications@pips.com>',
-    to: [profile.email],
-    subject,
-    text,
-  })
-
-  if (sendError) {
-    console.error('Failed to send notification email:', sendError)
-    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
+  if (!result.success) {
+    return NextResponse.json({ error: result.error ?? 'Failed to send email' }, { status: 500 })
   }
 
   // Mark the notification as emailed
-  await supabase
-    .from('notifications')
-    .update({ email_sent: true })
-    .eq('user_id', user_id)
-    .eq('entity_id', entity_id)
-    .eq('type', type)
-    .is('email_sent', false)
+  if (entity_id) {
+    await supabase
+      .from('notifications')
+      .update({ email_sent: true })
+      .eq('user_id', user_id)
+      .eq('entity_id', entity_id)
+      .eq('type', type)
+      .is('email_sent', false)
+  }
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, id: result.id })
 }

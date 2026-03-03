@@ -1,15 +1,21 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { TicketCreateForm } from '@/components/tickets/ticket-create-form'
+import { getParentTicket } from '../actions'
 
 export const metadata: Metadata = {
   title: 'New Ticket - PIPS',
   description: 'Create a new ticket',
 }
 
-const NewTicketPage = async () => {
+type NewTicketPageProps = {
+  searchParams: Promise<{ parent?: string }>
+}
+
+const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
+  const { parent: parentId } = await searchParams
   const supabase = await createClient()
 
   const {
@@ -29,6 +35,25 @@ const NewTicketPage = async () => {
 
   if (!membership) {
     redirect('/onboarding')
+  }
+
+  // Fetch parent ticket if creating a sub-ticket
+  let parentContext: { id: string; title: string; sequenceId: string } | null = null
+  if (parentId) {
+    const parentData = await getParentTicket(parentId)
+    if (parentData) {
+      const { data: parentOrgSettings } = await supabase
+        .from('org_settings')
+        .select('ticket_prefix')
+        .eq('org_id', parentData.org_id)
+        .single()
+      const prefix = parentOrgSettings?.ticket_prefix ?? 'TKT'
+      parentContext = {
+        id: parentData.id,
+        title: parentData.title,
+        sequenceId: `${prefix}-${parentData.sequence_number}`,
+      }
+    }
   }
 
   // Fetch org members for assignee selector
@@ -62,10 +87,17 @@ const NewTicketPage = async () => {
     <div className="mx-auto max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle>Create New Ticket</CardTitle>
+          <CardTitle>{parentContext ? 'Create Sub-Ticket' : 'Create New Ticket'}</CardTitle>
+          {parentContext && (
+            <CardDescription>
+              Creating sub-ticket under{' '}
+              <span className="font-mono font-medium">{parentContext.sequenceId}</span>{' '}
+              {parentContext.title}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
-          <TicketCreateForm members={members} projects={projects} />
+          <TicketCreateForm members={members} projects={projects} parentId={parentContext?.id} />
         </CardContent>
       </Card>
     </div>

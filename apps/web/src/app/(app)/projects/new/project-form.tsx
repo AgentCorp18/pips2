@@ -23,6 +23,7 @@ export const ProjectForm = () => {
         <form action={formAction} className="flex flex-col gap-4">
           {state.error && (
             <div
+              role="alert"
               className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
               style={{
                 backgroundColor: 'var(--color-error-subtle)',
@@ -41,11 +42,13 @@ export const ProjectForm = () => {
               name="name"
               type="text"
               placeholder="e.g. Reduce onboarding time"
+              aria-required="true"
+              aria-describedby={state.fieldErrors?.name ? 'name-error' : undefined}
               required
               disabled={isPending}
             />
             {state.fieldErrors?.name && (
-              <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+              <p id="name-error" className="text-sm" style={{ color: 'var(--color-error)' }}>
                 {state.fieldErrors.name}
               </p>
             )}
@@ -60,10 +63,11 @@ export const ProjectForm = () => {
               placeholder="Describe the process you want to improve..."
               disabled={isPending}
               rows={3}
+              aria-describedby={state.fieldErrors?.description ? 'description-error' : undefined}
               className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             />
             {state.fieldErrors?.description && (
-              <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+              <p id="description-error" className="text-sm" style={{ color: 'var(--color-error)' }}>
                 {state.fieldErrors.description}
               </p>
             )}
@@ -77,9 +81,12 @@ export const ProjectForm = () => {
               name="target_completion_date"
               type="date"
               disabled={isPending}
+              aria-describedby={
+                state.fieldErrors?.target_completion_date ? 'target-date-error' : undefined
+              }
             />
             {state.fieldErrors?.target_completion_date && (
-              <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+              <p id="target-date-error" className="text-sm" style={{ color: 'var(--color-error)' }}>
                 {state.fieldErrors.target_completion_date}
               </p>
             )}

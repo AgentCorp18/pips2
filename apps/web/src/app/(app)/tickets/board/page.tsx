@@ -8,6 +8,9 @@ import { getTicketsForBoard } from '../actions'
 import { KanbanBoard } from '@/components/tickets/kanban-board'
 import type { BoardTicket } from '@/components/tickets/kanban-board'
 import { BoardFilters } from '@/components/tickets/board-filters'
+import { TicketQuickFilters } from '@/components/tickets/ticket-quick-filters'
+import { resolveQuickFilters } from '@/components/tickets/quick-filter-resolver'
+import type { QuickFilterKey } from '@/components/tickets/ticket-quick-filters'
 
 export const metadata: Metadata = {
   title: 'Board - PIPS',
@@ -52,10 +55,34 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   const prefix = orgSettings?.ticket_prefix ?? 'TKT'
 
   // Build filters from search params
-  const filters: { priority?: string; assignee_id?: string; project_id?: string } = {}
-  if (typeof params.priority === 'string') filters.priority = params.priority
+  const filters: {
+    priority?: string[]
+    assignee_id?: string
+    reporter_id?: string
+    project_id?: string
+    unassigned?: boolean
+    due_date_before?: string
+    type?: string[]
+  } = {}
+
+  if (params.priority) {
+    filters.priority = Array.isArray(params.priority) ? params.priority : [params.priority]
+  }
   if (typeof params.assignee_id === 'string') filters.assignee_id = params.assignee_id
   if (typeof params.project_id === 'string') filters.project_id = params.project_id
+
+  // Resolve quick filters and merge
+  const quickRaw = Array.isArray(params.quick) ? params.quick : params.quick ? [params.quick] : []
+  const quickKeys = quickRaw.filter((v): v is QuickFilterKey =>
+    ['my_open', 'overdue', 'created_by_me', 'unassigned', 'high_priority'].includes(v as string),
+  )
+  const resolved = resolveQuickFilters(quickKeys, user.id)
+
+  if (resolved.priority && !filters.priority) filters.priority = resolved.priority
+  if (resolved.assignee_id && !filters.assignee_id) filters.assignee_id = resolved.assignee_id
+  if (resolved.reporter_id) filters.reporter_id = resolved.reporter_id
+  if (resolved.unassigned) filters.unassigned = true
+  if (resolved.due_date_before) filters.due_date_before = resolved.due_date_before
 
   const tickets = await getTicketsForBoard(membership.org_id, filters)
 
@@ -121,6 +148,11 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
             New Ticket
           </Link>
         </Button>
+      </div>
+
+      {/* Quick filters */}
+      <div className="mb-3">
+        <TicketQuickFilters basePath="/tickets/board" />
       </div>
 
       {/* Filters */}

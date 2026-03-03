@@ -3,7 +3,11 @@ import { Card, CardContent } from '@/components/ui/card'
 
 const TicketsLoading = () => {
   return (
-    <div className="mx-auto max-w-[var(--content-max-width)]">
+    <div
+      className="mx-auto max-w-[var(--content-max-width)]"
+      aria-busy="true"
+      aria-label="Loading tickets"
+    >
       {/* Header skeleton */}
       <div className="mb-6 flex items-center justify-between">
         <div>

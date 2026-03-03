@@ -60,7 +60,7 @@ export const OnboardingForm = () => {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Step indicator */}
-        <div className="mb-8 flex items-center justify-center gap-1.5">
+        <div className="mb-8 flex items-center justify-center gap-1.5" aria-hidden="true">
           <span className="step-1 pip-dot pip-dot--sm" />
           <span className="step-2 pip-dot pip-dot--sm" />
           <span className="step-3 pip-dot pip-dot--sm" />
@@ -81,6 +81,7 @@ export const OnboardingForm = () => {
             <form action={formAction} className="flex flex-col gap-4">
               {state.error && (
                 <div
+                  role="alert"
                   className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
                   style={{
                     backgroundColor: 'var(--color-error-subtle)',
@@ -92,28 +93,35 @@ export const OnboardingForm = () => {
               )}
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="name">Organization name</Label>
+                <Label htmlFor="name">Organization name *</Label>
                 <Input
                   id="name"
                   name="name"
                   type="text"
                   placeholder="Acme Corporation"
+                  aria-required="true"
+                  aria-describedby={state.fieldErrors?.name ? 'org-name-error' : undefined}
                   required
                   disabled={isPending}
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
                 />
                 {state.fieldErrors?.name && (
-                  <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+                  <p
+                    id="org-name-error"
+                    className="text-sm"
+                    style={{ color: 'var(--color-error)' }}
+                  >
                     {state.fieldErrors.name}
                   </p>
                 )}
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="slug">URL slug</Label>
+                <Label htmlFor="slug">URL slug *</Label>
                 <div className="flex items-center gap-0">
                   <span
+                    aria-hidden="true"
                     className="flex h-9 items-center rounded-l-md border border-r-0 px-3 text-sm"
                     style={{
                       backgroundColor: 'var(--color-surface-secondary)',
@@ -128,6 +136,14 @@ export const OnboardingForm = () => {
                     name="slug"
                     type="text"
                     placeholder="acme-corp"
+                    aria-required="true"
+                    aria-describedby={
+                      state.fieldErrors?.slug
+                        ? 'slug-error'
+                        : slugStatus !== 'idle'
+                          ? 'slug-status'
+                          : undefined
+                    }
                     required
                     disabled={isPending}
                     value={slug}
@@ -136,22 +152,37 @@ export const OnboardingForm = () => {
                   />
                 </div>
                 {slugStatus === 'checking' && (
-                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                  <p
+                    id="slug-status"
+                    aria-live="polite"
+                    className="text-sm"
+                    style={{ color: 'var(--color-text-tertiary)' }}
+                  >
                     Checking availability...
                   </p>
                 )}
                 {slugStatus === 'available' && (
-                  <p className="text-sm" style={{ color: 'var(--color-success)' }}>
+                  <p
+                    id="slug-status"
+                    aria-live="polite"
+                    className="text-sm"
+                    style={{ color: 'var(--color-success)' }}
+                  >
                     This slug is available
                   </p>
                 )}
                 {slugStatus === 'taken' && (
-                  <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+                  <p
+                    id="slug-status"
+                    aria-live="polite"
+                    className="text-sm"
+                    style={{ color: 'var(--color-error)' }}
+                  >
                     This slug is already taken
                   </p>
                 )}
                 {state.fieldErrors?.slug && (
-                  <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+                  <p id="slug-error" className="text-sm" style={{ color: 'var(--color-error)' }}>
                     {state.fieldErrors.slug}
                   </p>
                 )}

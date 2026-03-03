@@ -140,6 +140,7 @@ export const createTicketSchema = z.object({
   priority: z.enum(ticketPriorities).default('medium'),
   assignee_id: z.string().uuid().optional().or(z.literal('')),
   project_id: z.string().uuid().optional().or(z.literal('')),
+  parent_id: z.string().uuid().optional().or(z.literal('')),
   due_date: z
     .string()
     .optional()
@@ -180,7 +181,10 @@ export const ticketFiltersSchema = z.object({
   priority: z.array(z.enum(ticketPriorities)).optional(),
   type: z.array(z.enum(ticketTypes)).optional(),
   assignee_id: z.string().uuid().optional(),
+  reporter_id: z.string().uuid().optional(),
   project_id: z.string().uuid().optional(),
+  unassigned: z.coerce.boolean().optional(),
+  due_date_before: z.string().optional(),
   search: z.string().max(200).optional(),
   page: z.coerce.number().int().min(1).default(1),
   per_page: z.coerce.number().int().min(1).max(100).default(25),

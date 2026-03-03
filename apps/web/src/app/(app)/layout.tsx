@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import {
   Search,
   LayoutDashboard,
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
 const MOBILE_BREAKPOINT = 768
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname()
   const [commandOpen, setCommandOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -71,22 +73,26 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-bg)]">
+      {/* Skip to main content — visible on focus for keyboard users */}
+      <a
+        href="#main-content"
+        className="fixed left-2 top-2 z-[100] -translate-y-full rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
+      >
+        Skip to main content
+      </a>
+
       {/* Mobile sidebar backdrop */}
       {isMobile && sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 transition-opacity"
           onClick={closeSidebar}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') closeSidebar()
-          }}
-          role="button"
-          tabIndex={-1}
-          aria-label="Close sidebar"
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <aside
+        aria-label="Sidebar"
         className={`${
           isMobile
             ? `fixed inset-y-0 left-0 z-50 w-[var(--sidebar-width)] transform transition-transform duration-200 ease-in-out ${
@@ -99,8 +105,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Logo area */}
         <div className="flex h-[var(--topbar-height)] items-center justify-between gap-2 px-6">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              {/* Step dot pips */}
+            <div className="flex items-center gap-1.5" aria-hidden="true">
+              {/* Step dot pips — decorative */}
               <span className="step-1 pip-dot pip-dot--sm" />
               <span className="step-2 pip-dot pip-dot--sm" />
               <span className="step-3 pip-dot pip-dot--sm" />
@@ -122,20 +128,24 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           )}
         </div>
 
-        <div className="step-gradient-stripe" />
+        <div className="step-gradient-stripe" aria-hidden="true" />
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav aria-label="Main navigation" className="flex-1 space-y-1 px-3 py-4">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <a
                 key={item.href}
                 href={item.href}
                 onClick={isMobile ? closeSidebar : undefined}
-                className="flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium opacity-70 transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100"
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 ${
+                  isActive ? 'bg-[var(--sidebar-accent)] opacity-100' : 'opacity-70'
+                }`}
               >
-                <Icon size={20} />
+                <Icon size={20} aria-hidden="true" />
                 {item.label}
               </a>
             )
@@ -169,6 +179,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <button
               type="button"
               onClick={openCommandPalette}
+              aria-label="Search projects, tickets (Ctrl+K)"
               className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-1.5 transition-colors hover:border-[var(--color-primary)]"
             >
               <Search size={16} className="text-[var(--color-text-tertiary)]" />
@@ -190,7 +201,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
+        <main id="main-content" className="flex-1 overflow-auto p-4 md:p-6">
+          {children}
+        </main>
       </div>
 
       {/* Command Palette (Cmd+K) */}

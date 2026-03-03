@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getTicket } from '../actions'
+import { getTicket, getChildTickets, getParentTicket } from '../actions'
 import { getComments } from './comment-actions'
 import { TicketDetailClient } from '@/components/tickets/ticket-detail-client'
 import { CommentSection } from '@/components/tickets/comment-section'
+import { ParentTicketLink } from '@/components/tickets/parent-ticket-link'
+import { SubTickets } from '@/components/tickets/sub-tickets'
 import { Separator } from '@/components/ui/separator'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 
@@ -59,6 +61,38 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
 
   const prefix = orgSettings?.ticket_prefix ?? 'TKT'
   const sequenceId = `${prefix}-${ticket.sequence_number}`
+
+  // Fetch parent ticket if this ticket has a parent
+  const parentData = ticket.parent_id ? await getParentTicket(ticket.parent_id) : null
+
+  // Fetch child tickets
+  const childTicketsRaw = await getChildTickets(ticketId)
+  const childTickets = childTicketsRaw.map((c) => {
+    const assignee = c.assignee as unknown as {
+      id: string
+      display_name: string
+      avatar_url: string | null
+    } | null
+    return {
+      id: c.id,
+      title: c.title,
+      status: c.status as TicketStatus,
+      priority: c.priority as TicketPriority,
+      assignee,
+    }
+  })
+
+  // Compute parent sequence ID for breadcrumb
+  let parentSequenceId: string | undefined
+  if (parentData) {
+    const { data: parentOrgSettings } = await supabase
+      .from('org_settings')
+      .select('ticket_prefix')
+      .eq('org_id', parentData.org_id)
+      .single()
+    const parentPrefix = parentOrgSettings?.ticket_prefix ?? 'TKT'
+    parentSequenceId = `${parentPrefix}-${parentData.sequence_number}`
+  }
 
   // Fetch comments
   const commentsRaw = await getComments(ticketId)
@@ -127,7 +161,19 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
 
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
+      {parentData && parentSequenceId && (
+        <ParentTicketLink
+          parentId={parentData.id}
+          parentTitle={parentData.title}
+          parentSequenceId={parentSequenceId}
+        />
+      )}
+
       <TicketDetailClient ticket={ticketData} sequenceId={sequenceId} members={members} />
+
+      <Separator className="my-8" />
+
+      <SubTickets parentTicketId={ticketId} tickets={childTickets} />
 
       <Separator className="my-8" />
 

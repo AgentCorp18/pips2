@@ -83,14 +83,18 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
   }
 
   return (
-    <div className="mb-3 flex items-center gap-3 rounded-lg border border-[var(--color-primary-light)] bg-[var(--color-primary-subtle,#f0edfa)] p-2 px-3">
+    <div
+      role="toolbar"
+      aria-label={`Bulk actions for ${selectedIds.length} selected ticket${selectedIds.length !== 1 ? 's' : ''}`}
+      className="mb-3 flex items-center gap-3 rounded-lg border border-[var(--color-primary-light)] bg-[var(--color-primary-subtle,#f0edfa)] p-2 px-3"
+    >
       <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
         {selectedIds.length} selected
       </span>
 
       {/* Status change */}
       <Select onValueChange={handleStatusChange} disabled={isPending}>
-        <SelectTrigger className="w-[140px]" size="sm">
+        <SelectTrigger className="w-[140px]" size="sm" aria-label="Set status for selected tickets">
           <SelectValue placeholder="Set status" />
         </SelectTrigger>
         <SelectContent>
@@ -104,7 +108,11 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
 
       {/* Priority change */}
       <Select onValueChange={handlePriorityChange} disabled={isPending}>
-        <SelectTrigger className="w-[140px]" size="sm">
+        <SelectTrigger
+          className="w-[140px]"
+          size="sm"
+          aria-label="Set priority for selected tickets"
+        >
           <SelectValue placeholder="Set priority" />
         </SelectTrigger>
         <SelectContent>
@@ -148,7 +156,11 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
         Clear
       </Button>
 
-      {error && <span className="text-sm text-red-600">{error}</span>}
+      {error && (
+        <span role="alert" className="text-sm text-red-600">
+          {error}
+        </span>
+      )}
     </div>
   )
 }

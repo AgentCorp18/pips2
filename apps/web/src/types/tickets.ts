@@ -113,7 +113,10 @@ export type TicketFilters = {
   priority?: TicketPriority[]
   type?: TicketType[]
   assignee_id?: string
+  reporter_id?: string
   project_id?: string
+  unassigned?: boolean
+  due_date_before?: string
   search?: string
   page?: number
   per_page?: number

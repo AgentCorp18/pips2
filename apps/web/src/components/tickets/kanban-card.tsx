@@ -67,7 +67,13 @@ export const KanbanCard = ({
         >
           {sequenceId}
         </span>
-        <span style={{ color: 'var(--color-text-tertiary)' }}>{TYPE_ICONS[type]}</span>
+        <span
+          style={{ color: 'var(--color-text-tertiary)' }}
+          aria-label={`Type: ${type}`}
+          role="img"
+        >
+          {TYPE_ICONS[type]}
+        </span>
       </div>
 
       {/* Title */}
@@ -84,13 +90,15 @@ export const KanbanCard = ({
           <span
             className="inline-block h-2 w-2 rounded-full"
             style={{ backgroundColor: PRIORITY_COLOR[priority] }}
-            title={priority}
+            role="img"
+            aria-label={`Priority: ${priority}`}
           />
           {assigneeName && (
             <span
               className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-medium text-white"
               style={{ backgroundColor: 'var(--color-primary)' }}
-              title={assigneeName}
+              role="img"
+              aria-label={`Assigned to ${assigneeName}`}
             >
               {assigneeName.charAt(0).toUpperCase()}
             </span>
@@ -102,7 +110,7 @@ export const KanbanCard = ({
             className="flex items-center gap-1"
             style={{ color: isOverdue ? '#EF4444' : 'var(--color-text-tertiary)' }}
           >
-            <Calendar size={10} />
+            <Calendar size={10} aria-hidden="true" />
             {new Date(dueDate).toLocaleDateString(undefined, {
               month: 'short',
               day: 'numeric',

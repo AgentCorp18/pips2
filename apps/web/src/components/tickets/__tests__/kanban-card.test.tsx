@@ -79,9 +79,9 @@ describe('KanbanCard', () => {
     expect(screen.queryByText(dateStr)).not.toBeInTheDocument()
   })
 
-  it('renders the priority dot with title attribute', () => {
+  it('renders the priority dot with aria-label', () => {
     const { container } = render(<KanbanCard {...defaultProps} />)
-    const dot = container.querySelector('[title="high"]')
+    const dot = container.querySelector('[aria-label="Priority: high"]')
     expect(dot).toBeInTheDocument()
   })
 
@@ -130,7 +130,7 @@ describe('KanbanCard', () => {
     const priorities: KanbanCardProps['priority'][] = ['critical', 'high', 'medium', 'low', 'none']
     priorities.forEach((priority) => {
       const { unmount, container } = render(<KanbanCard {...defaultProps} priority={priority} />)
-      const dot = container.querySelector(`[title="${priority}"]`)
+      const dot = container.querySelector(`[aria-label="Priority: ${priority}"]`)
       expect(dot).toBeInTheDocument()
       unmount()
     })

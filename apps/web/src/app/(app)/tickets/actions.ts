@@ -31,6 +31,7 @@ export const createTicket = async (
     priority: formData.get('priority'),
     assignee_id: formData.get('assignee_id'),
     project_id: formData.get('project_id'),
+    parent_id: formData.get('parent_id'),
     due_date: formData.get('due_date'),
     tags: formData.get('tags'),
   }
@@ -85,6 +86,7 @@ export const createTicket = async (
     priority: result.data.priority,
     assignee_id: result.data.assignee_id || null,
     project_id: result.data.project_id || null,
+    parent_id: result.data.parent_id || null,
     reporter_id: user.id,
     due_date: result.data.due_date || null,
     tags: tagsArray,
@@ -254,11 +256,19 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
   if (filters.type && filters.type.length > 0) {
     query = query.in('type', filters.type)
   }
-  if (filters.assignee_id) {
+  if (filters.unassigned) {
+    query = query.is('assignee_id', null)
+  } else if (filters.assignee_id) {
     query = query.eq('assignee_id', filters.assignee_id)
+  }
+  if (filters.reporter_id) {
+    query = query.eq('reporter_id', filters.reporter_id)
   }
   if (filters.project_id) {
     query = query.eq('project_id', filters.project_id)
+  }
+  if (filters.due_date_before) {
+    query = query.lt('due_date', filters.due_date_before).not('due_date', 'is', null)
   }
   if (filters.search) {
     query = query.ilike('title', `%${filters.search}%`)
@@ -316,7 +326,15 @@ export const getTicket = async (ticketId: string) => {
 
 export const getTicketsForBoard = async (
   orgId: string,
-  filters?: { priority?: string; assignee_id?: string; project_id?: string },
+  filters?: {
+    priority?: string[]
+    assignee_id?: string
+    reporter_id?: string
+    project_id?: string
+    unassigned?: boolean
+    due_date_before?: string
+    type?: string[]
+  },
 ) => {
   const supabase = await createClient()
 
@@ -333,14 +351,25 @@ export const getTicketsForBoard = async (
     .eq('org_id', orgId)
     .order('created_at', { ascending: false })
 
-  if (filters?.priority) {
-    query = query.eq('priority', filters.priority)
+  if (filters?.priority && filters.priority.length > 0) {
+    query = query.in('priority', filters.priority)
   }
-  if (filters?.assignee_id) {
+  if (filters?.type && filters.type.length > 0) {
+    query = query.in('type', filters.type)
+  }
+  if (filters?.unassigned) {
+    query = query.is('assignee_id', null)
+  } else if (filters?.assignee_id) {
     query = query.eq('assignee_id', filters.assignee_id)
+  }
+  if (filters?.reporter_id) {
+    query = query.eq('reporter_id', filters.reporter_id)
   }
   if (filters?.project_id) {
     query = query.eq('project_id', filters.project_id)
+  }
+  if (filters?.due_date_before) {
+    query = query.lt('due_date', filters.due_date_before).not('due_date', 'is', null)
   }
 
   const { data, error } = await query
@@ -410,6 +439,205 @@ export const bulkUpdateTickets = async (
   }
 
   revalidatePath('/tickets')
+  return {}
+}
+
+/* ============================================================
+   getChildTickets
+   ============================================================ */
+
+export const getChildTickets = async (ticketId: string) => {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('tickets')
+    .select(
+      `
+      id,
+      title,
+      status,
+      priority,
+      assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url )
+    `,
+    )
+    .eq('parent_id', ticketId)
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('Failed to fetch child tickets:', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
+/* ============================================================
+   getParentTicket (lightweight — just id, title, sequence)
+   ============================================================ */
+
+export const getParentTicket = async (parentId: string) => {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('tickets')
+    .select('id, title, sequence_number, org_id')
+    .eq('id', parentId)
+    .single()
+
+  if (error || !data) {
+    return null
+  }
+
+  return data
+}
+
+/* ============================================================
+   setParentTicket
+   ============================================================ */
+
+export const setParentTicket = async (
+  ticketId: string,
+  parentTicketId: string,
+): Promise<TicketActionState> => {
+  if (ticketId === parentTicketId) {
+    return { error: 'A ticket cannot be its own parent' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'You must be signed in' }
+  }
+
+  // Verify both tickets exist and belong to same org
+  const { data: ticket } = await supabase
+    .from('tickets')
+    .select('org_id, parent_id')
+    .eq('id', ticketId)
+    .single()
+
+  if (!ticket) {
+    return { error: 'Ticket not found' }
+  }
+
+  const { data: parentTicket } = await supabase
+    .from('tickets')
+    .select('org_id, parent_id')
+    .eq('id', parentTicketId)
+    .single()
+
+  if (!parentTicket) {
+    return { error: 'Parent ticket not found' }
+  }
+
+  if (ticket.org_id !== parentTicket.org_id) {
+    return { error: 'Tickets must belong to the same organization' }
+  }
+
+  await requirePermission(ticket.org_id, 'ticket.create')
+
+  // Helper to fetch a ticket's parent_id (breaks TS circular inference)
+  const fetchParentId = async (id: string): Promise<string | null> => {
+    const { data } = await supabase.from('tickets').select('parent_id').eq('id', id).single()
+    return (data?.parent_id as string | null) ?? null
+  }
+
+  // Check for circular reference: walk up from parentTicketId
+  const visited = new Set<string>([ticketId])
+  let depth = 0
+  let currentId: string | null = parentTicketId
+
+  while (currentId) {
+    if (visited.has(currentId)) {
+      return { error: 'This would create a circular reference' }
+    }
+    visited.add(currentId)
+    depth++
+    if (depth > 10) {
+      return { error: 'Hierarchy depth exceeds safety limit' }
+    }
+    currentId = await fetchParentId(currentId)
+  }
+
+  // depth here is the depth of the parent from root.
+  // The ticket will be at depth level. Max allowed is 2 (0-indexed: root=0, child=1, grandchild=2)
+  if (depth >= 3) {
+    return { error: 'Maximum nesting depth of 3 levels would be exceeded' }
+  }
+
+  // Check that ticket's children wouldn't exceed max depth either
+  const { data: children } = await supabase
+    .from('tickets')
+    .select('id')
+    .eq('parent_id', ticketId)
+    .limit(1)
+
+  if (children && children.length > 0 && depth >= 2) {
+    return { error: 'This ticket has children and moving it here would exceed max nesting depth' }
+  }
+
+  const { error: updateError } = await supabase
+    .from('tickets')
+    .update({ parent_id: parentTicketId })
+    .eq('id', ticketId)
+
+  if (updateError) {
+    console.error('Failed to set parent ticket:', updateError.message)
+    return { error: 'Failed to set parent ticket. Please try again.' }
+  }
+
+  revalidatePath('/tickets')
+  revalidatePath(`/tickets/${ticketId}`)
+  revalidatePath(`/tickets/${parentTicketId}`)
+  return {}
+}
+
+/* ============================================================
+   removeParentTicket
+   ============================================================ */
+
+export const removeParentTicket = async (ticketId: string): Promise<TicketActionState> => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'You must be signed in' }
+  }
+
+  const { data: ticket } = await supabase
+    .from('tickets')
+    .select('org_id, parent_id')
+    .eq('id', ticketId)
+    .single()
+
+  if (!ticket) {
+    return { error: 'Ticket not found' }
+  }
+
+  await requirePermission(ticket.org_id, 'ticket.create')
+
+  const previousParentId = ticket.parent_id
+
+  const { error: updateError } = await supabase
+    .from('tickets')
+    .update({ parent_id: null })
+    .eq('id', ticketId)
+
+  if (updateError) {
+    console.error('Failed to remove parent ticket:', updateError.message)
+    return { error: 'Failed to remove parent ticket. Please try again.' }
+  }
+
+  revalidatePath('/tickets')
+  revalidatePath(`/tickets/${ticketId}`)
+  if (previousParentId) {
+    revalidatePath(`/tickets/${previousParentId}`)
+  }
   return {}
 }
 

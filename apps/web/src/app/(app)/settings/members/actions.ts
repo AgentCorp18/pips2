@@ -3,7 +3,9 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
-import { canManageRole, type OrgRole } from '@pips/shared'
+import { canManageRole, ROLE_LABELS, type OrgRole } from '@pips/shared'
+import { sendEmail } from '@/lib/email/send'
+import { invitationTemplate } from '@/lib/email/invitation'
 
 interface ActionResult {
   success: boolean
@@ -144,34 +146,88 @@ export const inviteMember = async (
 
     const supabase = await createClient()
 
-    // Check if the user exists by email in profiles
+    // Check if already a member (by email via profiles)
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', email)
       .single()
 
-    if (!profile) {
-      return { success: false, error: 'No user found with that email address' }
+    if (profile) {
+      const { data: existing } = await supabase
+        .from('org_members')
+        .select('id')
+        .eq('org_id', orgId)
+        .eq('user_id', profile.id)
+        .single()
+
+      if (existing) {
+        return { success: false, error: 'User is already a member of this organization' }
+      }
     }
 
-    // Check if already a member
-    const { data: existing } = await supabase
-      .from('org_members')
+    // Check for an existing pending invitation
+    const { data: pendingInvite } = await supabase
+      .from('org_invitations')
       .select('id')
       .eq('org_id', orgId)
-      .eq('user_id', profile.id)
+      .eq('email', email)
+      .eq('status', 'pending')
       .single()
 
-    if (existing) {
-      return { success: false, error: 'User is already a member of this organization' }
+    if (pendingInvite) {
+      return { success: false, error: 'An invitation is already pending for this email' }
     }
 
-    const { error } = await supabase
-      .from('org_members')
-      .insert({ org_id: orgId, user_id: profile.id, role })
+    // Get the inviter profile and org name
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Not authenticated' }
+
+    const { data: inviterProfile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('name')
+      .eq('id', orgId)
+      .single()
+
+    // Create the invitation record
+    const { data: invitation, error } = await supabase
+      .from('org_invitations')
+      .insert({
+        org_id: orgId,
+        email,
+        role,
+        invited_by: user.id,
+      })
+      .select('token')
+      .single()
 
     if (error) return { success: false, error: error.message }
+
+    // Send invitation email (non-blocking — don't fail the action if email fails)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const inviteUrl = `${baseUrl}/invite/${invitation.token}`
+
+    const html = invitationTemplate({
+      recipientEmail: email,
+      orgName: org?.name ?? 'an organization',
+      role: ROLE_LABELS[role],
+      inviterName: (inviterProfile?.full_name as string) ?? 'A team member',
+      acceptUrl: inviteUrl,
+    })
+
+    await sendEmail({
+      to: email,
+      subject: `PIPS — You've been invited to join ${org?.name ?? 'an organization'}`,
+      html,
+    })
 
     revalidatePath('/settings/members')
     return { success: true }
