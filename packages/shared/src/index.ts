@@ -30,3 +30,32 @@ export type { Permission } from './permissions'
 
 export { STEP_CONTENT, getStepForms, getRequiredForms, ALL_FORM_TYPES } from './step-content'
 export type { StepFormDef, StepContent, StepMethodology } from './step-content'
+
+export {
+  BOOK_CHAPTER_MAP,
+  CONTENT_PILLARS,
+  PILLAR_META,
+  stepNumberToContentStep,
+  pipsStepEnumToNumber,
+  formTypeToContentTool,
+  buildProductContext,
+  matchContentNodes,
+  groupByPillar,
+} from './content-taxonomy'
+export type {
+  ContentStep,
+  ContentPillar,
+  ContentTool,
+  ContentPrinciple,
+  ContentRole,
+  ContentDifficulty,
+  ContentType,
+  ContentAccessLevel,
+  ContentTags,
+  ContentNode,
+  ProductContext,
+  ChapterMapping,
+  TrainingExerciseType,
+  TrainingStatus,
+  WorkshopStatus,
+} from './content-taxonomy'

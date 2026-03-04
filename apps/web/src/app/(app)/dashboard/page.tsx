@@ -7,6 +7,8 @@ import { ProjectsByStepChart } from '@/components/dashboard/projects-by-step-cha
 import { RecentActivity } from '@/components/dashboard/recent-activity'
 import { CreateSampleProject } from './create-sample-project'
 import { getDashboardStats, getProjectsByStep, getRecentActivity } from './actions'
+import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
+import type { ProductContext } from '@pips/shared'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -55,6 +57,14 @@ const DashboardPage = async () => {
     getRecentActivity(orgId, 10),
   ])
 
+  // Overview-level cadence context — surfaces introductory PIPS content
+  const dashboardCadenceContext: ProductContext = {
+    steps: ['overview'],
+    tools: [],
+    roles: [],
+    principles: [],
+  }
+
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
       {/* Welcome header */}
@@ -75,6 +85,11 @@ const DashboardPage = async () => {
 
       {/* Step stripe */}
       <div className="step-gradient-stripe mb-8 rounded-full" />
+
+      {/* PIPS Knowledge — overview-level cadence bar */}
+      <div className="mb-8">
+        <KnowledgeCadenceBar context={dashboardCadenceContext} defaultCollapsed />
+      </div>
 
       {/* Stats cards */}
       <StatCards stats={stats} />

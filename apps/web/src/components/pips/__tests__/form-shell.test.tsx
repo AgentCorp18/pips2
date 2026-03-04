@@ -27,6 +27,10 @@ vi.mock('sonner', () => ({
   toast: mockToast,
 }))
 
+vi.mock('@/components/knowledge-cadence/knowledge-cadence-bar', () => ({
+  KnowledgeCadenceBar: () => <div data-testid="cadence-bar" />,
+}))
+
 /* ============================================================
    Helpers
    ============================================================ */
