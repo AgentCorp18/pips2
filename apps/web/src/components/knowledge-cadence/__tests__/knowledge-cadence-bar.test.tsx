@@ -23,7 +23,14 @@ vi.mock('@pips/shared', () => ({
   },
 }))
 
-const CONTEXT = { steps: ['step-1'], tools: ['fishbone'] }
+import type { ProductContext } from '@pips/shared'
+
+const CONTEXT: ProductContext = {
+  steps: ['step-1'],
+  tools: ['fishbone'],
+  roles: [],
+  principles: [],
+}
 
 describe('KnowledgeCadenceBar', () => {
   beforeEach(() => {

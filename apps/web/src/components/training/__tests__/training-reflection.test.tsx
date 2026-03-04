@@ -5,7 +5,7 @@ import { TrainingReflection } from '../training-reflection'
 const DEFAULT_CONFIG = { prompt: 'Reflect on the PIPS methodology.', minWords: 5 }
 
 describe('TrainingReflection', () => {
-  let onComplete: ReturnType<typeof vi.fn>
+  let onComplete: (text: string) => void
 
   beforeEach(() => {
     onComplete = vi.fn()

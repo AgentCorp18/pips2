@@ -98,6 +98,8 @@ describe('TrainingExercise', () => {
       data: { selectedIndex: 0 },
       score: 100,
       time_spent_seconds: 30,
+      attempts: 1,
+      last_attempt_at: '2026-01-01T00:00:00Z',
     }
     render(
       <TrainingExercise

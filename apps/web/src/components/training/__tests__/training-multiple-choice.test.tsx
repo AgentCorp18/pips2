@@ -9,7 +9,7 @@ const DEFAULT_CONFIG = {
 }
 
 describe('TrainingMultipleChoice', () => {
-  let onComplete: ReturnType<typeof vi.fn>
+  let onComplete: (selectedIndex: number, isCorrect: boolean) => void
 
   beforeEach(() => {
     onComplete = vi.fn()

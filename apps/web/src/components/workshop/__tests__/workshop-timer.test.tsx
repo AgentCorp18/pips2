@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { WorkshopTimer } from '../workshop-timer'
 
 vi.mock('@/hooks/use-workshop-realtime', () => ({
-  useWorkshopTimer: (state: { elapsed?: number }) => state.elapsed ?? 0,
+  useWorkshopTimer: () => 0,
   formatTime: (seconds: number) => {
     const m = Math.floor(seconds / 60)
     const s = seconds % 60
@@ -11,11 +11,13 @@ vi.mock('@/hooks/use-workshop-realtime', () => ({
   },
 }))
 
-const IDLE_TIMER = { mode: null, running: false, elapsed: 0 }
-const RUNNING_COUNTDOWN = { mode: 'countdown' as const, running: true, elapsed: 300 }
-const PAUSED_COUNTDOWN = { mode: 'countdown' as const, running: false, elapsed: 300 }
-const EXPIRED_COUNTDOWN = { mode: 'countdown' as const, running: true, elapsed: 0 }
-const RUNNING_COUNTUP = { mode: 'countup' as const, running: true, elapsed: 150 }
+import type { TimerState } from '@/app/(app)/knowledge/workshop/actions'
+
+const IDLE_TIMER: TimerState = { running: false }
+const RUNNING_COUNTDOWN: TimerState = { mode: 'countdown', running: true }
+const PAUSED_COUNTDOWN: TimerState = { mode: 'countdown', running: false }
+const EXPIRED_COUNTDOWN: TimerState = { mode: 'countdown', running: true }
+const RUNNING_COUNTUP: TimerState = { mode: 'countup', running: true }
 
 describe('WorkshopTimer', () => {
   it('renders data-testid on container', () => {
