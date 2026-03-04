@@ -35,7 +35,12 @@ vi.mock('../bookmark-button', () => ({
   ),
 }))
 
-const BASE_NODE = {
+import type { ContentNodeRow } from '@/app/(app)/knowledge/actions'
+
+const NODE_DEFAULTS = { access_level: 'public', tags: {}, related_nodes: [] }
+
+const BASE_NODE: ContentNodeRow = {
+  ...NODE_DEFAULTS,
   id: 'node-1',
   title: 'Chapter 1: Introduction',
   slug: 'ch1-intro',
@@ -47,51 +52,55 @@ const BASE_NODE = {
   parent_id: null,
 }
 
-const SECTIONS = [
+const SECTIONS: ContentNodeRow[] = [
   {
+    ...NODE_DEFAULTS,
     id: 'sec-1',
     title: 'What is PIPS?',
     slug: 'what-is-pips',
     pillar: 'book',
     sort_order: 1,
     body_md: 'PIPS is...',
-    summary: null,
+    summary: '',
     estimated_read_minutes: 2,
     parent_id: 'node-1',
   },
   {
+    ...NODE_DEFAULTS,
     id: 'sec-2',
     title: 'Key Concepts',
     slug: 'key-concepts',
     pillar: 'book',
     sort_order: 2,
     body_md: 'Key concepts are...',
-    summary: null,
+    summary: '',
     estimated_read_minutes: 3,
     parent_id: 'node-1',
   },
 ]
 
-const PREV_NODE = {
+const PREV_NODE: ContentNodeRow = {
+  ...NODE_DEFAULTS,
   id: 'prev-1',
   title: 'Preface',
   slug: 'preface',
   pillar: 'book',
   sort_order: -1,
   body_md: '',
-  summary: null,
+  summary: '',
   estimated_read_minutes: 2,
   parent_id: null,
 }
 
-const NEXT_NODE = {
+const NEXT_NODE: ContentNodeRow = {
+  ...NODE_DEFAULTS,
   id: 'next-1',
   title: 'Chapter 2: Identify',
   slug: 'ch2-identify',
   pillar: 'book',
   sort_order: 1,
   body_md: '',
-  summary: null,
+  summary: '',
   estimated_read_minutes: 8,
   parent_id: null,
 }
