@@ -32,6 +32,7 @@ export const BookmarkButton = ({
       disabled={isPending}
       className="gap-1.5"
       aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+      data-testid="bookmark-btn"
     >
       {bookmarked ? (
         <BookmarkCheck size={14} className="text-[var(--color-primary)]" />

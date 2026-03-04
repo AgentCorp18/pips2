@@ -32,7 +32,7 @@ export const TrainingMultipleChoice = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="multiple-choice">
       <p id="mc-question" className="text-sm font-medium text-[var(--color-text-primary)]">
         {config.question}
       </p>

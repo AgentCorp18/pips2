@@ -79,9 +79,12 @@ export const ContentReader = ({
   }, [saveScrollPosition])
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6" data-testid="content-reader">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
+      <nav
+        data-testid="breadcrumbs"
+        className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]"
+      >
         {breadcrumbs.map((crumb, i) => (
           <span key={crumb.href} className="flex items-center gap-1.5">
             {i > 0 && <span>/</span>}
@@ -126,7 +129,10 @@ export const ContentReader = ({
           <div className="mb-6 border-b border-[var(--color-border)] pb-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                <h1
+                  data-testid="content-title"
+                  className="text-2xl font-bold text-[var(--color-text-primary)]"
+                >
                   {node.title}
                 </h1>
                 <div className="mt-2 flex items-center gap-3 text-xs text-[var(--color-text-tertiary)]">
@@ -167,6 +173,7 @@ export const ContentReader = ({
             <CardContent className="flex items-center justify-between py-4">
               {prevNode ? (
                 <Link
+                  data-testid="nav-prev"
                   href={`/knowledge/book/${prevNode.slug}`}
                   className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
                 >
@@ -178,6 +185,7 @@ export const ContentReader = ({
               )}
               {nextNode ? (
                 <Link
+                  data-testid="nav-next"
                   href={`/knowledge/book/${nextNode.slug}`}
                   className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
                 >

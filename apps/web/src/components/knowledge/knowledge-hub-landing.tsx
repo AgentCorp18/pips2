@@ -81,17 +81,22 @@ export const KnowledgeHubLanding = ({
   readingSessions = [],
 }: KnowledgeHubLandingProps) => {
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8" data-testid="knowledge-hub">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Knowledge Hub</h1>
+          <h1
+            data-testid="knowledge-hub-title"
+            className="text-2xl font-bold text-[var(--color-text-primary)]"
+          >
+            Knowledge Hub
+          </h1>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
             Everything you need to master the PIPS methodology — from theory to practice
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/knowledge/bookmarks">
+          <Link href="/knowledge/bookmarks" data-testid="bookmarks-link">
             <Button variant="outline" size="sm" className="gap-2">
               <Bookmark size={14} />
               Bookmarks
@@ -109,11 +114,11 @@ export const KnowledgeHubLanding = ({
       <ContentSearchBar />
 
       {/* 4-Pillar Cards */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div data-testid="pillar-cards" className="grid gap-4 sm:grid-cols-2">
         {PILLAR_CARDS.map((card) => {
           const Icon = card.icon
           return (
-            <Link key={card.pillar} href={card.href}>
+            <Link key={card.pillar} href={card.href} data-testid={`pillar-${card.pillar}`}>
               <Card className="group h-full cursor-pointer transition-all hover:border-[var(--color-primary)] hover:shadow-md">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">

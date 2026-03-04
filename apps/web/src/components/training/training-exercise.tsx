@@ -73,7 +73,7 @@ export const TrainingExercise = ({
   }
 
   return (
-    <Card className={isCompleted ? 'border-emerald-200' : ''}>
+    <Card data-testid={`exercise-${index}`} className={isCompleted ? 'border-emerald-200' : ''}>
       <CardContent className="space-y-4 py-4">
         {/* Exercise header */}
         <div className="flex items-start gap-3">

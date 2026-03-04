@@ -79,12 +79,13 @@ export const KnowledgeCadenceBar = ({
   if (!loading && !hasPillars) return null
 
   return (
-    <Card className="border-[var(--color-border)]">
+    <Card className="border-[var(--color-border)]" data-testid="cadence-bar">
       <button
         type="button"
         onClick={() => setCollapsed((prev) => !prev)}
         aria-expanded={!collapsed}
         aria-controls="cadence-bar-content"
+        data-testid="cadence-bar-toggle"
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
         <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">

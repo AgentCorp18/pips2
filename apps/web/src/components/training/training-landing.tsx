@@ -33,16 +33,21 @@ export const TrainingLanding = ({ paths, progress, moduleCounts }: TrainingLandi
   const hasProgress = progress.length > 0
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8" data-testid="training-landing">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Training</h1>
+          <h1
+            data-testid="training-title"
+            className="text-2xl font-bold text-[var(--color-text-primary)]"
+          >
+            Training
+          </h1>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
             Structured learning paths to master the PIPS methodology
           </p>
         </div>
-        <Link href="/training/progress">
+        <Link href="/training/progress" data-testid="progress-link">
           <Button variant="outline" size="sm" className="gap-2">
             <BarChart3 size={14} />
             My Progress
@@ -113,6 +118,7 @@ export const TrainingLanding = ({ paths, progress, moduleCounts }: TrainingLandi
           return (
             <Card
               key={path.id}
+              data-testid={`training-path-${path.id}`}
               className="group transition-all hover:border-[var(--color-primary)] hover:shadow-md"
             >
               <CardContent className="flex items-center gap-4 py-5">
@@ -162,7 +168,7 @@ export const TrainingLanding = ({ paths, progress, moduleCounts }: TrainingLandi
                     </div>
                   )}
                 </div>
-                <Link href={`/training/path/${path.id}`}>
+                <Link href={`/training/path/${path.id}`} data-testid={`path-${path.id}-action`}>
                   <Button
                     size="sm"
                     variant={isComplete ? 'outline' : isStarted ? 'default' : 'default'}

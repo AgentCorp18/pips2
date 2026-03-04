@@ -54,7 +54,7 @@ export const ScenarioRunner = ({ scenario }: { scenario: ScenarioData }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="scenario-runner">
       {/* Scenario context */}
       <Card>
         <CardContent className="space-y-3 py-5">
