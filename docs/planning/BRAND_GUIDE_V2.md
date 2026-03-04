@@ -1,10 +1,11 @@
 # PIPS 2.0 — Comprehensive Branding & Identity Guide
 
-**Version:** 2.0
+**Version:** 2.1 — Updated 2026-03-04
 **Date:** March 2026
 **Author:** Marc Albers + Claude
 **Status:** Draft for founder review
 **Classification:** Internal
+**v2.1 changes:** Added Section 4.6 (Post-MVP Component Patterns) covering Cadence Bar, Content Reader, Training UI, Marketing Landing components, and SEO component patterns. Added build-status markers to component sections.
 
 ---
 
@@ -14,6 +15,8 @@
 2. [Naming](#2-naming)
 3. [Visual Identity System](#3-visual-identity-system)
 4. [UI Design Language](#4-ui-design-language)
+   - 4.1-4.5: Core component styling, step visual system, layout, animation
+   - 4.6: Post-MVP Component Patterns (Cadence Bar, Content Reader, Training UI, Marketing) — **NEW in v2.1**
 5. [Brand Application](#5-brand-application)
 6. [Brand Guidelines Summary](#6-brand-guidelines-summary)
 7. [White-Label Considerations](#7-white-label-considerations)
@@ -27,11 +30,11 @@
 
 **Why does this brand exist?**
 
-Most organizations know they need to improve. They invest in project management tools, hire consultants, attend workshops. But the tools they use separate *what needs to get done* from *how to think about what needs to get done.* Jira tracks tickets. Asana manages tasks. Neither one teaches a team how to properly define a problem, find the root cause, or measure whether their solution actually worked.
+Most organizations know they need to improve. They invest in project management tools, hire consultants, attend workshops. But the tools they use separate _what needs to get done_ from _how to think about what needs to get done._ Jira tracks tickets. Asana manages tasks. Neither one teaches a team how to properly define a problem, find the root cause, or measure whether their solution actually worked.
 
 PIPS 2.0 exists to close that gap. It embeds a proven problem-solving methodology into the daily work of organizations so that improvement is not a separate initiative people attend a training for -- it is the way work gets done.
 
-**Purpose statement:** *To make structured problem-solving and continuous improvement the default operating system for how organizations work.*
+**Purpose statement:** _To make structured problem-solving and continuous improvement the default operating system for how organizations work._
 
 ### 1.2 Brand Vision
 
@@ -39,7 +42,7 @@ PIPS 2.0 exists to close that gap. It embeds a proven problem-solving methodolog
 
 The standard that organizations reach for when they say "we want to get better." Not a tool they use alongside their methodology, but the place where methodology and work management are the same thing. In five years, when a VP of Operations says "we need to fix this," the natural next step is opening PIPS 2.0 and walking the team through a structured process -- not scheduling a meeting, not opening a spreadsheet, not hiring a consultant.
 
-**Vision statement:** *Every organization has a repeatable, measurable system for solving problems and improving processes -- and it lives where their teams already work.*
+**Vision statement:** _Every organization has a repeatable, measurable system for solving problems and improving processes -- and it lives where their teams already work._
 
 ### 1.3 Brand Mission
 
@@ -47,25 +50,30 @@ The standard that organizations reach for when they say "we want to get better."
 
 PIPS 2.0 gives teams a structured 6-step workflow for process improvement and problem solving, embedded in enterprise-grade project management software. It guides teams from problem identification through root cause analysis, solution design, implementation, and measurable evaluation -- while also handling the everyday tickets, tasks, and projects that result from that process.
 
-**Mission statement:** *We give organizations the methodology and the tools to identify, solve, and measure their most important problems -- in one platform.*
+**Mission statement:** _We give organizations the methodology and the tools to identify, solve, and measure their most important problems -- in one platform._
 
 ### 1.4 Brand Values
 
 **Five core values that govern every decision:**
 
 #### 1. Structured Clarity
+
 Ambiguity kills improvement projects. Every feature, every screen, every workflow in this product reduces ambiguity. We believe that a well-defined problem is half-solved, and our product reflects that belief in how it guides users. Our brand communication is similarly direct -- no jargon, no buzzword soup, no vague promises.
 
 #### 2. Measurable Impact
+
 If you cannot measure it, you cannot improve it. We are obsessed with outcomes, not activity. Our product measures results. Our marketing cites real numbers. Our customers know exactly what they are getting and can prove it worked.
 
 #### 3. Accessible Rigor
+
 The best methodologies in the world are useless if only experts can apply them. This product takes the rigor of Six Sigma, Lean, and PDCA and makes it accessible to any team -- without dumbing it down. Our brand strikes the same balance: professional and substantive, but never intimidating or exclusive.
 
 #### 4. Continuous Evolution
+
 Step 6 feeds back to Step 1. This is not just a product feature; it is a philosophy. We improve our own product, our own processes, and our own brand the same way we teach others to. Nothing is static. Everything is iterable.
 
 #### 5. Earned Trust
+
 We serve operations leaders, strategy executives, and consultants who manage high-stakes initiatives. Trust is the price of entry. We earn it through transparency, reliability, data privacy, and following through on what we promise. Our brand projects confidence, not hype.
 
 ### 1.5 Brand Personality
@@ -77,6 +85,7 @@ A senior operations leader who moonlights as a really good coach. They have run 
 They dress sharp -- clean, modern, maybe a nice watch -- but they will roll up their sleeves and get on the floor with you. They are the person who brings structure to chaos without making anyone feel talked down to, and who celebrates wins as loudly as they diagnose problems.
 
 **Personality traits:**
+
 - **Authoritative** but not arrogant
 - **Precise** but not rigid
 - **Warm** but not casual
@@ -91,6 +100,7 @@ This is the core brand challenge: how do you feel approachable to a team of 4 AN
 The answer is not to pick one and compromise on the other. The answer is to be like the best modern SaaS brands -- Slack, Notion, Figma, Linear -- that proved you can be both. Here is how this plays out across the brand:
 
 **Where FUN shows up:**
+
 - The name itself (short, memorable, has personality)
 - Microcopy and empty states (human, occasionally witty, never robotic)
 - The step colors (vibrant, energetic, not muted corporate pastels)
@@ -99,6 +109,7 @@ The answer is not to pick one and compromise on the other. The answer is to be l
 - Onboarding experience (encouraging, conversational)
 
 **Where ENTERPRISE shows up:**
+
 - The primary color palette (deep, saturated, authoritative)
 - Typography (clean, precise, structured)
 - Data visualization (dense, information-rich, no decoration for decoration's sake)
@@ -113,14 +124,14 @@ The answer is not to pick one and compromise on the other. The answer is to be l
 
 **How this product speaks:**
 
-| Attribute | What it sounds like | What it does NOT sound like |
-|-----------|--------------------|-----------------------------|
-| **Direct** | "Define your problem in one measurable statement." | "Consider exploring the various dimensions of your challenge space." |
-| **Substantive** | "Teams using structured root cause analysis resolve issues 2.3x faster." | "Supercharge your problem-solving! 10x your results!" |
-| **Guiding** | "Start here. Identify who is affected and what success looks like." | "Figure out what your problem is and enter it." |
-| **Confident** | "This is a proven 6-step approach." | "We think this might work for you." |
-| **Human** | "Every organization has that one process that everyone complains about but nobody fixes. Start there." | "Leverage our platform to optimize your organizational throughput vectors." |
-| **Inclusive** | "Whether you run a hospital, a factory, or a software company." | "For enterprise-class operational excellence professionals." |
+| Attribute       | What it sounds like                                                                                    | What it does NOT sound like                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| **Direct**      | "Define your problem in one measurable statement."                                                     | "Consider exploring the various dimensions of your challenge space."        |
+| **Substantive** | "Teams using structured root cause analysis resolve issues 2.3x faster."                               | "Supercharge your problem-solving! 10x your results!"                       |
+| **Guiding**     | "Start here. Identify who is affected and what success looks like."                                    | "Figure out what your problem is and enter it."                             |
+| **Confident**   | "This is a proven 6-step approach."                                                                    | "We think this might work for you."                                         |
+| **Human**       | "Every organization has that one process that everyone complains about but nobody fixes. Start there." | "Leverage our platform to optimize your organizational throughput vectors." |
+| **Inclusive**   | "Whether you run a hospital, a factory, or a software company."                                        | "For enterprise-class operational excellence professionals."                |
 
 **Tone calibration by context:**
 
@@ -170,9 +181,10 @@ The answer is not to pick one and compromise on the other. The answer is to be l
 
 **What this product guarantees:**
 
-*A clear, structured path from problem to solution -- and the tools to manage every step of the journey.*
+_A clear, structured path from problem to solution -- and the tools to manage every step of the journey._
 
 This promise has three components:
+
 1. **Clarity:** You will never wonder "what should we do next?" The methodology guides you.
 2. **Structure:** The 6-step framework is not a suggestion. It is built into the product.
 3. **Completeness:** This is not just a methodology tool or just a project management tool. It is both.
@@ -203,14 +215,14 @@ How this brand looks and feels relative to the competitive landscape:
 
 **Visual differentiation from specific competitors:**
 
-| Competitor | Their visual identity | How we differ |
-|------------|---------------------|---------------|
-| **Asana** | Coral/salmon pink, gradient illustrations, playful but increasingly corporate | We are warmer in copy but more structured visually. Our step color system gives us a richer, more purposeful palette than their monochrome-plus-coral approach. |
-| **monday.com** | Rainbow colors, rounded shapes, maximalist energy | We are more restrained and structured. Their rainbow is decorative; our 6 colors are functional (each color means something). |
-| **Jira** | Atlassian blue, dense, utilitarian | We share information density but pair it with warmth, guidance, and visual breathing room. We look like the product Jira would be if they started over in 2026. |
-| **Linear** | Grayscale + purple accent, minimal, developer-oriented | We share the clean minimalism but add color with purpose (step colors) and warmth (copy, illustrations). Linear is cool; we are warm. |
-| **ClickUp** | Purple/violet, feature-dense, "everything app" energy | We are focused where they are sprawling. Our visual identity communicates "structured methodology" not "infinite features." |
-| **Rhythm Systems** | Dated corporate design, green/blue, consultant-oriented | We are the modern version of what they are trying to be. Same problem space, completely different design generation. |
+| Competitor         | Their visual identity                                                         | How we differ                                                                                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Asana**          | Coral/salmon pink, gradient illustrations, playful but increasingly corporate | We are warmer in copy but more structured visually. Our step color system gives us a richer, more purposeful palette than their monochrome-plus-coral approach. |
+| **monday.com**     | Rainbow colors, rounded shapes, maximalist energy                             | We are more restrained and structured. Their rainbow is decorative; our 6 colors are functional (each color means something).                                   |
+| **Jira**           | Atlassian blue, dense, utilitarian                                            | We share information density but pair it with warmth, guidance, and visual breathing room. We look like the product Jira would be if they started over in 2026. |
+| **Linear**         | Grayscale + purple accent, minimal, developer-oriented                        | We share the clean minimalism but add color with purpose (step colors) and warmth (copy, illustrations). Linear is cool; we are warm.                           |
+| **ClickUp**        | Purple/violet, feature-dense, "everything app" energy                         | We are focused where they are sprawling. Our visual identity communicates "structured methodology" not "infinite features."                                     |
+| **Rhythm Systems** | Dated corporate design, green/blue, consultant-oriented                       | We are the modern version of what they are trying to be. Same problem space, completely different design generation.                                            |
 
 ---
 
@@ -253,6 +265,7 @@ The best SaaS names often come from verbs. Slack, Notion, Loom, Rippling, Figma 
 **Domain plausibility:** hone.com is likely taken but hone.app, gethone.com, or honehq.com are realistic. There is an existing company called Hone (corporate training) which creates some namespace collision, but they are in a different category.
 
 **In context:**
+
 - "We use Hone for our improvement projects" -- natural, clean
 - "Check the Hone board" -- works perfectly
 - "I Hone'd it" -- stretches but passable
@@ -278,6 +291,7 @@ The best SaaS names often come from verbs. Slack, Notion, Loom, Rippling, Figma 
 **Domain plausibility:** notch.com is almost certainly taken (Minecraft creator). notch.app, usenotch.com, or getnotch.com are plausible. Namespace collision with Notch (Markus Persson) is a concern for search.
 
 **In context:**
+
 - "We use Notch for our improvement projects" -- good
 - "Check the Notch board" -- natural
 - "We notched three projects this quarter" -- excellent verb usage
@@ -303,6 +317,7 @@ The best SaaS names often come from verbs. Slack, Notion, Loom, Rippling, Figma 
 **Domain plausibility:** rally.com is taken. rally.app, rallypm.com, or userally.com are realistic. Rally was previously a project management tool (CA Rally, now part of Broadcom) which is a meaningful namespace concern in the PM space specifically.
 
 **In context:**
+
 - "We use Rally for our improvement projects" -- natural but collides with legacy CA Rally
 - "Rally the team around this problem" -- excellent
 - "Check the Rally board" -- clean
@@ -334,6 +349,7 @@ The best SaaS names often come from verbs. Slack, Notion, Loom, Rippling, Figma 
 **Domain plausibility:** pivra.com is likely available (coined word). pivra.io, pivra.app also realistic. Strong search ownability -- no existing use.
 
 **In context:**
+
 - "We use Pivra for our improvement projects" -- modern, professional
 - "Powered by Pivra" -- strong
 - "Check Pivra" -- clean
@@ -359,6 +375,7 @@ The best SaaS names often come from verbs. Slack, Notion, Loom, Rippling, Figma 
 **Domain plausibility:** kasko.com may be taken (there is a European insurtech called KASKO). kasko.app or getkasko.com are plausible. Some namespace collision.
 
 **In context:**
+
 - "We use Kasko" -- memorable, distinctive
 - "The Kasko board" -- clean
 - "Kasko Enterprise" -- slightly informal but works
@@ -390,6 +407,7 @@ Marc has an attachment to "PIPS" -- it is fun, it is memorable, and it means som
 **Domain plausibility:** pipstep.com is likely available (not a common word). pipstep.io, pipstep.app also realistic. Strong search ownability.
 
 **In context:**
+
 - "We use Pipstep -- everyone just calls it Pips" -- natural
 - "Check the Pipstep board" -- professional
 - "Pips says we are on Step 3" -- casual, friendly
@@ -415,6 +433,7 @@ Marc has an attachment to "PIPS" -- it is fun, it is memorable, and it means som
 **Domain plausibility:** pipspark.com is very likely available. Strong ownability.
 
 **In context:**
+
 - "We use Pipspark" -- energetic
 - "Everyone just calls it Pips" -- natural nickname
 - "Spark an improvement project in Pips" -- verb potential through the "spark" element
@@ -445,6 +464,7 @@ The "making things better" metaphor space. These names borrow from physical craf
 **Domain plausibility:** gauge.com is likely taken. gauge.app, gaugehq.com, or usegauge.com are realistic. Some collision with general measurement tools, but "Gauge project management" or "Gauge process improvement" would be ownable.
 
 **In context:**
+
 - "We use Gauge for our improvement projects" -- clean, professional
 - "Gauge the results" -- perfect verb usage
 - "Check the Gauge board" -- natural
@@ -471,6 +491,7 @@ The "making things better" metaphor space. These names borrow from physical craf
 **Domain plausibility:** forge.com is taken. forge.app may be available. forgehq.com, useforge.com are realistic. Collision with various "Forge" products exists but is manageable. The ForgePIPS brand already has "Forge" recognition.
 
 **In context:**
+
 - "We use Forge" -- strong, active
 - "Forge a better process" -- excellent verb usage
 - "Check the Forge board" -- clean
@@ -492,7 +513,7 @@ The "making things better" metaphor space. These names borrow from physical craf
 
 ### 2.7 Category E: PIPS Itself with a Rebrand Strategy
 
-What if the answer is not a new name but a stronger *presentation* of "PIPS"?
+What if the answer is not a new name but a stronger _presentation_ of "PIPS"?
 
 ---
 
@@ -501,6 +522,7 @@ What if the answer is not a new name but a stronger *presentation* of "PIPS"?
 **The case for keeping PIPS:**
 
 The name PIPS has qualities that are genuinely hard to manufacture:
+
 - It is 4 letters, one syllable
 - It is memorable and fun -- Marc's instinct here is correct
 - It stands for something meaningful (Process Improvement and Problem Solving)
@@ -524,6 +546,7 @@ The V1 guide dismissed PIPS primarily on three grounds: SEO collision (forex pip
 5. **Lean into the personality:** The name is fun. Own that. "PIPS" is the product your team actually wants to use, not the one IT mandates
 
 **In context:**
+
 - "We use PIPS" -- short, memorable
 - "Check the PIPS board" -- natural
 - "PIPS says we are on Step 3" -- casual, friendly
@@ -545,18 +568,18 @@ The V1 guide dismissed PIPS primarily on three grounds: SEO collision (forex pip
 
 ### 2.8 Ranking Summary
 
-| Rank | Name | Category | Score | Key Strength | Key Risk |
-|------|------|----------|-------|-------------|----------|
-| 1 | **PIPS** (rebranded) | E: Rebrand | 26/30 | Existing equity, memorable, fun, founder loves it | SEO collision, enterprise perception |
-| 2 (tie) | **Pipstep** | C: Contains PIPS | 26/30 | Ownable, "Pips" as nickname, professional | Compound word is slightly longer |
-| 2 (tie) | **Forge** | D: Craft domain | 26/30 | Perfect verb, strong energy, ForgePIPS continuity | Namespace collision |
-| 4 | **Gauge** | D: Craft domain | 25/30 | Measurement metaphor, great verb | Common word, moderate search competition |
-| 5 (tie) | **Notch** | A: Verb-forward | 25/30 | Punchy, perfect verb usage | Minecraft creator owns search |
-| 6 | **Hone** | A: Verb-forward | 24/30 | Craft feel, refinement metaphor | Existing Hone company |
-| 7 | **Rally** | A: Verb-forward | 24/30 | Energetic, team-oriented | CA Rally disqualifies it |
-| 8 | **Pipspark** | C: Contains PIPS | 22/30 | Energetic, clear nickname | Slightly long |
-| 9 | **Pivra** | B: Invented | 20/30 | Fully ownable search | Hard to spell, clinical feel |
-| 10 | **Kasko** | B: Invented | 19/30 | Punchy, memorable | Spelling ambiguity, insurtech collision |
+| Rank    | Name                 | Category         | Score | Key Strength                                      | Key Risk                                 |
+| ------- | -------------------- | ---------------- | ----- | ------------------------------------------------- | ---------------------------------------- |
+| 1       | **PIPS** (rebranded) | E: Rebrand       | 26/30 | Existing equity, memorable, fun, founder loves it | SEO collision, enterprise perception     |
+| 2 (tie) | **Pipstep**          | C: Contains PIPS | 26/30 | Ownable, "Pips" as nickname, professional         | Compound word is slightly longer         |
+| 2 (tie) | **Forge**            | D: Craft domain  | 26/30 | Perfect verb, strong energy, ForgePIPS continuity | Namespace collision                      |
+| 4       | **Gauge**            | D: Craft domain  | 25/30 | Measurement metaphor, great verb                  | Common word, moderate search competition |
+| 5 (tie) | **Notch**            | A: Verb-forward  | 25/30 | Punchy, perfect verb usage                        | Minecraft creator owns search            |
+| 6       | **Hone**             | A: Verb-forward  | 24/30 | Craft feel, refinement metaphor                   | Existing Hone company                    |
+| 7       | **Rally**            | A: Verb-forward  | 24/30 | Energetic, team-oriented                          | CA Rally disqualifies it                 |
+| 8       | **Pipspark**         | C: Contains PIPS | 22/30 | Energetic, clear nickname                         | Slightly long                            |
+| 9       | **Pivra**            | B: Invented      | 20/30 | Fully ownable search                              | Hard to spell, clinical feel             |
+| 10      | **Kasko**            | B: Invented      | 19/30 | Punchy, memorable                                 | Spelling ambiguity, insurtech collision  |
 
 ### 2.9 Recommendation
 
@@ -574,9 +597,10 @@ If Marc ultimately feels PIPS alone is too informal for enterprise positioning, 
 
 ### 2.10 Name Usage Rules
 
-*Note: These rules use "PIPS" as the product name per the primary recommendation. Adjust if the founder selects a different name.*
+_Note: These rules use "PIPS" as the product name per the primary recommendation. Adjust if the founder selects a different name._
 
 **The product name:**
+
 - Written as: **PIPS** (all caps -- it is an acronym, and this distinguishes it from the common English word)
 - First reference in any document: "PIPS, the methodology-driven process improvement platform" (or similar descriptor)
 - Subsequent references: just "PIPS"
@@ -584,6 +608,7 @@ If Marc ultimately feels PIPS alone is too informal for enterprise positioning, 
 - Domain reference: "pips.app" (or chosen domain) in URLs only, never in body text
 
 **The methodology name:**
+
 - Full name: **The PIPS Framework** or **The PIPS Methodology**
 - First reference in context: "The PIPS Framework (Process Improvement and Problem Solving)"
 - Subsequent references: "the framework," "the PIPS process," or "the 6-step process"
@@ -592,6 +617,7 @@ If Marc ultimately feels PIPS alone is too informal for enterprise positioning, 
 ### 2.11 Sub-Brand Naming Convention
 
 **Product tiers:**
+
 - PIPS Starter
 - PIPS Professional
 - PIPS Enterprise
@@ -599,6 +625,7 @@ If Marc ultimately feels PIPS alone is too informal for enterprise positioning, 
 
 **Feature modules:**
 Use functional, descriptive names (not branded sub-names):
+
 - PIPS Ticketing
 - PIPS Analytics
 - PIPS Integrations
@@ -606,6 +633,7 @@ Use functional, descriptive names (not branded sub-names):
 
 **The PIPS steps within the product:**
 Always use the step number + verb:
+
 - Step 1: Identify
 - Step 2: Analyze
 - Step 3: Generate
@@ -618,6 +646,7 @@ These steps are NOT given separate brand names. They are always referred to by t
 ### 2.12 How the Name Works with White-Labeling
 
 When a client white-labels the platform:
+
 - The client's brand replaces "PIPS" everywhere in the UI
 - "Powered by PIPS" appears in the footer (small, tasteful) -- and this works because the visual identity around it is strong
 - The PIPS Framework methodology naming can remain intact or be renamed by the client
@@ -642,11 +671,11 @@ The palette is built on two principles:
 
 #### Primary Colors
 
-| Name | Hex | RGB | HSL | Usage |
-|------|-----|-----|-----|-------|
-| **PIPS Deep** | `#1B1340` | 27, 19, 64 | 251, 54%, 16% | Primary brand color, dark backgrounds, headers, hero sections |
-| **PIPS Indigo** | `#4F46E5` | 79, 70, 229 | 234, 74%, 59% | Primary action color, buttons, interactive elements, links |
-| **PIPS Violet** | `#7C3AED` | 124, 58, 237 | 262, 83%, 58% | Accent, highlights, CTAs, AI features, premium elements |
+| Name            | Hex       | RGB          | HSL           | Usage                                                         |
+| --------------- | --------- | ------------ | ------------- | ------------------------------------------------------------- |
+| **PIPS Deep**   | `#1B1340` | 27, 19, 64   | 251, 54%, 16% | Primary brand color, dark backgrounds, headers, hero sections |
+| **PIPS Indigo** | `#4F46E5` | 79, 70, 229  | 234, 74%, 59% | Primary action color, buttons, interactive elements, links    |
+| **PIPS Violet** | `#7C3AED` | 124, 58, 237 | 262, 83%, 58% | Accent, highlights, CTAs, AI features, premium elements       |
 
 **Rationale:** The deep-to-violet spectrum is distinctive without being alienating. Indigo (#4F46E5) sits between blue and purple -- it feels trustworthy like blue but memorable like purple. It is NOT a standard Tailwind color (Tailwind's indigo-600 is #4F46E5 but the surrounding palette and usage are custom). The deep navy-purple (#1B1340) provides the enterprise gravitas that pure purple would lack. The violet (#7C3AED) adds energy for accent moments.
 
@@ -654,11 +683,11 @@ The palette is built on two principles:
 
 #### Secondary Colors
 
-| Name | Hex | RGB | HSL | Usage |
-|------|-----|-----|-----|-------|
-| **Warm Slate** | `#3D3654` | 61, 54, 84 | 254, 22%, 27% | Secondary text, borders, subtle backgrounds -- warmer than pure gray |
-| **Cloud** | `#F0EDFA` | 240, 237, 250 | 254, 45%, 95% | Light backgrounds, hover states, subtle fills -- has a faint violet tint |
-| **Ink** | `#1E1B2E` | 30, 27, 46 | 249, 26%, 14% | Darkest text, dark mode surfaces |
+| Name           | Hex       | RGB           | HSL           | Usage                                                                    |
+| -------------- | --------- | ------------- | ------------- | ------------------------------------------------------------------------ |
+| **Warm Slate** | `#3D3654` | 61, 54, 84    | 254, 22%, 27% | Secondary text, borders, subtle backgrounds -- warmer than pure gray     |
+| **Cloud**      | `#F0EDFA` | 240, 237, 250 | 254, 45%, 95% | Light backgrounds, hover states, subtle fills -- has a faint violet tint |
+| **Ink**        | `#1E1B2E` | 30, 27, 46    | 249, 26%, 14% | Darkest text, dark mode surfaces                                         |
 
 **Rationale:** The secondary palette is tinted with the primary indigo-violet hue rather than using pure blue-grays. This creates visual cohesion -- even the "gray" elements subtly belong to the PIPS color family.
 
@@ -666,20 +695,21 @@ The palette is built on two principles:
 
 Each of the 6 PIPS methodology steps owns a distinct color. This is the brand's most recognizable visual element -- a structured rainbow that means something. V2 fixes the V1 problem where Step 5 (Implement) was red, which collides with "error" semantics in UI.
 
-| Step | Name | Color Name | Hex | HSL | Rationale |
-|------|------|-----------|-----|-----|-----------|
-| 1 | **Identify** | Signal Blue | `#2563EB` | 217, 91%, 53% | Blue for discovery and orientation -- finding where the problem is. Universally associated with "start here." |
-| 2 | **Analyze** | Insight Amber | `#D97706` | 38, 92%, 44% | Amber for investigation and scrutiny -- shining a light on root causes. Warm, attentive, focused. |
-| 3 | **Generate** | Spark Green | `#059669` | 160, 94%, 30% | Green for generative energy and growth -- new ideas emerging. Fresh, optimistic, creative. |
-| 4 | **Select & Plan** | Blueprint Indigo | `#4338CA` | 243, 58%, 51% | Indigo for planning and architecture -- structural decision-making. Thoughtful, deliberate. |
-| 5 | **Implement** | Action Gold | `#CA8A04` | 46, 93%, 40% | Gold for execution and achievement -- getting things done and doing them well. Active, warm, reward-oriented. Gold means "go" not "stop." |
-| 6 | **Evaluate** | Loop Teal | `#0891B2` | 189, 92%, 37% | Teal for evaluation and reflection -- completing the cycle. Calm, analytical, forward-looking. Connects visually back toward Step 1's blue, reinforcing the loop. |
+| Step | Name              | Color Name       | Hex       | HSL           | Rationale                                                                                                                                                         |
+| ---- | ----------------- | ---------------- | --------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | **Identify**      | Signal Blue      | `#2563EB` | 217, 91%, 53% | Blue for discovery and orientation -- finding where the problem is. Universally associated with "start here."                                                     |
+| 2    | **Analyze**       | Insight Amber    | `#D97706` | 38, 92%, 44%  | Amber for investigation and scrutiny -- shining a light on root causes. Warm, attentive, focused.                                                                 |
+| 3    | **Generate**      | Spark Green      | `#059669` | 160, 94%, 30% | Green for generative energy and growth -- new ideas emerging. Fresh, optimistic, creative.                                                                        |
+| 4    | **Select & Plan** | Blueprint Indigo | `#4338CA` | 243, 58%, 51% | Indigo for planning and architecture -- structural decision-making. Thoughtful, deliberate.                                                                       |
+| 5    | **Implement**     | Action Gold      | `#CA8A04` | 46, 93%, 40%  | Gold for execution and achievement -- getting things done and doing them well. Active, warm, reward-oriented. Gold means "go" not "stop."                         |
+| 6    | **Evaluate**      | Loop Teal        | `#0891B2` | 189, 92%, 37% | Teal for evaluation and reflection -- completing the cycle. Calm, analytical, forward-looking. Connects visually back toward Step 1's blue, reinforcing the loop. |
 
 **Why gold for Step 5 instead of red:** Red means "error," "stop," "danger," and "destructive action" in every UI system on the planet. Using red for the implementation step -- the step where teams are doing their most important work -- sends exactly the wrong signal. Gold means achievement, progress, and reward. It says "go build something great" not "something is wrong."
 
 **Why teal for Step 6 instead of cyan:** The V1 cyan (#06B6D4) was too close to the primary accent, creating confusion between "this is a Step 6 element" and "this is an accent element." Teal (#0891B2) is deeper, more distinctive, and meets WCAG AA contrast on white backgrounds for normal text -- which cyan does not.
 
 **Step color usage rules:**
+
 - Step colors are used at 100% opacity for active steps and at 12% opacity for step backgrounds/cards
 - In the circular PIPS diagram, each arc segment uses its step color
 - In data visualizations, step colors denote which step a ticket or project is in
@@ -689,51 +719,51 @@ Each of the 6 PIPS methodology steps owns a distinct color. This is the brand's 
 
 **Dark mode step colors:**
 
-| Step | Light Hex | Dark Hex |
-|------|----------|----------|
-| 1. Identify | `#2563EB` | `#60A5FA` |
-| 2. Analyze | `#D97706` | `#FBBF24` |
-| 3. Generate | `#059669` | `#34D399` |
+| Step             | Light Hex | Dark Hex  |
+| ---------------- | --------- | --------- |
+| 1. Identify      | `#2563EB` | `#60A5FA` |
+| 2. Analyze       | `#D97706` | `#FBBF24` |
+| 3. Generate      | `#059669` | `#34D399` |
 | 4. Select & Plan | `#4338CA` | `#818CF8` |
-| 5. Implement | `#CA8A04` | `#FACC15` |
-| 6. Evaluate | `#0891B2` | `#22D3EE` |
+| 5. Implement     | `#CA8A04` | `#FACC15` |
+| 6. Evaluate      | `#0891B2` | `#22D3EE` |
 
 #### Accent Colors
 
-| Name | Hex | RGB | HSL | Usage |
-|------|-----|-----|-----|-------|
-| **Signal Amber** | `#F59E0B` | 245, 158, 11 | 38, 92%, 50% | Warnings, attention states, highlight callouts |
-| **Signal Red** | `#EF4444` | 239, 68, 68 | 0, 84%, 60% | Error states, destructive actions, critical alerts |
+| Name               | Hex       | RGB          | HSL           | Usage                                                |
+| ------------------ | --------- | ------------ | ------------- | ---------------------------------------------------- |
+| **Signal Amber**   | `#F59E0B` | 245, 158, 11 | 38, 92%, 50%  | Warnings, attention states, highlight callouts       |
+| **Signal Red**     | `#EF4444` | 239, 68, 68  | 0, 84%, 60%   | Error states, destructive actions, critical alerts   |
 | **Signal Emerald** | `#10B981` | 16, 185, 129 | 160, 84%, 39% | Success states, positive indicators, completed items |
 
 #### Neutral Palette
 
 A 10-stop scale built on a violet-tinted base (not pure gray, not blue-gray) for visual cohesion with the primary palette.
 
-| Name | Hex | Light Mode Usage | Dark Mode Usage |
-|------|-----|------------------|-----------------|
-| **Neutral 50** | `#FAFAFB` | Page background | -- |
-| **Neutral 100** | `#F3F2F7` | Card backgrounds, alternating rows | -- |
-| **Neutral 200** | `#E4E2ED` | Borders, dividers | -- |
-| **Neutral 300** | `#C9C6D9` | Disabled states, placeholder text | -- |
-| **Neutral 400** | `#9A96B3` | Secondary text, icons | -- |
-| **Neutral 500** | `#6E6989` | Body text (on white) | -- |
-| **Neutral 600** | `#504B68` | Strong secondary text | Body text (on dark) |
-| **Neutral 700** | `#3D3654` | Heading text | Secondary text |
-| **Neutral 800** | `#2A2440` | Primary text | Card backgrounds |
-| **Neutral 900** | `#1E1B2E` | Darkest text | Page background |
-| **Neutral 950** | `#110F1C` | -- | True dark background |
+| Name            | Hex       | Light Mode Usage                   | Dark Mode Usage      |
+| --------------- | --------- | ---------------------------------- | -------------------- |
+| **Neutral 50**  | `#FAFAFB` | Page background                    | --                   |
+| **Neutral 100** | `#F3F2F7` | Card backgrounds, alternating rows | --                   |
+| **Neutral 200** | `#E4E2ED` | Borders, dividers                  | --                   |
+| **Neutral 300** | `#C9C6D9` | Disabled states, placeholder text  | --                   |
+| **Neutral 400** | `#9A96B3` | Secondary text, icons              | --                   |
+| **Neutral 500** | `#6E6989` | Body text (on white)               | --                   |
+| **Neutral 600** | `#504B68` | Strong secondary text              | Body text (on dark)  |
+| **Neutral 700** | `#3D3654` | Heading text                       | Secondary text       |
+| **Neutral 800** | `#2A2440` | Primary text                       | Card backgrounds     |
+| **Neutral 900** | `#1E1B2E` | Darkest text                       | Page background      |
+| **Neutral 950** | `#110F1C` | --                                 | True dark background |
 
-**Rationale:** Every gray has a subtle violet tint. This means even in the most "boring" parts of the UI -- borders, placeholder text, disabled states -- the PIPS color family is present. This is the difference between a color palette and a color *system*.
+**Rationale:** Every gray has a subtle violet tint. This means even in the most "boring" parts of the UI -- borders, placeholder text, disabled states -- the PIPS color family is present. This is the difference between a color palette and a color _system_.
 
 #### Semantic Colors
 
-| Purpose | Light Mode | Dark Mode | Usage |
-|---------|-----------|-----------|-------|
-| **Success** | `#059669` | `#34D399` | Completed steps, success messages, positive metrics |
-| **Warning** | `#D97706` | `#FBBF24` | At-risk items, approaching deadlines, caution states |
-| **Error** | `#EF4444` | `#FCA5A5` | Validation errors, failed actions, critical alerts |
-| **Info** | `#4F46E5` | `#818CF8` | Informational messages, tips, help text (uses the primary indigo) |
+| Purpose     | Light Mode | Dark Mode | Usage                                                             |
+| ----------- | ---------- | --------- | ----------------------------------------------------------------- |
+| **Success** | `#059669`  | `#34D399` | Completed steps, success messages, positive metrics               |
+| **Warning** | `#D97706`  | `#FBBF24` | At-risk items, approaching deadlines, caution states              |
+| **Error**   | `#EF4444`  | `#FCA5A5` | Validation errors, failed actions, critical alerts                |
+| **Info**    | `#4F46E5`  | `#818CF8` | Informational messages, tips, help text (uses the primary indigo) |
 
 #### Color Usage Ratios
 
@@ -750,6 +780,7 @@ Never use accent colors for large background areas. Never use step colors as pri
 The following pairs meet WCAG AA contrast requirements (4.5:1 for normal text, 3:1 for large text):
 
 **Light mode:**
+
 - Neutral 700 (`#3D3654`) on Neutral 50 (`#FAFAFB`) -- 9.8:1 (primary text)
 - Neutral 500 (`#6E6989`) on Neutral 50 (`#FAFAFB`) -- 4.7:1 (secondary text)
 - White (`#FFFFFF`) on PIPS Indigo (`#4F46E5`) -- 5.2:1 (buttons)
@@ -757,11 +788,13 @@ The following pairs meet WCAG AA contrast requirements (4.5:1 for normal text, 3
 - Neutral 50 on PIPS Deep -- 14.9:1 (light text on dark)
 
 **Dark mode:**
+
 - Neutral 200 (`#E4E2ED`) on Neutral 900 (`#1E1B2E`) -- 11.4:1 (primary text)
 - Neutral 400 (`#9A96B3`) on Neutral 900 (`#1E1B2E`) -- 4.9:1 (secondary text)
 - White on PIPS Indigo (`#4F46E5`) -- 5.2:1 (buttons)
 
 **Critical notes:**
+
 - PIPS Violet (`#7C3AED`) achieves 4.6:1 on white -- AA compliant for normal text. Use it confidently.
 - Step 5 Gold (`#CA8A04`) achieves 3.5:1 on white -- AA for large text only. For small text on white, darken to `#A16207`.
 - Step 6 Teal (`#0891B2`) achieves 4.5:1 on white -- AA compliant for normal text. A significant improvement over V1's cyan.
@@ -769,6 +802,7 @@ The following pairs meet WCAG AA contrast requirements (4.5:1 for normal text, 3
 #### White-Label Color Adaptation
 
 When clients white-label the platform:
+
 - **Primary colors** (Deep, Indigo, Violet) are replaced by the client's brand colors
 - **Neutral palette** adapts its tint to match the client's primary hue (auto-generated)
 - **Semantic colors** remain fixed (success/warning/error are universal)
@@ -788,6 +822,7 @@ When clients white-label the platform:
 Inter is an excellent typeface. It is also used by GitHub, Figma, Linear, Vercel, Supabase, and approximately half the SaaS products shipping in 2026. Using Inter is the typographic equivalent of using Tailwind blue -- it is a good default that says nothing about your brand.
 
 DM Sans offers:
+
 - **Distinctiveness:** It is used by fewer major products, giving PIPS a typographic identity
 - **Geometric warmth:** Its shapes are clean and geometric (professional) but with slightly softer curves than Inter (approachable). This matches the "fun + enterprise" brand tension
 - **Excellent screen readability:** Designed for digital use, large x-height, clear at all sizes
@@ -796,6 +831,7 @@ DM Sans offers:
 - **Free and open:** Available on Google Fonts under the Open Font License
 
 **Weights used:**
+
 - **DM Sans 400 (Regular):** Body text, form labels, descriptions
 - **DM Sans 500 (Medium):** Navigation items, secondary buttons, table headers
 - **DM Sans 600 (SemiBold):** Subheadings (H3-H6), button text, emphasis
@@ -813,6 +849,7 @@ DM Sans offers:
 **Why a display serif?** It solves the "fun + enterprise" tension typographically. The serif carries authority and warmth (like a well-written editorial) while the sans-serif carries clarity and precision (like a well-designed tool). Together, they create a brand that feels both credible and human.
 
 **Weights used:**
+
 - **DM Serif Display 400 (Regular):** Hero headlines, marketing section headings, pull quotes
 
 #### Monospace Typeface: JetBrains Mono
@@ -822,6 +859,7 @@ DM Sans offers:
 [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) has ligatures for common code sequences, excellent readability at small sizes, and a modern feel that complements DM Sans.
 
 **Weights used:**
+
 - **JetBrains Mono 400 (Regular):** Code blocks, inline code
 - **JetBrains Mono 500 (Medium):** Code with emphasis, terminal commands
 
@@ -829,28 +867,31 @@ DM Sans offers:
 
 Based on a 1.250 ratio (Major Third) with a 16px base size:
 
-| Element | Size (px) | Size (rem) | Font | Weight | Line Height | Letter Spacing | Usage |
-|---------|----------|-----------|------|--------|-------------|----------------|-------|
-| **Display** | 52px | 3.25rem | DM Serif Display | 400 | 1.1 | -0.02em | Marketing hero headlines |
-| **H1** | 36px | 2.25rem | DM Sans | 700 | 1.2 | -0.025em | Page titles |
-| **H2** | 28px | 1.75rem | DM Sans | 700 | 1.25 | -0.02em | Section headings |
-| **H3** | 22px | 1.375rem | DM Sans | 600 | 1.3 | -0.015em | Subsection headings |
-| **H4** | 18px | 1.125rem | DM Sans | 600 | 1.4 | -0.01em | Card headings, widget titles |
-| **H5** | 16px | 1rem | DM Sans | 600 | 1.4 | 0 | Small section titles |
-| **H6** | 14px | 0.875rem | DM Sans | 600 | 1.4 | 0.01em | Overline text, category labels |
-| **Body Large** | 18px | 1.125rem | DM Sans | 400 | 1.6 | 0 | Lead paragraphs, feature descriptions |
-| **Body** | 16px | 1rem | DM Sans | 400 | 1.6 | 0 | Default body text |
-| **Body Small** | 14px | 0.875rem | DM Sans | 400 | 1.5 | 0 | Secondary text, descriptions |
-| **Caption** | 12px | 0.75rem | DM Sans | 500 | 1.4 | 0.02em | Timestamps, metadata, helper text |
-| **Overline** | 11px | 0.6875rem | DM Sans | 600 | 1.4 | 0.08em | Category labels, step indicators (uppercase) |
+| Element        | Size (px) | Size (rem) | Font             | Weight | Line Height | Letter Spacing | Usage                                        |
+| -------------- | --------- | ---------- | ---------------- | ------ | ----------- | -------------- | -------------------------------------------- |
+| **Display**    | 52px      | 3.25rem    | DM Serif Display | 400    | 1.1         | -0.02em        | Marketing hero headlines                     |
+| **H1**         | 36px      | 2.25rem    | DM Sans          | 700    | 1.2         | -0.025em       | Page titles                                  |
+| **H2**         | 28px      | 1.75rem    | DM Sans          | 700    | 1.25        | -0.02em        | Section headings                             |
+| **H3**         | 22px      | 1.375rem   | DM Sans          | 600    | 1.3         | -0.015em       | Subsection headings                          |
+| **H4**         | 18px      | 1.125rem   | DM Sans          | 600    | 1.4         | -0.01em        | Card headings, widget titles                 |
+| **H5**         | 16px      | 1rem       | DM Sans          | 600    | 1.4         | 0              | Small section titles                         |
+| **H6**         | 14px      | 0.875rem   | DM Sans          | 600    | 1.4         | 0.01em         | Overline text, category labels               |
+| **Body Large** | 18px      | 1.125rem   | DM Sans          | 400    | 1.6         | 0              | Lead paragraphs, feature descriptions        |
+| **Body**       | 16px      | 1rem       | DM Sans          | 400    | 1.6         | 0              | Default body text                            |
+| **Body Small** | 14px      | 0.875rem   | DM Sans          | 400    | 1.5         | 0              | Secondary text, descriptions                 |
+| **Caption**    | 12px      | 0.75rem    | DM Sans          | 500    | 1.4         | 0.02em         | Timestamps, metadata, helper text            |
+| **Overline**   | 11px      | 0.6875rem  | DM Sans          | 600    | 1.4         | 0.08em         | Category labels, step indicators (uppercase) |
 
 #### Font Loading Strategy
 
 ```html
 <!-- Preload critical fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
 ```
 
 **CSS custom properties for typography:**
@@ -874,6 +915,7 @@ All concepts are tied to the recommended name (PIPS). Each is described in enoug
 **Description:** The letters P-I-P-S in DM Sans 700, with six small colored dots arranged in a subtle arc above or below the wordmark. The dots use the 6 step colors (blue, amber, green, indigo, gold, teal) and represent the methodology's 6 steps. The dots are evenly spaced and follow a gentle curve that suggests forward motion and a cycle.
 
 **Why it works:**
+
 - **Warmth and approachability:** Dots are friendly, not intimidating. They have the same visual energy as confetti or seeds (pips). This satisfies Marc's "fun" requirement.
 - **Conceptual depth:** Six dots = six steps. The arc suggests progression and the cycle. All of this communicates at a glance without needing explanation.
 - **Competitive differentiation:** No competitor in the PM space uses dots-on-an-arc. Asana has three dots (stacked vertically). monday.com has a complex symbol. Jira has a diamond. Linear has an L-mark. This is distinct from all of them.
@@ -882,12 +924,14 @@ All concepts are tied to the recommended name (PIPS). Each is described in enoug
 **Typography treatment:** "PIPS" in DM Sans 700, letter-spacing 0.05em. The wider spacing gives the four letters room to breathe and feel more substantial. The dots sit in a gentle arc above the wordmark, centered.
 
 **Color variations:**
+
 - **Full color:** Six dots in step colors (left to right: blue, amber, green, indigo, gold, teal). "PIPS" in Neutral 800.
 - **Monochrome dark:** Dots and text in PIPS Deep (#1B1340)
 - **Monochrome light:** Dots and text in white (for dark backgrounds)
 - **Single-color:** Dots and text in PIPS Indigo (for constrained contexts)
 
 **Minimum sizes:**
+
 - Full logo (dots + wordmark): 100px wide minimum
 - Dots icon only: 20px minimum (at this size, dots may merge into a single arc stroke)
 - Clear space: equal to the height of the "P" in the wordmark on all sides
@@ -903,6 +947,7 @@ All concepts are tied to the recommended name (PIPS). Each is described in enoug
 **Description:** A single, custom-drawn geometric mark that combines a "P" letterform with a visual reference to improvement/progress. The mark is a stylized P where the bowl of the P is replaced by an upward-curving arc with a small node at its peak -- suggesting a trajectory of improvement. The arc is rendered in PIPS Indigo, and a small step-colored dot sits at the apex.
 
 **Why it works:**
+
 - **Monogram strength:** A strong single-letter mark gives the brand a premium feel (think: Medium's M, Notion's N, Linear's L)
 - **The arc suggests improvement:** The upward curve in the P's bowl visually communicates "getting better"
 - **Scales beautifully:** A single mark works at every size, from 16px favicon to 200px hero
@@ -910,12 +955,14 @@ All concepts are tied to the recommended name (PIPS). Each is described in enoug
 **Typography treatment:** The custom P mark followed by "IPS" in DM Sans 700, creating a seamless wordmark. Or the P mark used independently as an icon.
 
 **Color variations:**
+
 - **Full color:** P mark in PIPS Indigo with a step-colored dot, "IPS" in Neutral 800
 - **Monochrome:** All in PIPS Deep
 - **Reversed:** White on PIPS Deep background
 - **Icon only:** The P mark alone in a rounded square
 
 **Minimum sizes:**
+
 - Full wordmark: 90px wide minimum
 - P mark icon: 16px minimum
 - Clear space: equal to the counter space inside the P on all sides
@@ -929,6 +976,7 @@ All concepts are tied to the recommended name (PIPS). Each is described in enoug
 **Description:** An abstract mark that combines a circle (representing the continuous improvement cycle) with a subtle step-indicator. The circle is not closed -- it has a small gap at the top-right where the line trails off, suggesting "the cycle continues." Six small tick marks or notches on the circle's perimeter mark the 6 steps.
 
 **Why it works:**
+
 - **Directly represents the methodology:** The open circle with 6 marks IS the PIPS cycle
 - **Unique in the PM space:** No major competitor uses an open-circle-with-notches mark
 - **Conceptually elegant:** The gap in the circle says "this never ends -- you always improve"
@@ -936,11 +984,13 @@ All concepts are tied to the recommended name (PIPS). Each is described in enoug
 **Typography treatment:** "PIPS" in DM Sans 700 to the right of the loop mark.
 
 **Color variations:**
+
 - **Full color:** Circle stroke in PIPS Indigo, 6 notch marks in their step colors, "PIPS" in Neutral 800
 - **Monochrome:** All in PIPS Deep
 - **Reversed:** White on PIPS Deep
 
 **Minimum sizes:**
+
 - Full logo: 120px wide minimum
 - Loop icon only: 24px minimum (at small sizes, the 6 notches simplify to the open circle alone)
 - Clear space: equal to the circle's radius on all sides
@@ -954,6 +1004,7 @@ All concepts are tied to the recommended name (PIPS). Each is described in enoug
 **Primary recommendation: Concept A ("The Step Dots")**
 
 Reasoning:
+
 1. **Distinctiveness:** No competitor uses dots-on-an-arc. The colored dots are immediately recognizable and ownable.
 2. **Name reinforcement:** "Pips" literally means dots/marks. The logo embodies the name in a way that feels natural, not forced.
 3. **Fun + Enterprise balance:** The dots add warmth and playfulness. The clean typography adds professionalism. Together, they hit the exact tone the brand needs.
@@ -974,6 +1025,7 @@ A thin horizontal bar (4px tall) that displays all 6 step colors in sequence, le
 **Usage:** Top of pages, bottom of hero sections, email headers, card dividers, presentation slides. It is the brand's "signature" -- like a racing stripe.
 
 **Variants:**
+
 - **Hard-edge:** Each color occupies exactly 1/6 of the width with no blending. Use for product UI.
 - **Smooth gradient:** Colors blend into each other. Use for marketing materials where a softer feel is appropriate.
 
@@ -983,7 +1035,7 @@ A repeating pattern of small circles (3px diameter, 10% opacity of PIPS Indigo) 
 
 **Usage:** Subtle background texture on hero sections, card backgrounds, empty state areas, presentation slides. Always at very low opacity (5-10%) so it creates texture without competing with content.
 
-**Why this replaces the V1 "Meridian Grid":** The dot grid is directly tied to the brand name and logo concept. "Pips" are dots. The dot pattern reinforces this everywhere it appears, subconsciously. This is what makes a visual system feel *designed* rather than *decorated*.
+**Why this replaces the V1 "Meridian Grid":** The dot grid is directly tied to the brand name and logo concept. "Pips" are dots. The dot pattern reinforces this everywhere it appears, subconsciously. This is what makes a visual system feel _designed_ rather than _decorated_.
 
 #### 3. The Step Pip Indicators
 
@@ -1014,26 +1066,26 @@ Lucide is the actively-maintained successor to Feather Icons. It provides 1,400+
 
 **PIPS Step Icons (6 required):**
 
-| Step | Icon Concept | Visual Description |
-|------|-------------|-------------------|
-| 1. Identify | Target/Crosshair | A crosshair or target reticle with a central point -- "zeroing in on the problem" |
-| 2. Analyze | Magnifying Glass + Root | A magnifying glass over a branching root structure -- "root cause analysis" |
-| 3. Generate | Lightbulb Burst | A lightbulb with radiating lines -- "ideas emerging" |
-| 4. Select & Plan | Checklist + Blueprint | A document with checkmarks and a grid overlay -- "planning and selecting" |
-| 5. Implement | Wrench + Arrow | A wrench with an upward arrow -- "building and executing" (not a rocket -- too startup-y) |
-| 6. Evaluate | Gauge + Loop | A semicircular gauge with a return arrow -- "measuring and cycling back" |
+| Step             | Icon Concept            | Visual Description                                                                        |
+| ---------------- | ----------------------- | ----------------------------------------------------------------------------------------- |
+| 1. Identify      | Target/Crosshair        | A crosshair or target reticle with a central point -- "zeroing in on the problem"         |
+| 2. Analyze       | Magnifying Glass + Root | A magnifying glass over a branching root structure -- "root cause analysis"               |
+| 3. Generate      | Lightbulb Burst         | A lightbulb with radiating lines -- "ideas emerging"                                      |
+| 4. Select & Plan | Checklist + Blueprint   | A document with checkmarks and a grid overlay -- "planning and selecting"                 |
+| 5. Implement     | Wrench + Arrow          | A wrench with an upward arrow -- "building and executing" (not a rocket -- too startup-y) |
+| 6. Evaluate      | Gauge + Loop            | A semicircular gauge with a return arrow -- "measuring and cycling back"                  |
 
 #### Icon Sizing Grid
 
-| Context | Size | Touch Target |
-|---------|------|-------------|
-| **Navigation** | 20px | 40px |
-| **Toolbar/Actions** | 20px | 36px |
-| **In-line with text** | 16px | -- |
-| **Card icons** | 24px | -- |
-| **Feature icons** | 32px | -- |
-| **Hero/illustration** | 48-64px | -- |
-| **Step indicators** | 40px (within 48px circle) | 48px |
+| Context               | Size                      | Touch Target |
+| --------------------- | ------------------------- | ------------ |
+| **Navigation**        | 20px                      | 40px         |
+| **Toolbar/Actions**   | 20px                      | 36px         |
+| **In-line with text** | 16px                      | --           |
+| **Card icons**        | 24px                      | --           |
+| **Feature icons**     | 32px                      | --           |
+| **Hero/illustration** | 48-64px                   | --           |
+| **Step indicators**   | 40px (within 48px circle) | 48px         |
 
 ### 3.6 Illustration & Imagery Style
 
@@ -1042,6 +1094,7 @@ Lucide is the actively-maintained successor to Feather Icons. It provides 1,400+
 **Primary style:** Clean geometric illustrations built from simple shapes using the PIPS color palette -- but warmer than the typical "flat illustration" style. The key differentiator is the use of subtle gradients within shapes (not hard flat fills) and rounded, organic edges mixed with geometric structure.
 
 **Characteristics:**
+
 - Flat shapes with subtle inner gradients (PIPS Indigo to PIPS Violet, for example)
 - Generous use of the step colors to create visual interest -- each illustration should use 2-3 step colors
 - Dot motifs (echoing the logo and the "pips" name) used as decorative elements
@@ -1050,6 +1103,7 @@ Lucide is the actively-maintained successor to Feather Icons. It provides 1,400+
 - Background patterns use the Dot Grid at very low opacity
 
 **When to use illustrations:**
+
 - Marketing landing pages (hero sections, feature sections)
 - Onboarding flows
 - Empty states in the product
@@ -1062,6 +1116,7 @@ Lucide is the actively-maintained successor to Feather Icons. It provides 1,400+
 Photography should be used sparingly and only for team/culture pages, case studies, and blog posts.
 
 **Photo guidelines:**
+
 - Desaturated slightly (reduce saturation 10-15%) to blend with the color palette
 - Apply a subtle PIPS Deep overlay (5-8% opacity) for cohesion
 - Avoid cliche stock photography (no pointing at screens, no fake laughter in meetings)
@@ -1087,6 +1142,7 @@ Photography should be used sparingly and only for team/culture pages, case studi
 The UI should feel like a well-organized workshop: everything has its place, the tools are sharp, and you can find what you need without thinking about it. It is information-dense (this is a productivity tool, not a marketing site) but never cluttered. Every pixel earns its place.
 
 **Three principles:**
+
 1. **Structure is visible.** The 6-step methodology should be spatially apparent. Users should always know where they are in the process.
 2. **Color is functional.** Every color in the UI means something -- a step, a state, an action. Decorative color is minimal.
 3. **Motion is purposeful.** Animations serve comprehension (showing a step advancing, a card moving) not decoration.
@@ -1095,16 +1151,16 @@ The UI should feel like a well-organized workshop: everything has its place, the
 
 #### Border Radius Standard
 
-| Element | Radius | CSS Token |
-|---------|--------|-----------|
-| Buttons (small) | 6px | `--radius-sm` |
-| Buttons (default) | 10px | `--radius-md` |
-| Cards, modals, dropdowns | 14px | `--radius-lg` |
-| Large containers, panels | 18px | `--radius-xl` |
+| Element                  | Radius            | CSS Token       |
+| ------------------------ | ----------------- | --------------- |
+| Buttons (small)          | 6px               | `--radius-sm`   |
+| Buttons (default)        | 10px              | `--radius-md`   |
+| Cards, modals, dropdowns | 14px              | `--radius-lg`   |
+| Large containers, panels | 18px              | `--radius-xl`   |
 | Avatars, step indicators | 50% (full circle) | `--radius-full` |
-| Input fields, selects | 10px | `--radius-md` |
-| Badges, tags | 20px (pill shape) | `--radius-pill` |
-| Tooltips | 10px | `--radius-md` |
+| Input fields, selects    | 10px              | `--radius-md`   |
+| Badges, tags             | 20px (pill shape) | `--radius-pill` |
+| Tooltips                 | 10px              | `--radius-md`   |
 
 **Design principle:** Slightly rounder than the industry standard 8px. The 10px default and pill-shaped badges give the UI a friendlier feel than the sharp-cornered enterprise norm, while the consistent system prevents it from feeling bubbly or juvenile. This is a conscious departure from the Tailwind/shadcn default of 8px -- it signals "we designed this on purpose, not from a template."
 
@@ -1112,14 +1168,14 @@ The pill-shaped badges and tags are particularly important: they echo the circul
 
 #### Shadow System (Elevation Levels)
 
-| Level | Name | CSS Value | Usage |
-|-------|------|----------|-------|
-| 0 | None | `none` | Inline elements, flat cards, table rows |
-| 1 | Subtle | `0 1px 3px rgba(27, 19, 64, 0.04), 0 1px 2px rgba(27, 19, 64, 0.03)` | Cards at rest, input fields |
-| 2 | Low | `0 2px 8px rgba(27, 19, 64, 0.06), 0 1px 3px rgba(27, 19, 64, 0.04)` | Cards on hover, raised elements |
-| 3 | Medium | `0 4px 16px rgba(27, 19, 64, 0.08), 0 2px 6px rgba(27, 19, 64, 0.04)` | Dropdowns, popovers |
-| 4 | High | `0 8px 30px rgba(27, 19, 64, 0.12), 0 4px 10px rgba(27, 19, 64, 0.06)` | Modals, command palette |
-| 5 | Highest | `0 16px 50px rgba(27, 19, 64, 0.16), 0 8px 16px rgba(27, 19, 64, 0.06)` | Overlays, dialogs |
+| Level | Name    | CSS Value                                                               | Usage                                   |
+| ----- | ------- | ----------------------------------------------------------------------- | --------------------------------------- |
+| 0     | None    | `none`                                                                  | Inline elements, flat cards, table rows |
+| 1     | Subtle  | `0 1px 3px rgba(27, 19, 64, 0.04), 0 1px 2px rgba(27, 19, 64, 0.03)`    | Cards at rest, input fields             |
+| 2     | Low     | `0 2px 8px rgba(27, 19, 64, 0.06), 0 1px 3px rgba(27, 19, 64, 0.04)`    | Cards on hover, raised elements         |
+| 3     | Medium  | `0 4px 16px rgba(27, 19, 64, 0.08), 0 2px 6px rgba(27, 19, 64, 0.04)`   | Dropdowns, popovers                     |
+| 4     | High    | `0 8px 30px rgba(27, 19, 64, 0.12), 0 4px 10px rgba(27, 19, 64, 0.06)`  | Modals, command palette                 |
+| 5     | Highest | `0 16px 50px rgba(27, 19, 64, 0.16), 0 8px 16px rgba(27, 19, 64, 0.06)` | Overlays, dialogs                       |
 
 **Key difference from V1:** These shadows use the PIPS Deep color (`#1B1340`, rgb 27, 19, 64) as the shadow base instead of pure black. This gives shadows a very subtle violet tint that belongs to the PIPS color family. The effect is barely perceptible consciously but contributes to the overall "this feels designed" quality of the UI.
 
@@ -1127,27 +1183,28 @@ The pill-shaped badges and tags are particularly important: they echo the circul
 
 Based on a 4px grid:
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-0` | 0px | Reset |
-| `--space-0.5` | 2px | Hairline gaps, icon-to-text micro spacing |
-| `--space-1` | 4px | Tight padding (badges, tags) |
-| `--space-1.5` | 6px | Small gaps within compact components |
-| `--space-2` | 8px | Standard inner padding, icon spacing |
-| `--space-3` | 12px | Default gap between related elements |
-| `--space-4` | 16px | Card inner padding, section spacing |
-| `--space-5` | 20px | Medium section gaps |
-| `--space-6` | 24px | Standard card padding, content margins |
-| `--space-8` | 32px | Large section spacing |
-| `--space-10` | 40px | Section divisions |
-| `--space-12` | 48px | Major section spacing |
-| `--space-16` | 64px | Page section spacing |
-| `--space-20` | 80px | Hero/marketing section spacing |
-| `--space-24` | 96px | Maximum section spacing |
+| Token         | Value | Usage                                     |
+| ------------- | ----- | ----------------------------------------- |
+| `--space-0`   | 0px   | Reset                                     |
+| `--space-0.5` | 2px   | Hairline gaps, icon-to-text micro spacing |
+| `--space-1`   | 4px   | Tight padding (badges, tags)              |
+| `--space-1.5` | 6px   | Small gaps within compact components      |
+| `--space-2`   | 8px   | Standard inner padding, icon spacing      |
+| `--space-3`   | 12px  | Default gap between related elements      |
+| `--space-4`   | 16px  | Card inner padding, section spacing       |
+| `--space-5`   | 20px  | Medium section gaps                       |
+| `--space-6`   | 24px  | Standard card padding, content margins    |
+| `--space-8`   | 32px  | Large section spacing                     |
+| `--space-10`  | 40px  | Section divisions                         |
+| `--space-12`  | 48px  | Major section spacing                     |
+| `--space-16`  | 64px  | Page section spacing                      |
+| `--space-20`  | 80px  | Hero/marketing section spacing            |
+| `--space-24`  | 96px  | Maximum section spacing                   |
 
 #### Card Styles
 
 **Default Card:**
+
 ```
 Background: White (light) / Neutral 800 (dark)
 Border: 1px solid Neutral 200 (light) / Neutral 700 (dark)
@@ -1158,6 +1215,7 @@ Hover: Shadow Level 2 (low), border color transitions to Neutral 300
 ```
 
 **Interactive Card (clickable):**
+
 ```
 Same as Default Card, plus:
 Cursor: pointer
@@ -1167,6 +1225,7 @@ Transition: all 150ms ease
 ```
 
 **Step Card (PIPS methodology step):**
+
 ```
 Same as Default Card, plus:
 Left border: 3px solid [step color]
@@ -1176,6 +1235,7 @@ Active step: Left border at 100% opacity, pip dot at full size (12px), subtle gl
 ```
 
 **Stat Card (dashboard metric):**
+
 ```
 Background: White (light) / Neutral 800 (dark)
 Border: 1px solid Neutral 200 / Neutral 700
@@ -1190,6 +1250,7 @@ Optional: Step Gradient Stripe along the bottom (2px) when the stat relates to t
 #### Button Styles
 
 **Primary Button:**
+
 ```
 Background: PIPS Indigo (#4F46E5)
 Text: White, DM Sans 600, 14px
@@ -1204,6 +1265,7 @@ Transition: background 150ms ease, transform 100ms ease
 ```
 
 **Secondary Button:**
+
 ```
 Background: transparent
 Text: Neutral 700 (light) / Neutral 200 (dark), DM Sans 600, 14px
@@ -1215,6 +1277,7 @@ Active: Background Neutral 200 (light) / Neutral 600 (dark)
 ```
 
 **Ghost Button:**
+
 ```
 Background: transparent
 Text: Neutral 600 (light) / Neutral 300 (dark), DM Sans 500, 14px
@@ -1225,6 +1288,7 @@ Hover: Background Cloud (#F0EDFA) (light) / Neutral 800 (dark)
 ```
 
 **Destructive Button:**
+
 ```
 Background: Signal Red (#EF4444)
 Text: White, DM Sans 600, 14px
@@ -1237,11 +1301,11 @@ Focus: 2px offset ring in Signal Red at 40%
 
 **Button Sizes:**
 
-| Size | Padding | Font Size | Min Height |
-|------|---------|----------|------------|
-| Small | 6px 12px | 13px | 32px |
-| Default | 10px 20px | 14px | 40px |
-| Large | 12px 28px | 16px | 48px |
+| Size    | Padding   | Font Size | Min Height |
+| ------- | --------- | --------- | ---------- |
+| Small   | 6px 12px  | 13px      | 32px       |
+| Default | 10px 20px | 14px      | 40px       |
+| Large   | 12px 28px | 16px      | 48px       |
 
 #### Input Field Styles
 
@@ -1266,6 +1330,7 @@ Error text: DM Sans 400, 12px, Signal Red, margin-top 4px
 #### Badge & Tag Styles
 
 **Status Badge:**
+
 ```
 Padding: 2px 10px
 Font: DM Sans 500, 12px
@@ -1279,6 +1344,7 @@ Variants:
 ```
 
 **Step Badge:**
+
 ```
 Padding: 2px 10px
 Font: DM Sans 600, 11px, uppercase, letter-spacing 0.05em
@@ -1289,6 +1355,7 @@ Optional: 6px pip dot before the text in the step color
 ```
 
 **Tag (removable):**
+
 ```
 Padding: 4px 10px (4px 14px with remove button)
 Font: DM Sans 400, 13px
@@ -1352,14 +1419,14 @@ When a table shows projects with their current step:
 
 **12-column grid** with responsive behavior:
 
-| Breakpoint | Name | Width | Columns | Gutter | Margin |
-|-----------|------|-------|---------|--------|--------|
-| < 640px | Mobile | 100% | 4 | 16px | 16px |
-| 640-768px | Tablet Small | 100% | 8 | 20px | 24px |
-| 768-1024px | Tablet | 100% | 12 | 20px | 24px |
-| 1024-1280px | Desktop | 100% | 12 | 24px | 32px |
-| 1280-1536px | Desktop Wide | 1280px max | 12 | 24px | auto |
-| > 1536px | Desktop XL | 1440px max | 12 | 24px | auto |
+| Breakpoint  | Name         | Width      | Columns | Gutter | Margin |
+| ----------- | ------------ | ---------- | ------- | ------ | ------ |
+| < 640px     | Mobile       | 100%       | 4       | 16px   | 16px   |
+| 640-768px   | Tablet Small | 100%       | 8       | 20px   | 24px   |
+| 768-1024px  | Tablet       | 100%       | 12      | 20px   | 24px   |
+| 1024-1280px | Desktop      | 100%       | 12      | 24px   | 32px   |
+| 1280-1536px | Desktop Wide | 1280px max | 12      | 24px   | auto   |
+| > 1536px    | Desktop XL   | 1440px max | 12      | 24px   | auto   |
 
 #### Maximum Content Width
 
@@ -1371,6 +1438,7 @@ When a table shows projects with their current step:
 #### Sidebar Patterns
 
 **Primary Sidebar (Left, Product Navigation):**
+
 ```
 Width: 260px (collapsible to 60px icon-only mode)
 Background: Neutral 50 (light) / Neutral 900 (dark)
@@ -1385,13 +1453,13 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 
 #### Transition Standards
 
-| Property | Duration | Easing | Usage |
-|----------|----------|--------|-------|
-| Color, background, border | 150ms | ease | Hover states, focus states |
-| Opacity | 200ms | ease-out | Fade in/out |
-| Transform (scale, translate) | 200ms | cubic-bezier(0.16, 1, 0.3, 1) | Slide in, pop, scale |
-| Width, height | 250ms | ease-in-out | Expand/collapse, accordion |
-| Box-shadow | 150ms | ease | Card hover elevation |
+| Property                     | Duration | Easing                        | Usage                      |
+| ---------------------------- | -------- | ----------------------------- | -------------------------- |
+| Color, background, border    | 150ms    | ease                          | Hover states, focus states |
+| Opacity                      | 200ms    | ease-out                      | Fade in/out                |
+| Transform (scale, translate) | 200ms    | cubic-bezier(0.16, 1, 0.3, 1) | Slide in, pop, scale       |
+| Width, height                | 250ms    | ease-in-out                   | Expand/collapse, accordion |
+| Box-shadow                   | 150ms    | ease                          | Card hover elevation       |
 
 #### Micro-Interactions
 
@@ -1406,6 +1474,7 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 #### Loading States
 
 **Skeleton screens** are the primary loading pattern:
+
 - Replace content areas with animated placeholder blocks
 - Blocks are Neutral 200 (light) / Neutral 700 (dark) with a shimmer animation
 - Shimmer uses a subtle left-to-right gradient sweep, repeating every 1.5s
@@ -1413,6 +1482,341 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 **Full-page initial load:** The 6 step pip dots animate in sequence -- each dot appears and scales up, one after another (100ms apart), cycling through the step colors. This is a subtle, branded loading animation that takes about 600ms total.
 
 **Motion philosophy:** Motion should be fast, functional, and nearly invisible. If a user notices the animation, it is too long or too dramatic. The one exception is the step-advance moment, which is allowed to be slightly more celebratory.
+
+### 4.6 Post-MVP Component Patterns (v2.1)
+
+> These component patterns were introduced in the post-MVP build phases (Knowledge Hub, Training Mode, Marketing pages). They extend the core design language from Sections 4.1-4.5 and must remain consistent with the existing token system.
+
+#### 4.6.1 Cadence Bar [BUILT]
+
+**Component:** `knowledge-cadence-bar.tsx`
+
+The Cadence Bar is a contextual methodology learning widget that appears across multiple product surfaces (step-view, ticket detail, dashboard, Knowledge Hub). It is one of the product's most distinctive UX elements -- it bridges the gap between "work management tool" and "methodology learning platform."
+
+**Visual Design:**
+
+```
+┌────────────────────────────────────────────────────┐
+│  📖  PIPS Methodology · Step 2: Analyze            │
+│  ▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░  45% read                  │
+│                                                     │
+│  Recommended reading:                               │
+│  • Root Cause Analysis Fundamentals                 │
+│  • When to Use the Fishbone Diagram                 │
+│  • 5-Why Analysis Best Practices                    │
+│                                                     │
+│  [Expand to read →]                                │
+└────────────────────────────────────────────────────┘
+```
+
+**Styling Tokens:**
+
+- Background: `var(--color-surface-tinted)` (Cloud #F0EDFA in light mode)
+- Border: `1px solid var(--color-border)` with step-color left border (3px)
+- Border radius: `var(--radius-lg)` (14px)
+- Padding: `var(--space-4)` (16px)
+- Progress bar: Step-color fill on `var(--color-neutral-200)` track, height 4px, radius `var(--radius-full)`
+- Content links: `var(--color-text-link)` (PIPS Indigo), hover underline
+- Header icon: Book icon from Lucide, 16px, step color
+- Section title: DM Sans 600, `var(--text-body-sm)`, step color text
+
+**States:**
+
+- **Collapsed:** Thin bar (40px height) showing step context + progress percentage + expand chevron. Uses `defaultCollapsed` prop.
+- **Expanded:** Full panel (variable height) with content links and reading recommendations.
+- **Empty/No context:** Hidden entirely (do not render an empty Cadence Bar).
+- **Dark mode:** Surface tinted background uses `var(--color-surface-tinted)` which auto-adjusts.
+
+**Behavior:**
+
+- Collapsible via chevron toggle (state persisted in component state, not localStorage)
+- Content links navigate to Knowledge Hub reader
+- Progress updates reflect reading sessions tracked in DB
+- Step color changes based on current context (matches the PIPS step being viewed)
+
+**Placement Rules:**
+
+- Dashboard: Below stat cards, above recent activity. Collapsed by default.
+- Step View: Above the tool tabs area. Expanded on first visit per step (per user tracking is [PLANNED]).
+- Ticket Detail: Below the ticket metadata panel. Collapsed by default.
+- Knowledge Hub: In the landing page header area. Always expanded.
+
+---
+
+#### 4.6.2 Content Reader [BUILT]
+
+**Component:** `content-reader.tsx`
+
+The Content Reader renders methodology book content within the Knowledge Hub. It is the primary reading surface for the 205 content nodes and must feel like a high-quality reading experience -- not a wiki page.
+
+**Visual Design:**
+
+```
+┌──────────┬──────────────────────────────────────────┐
+│  TOC     │  Chapter 5: Root Cause Analysis           │
+│          │                                            │
+│  Ch 1    │  The most powerful question in process     │
+│  Ch 2    │  improvement is "Why?" Not asked once,     │
+│  Ch 3    │  not asked politely, but asked repeatedly  │
+│ >Ch 5    │  until the true cause surfaces...          │
+│  Ch 6    │                                            │
+│  ...     │  [Bookmark ☆]                              │
+│          │                                            │
+│          │  ◄ Previous    Next ►                      │
+└──────────┴──────────────────────────────────────────┘
+```
+
+**Styling Tokens:**
+
+- Content area max width: `var(--text-max-width)` (720px) for optimal line length
+- TOC sidebar: 220px fixed width, `var(--color-surface-secondary)` background
+- TOC active item: `var(--color-primary)` text, `var(--color-primary-subtle)` background, 2px left border
+- Content typography: Body text uses DM Sans 400, 16px, `var(--leading-loose)` (1.6 line height)
+- Headings within content: DM Sans 700 (H2), DM Sans 600 (H3-H4), standard type scale
+- Blockquotes: Left border 3px `var(--color-primary)`, `var(--color-surface-tinted)` background, italic
+- Code blocks: `var(--font-mono)`, `var(--color-neutral-900)` background even in light mode
+- Links within content: `var(--color-text-link)`, underline on hover
+- Bookmark button: Star icon (Lucide), positioned top-right of content area. Unbookmarked: `var(--color-neutral-400)`. Bookmarked: `var(--color-signal-amber)` fill.
+- Previous/Next navigation: Ghost button style, with chapter title preview
+
+**Component:** `markdown-content.tsx`
+
+- Renders markdown-to-HTML with consistent styling
+- Applies PIPS typography tokens to all rendered elements
+- Handles images, tables, code blocks, callouts within content
+
+**Component:** `bookmark-button.tsx`
+
+- Toggle bookmark state with optimistic UI update
+- Star icon animation: scale 1 -> 1.2 -> 1 on bookmark (200ms, ease-spring)
+- Server action to persist bookmark state
+
+**Responsive Behavior:**
+
+- Desktop: Two-column (TOC + content)
+- Tablet: TOC collapses to hamburger menu at top
+- Mobile: Full-width content, TOC as slide-out drawer
+
+---
+
+#### 4.6.3 Training UI Components [SCAFFOLDED]
+
+The Training Mode introduces several new component patterns for structured learning. All components use the existing design token system and follow the same styling principles as core product components.
+
+**Component: `training-landing.tsx`**
+
+Training Mode landing page with path overview.
+
+- Layout: Vertical stack of path cards
+- Header: DM Sans 700, H1 size, "Master the PIPS Methodology"
+- Progress summary: Overall completion ring + stats row
+- Path cards: Use the Interactive Card style from Section 4.2, plus:
+  - Left accent: Step-color-family gradient (each path maps to a step color range)
+  - Progress ring in top-right corner
+  - Module count and exercise count in caption text
+  - Estimated duration badge (pill-shaped, `var(--radius-pill)`)
+
+**Component: `training-module-card.tsx`**
+
+Individual module card within a path.
+
+```
+┌───────────────────────────────────────────────┐
+│  [3]  Understanding Root Cause Analysis        │
+│                                                │
+│  Learn the fundamentals of identifying why     │
+│  problems really occur.                        │
+│                                                │
+│  5 exercises · ~20 minutes                     │
+│                                                │
+│  ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░  60% complete              │
+│                                  [Continue →]  │
+└───────────────────────────────────────────────┘
+```
+
+- Styling: Default Card style + sequence number badge (circular, step-color background, white text)
+- Completed state: Checkmark overlay on number badge, green border accent
+- Locked state: Opacity 50%, lock icon replacing number badge, no hover effect
+- Progress bar: Same 4px style as Cadence Bar, step-color fill
+
+**Component: `training-progress-ring.tsx`**
+
+Circular progress indicator used throughout Training Mode.
+
+- SVG-based circular progress with percentage text in center
+- Sizes: Small (40px, used in cards), Medium (64px, used in path headers), Large (96px, used in progress page)
+- Stroke: Step-color fill, `var(--color-neutral-200)` track
+- Stroke width: 3px (small), 4px (medium), 5px (large)
+- Center text: DM Sans 700, percentage value, `var(--color-text-primary)`
+- Animation: Fill animates clockwise from 12 o'clock position on mount (300ms, ease-spring)
+
+**Component: `training-exercise.tsx`**
+
+Container component for all exercise types.
+
+- Card-based layout with exercise type badge (pill, step-color)
+- Exercise types: "Multiple Choice", "Scenario", "Reflection"
+- Question/prompt: DM Sans 600, H3 size
+- Submission: Primary button ("Submit Answer" / "Submit Reflection")
+- Feedback area: appears below submission with green (correct) or amber (review) accent border
+
+**Component: `training-multiple-choice.tsx`**
+
+Multiple-choice exercise option cards.
+
+- Options rendered as clickable cards (not radio buttons)
+- Unselected: Default Card style, `var(--color-surface)` background
+- Selected: `var(--color-primary-subtle)` background, `var(--color-primary)` border
+- Correct (after submit): `var(--color-success-light)` background, `var(--color-success)` border, checkmark icon
+- Incorrect (after submit): `var(--color-error-light)` background, `var(--color-error)` border, X icon
+- Explanation text: Appears below options after submission, DM Sans 400, body-sm
+
+**Component: `training-reflection.tsx`**
+
+Open-ended reflection exercise.
+
+- Prompt: DM Sans 600, body-lg
+- Text area: Standard input field style, min-height 120px
+- Character count: Caption text, bottom-right of text area
+- After submission: "Expert perspective" expandable section appears
+
+**Component: `scenario-runner.tsx`**
+
+Interactive scenario exercise with branching decisions.
+
+- Scenario description: Card with step-color left border
+- Decision options: Interactive cards (same style as multiple-choice but with consequence preview on hover)
+- Consequence reveal: Slide-in panel showing the result of the choice
+- Multi-stage: Progress dots at top showing current stage position
+- Summary: Final card with key learnings and PIPS methodology connection
+
+---
+
+#### 4.6.4 Marketing Landing Components [BUILT]
+
+The marketing landing page system uses a distinct set of components that follow the "marketing register" (DM Serif Display headlines, larger spacing, more visual drama) while maintaining the same design tokens.
+
+**Component: `landing-nav.tsx`**
+
+Marketing page navigation bar.
+
+- Height: 64px
+- Background: Transparent on hero section, `var(--color-surface)` with `var(--shadow-subtle)` after scroll
+- Logo: PIPS logo, 32px height
+- Nav links: DM Sans 500, 14px, `var(--color-neutral-600)`, hover `var(--color-primary)`
+- CTAs: "Sign In" (Ghost button), "Get Started" (Primary button, small size)
+- Sticky on scroll with smooth background transition (200ms)
+- Mobile: Hamburger menu at 768px breakpoint
+
+**Component: `hero-section.tsx`**
+
+Marketing hero section.
+
+- Background: `var(--color-primary-deep)` (#1B1340) with Dot Grid pattern at 5% opacity
+- Headline: DM Serif Display 400, Display size (52px), white text
+- Subtitle: DM Sans 400, body-lg, `var(--color-neutral-300)` on dark background
+- CTAs: "Start Free" (Primary button, large) + "See How It Works" (Ghost button, white text, large)
+- Step Gradient Stripe: 4px, smooth variant, positioned at hero bottom as decorative divider
+- Padding: `var(--space-24)` (96px) top and bottom
+- Max content width: `var(--marketing-max-width)` (1200px)
+
+**Component: `how-it-works-section.tsx`**
+
+6-step methodology visual walkthrough.
+
+- Background: `var(--color-surface)` (white)
+- Section heading: DM Serif Display 400, H2 size, centered
+- 6 step cards in horizontal row (desktop) or vertical stack (mobile)
+- Each step card:
+  - Pip dot (12px) in step color at top
+  - Step number: Overline text style, step color
+  - Step name: DM Sans 600, H4 size
+  - Description: DM Sans 400, body-sm
+  - Hover: slight elevation increase (shadow-low), translateY(-2px)
+- Connected by thin line (1px, `var(--color-neutral-200)`) between cards
+- Interactive: Click a step to reveal more detail (expand below card)
+
+**Component: `features-section.tsx`**
+
+Product feature showcase.
+
+- Alternating left/right layout (text + screenshot mockup)
+- Feature title: DM Serif Display 400, H3 size
+- Feature description: DM Sans 400, body text
+- Screenshot: Device frame mockup with 14px rounded corners and shadow-medium
+- Step-color accent: small pip dot before the feature title
+- Spacing: `var(--space-16)` (64px) between feature blocks
+
+**Component: `methodology-section.tsx`**
+
+Deeper methodology explanation with links.
+
+- Builds on how-it-works but provides more detail
+- Links to individual step pages and tool pages
+- Uses step-color cards with expanded descriptions
+
+**Component: `cta-section.tsx`**
+
+Conversion call-to-action section.
+
+- Background: `var(--color-primary-deep)` or `var(--color-surface-tinted)`
+- Headline: DM Serif Display 400, centered, white (on deep) or primary text
+- Single primary CTA button (large)
+- Dot Grid pattern at 5% opacity for texture
+- Padding: `var(--space-20)` (80px) vertical
+
+**Component: `landing-footer.tsx`**
+
+Marketing site footer.
+
+- Step Gradient Stripe (hard-edge) above footer
+- Background: `var(--color-neutral-900)` or `var(--color-primary-deep)`
+- 4-column grid: Product, Resources, Company, Legal
+- Column headers: DM Sans 600, caption size, white, uppercase, widest tracking
+- Link items: DM Sans 400, body-sm, `var(--color-neutral-400)`, hover white
+- Bottom bar: Logo (small, white), copyright, social links
+- Padding: `var(--space-16)` (64px) top, `var(--space-8)` (32px) bottom
+
+---
+
+#### 4.6.5 SEO Component Patterns [BUILT]
+
+Components that support the SEO marketing page infrastructure.
+
+**Structured Metadata:**
+
+- Every marketing page includes: title, description, keywords, Open Graph image, canonical URL
+- JSON-LD schemas: Article (for tool/step pages), HowTo (for methodology steps), DefinedTerm (for glossary)
+- Server-rendered content ensures full indexability
+
+**Methodology Step Page Pattern:**
+
+- Step-color accent used in page header and section dividers
+- Step icon (custom Lucide-based) at 48px as hero element
+- "Tools in this step" section with tool page cards
+- Breadcrumb: Home > Methodology > Step N: [Name]
+- Previous/Next step navigation at page bottom
+
+**Tool Page Pattern:**
+
+- Tool-specific hero with descriptive title
+- "When to use this" / "How it works" / "Step-by-step" sections
+- Connection to PIPS steps shown with pip dots
+- CTA: "Use [tool name] in PIPS" with primary button
+
+**Glossary Term Pattern:**
+
+- Term as H1, definition as body-lg text
+- Related terms as pill-shaped tag chips
+- Cross-links to tool and step pages where term is relevant
+- Minimal design -- content-forward, scannable
+
+**Book Preview Pattern:**
+
+- Chapter title in DM Serif Display (marketing register)
+- Preview content uses Content Reader typography (body register)
+- Gated content indicator: horizontal divider with lock icon and "Sign up to continue reading"
+- Related chapters at bottom as small cards
 
 ---
 
@@ -1423,7 +1827,8 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 #### Website / Landing Page Design Direction
 
 **Hero Section:**
-- Large headline (Display size, DM Serif Display 400): problem-focused statement, e.g., *"Every organization has problems. The best ones have a system for solving them."*
+
+- Large headline (Display size, DM Serif Display 400): problem-focused statement, e.g., _"Every organization has problems. The best ones have a system for solving them."_
 - Subtitle (Body Large, DM Sans 400, Neutral 500): one-sentence product description
 - Two CTAs: "Start Free" (Primary button, PIPS Indigo) + "See How It Works" (Ghost button)
 - Background: PIPS Deep (#1B1340) with subtle Dot Grid pattern at 5% opacity
@@ -1431,6 +1836,7 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 - Step Gradient Stripe runs across the bottom of the hero as a decorative divider
 
 **Feature Sections:**
+
 - Alternating left/right layout: screenshot on one side, text on the other
 - Each feature section corresponds to one of the 6 PIPS steps (using the step color as the accent)
 - H2 headline in DM Serif Display for marketing weight, body text in DM Sans
@@ -1438,16 +1844,19 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 - A single pip dot in the step color accompanies each step's section header
 
 **Social Proof Section:**
+
 - Logo row of customer organizations (when available)
 - Pull quote from a customer in DM Serif Display 400 (italic feel through the serif)
 - Background: Cloud (#F0EDFA), subtle Dot Grid pattern
 
 **Pricing Section:**
+
 - 3-4 columns: Starter, Professional, Enterprise, Contact Us
 - The recommended tier has a PIPS Indigo top border accent and a "Most Popular" pill badge
 - Clean, scannable feature comparison with pip-dot checkmarks in PIPS Indigo
 
 **Footer:**
+
 - 4-column layout: Product, Resources, Company, Legal
 - Step Gradient Stripe above the footer
 - PIPS logo (small) and tagline
@@ -1465,6 +1874,7 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 #### Social Media Templates
 
 **LinkedIn (1200x627):**
+
 - Background: PIPS Deep or Cloud
 - Large headline: DM Serif Display 400, white (on deep) or Neutral 800 (on cloud)
 - PIPS logo in the top-left corner
@@ -1472,10 +1882,12 @@ Mobile: Overlay from left, 280px wide, dismissible with scrim
 - One main message per image
 
 **Twitter/X (1200x675):**
+
 - Same principles as LinkedIn, more concise text
 - Can use step colors more boldly as background accents
 
 **Profile images:**
+
 - The 6 step dots (from logo) arranged in a circle on PIPS Deep background
 - Consistent across all platforms
 
@@ -1516,7 +1928,8 @@ The dashboard is the product's command center -- organized, information-dense, b
 
 **Primary: Left sidebar.**
 
-Sidebar navigation structure:
+Sidebar navigation structure (v2.1 — updated with Knowledge Hub and Training):
+
 ```
 [Logo / Org Name]
 [Org Switcher Dropdown]
@@ -1533,6 +1946,11 @@ General Tickets
 Team
   - Members
   - Groups
+---
+LEARN                     ← v2.1 addition
+  Knowledge Hub           ← [BUILT]
+  Training                ← [SCAFFOLDED]
+---
 Analytics
   - Dashboards
   - Reports
@@ -1548,6 +1966,7 @@ Help & Support
 ```
 
 **Navigation item styling:**
+
 - Default: DM Sans 400, 14px, Neutral 600 (light) / Neutral 400 (dark)
 - Hover: Background Cloud (light) / Neutral 800 (dark), text Neutral 800 / Neutral 100
 - Active: Background PIPS Indigo at 10%, text PIPS Indigo, 3px left border in PIPS Indigo
@@ -1556,12 +1975,14 @@ Help & Support
 #### Empty States
 
 Every empty state follows a consistent pattern:
+
 - Centered layout within the content area
 - Custom geometric illustration (120-160px) incorporating pip dots and step colors
 - H4 headline in DM Sans + Body Small description + Primary CTA button
 - The illustration uses the relevant step color if the empty state is within a step context
 
 Examples:
+
 - **No PIPS projects:** "Start your first improvement project. Every great improvement begins with a well-defined problem." [Create Project]
 - **No tickets in this step:** "Nothing in Analyze yet. Move a project here when you are ready to dig into root causes." [Learn About This Step]
 - **No team members:** "Build your team. Invite colleagues to collaborate on improvement projects." [Invite Members]
@@ -1569,12 +1990,14 @@ Examples:
 #### Error Pages
 
 **404 Page:**
+
 - The 6 step dots from the logo, but with one dot missing (a gap in the sequence)
 - H1: "Page not found"
 - Body: "This page does not exist or has been moved. But hey, every good process starts with identifying the problem."
 - CTAs: "Go to Dashboard" (Primary), "Contact Support" (Ghost)
 
 **500 Page:**
+
 - The 6 step dots, all dimmed to Neutral 300 (suggesting the system is paused)
 - H1: "Something went wrong"
 - Body: "We are working on it. Please try again in a moment."
@@ -1616,6 +2039,11 @@ Examples:
 - Let whitespace breathe
 - Test all color combinations for accessibility before shipping
 - Use pill-shaped badges and tags (20px radius)
+- Use the Cadence Bar for contextual methodology content across all PIPS step surfaces (v2.1)
+- Use the Content Reader typography for all rendered book/guide content -- 720px max width, DM Sans 400, 1.6 line height (v2.1)
+- Use the training-progress-ring for all circular progress indicators in Training Mode (v2.1)
+- Use the marketing register (DM Serif Display headlines) on all public-facing marketing pages (v2.1)
+- Ensure marketing page CTAs use Primary button styling consistently (v2.1)
 
 #### DO NOT:
 
@@ -1634,21 +2062,25 @@ Examples:
 - Never use a colored background behind the full-color logo (use the monochrome version)
 - Never use the word "synergy," "leverage" (as a verb), "ideate," or "paradigm" in brand communications
 - Never place the logo smaller than its minimum size (100px for full logo, 20px for dots icon)
+- Never render Cadence Bar when there is no contextual content -- hide it entirely (v2.1)
+- Never use the marketing register (DM Serif Display) inside the product UI except in the Knowledge Hub book title rendering (v2.1)
+- Never create training exercise components that bypass the training-exercise.tsx container component (v2.1)
+- Never render Knowledge Hub content without the Content Reader typography styles (v2.1)
 
 ### 6.2 Common Misuse Examples
 
-| Misuse | Problem | Correct Usage |
-|--------|---------|---------------|
-| "Welcome to the PIPS" | Definite article not used with the name | "Welcome to PIPS" |
-| "Pips helps teams..." | Lowercase in body text | "PIPS helps teams..." |
-| Using Step 5 color (gold) as a button color | Step colors are not UI action colors | Use PIPS Indigo for buttons |
-| Using red (#EF4444) for Step 5: Implement | Red = error in UI semantics | Step 5 is Action Gold (#CA8A04) |
-| Rainbow gradient using all 6 step colors in a card | Overuse of step colors | Use one step color per context, or all 6 only in progress bars/charts |
-| Using pure gray (#6B7280) for text | Breaks the violet-tinted neutral system | Use Neutral 500 (#6E6989) |
-| Inter font in the product | Wrong typeface | DM Sans for all product text |
-| Spinner for page loading | Inconsistent with brand patterns | Use skeleton screens or pip-dot animation |
-| Logo on a busy photo background | Reduces legibility | Logo on solid or near-solid backgrounds only |
-| "Powered by PIPS" in tiny gray text | Undermines the badge | "Powered by PIPS" with adequate size and contrast |
+| Misuse                                             | Problem                                 | Correct Usage                                                         |
+| -------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------- |
+| "Welcome to the PIPS"                              | Definite article not used with the name | "Welcome to PIPS"                                                     |
+| "Pips helps teams..."                              | Lowercase in body text                  | "PIPS helps teams..."                                                 |
+| Using Step 5 color (gold) as a button color        | Step colors are not UI action colors    | Use PIPS Indigo for buttons                                           |
+| Using red (#EF4444) for Step 5: Implement          | Red = error in UI semantics             | Step 5 is Action Gold (#CA8A04)                                       |
+| Rainbow gradient using all 6 step colors in a card | Overuse of step colors                  | Use one step color per context, or all 6 only in progress bars/charts |
+| Using pure gray (#6B7280) for text                 | Breaks the violet-tinted neutral system | Use Neutral 500 (#6E6989)                                             |
+| Inter font in the product                          | Wrong typeface                          | DM Sans for all product text                                          |
+| Spinner for page loading                           | Inconsistent with brand patterns        | Use skeleton screens or pip-dot animation                             |
+| Logo on a busy photo background                    | Reduces legibility                      | Logo on solid or near-solid backgrounds only                          |
+| "Powered by PIPS" in tiny gray text                | Undermines the badge                    | "Powered by PIPS" with adequate size and contrast                     |
 
 ### 6.3 Brand Asset Checklist
 
@@ -1672,6 +2104,15 @@ The following assets need to be created by a designer based on this guide:
 - [ ] Loading animation (pip dots cycling through step colors)
 - [ ] Step-advance celebration animation
 - [ ] Figma component library with all tokens, components, and patterns
+- [ ] Cadence Bar component variants (collapsed, expanded, per-step context) (v2.1)
+- [ ] Content Reader layout template (TOC + content + bookmark) (v2.1)
+- [ ] Training progress ring variants (40px, 64px, 96px) (v2.1)
+- [ ] Training module card states (active, completed, locked) (v2.1)
+- [ ] Training exercise type badges (Multiple Choice, Scenario, Reflection) (v2.1)
+- [ ] Marketing page hero section template (v2.1)
+- [ ] Marketing page feature section alternating layout template (v2.1)
+- [ ] Glossary term page layout template (v2.1)
+- [ ] Book preview gated content divider illustration (v2.1)
 
 ### 6.4 Quick Reference Card
 
@@ -1709,6 +2150,15 @@ KEY ELEMENTS:
   Max content:      720px (text), 960px (product), 1200px (marketing)
   Signature:        Step Gradient Stripe, Dot Grid, Pip Dot indicators
 
+POST-MVP COMPONENTS (v2.1):
+  Cadence Bar:      Contextual methodology widget (step-view, dashboard, tickets)
+  Content Reader:   Book/guide content rendering (720px max, DM Sans 400, 1.6 LH)
+  Training Ring:    Circular SVG progress (40/64/96px sizes, step-color fill)
+  Module Card:      Training module with sequence number + progress bar
+  Landing Nav:      Marketing nav (transparent→solid on scroll, 64px)
+  Hero Section:     PIPS Deep bg + Dot Grid + Step Stripe divider
+  Bookmark Button:  Star icon toggle (amber when bookmarked)
+
 VOICE:
   Direct, Substantive, Guiding, Confident, Human, Inclusive
 
@@ -1724,6 +2174,10 @@ DO NOT FORGET:
   - Pill-shaped badges (20px radius)
   - "PIPS" always all caps in text
   - Skeleton screens for loading, not spinners
+  - Cadence Bar uses step-color left border for context (v2.1)
+  - Content Reader max-width is 720px (v2.1)
+  - Marketing pages use DM Serif Display headlines (v2.1)
+  - Training progress rings use step-color fills (v2.1)
 ```
 
 ---
@@ -1735,6 +2189,7 @@ DO NOT FORGET:
 When a client white-labels the PIPS platform, the following elements are customizable:
 
 **Always customizable (all tiers):**
+
 - Organization name and logo (replaces "PIPS" in the sidebar and header)
 - Primary brand color (replaces PIPS Indigo)
 - Accent color (replaces PIPS Violet)
@@ -1743,12 +2198,14 @@ When a client white-labels the PIPS platform, the following elements are customi
 - Email template header (logo, colors)
 
 **Customizable at Professional tier:**
+
 - Custom domain (CNAME mapping: e.g., improve.clientname.com)
 - Secondary brand color
 - Custom login page illustration/image
 - "Powered by PIPS" badge can be recolored (but not removed)
 
 **Customizable at Enterprise tier:**
+
 - Full color palette override (all brand colors)
 - Custom font (with fallback to DM Sans)
 - Neutral palette hue-shift (auto-generated from primary color)
@@ -1803,14 +2260,14 @@ Base tokens (PIPS defaults)
 ```css
 /* Client theme: "Acme Corp" */
 :root {
-  --color-primary: #7C3AED;           /* Acme's purple */
-  --color-primary-hover: #6D28D9;
-  --color-primary-light: #A78BFA;
+  --color-primary: #7c3aed; /* Acme's purple */
+  --color-primary-hover: #6d28d9;
+  --color-primary-light: #a78bfa;
   --color-primary-subtle: rgba(124, 58, 237, 0.1);
-  --color-accent: #F59E0B;            /* Acme's gold */
-  --color-accent-hover: #D97706;
-  --color-surface-tint: 263;          /* Hue for neutral tinting */
-  --font-brand: 'Poppins', var(--font-sans);  /* Enterprise tier only */
+  --color-accent: #f59e0b; /* Acme's gold */
+  --color-accent-hover: #d97706;
+  --color-surface-tint: 263; /* Hue for neutral tinting */
+  --font-brand: 'Poppins', var(--font-sans); /* Enterprise tier only */
 }
 ```
 
@@ -1829,6 +2286,7 @@ When Enterprise clients customize the 6 step colors:
 ### 7.5 "Powered by PIPS" Badge
 
 **Design:**
+
 - Text: "Powered by PIPS" in DM Sans 400, 11px, Neutral 400
 - Optional: Small pip dots (4px, step colors) to the left of the text
 - Placement: Footer of the application, right-aligned
@@ -1836,10 +2294,12 @@ When Enterprise clients customize the 6 step colors:
 - Link: Clicks through to the PIPS marketing site
 
 **Tier behavior:**
+
 - Starter / Professional: Badge is always present. Can be recolored to match client theme but not hidden.
 - Enterprise: Badge can be removed entirely as part of the license agreement.
 
 **Design constraints:**
+
 - The badge must never be overlaid on a busy background
 - Minimum contrast of 3:1 against its background
 - Never modify the badge text (no "Built with PIPS" or "Running on PIPS")
@@ -1857,84 +2317,84 @@ The complete token system that implements this brand. Copy this directly into yo
   /* ============================================
      COLORS -- PRIMARY
      ============================================ */
-  --color-primary-deep: #1B1340;
-  --color-primary: #4F46E5;
-  --color-primary-hover: #4338CA;
-  --color-primary-active: #3730A3;
-  --color-primary-light: #818CF8;
-  --color-primary-subtle: rgba(79, 70, 229, 0.10);
-  --color-accent: #7C3AED;
-  --color-accent-hover: #6D28D9;
-  --color-accent-light: #A78BFA;
-  --color-accent-subtle: rgba(124, 58, 237, 0.10);
+  --color-primary-deep: #1b1340;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-active: #3730a3;
+  --color-primary-light: #818cf8;
+  --color-primary-subtle: rgba(79, 70, 229, 0.1);
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
+  --color-accent-light: #a78bfa;
+  --color-accent-subtle: rgba(124, 58, 237, 0.1);
 
   /* ============================================
      COLORS -- SECONDARY
      ============================================ */
-  --color-warm-slate: #3D3654;
-  --color-cloud: #F0EDFA;
-  --color-ink: #1E1B2E;
+  --color-warm-slate: #3d3654;
+  --color-cloud: #f0edfa;
+  --color-ink: #1e1b2e;
 
   /* ============================================
      COLORS -- SIGNAL / SEMANTIC
      ============================================ */
-  --color-signal-amber: #F59E0B;
-  --color-signal-amber-subtle: rgba(245, 158, 11, 0.10);
-  --color-signal-red: #EF4444;
-  --color-signal-red-subtle: rgba(239, 68, 68, 0.10);
-  --color-signal-emerald: #10B981;
-  --color-signal-emerald-subtle: rgba(16, 185, 129, 0.10);
+  --color-signal-amber: #f59e0b;
+  --color-signal-amber-subtle: rgba(245, 158, 11, 0.1);
+  --color-signal-red: #ef4444;
+  --color-signal-red-subtle: rgba(239, 68, 68, 0.1);
+  --color-signal-emerald: #10b981;
+  --color-signal-emerald-subtle: rgba(16, 185, 129, 0.1);
 
   --color-success: #059669;
-  --color-success-light: #D1FAE5;
-  --color-success-subtle: rgba(5, 150, 105, 0.10);
-  --color-warning: #D97706;
-  --color-warning-light: #FEF3C7;
-  --color-warning-subtle: rgba(217, 119, 6, 0.10);
-  --color-error: #EF4444;
-  --color-error-light: #FEE2E2;
-  --color-error-subtle: rgba(239, 68, 68, 0.10);
-  --color-info: #4F46E5;
-  --color-info-light: #EEF2FF;
-  --color-info-subtle: rgba(79, 70, 229, 0.10);
+  --color-success-light: #d1fae5;
+  --color-success-subtle: rgba(5, 150, 105, 0.1);
+  --color-warning: #d97706;
+  --color-warning-light: #fef3c7;
+  --color-warning-subtle: rgba(217, 119, 6, 0.1);
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-subtle: rgba(239, 68, 68, 0.1);
+  --color-info: #4f46e5;
+  --color-info-light: #eef2ff;
+  --color-info-subtle: rgba(79, 70, 229, 0.1);
 
   /* ============================================
      COLORS -- NEUTRALS (violet-tinted)
      ============================================ */
-  --color-neutral-50: #FAFAFB;
-  --color-neutral-100: #F3F2F7;
-  --color-neutral-200: #E4E2ED;
-  --color-neutral-300: #C9C6D9;
-  --color-neutral-400: #9A96B3;
-  --color-neutral-500: #6E6989;
-  --color-neutral-600: #504B68;
-  --color-neutral-700: #3D3654;
-  --color-neutral-800: #2A2440;
-  --color-neutral-900: #1E1B2E;
-  --color-neutral-950: #110F1C;
+  --color-neutral-50: #fafafb;
+  --color-neutral-100: #f3f2f7;
+  --color-neutral-200: #e4e2ed;
+  --color-neutral-300: #c9c6d9;
+  --color-neutral-400: #9a96b3;
+  --color-neutral-500: #6e6989;
+  --color-neutral-600: #504b68;
+  --color-neutral-700: #3d3654;
+  --color-neutral-800: #2a2440;
+  --color-neutral-900: #1e1b2e;
+  --color-neutral-950: #110f1c;
 
   /* ============================================
      COLORS -- PIPS STEP COLORS
      ============================================ */
-  --color-step-1: #2563EB;   /* Identify -- Signal Blue */
+  --color-step-1: #2563eb; /* Identify -- Signal Blue */
   --color-step-1-subtle: rgba(37, 99, 235, 0.12);
-  --color-step-2: #D97706;   /* Analyze -- Insight Amber */
+  --color-step-2: #d97706; /* Analyze -- Insight Amber */
   --color-step-2-subtle: rgba(217, 119, 6, 0.12);
-  --color-step-3: #059669;   /* Generate -- Spark Green */
+  --color-step-3: #059669; /* Generate -- Spark Green */
   --color-step-3-subtle: rgba(5, 150, 105, 0.12);
-  --color-step-4: #4338CA;   /* Select & Plan -- Blueprint Indigo */
+  --color-step-4: #4338ca; /* Select & Plan -- Blueprint Indigo */
   --color-step-4-subtle: rgba(67, 56, 202, 0.12);
-  --color-step-5: #CA8A04;   /* Implement -- Action Gold */
+  --color-step-5: #ca8a04; /* Implement -- Action Gold */
   --color-step-5-subtle: rgba(202, 138, 4, 0.12);
-  --color-step-6: #0891B2;   /* Evaluate -- Loop Teal */
+  --color-step-6: #0891b2; /* Evaluate -- Loop Teal */
   --color-step-6-subtle: rgba(8, 145, 178, 0.12);
 
   /* ============================================
      COLORS -- SURFACE (Semantic aliases)
      ============================================ */
   --color-bg: var(--color-neutral-50);
-  --color-bg-secondary: #FFFFFF;
-  --color-surface: #FFFFFF;
+  --color-bg-secondary: #ffffff;
+  --color-surface: #ffffff;
   --color-surface-secondary: var(--color-neutral-100);
   --color-surface-tinted: var(--color-cloud);
   --color-border: var(--color-neutral-200);
@@ -1942,7 +2402,7 @@ The complete token system that implements this brand. Copy this directly into yo
   --color-text-primary: var(--color-neutral-800);
   --color-text-secondary: var(--color-neutral-500);
   --color-text-tertiary: var(--color-neutral-400);
-  --color-text-inverse: #FFFFFF;
+  --color-text-inverse: #ffffff;
   --color-text-link: var(--color-primary);
   --color-text-link-hover: var(--color-primary-hover);
 
@@ -1954,18 +2414,18 @@ The complete token system that implements this brand. Copy this directly into yo
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
 
   /* Font sizes */
-  --text-display: 3.25rem;      /* 52px */
-  --text-h1: 2.25rem;           /* 36px */
-  --text-h2: 1.75rem;           /* 28px */
-  --text-h3: 1.375rem;          /* 22px */
-  --text-h4: 1.125rem;          /* 18px */
-  --text-h5: 1rem;              /* 16px */
-  --text-h6: 0.875rem;          /* 14px */
-  --text-body-lg: 1.125rem;     /* 18px */
-  --text-body: 1rem;            /* 16px */
-  --text-body-sm: 0.875rem;     /* 14px */
-  --text-caption: 0.75rem;      /* 12px */
-  --text-overline: 0.6875rem;   /* 11px */
+  --text-display: 3.25rem; /* 52px */
+  --text-h1: 2.25rem; /* 36px */
+  --text-h2: 1.75rem; /* 28px */
+  --text-h3: 1.375rem; /* 22px */
+  --text-h4: 1.125rem; /* 18px */
+  --text-h5: 1rem; /* 16px */
+  --text-h6: 0.875rem; /* 14px */
+  --text-body-lg: 1.125rem; /* 18px */
+  --text-body: 1rem; /* 16px */
+  --text-body-sm: 0.875rem; /* 14px */
+  --text-caption: 0.75rem; /* 12px */
+  --text-overline: 0.6875rem; /* 11px */
 
   /* Font weights */
   --weight-regular: 400;
@@ -2086,7 +2546,7 @@ The complete token system that implements this brand. Copy this directly into yo
 ### 8.2 Dark Mode Overrides
 
 ```css
-[data-theme="dark"],
+[data-theme='dark'],
 .dark,
 @media (prefers-color-scheme: dark) {
   :root {
@@ -2110,39 +2570,39 @@ The complete token system that implements this brand. Copy this directly into yo
     /* ============================================
        SEMANTIC COLOR OVERRIDES
        ============================================ */
-    --color-success: #34D399;
+    --color-success: #34d399;
     --color-success-light: rgba(52, 211, 153, 0.15);
-    --color-warning: #FBBF24;
+    --color-warning: #fbbf24;
     --color-warning-light: rgba(251, 191, 36, 0.15);
-    --color-error: #FCA5A5;
+    --color-error: #fca5a5;
     --color-error-light: rgba(252, 165, 165, 0.15);
-    --color-info: #818CF8;
+    --color-info: #818cf8;
     --color-info-light: rgba(129, 140, 248, 0.15);
 
     /* ============================================
        STEP COLOR OVERRIDES (Brightened for dark BG)
        ============================================ */
-    --color-step-1: #60A5FA;   /* Identify -- lighter blue */
+    --color-step-1: #60a5fa; /* Identify -- lighter blue */
     --color-step-1-subtle: rgba(96, 165, 250, 0.15);
-    --color-step-2: #FBBF24;   /* Analyze -- lighter amber */
+    --color-step-2: #fbbf24; /* Analyze -- lighter amber */
     --color-step-2-subtle: rgba(251, 191, 36, 0.15);
-    --color-step-3: #34D399;   /* Generate -- lighter green */
+    --color-step-3: #34d399; /* Generate -- lighter green */
     --color-step-3-subtle: rgba(52, 211, 153, 0.15);
-    --color-step-4: #818CF8;   /* Select & Plan -- lighter indigo */
+    --color-step-4: #818cf8; /* Select & Plan -- lighter indigo */
     --color-step-4-subtle: rgba(129, 140, 248, 0.15);
-    --color-step-5: #FACC15;   /* Implement -- lighter gold */
+    --color-step-5: #facc15; /* Implement -- lighter gold */
     --color-step-5-subtle: rgba(250, 204, 21, 0.15);
-    --color-step-6: #22D3EE;   /* Evaluate -- lighter teal */
+    --color-step-6: #22d3ee; /* Evaluate -- lighter teal */
     --color-step-6-subtle: rgba(34, 211, 238, 0.15);
 
     /* ============================================
        SHADOW OVERRIDES (Increased opacity for dark)
        ============================================ */
-    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.10);
-    --shadow-low: 0 2px 8px rgba(0, 0, 0, 0.20), 0 1px 3px rgba(0, 0, 0, 0.15);
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-low: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
     --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
-    --shadow-high: 0 8px 30px rgba(0, 0, 0, 0.30), 0 4px 10px rgba(0, 0, 0, 0.20);
-    --shadow-highest: 0 16px 50px rgba(0, 0, 0, 0.40), 0 8px 16px rgba(0, 0, 0, 0.20);
+    --shadow-high: 0 8px 30px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+    --shadow-highest: 0 16px 50px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2);
   }
 }
 ```
@@ -2207,9 +2667,18 @@ The complete token system that implements this brand. Copy this directly into yo
   flex-shrink: 0;
 }
 
-.pip-dot--sm { width: var(--pip-sm); height: var(--pip-sm); }
-.pip-dot--lg { width: var(--pip-lg); height: var(--pip-lg); }
-.pip-dot--xl { width: var(--pip-xl); height: var(--pip-xl); }
+.pip-dot--sm {
+  width: var(--pip-sm);
+  height: var(--pip-sm);
+}
+.pip-dot--lg {
+  width: var(--pip-lg);
+  height: var(--pip-lg);
+}
+.pip-dot--xl {
+  width: var(--pip-xl);
+  height: var(--pip-xl);
+}
 
 /* Pip dot with glow (active step) */
 .pip-dot--active {
@@ -2220,8 +2689,13 @@ The complete token system that implements this brand. Copy this directly into yo
 }
 
 @keyframes pip-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px var(--step-color-subtle); }
-  50% { box-shadow: 0 0 0 8px var(--step-color-subtle); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px var(--step-color-subtle);
+  }
+  50% {
+    box-shadow: 0 0 0 8px var(--step-color-subtle);
+  }
 }
 
 /* Loading animation -- pip dots cycling */
@@ -2235,16 +2709,36 @@ The complete token system that implements this brand. Copy this directly into yo
   animation: pip-load 1.2s ease-in-out infinite;
 }
 
-.pip-loading .pip-dot:nth-child(1) { animation-delay: 0ms; }
-.pip-loading .pip-dot:nth-child(2) { animation-delay: 100ms; }
-.pip-loading .pip-dot:nth-child(3) { animation-delay: 200ms; }
-.pip-loading .pip-dot:nth-child(4) { animation-delay: 300ms; }
-.pip-loading .pip-dot:nth-child(5) { animation-delay: 400ms; }
-.pip-loading .pip-dot:nth-child(6) { animation-delay: 500ms; }
+.pip-loading .pip-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+.pip-loading .pip-dot:nth-child(2) {
+  animation-delay: 100ms;
+}
+.pip-loading .pip-dot:nth-child(3) {
+  animation-delay: 200ms;
+}
+.pip-loading .pip-dot:nth-child(4) {
+  animation-delay: 300ms;
+}
+.pip-loading .pip-dot:nth-child(5) {
+  animation-delay: 400ms;
+}
+.pip-loading .pip-dot:nth-child(6) {
+  animation-delay: 500ms;
+}
 
 @keyframes pip-load {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
-  40% { transform: scale(1); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.3;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 ```
 
@@ -2252,66 +2746,196 @@ The complete token system that implements this brand. Copy this directly into yo
 
 ```css
 /* Typography utilities */
-.text-display { font-family: var(--font-display); font-size: var(--text-display); font-weight: var(--weight-regular); line-height: var(--leading-tight); letter-spacing: -0.02em; }
-.text-h1 { font-family: var(--font-sans); font-size: var(--text-h1); font-weight: var(--weight-bold); line-height: var(--leading-snug); letter-spacing: var(--tracking-tighter); }
-.text-h2 { font-family: var(--font-sans); font-size: var(--text-h2); font-weight: var(--weight-bold); line-height: var(--leading-snug); letter-spacing: var(--tracking-tight); }
-.text-h3 { font-family: var(--font-sans); font-size: var(--text-h3); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-tight); }
-.text-h4 { font-family: var(--font-sans); font-size: var(--text-h4); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
-.text-h5 { font-family: var(--font-sans); font-size: var(--text-h5); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
-.text-h6 { font-family: var(--font-sans); font-size: var(--text-h6); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-wide); }
-.text-body-lg { font-family: var(--font-sans); font-size: var(--text-body-lg); font-weight: var(--weight-regular); line-height: var(--leading-loose); }
-.text-body { font-family: var(--font-sans); font-size: var(--text-body); font-weight: var(--weight-regular); line-height: var(--leading-loose); }
-.text-body-sm { font-family: var(--font-sans); font-size: var(--text-body-sm); font-weight: var(--weight-regular); line-height: var(--leading-relaxed); }
-.text-caption { font-family: var(--font-sans); font-size: var(--text-caption); font-weight: var(--weight-medium); line-height: var(--leading-normal); }
-.text-overline { font-family: var(--font-sans); font-size: var(--text-overline); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-widest); text-transform: uppercase; }
+.text-display {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+.text-h1 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tighter);
+}
+.text-h2 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+.text-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-tight);
+}
+.text-h4 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+}
+.text-h5 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h5);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+}
+.text-h6 {
+  font-family: var(--font-sans);
+  font-size: var(--text-h6);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-wide);
+}
+.text-body-lg {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-loose);
+}
+.text-body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-loose);
+}
+.text-body-sm {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+}
+.text-caption {
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-normal);
+}
+.text-overline {
+  font-family: var(--font-sans);
+  font-size: var(--text-overline);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
 
 /* Color utilities */
-.text-primary { color: var(--color-text-primary); }
-.text-secondary { color: var(--color-text-secondary); }
-.text-tertiary { color: var(--color-text-tertiary); }
-.text-brand { color: var(--color-primary); }
-.text-accent { color: var(--color-accent); }
+.text-primary {
+  color: var(--color-text-primary);
+}
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+.text-tertiary {
+  color: var(--color-text-tertiary);
+}
+.text-brand {
+  color: var(--color-primary);
+}
+.text-accent {
+  color: var(--color-accent);
+}
 
-.bg-page { background-color: var(--color-bg); }
-.bg-surface { background-color: var(--color-surface); }
-.bg-surface-secondary { background-color: var(--color-surface-secondary); }
-.bg-surface-tinted { background-color: var(--color-surface-tinted); }
-.bg-brand { background-color: var(--color-primary-deep); }
+.bg-page {
+  background-color: var(--color-bg);
+}
+.bg-surface {
+  background-color: var(--color-surface);
+}
+.bg-surface-secondary {
+  background-color: var(--color-surface-secondary);
+}
+.bg-surface-tinted {
+  background-color: var(--color-surface-tinted);
+}
+.bg-brand {
+  background-color: var(--color-primary-deep);
+}
 
 /* Step color utilities */
-.step-1 { --step-color: var(--color-step-1); --step-color-subtle: var(--color-step-1-subtle); }
-.step-2 { --step-color: var(--color-step-2); --step-color-subtle: var(--color-step-2-subtle); }
-.step-3 { --step-color: var(--color-step-3); --step-color-subtle: var(--color-step-3-subtle); }
-.step-4 { --step-color: var(--color-step-4); --step-color-subtle: var(--color-step-4-subtle); }
-.step-5 { --step-color: var(--color-step-5); --step-color-subtle: var(--color-step-5-subtle); }
-.step-6 { --step-color: var(--color-step-6); --step-color-subtle: var(--color-step-6-subtle); }
+.step-1 {
+  --step-color: var(--color-step-1);
+  --step-color-subtle: var(--color-step-1-subtle);
+}
+.step-2 {
+  --step-color: var(--color-step-2);
+  --step-color-subtle: var(--color-step-2-subtle);
+}
+.step-3 {
+  --step-color: var(--color-step-3);
+  --step-color-subtle: var(--color-step-3-subtle);
+}
+.step-4 {
+  --step-color: var(--color-step-4);
+  --step-color-subtle: var(--color-step-4-subtle);
+}
+.step-5 {
+  --step-color: var(--color-step-5);
+  --step-color-subtle: var(--color-step-5-subtle);
+}
+.step-6 {
+  --step-color: var(--color-step-6);
+  --step-color-subtle: var(--color-step-6-subtle);
+}
 
 /* Animation utilities */
-.transition-colors { transition: color var(--duration-normal) var(--ease-default), background-color var(--duration-normal) var(--ease-default), border-color var(--duration-normal) var(--ease-default); }
-.transition-shadow { transition: box-shadow var(--duration-normal) var(--ease-default); }
-.transition-transform { transition: transform var(--duration-normal) var(--ease-spring); }
-.transition-all { transition: all var(--duration-normal) var(--ease-default); }
+.transition-colors {
+  transition:
+    color var(--duration-normal) var(--ease-default),
+    background-color var(--duration-normal) var(--ease-default),
+    border-color var(--duration-normal) var(--ease-default);
+}
+.transition-shadow {
+  transition: box-shadow var(--duration-normal) var(--ease-default);
+}
+.transition-transform {
+  transition: transform var(--duration-normal) var(--ease-spring);
+}
+.transition-all {
+  transition: all var(--duration-normal) var(--ease-default);
+}
 ```
 
 ---
 
 ## Appendix: Design Decision Log
 
-| Decision | V1 Choice | V2 Choice | Rationale for Change |
-|----------|-----------|-----------|---------------------|
-| Name | Meridian | PIPS (rebranded) | Founder rejected Meridian. PIPS has personality, existing equity, and the "fun" quality Marc wants. Visual identity carries the enterprise weight. |
-| Primary color | Blue (#1E40AF) -- Tailwind default | Indigo (#4F46E5) | Blue is the default color of SaaS. Indigo-violet is adjacent but distinctive. The product should not look like every other Tailwind app. |
-| Step 5 color | Red/Coral (#DC2626) | Gold (#CA8A04) | Red = error in UI semantics. Gold = achievement, progress, execution. |
-| Step 6 color | Cyan (#06B6D4) | Teal (#0891B2) | Cyan failed WCAG AA on white for normal text. Teal passes. Also reduces confusion with the accent color. |
-| Neutral palette | Blue-tinted (Tailwind slate) | Violet-tinted (custom) | Neutrals should belong to the same color family as the primary. Violet tinting creates visual cohesion. |
-| Shadow color | Pure black | PIPS Deep (#1B1340) tinted | Violet-tinted shadows feel more designed and cohesive. |
-| Primary font | Inter | DM Sans | Inter is ubiquitous. DM Sans has similar quality but more personality (geometric warmth) and less market saturation. |
-| Display font | None (Inter for everything) | DM Serif Display | Adding a serif for marketing/editorial creates visual hierarchy and carries authority. Solves the "fun + enterprise" tension typographically. |
-| Border radius | 8px default | 10px default, pill badges | Slightly rounder = friendlier. Pill-shaped badges echo the circular pip-dot motif. Both signal "designed on purpose, not from a template." |
-| Logo direction | Meridian Arc (tied to "Meridian") | Step Dots (tied to "PIPS") | Dots = pips. The logo embodies the name. Dots are fun, distinctive, and scale well. No competitor uses this approach. |
-| Brand archetype | Sage + Hero | Removed | Archetype frameworks rarely translate to actionable design decisions. Replaced with concrete competitive positioning and the "Fun + Enterprise" tension section. |
-| Signature elements | Step Gradient Stripe only | Stripe + Dot Grid + Pip Dots | Three signature elements create more opportunities for brand recognition. All three are tied to the "pips" concept. |
+| Decision           | V1 Choice                          | V2 Choice                    | Rationale for Change                                                                                                                                             |
+| ------------------ | ---------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name               | Meridian                           | PIPS (rebranded)             | Founder rejected Meridian. PIPS has personality, existing equity, and the "fun" quality Marc wants. Visual identity carries the enterprise weight.               |
+| Primary color      | Blue (#1E40AF) -- Tailwind default | Indigo (#4F46E5)             | Blue is the default color of SaaS. Indigo-violet is adjacent but distinctive. The product should not look like every other Tailwind app.                         |
+| Step 5 color       | Red/Coral (#DC2626)                | Gold (#CA8A04)               | Red = error in UI semantics. Gold = achievement, progress, execution.                                                                                            |
+| Step 6 color       | Cyan (#06B6D4)                     | Teal (#0891B2)               | Cyan failed WCAG AA on white for normal text. Teal passes. Also reduces confusion with the accent color.                                                         |
+| Neutral palette    | Blue-tinted (Tailwind slate)       | Violet-tinted (custom)       | Neutrals should belong to the same color family as the primary. Violet tinting creates visual cohesion.                                                          |
+| Shadow color       | Pure black                         | PIPS Deep (#1B1340) tinted   | Violet-tinted shadows feel more designed and cohesive.                                                                                                           |
+| Primary font       | Inter                              | DM Sans                      | Inter is ubiquitous. DM Sans has similar quality but more personality (geometric warmth) and less market saturation.                                             |
+| Display font       | None (Inter for everything)        | DM Serif Display             | Adding a serif for marketing/editorial creates visual hierarchy and carries authority. Solves the "fun + enterprise" tension typographically.                    |
+| Border radius      | 8px default                        | 10px default, pill badges    | Slightly rounder = friendlier. Pill-shaped badges echo the circular pip-dot motif. Both signal "designed on purpose, not from a template."                       |
+| Logo direction     | Meridian Arc (tied to "Meridian")  | Step Dots (tied to "PIPS")   | Dots = pips. The logo embodies the name. Dots are fun, distinctive, and scale well. No competitor uses this approach.                                            |
+| Brand archetype    | Sage + Hero                        | Removed                      | Archetype frameworks rarely translate to actionable design decisions. Replaced with concrete competitive positioning and the "Fun + Enterprise" tension section. |
+| Signature elements | Step Gradient Stripe only          | Stripe + Dot Grid + Pip Dots | Three signature elements create more opportunities for brand recognition. All three are tied to the "pips" concept.                                              |
 
 ---
 
-*This brand guide is a living document. It should be updated as the product evolves, as user research provides new insights, and as the brand matures in market. Review quarterly.*
+### v2.1 Additions (Post-MVP)
+
+| Decision                              | Approach                                            | Rationale                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cadence Bar placement                 | Step-view, dashboard, ticket detail, Knowledge Hub  | The Cadence Bar is the primary bridge between "doing work" and "learning methodology." Placing it on multiple surfaces ensures discoverability without requiring users to navigate to the Knowledge Hub. Customer Insights Report identifies Cadence Bar click-through as a key adoption metric. |
+| Content Reader typography             | 720px max-width, DM Sans 400, 1.6 line height       | Follows established reading research for optimal line length (60-80 characters). Matches product body text register (not marketing register) because users are reading inside the authenticated product.                                                                                         |
+| Training progress ring vs. linear bar | Circular SVG ring                                   | Rings are more space-efficient in cards and grid layouts. They echo the circular pip-dot motif from the logo. Linear bars are reserved for inline progress (Cadence Bar, module cards).                                                                                                          |
+| Marketing register separation         | DM Serif Display for marketing, DM Sans for product | Creates clear visual separation between "public-facing" and "authenticated" experiences. Marketing pages feel editorial and authoritative. Product UI feels clean and functional.                                                                                                                |
+| Gated content pattern                 | Preview + divider + CTA                             | Book preview pages show ~20% of content to demonstrate quality, then gate the rest behind signup. This is a proven SaaS content marketing pattern that balances SEO value with conversion pressure.                                                                                              |
+
+---
+
+_This brand guide is a living document. It should be updated as the product evolves, as user research provides new insights, and as the brand matures in market. Review quarterly._

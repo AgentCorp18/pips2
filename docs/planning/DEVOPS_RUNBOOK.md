@@ -1,10 +1,51 @@
 # PIPS 2.0 -- DevOps & Infrastructure Runbook
 
-> **Version:** 1.0.0
-> **Date:** 2026-03-02
-> **Status:** Draft
-> **Author:** Marc Albers + Claude
-> **Companion doc:** `AGENT_COORDINATION_PLAN.md` (defines how agents use this infrastructure)
+> **Version:** 1.1 — Updated 2026-03-04
+> **Date:** 2026-03-02 (created), 2026-03-04 (updated)
+> **Status:** Current — reflects ACTUAL deployed system state
+> **Author:** Marc Albers + Claude (DevOps Agent)
+> **Companion doc:** `AI_AGENT_COORDINATION.md` (defines how agents use this infrastructure)
+> **Production URL:** https://pips-app.vercel.app
+> **Supabase Project:** `cmrribhjgfybbxhrsxqi` (us-east-2)
+>
+> **v1.1 changes (2026-03-04):**
+>
+> - Added build-status markers ([CONFIGURED], [PLANNED]) throughout
+> - Updated CI/CD pipeline documentation to match actual `.github/workflows/` files
+> - Added Content Pipeline Operations section (compile-content, seed-content, seed-training)
+> - Added migration management for Knowledge Hub + Training tables (11 migrations documented)
+> - Added Disaster Recovery procedures
+> - Updated Environment Variable documentation to match actual `.env.example`
+> - Updated deployment state: live at pips-app.vercel.app, 896 unit tests, 160 E2E tests
+> - Updated tooling versions: pnpm 10, Next.js 16.1.6, Tailwind v4
+> - Updated quick reference commands with content pipeline and training scripts
+
+---
+
+## Build Status Legend
+
+Throughout this document, section headers and descriptions include a status marker:
+
+- **[CONFIGURED]** — Set up, tested, and operational in the deployed system
+- **[PLANNED]** — Specified in this runbook but not yet configured or activated
+
+---
+
+## Current Deployment State
+
+> **Production URL:** https://pips-app.vercel.app (live since March 3, 2026)
+> **Supabase:** Project `cmrribhjgfybbxhrsxqi` (us-east-2)
+> **Unit tests:** 896 passing (56 files)
+> **E2E tests:** 160 specs (18 files)
+> **Type errors:** 0
+> **Lint errors:** 0 (20 warnings, acceptable)
+> **DB migrations:** 11 applied to production
+> **Content nodes:** 205 seeded (FTS active)
+> **Training data:** 4 paths, 27 modules, 59 exercises seeded
+> **Marketing pages:** 83+ SEO pages
+> **CI workflows:** 4 (ci.yml, e2e.yml, deploy-preview.yml, migration-check.yml)
+> **Monorepo:** Turborepo + pnpm 10.30.3
+> **Node:** >=22.0.0
 
 ---
 
@@ -21,12 +62,16 @@
 9. [Operational Playbooks](#9-operational-playbooks)
 10. [Agent-Specific Infrastructure](#10-agent-specific-infrastructure)
 11. [Cost Management](#11-cost-management)
+12. [Content Pipeline Operations](#12-content-pipeline-operations)
+13. [Disaster Recovery](#13-disaster-recovery)
 
 ---
 
-## 1. Day-1 Setup Guide
+## 1. Day-1 Setup Guide [CONFIGURED]
 
 This section walks through every step required to go from zero to a working development environment with CI/CD, preview deployments, and production infrastructure. Follow these in order.
+
+> **Status:** All Day-1 setup is complete. The monorepo, CI pipelines, Supabase, and Vercel are fully operational.
 
 ### 1.1 Repository Setup
 
@@ -53,8 +98,8 @@ Create `pnpm-workspace.yaml`:
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 ```
 
 Create `turbo.json`:
@@ -68,13 +113,19 @@ Create `turbo.json`:
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
     "NEXT_PUBLIC_SENTRY_DSN",
-    "NEXT_PUBLIC_APP_NAME"
+    "NEXT_PUBLIC_APP_NAME",
+    "NEXT_PUBLIC_SITE_URL"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "NOTIFICATION_EMAIL_SECRET",
+        "RESEND_API_KEY",
+        "SENTRY_DSN"
+      ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "dev": {
@@ -85,6 +136,9 @@ Create `turbo.json`:
       "dependsOn": ["^build"]
     },
     "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
       "dependsOn": ["^build"]
     },
     "test:unit": {
@@ -107,7 +161,7 @@ Update root `package.json`:
 {
   "name": "pips2",
   "private": true,
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@10.30.3",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -117,6 +171,7 @@ Update root `package.json`:
     "lint": "turbo lint",
     "lint:fix": "turbo lint -- --fix",
     "typecheck": "turbo typecheck",
+    "test": "turbo test",
     "test:unit": "turbo test:unit",
     "test:e2e": "turbo test:e2e",
     "clean": "turbo clean",
@@ -130,6 +185,10 @@ Update root `package.json`:
     "db:lint": "supabase db lint",
     "db:types": "supabase gen types typescript --local > packages/shared/src/types/database.ts",
     "db:seed": "supabase db reset --seed-only",
+    "content:compile": "npx tsx scripts/compile-content.ts",
+    "content:seed": "npx tsx scripts/seed-content.ts",
+    "content:build": "npx tsx scripts/compile-content.ts && npx tsx scripts/seed-content.ts",
+    "training:seed": "npx tsx scripts/seed-training.ts",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -137,6 +196,12 @@ Update root `package.json`:
     "lint-staged": "^15.4.0",
     "prettier": "^3.4.0",
     "turbo": "^2.4.0"
+  },
+  "dependencies": {
+    "supabase": "^2.76.15"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@swc/core", "esbuild", "supabase"]
   }
 }
 ```
@@ -283,11 +348,13 @@ pnpm-debug.log*
 ## Section 0: Work Coordination Protocol
 
 ### Before Starting Any Work
+
 1. Read `docs/planning/AGENT_COORDINATION_PLAN.md` for your assigned work item
 2. Check `WORK_LOG.md` for current status and recent changes
 3. Run `git pull origin develop` to get latest changes
 
 ### Work Item Lifecycle
+
 1. Create branch: `agent/<work-item-id>-<short-description>`
 2. Do the work in your worktree
 3. Run full validation: `pnpm typecheck && pnpm lint && pnpm test:unit && pnpm build`
@@ -297,12 +364,14 @@ pnpm-debug.log*
 
 ### Commit Message Format
 ```
+
 <type>(<scope>): <description>
 
 [optional body]
 
 Co-Authored-By: Claude <noreply@anthropic.com>
-```
+
+````
 
 Types: feat, fix, refactor, test, chore, docs, style, perf
 Scopes: auth, tickets, projects, pips, teams, integrations, ui, db, api, ci
@@ -314,7 +383,7 @@ Agents creating migrations must use timestamps at least 1 minute apart.
 Check existing migrations before creating a new one:
 ```bash
 ls supabase/migrations/
-```
+````
 
 ## Project Overview
 
@@ -362,7 +431,8 @@ pnpm db:migration:new # Create new migration file
 See `.env.example` for all required variables.
 Copy to `.env.local` for local development.
 Never commit `.env.local` or any file containing secrets.
-```
+
+````
 
 #### First Commit
 
@@ -380,7 +450,7 @@ git commit -m "chore: initialize monorepo with Turborepo + pnpm workspaces
 
 git branch -M main
 git push -u origin main
-```
+````
 
 ### 1.2 Next.js App Setup
 
@@ -460,6 +530,7 @@ pnpm dlx shadcn@latest init
 ```
 
 When prompted, select:
+
 - Style: **New York**
 - Base color: **Zinc**
 - CSS variables: **Yes**
@@ -475,14 +546,11 @@ pnpm dlx shadcn@latest add button input label card dialog dropdown-menu select t
 Update `apps/web/tailwind.config.ts`:
 
 ```typescript
-import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
   darkMode: ['class'],
-  content: [
-    './src/**/*.{ts,tsx}',
-    './src/components/**/*.{ts,tsx}',
-  ],
+  content: ['./src/**/*.{ts,tsx}', './src/components/**/*.{ts,tsx}'],
   theme: {
     container: {
       center: true,
@@ -562,9 +630,9 @@ const config: Config = {
     },
   },
   plugins: [require('tailwindcss-animate')],
-};
+}
 
-export default config;
+export default config
 ```
 
 ```bash
@@ -578,7 +646,7 @@ pnpm add -D tailwindcss-animate
 Create `apps/web/next.config.ts`:
 
 ```typescript
-import type { NextConfig } from 'next';
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   // Enable React strict mode for development
@@ -617,14 +685,14 @@ const nextConfig: NextConfig = {
               "img-src 'self' blob: data: https://*.supabase.co",
               "font-src 'self'",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://vitals.vercel-insights.com",
-              "frame-src https://js.stripe.com https://hooks.stripe.com",
+              'frame-src https://js.stripe.com https://hooks.stripe.com',
               "object-src 'none'",
               "base-uri 'self'",
             ].join('; '),
           },
         ],
       },
-    ];
+    ]
   },
 
   // Redirects
@@ -635,11 +703,11 @@ const nextConfig: NextConfig = {
         destination: '/login',
         permanent: false,
       },
-    ];
+    ]
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
 ```
 
 #### apps/web/package.json Scripts
@@ -745,9 +813,9 @@ pnpm add -D vitest @vitejs/plugin-react @testing-library/react @testing-library/
 Create `apps/web/vitest.config.ts`:
 
 ```typescript
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
@@ -768,13 +836,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-});
+})
 ```
 
 Create `apps/web/src/test/setup.ts`:
 
 ```typescript
-import '@testing-library/jest-dom/vitest';
+import '@testing-library/jest-dom/vitest'
 ```
 
 #### Set Up Playwright
@@ -788,7 +856,7 @@ pnpm exec playwright install --with-deps chromium
 Create `apps/web/playwright.config.ts`:
 
 ```typescript
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: '../../tests/e2e',
@@ -802,9 +870,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: process.env.CI
     ? undefined
     : {
@@ -812,7 +878,7 @@ export default defineConfig({
         url: 'http://localhost:3000',
         reuseExistingServer: true,
       },
-});
+})
 ```
 
 ### 1.3 Supabase Setup
@@ -929,25 +995,25 @@ supabase link --project-ref <your-project-ref>
 Create `apps/web/src/lib/supabase/client.ts`:
 
 ```typescript
-import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@pips2/shared/types/database';
+import { createBrowserClient } from '@supabase/ssr'
+import type { Database } from '@pips2/shared/types/database'
 
 export const createClient = () =>
   createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
+  )
 ```
 
 Create `apps/web/src/lib/supabase/server.ts`:
 
 ```typescript
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import type { Database } from '@pips2/shared/types/database';
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import type { Database } from '@pips2/shared/types/database'
 
 export const createClient = async () => {
-  const cookieStore = await cookies();
+  const cookieStore = await cookies()
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -955,13 +1021,13 @@ export const createClient = async () => {
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll();
+          return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options),
-            );
+            )
           } catch {
             // The `setAll` method is called from a Server Component.
             // This can be ignored if you have middleware refreshing sessions.
@@ -969,18 +1035,18 @@ export const createClient = async () => {
         },
       },
     },
-  );
-};
+  )
+}
 ```
 
 Create `apps/web/src/lib/supabase/middleware.ts`:
 
 ```typescript
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export const updateSession = async (request: NextRequest) => {
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -988,44 +1054,47 @@ export const updateSession = async (request: NextRequest) => {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll();
+          return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
-          );
+          )
         },
       },
     },
-  );
+  )
 
   // Refresh the session - important for Server Components
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   // Redirect unauthenticated users from protected routes
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/(app)') ||
-    request.nextUrl.pathname.match(/^\/[a-z0-9-]+\/(projects|tickets|teams|members|settings|integrations)/);
+  const isProtectedRoute =
+    request.nextUrl.pathname.startsWith('/(app)') ||
+    request.nextUrl.pathname.match(
+      /^\/[a-z0-9-]+\/(projects|tickets|teams|members|settings|integrations)/,
+    )
 
   if (!user && isProtectedRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('redirect', request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('redirect', request.nextUrl.pathname)
+    return NextResponse.redirect(url)
   }
 
-  return supabaseResponse;
-};
+  return supabaseResponse
+}
 ```
 
 Create `apps/web/src/lib/supabase/service.ts`:
 
 ```typescript
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@pips2/shared/types/database';
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@pips2/shared/types/database'
 
 // Service role client - bypasses RLS. Use ONLY in:
 // - API routes that need admin access
@@ -1042,24 +1111,22 @@ export const createServiceClient = () =>
         persistSession: false,
       },
     },
-  );
+  )
 ```
 
 Create `apps/web/src/middleware.ts`:
 
 ```typescript
-import { type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/middleware';
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
 export const middleware = async (request: NextRequest) => {
-  return await updateSession(request);
-};
+  return await updateSession(request)
+}
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
-};
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+}
 ```
 
 #### Create Initial Migration
@@ -1210,36 +1277,37 @@ supabase gen types typescript --linked > packages/shared/src/types/database.ts
 
 Go to **Project Settings > General**:
 
-| Setting | Value |
-|---------|-------|
-| Framework Preset | Next.js |
-| Root Directory | `apps/web` |
-| Build Command | `cd ../.. && pnpm turbo build --filter=@pips2/web` |
-| Install Command | `pnpm install --frozen-lockfile` |
-| Node.js Version | 22.x |
+| Setting          | Value                                              |
+| ---------------- | -------------------------------------------------- |
+| Framework Preset | Next.js                                            |
+| Root Directory   | `apps/web`                                         |
+| Build Command    | `cd ../.. && pnpm turbo build --filter=@pips2/web` |
+| Install Command  | `pnpm install --frozen-lockfile`                   |
+| Node.js Version  | 22.x                                               |
 
 #### Set Environment Variables in Vercel
 
 Go to **Project Settings > Environment Variables** and add each variable from `.env.example`. Set them for the appropriate environments:
 
-| Variable | Production | Preview | Development |
-|----------|-----------|---------|-------------|
-| `NEXT_PUBLIC_APP_URL` | `https://app.pips2.com` | `https://$VERCEL_URL` | `http://localhost:3000` |
-| `NEXT_PUBLIC_SUPABASE_URL` | prod URL | staging URL | `http://127.0.0.1:54321` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | prod key | staging key | local key |
-| `SUPABASE_SERVICE_ROLE_KEY` | prod key | staging key | local key |
-| `STRIPE_SECRET_KEY` | `sk_live_...` | `sk_test_...` | `sk_test_...` |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` | `pk_test_...` | `pk_test_...` |
-| `STRIPE_WEBHOOK_SECRET` | prod webhook | test webhook | test webhook |
-| `RESEND_API_KEY` | prod key | test key | test key |
-| `NEXT_PUBLIC_SENTRY_DSN` | prod DSN | same | same |
-| `SENTRY_AUTH_TOKEN` | token | token | token |
-| `UPSTASH_REDIS_URL` | prod URL | staging URL | staging URL |
-| `UPSTASH_REDIS_TOKEN` | prod token | staging token | staging token |
+| Variable                             | Production              | Preview               | Development              |
+| ------------------------------------ | ----------------------- | --------------------- | ------------------------ |
+| `NEXT_PUBLIC_APP_URL`                | `https://app.pips2.com` | `https://$VERCEL_URL` | `http://localhost:3000`  |
+| `NEXT_PUBLIC_SUPABASE_URL`           | prod URL                | staging URL           | `http://127.0.0.1:54321` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | prod key                | staging key           | local key                |
+| `SUPABASE_SERVICE_ROLE_KEY`          | prod key                | staging key           | local key                |
+| `STRIPE_SECRET_KEY`                  | `sk_live_...`           | `sk_test_...`         | `sk_test_...`            |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_live_...`           | `pk_test_...`         | `pk_test_...`            |
+| `STRIPE_WEBHOOK_SECRET`              | prod webhook            | test webhook          | test webhook             |
+| `RESEND_API_KEY`                     | prod key                | test key              | test key                 |
+| `NEXT_PUBLIC_SENTRY_DSN`             | prod DSN                | same                  | same                     |
+| `SENTRY_AUTH_TOKEN`                  | token                   | token                 | token                    |
+| `UPSTASH_REDIS_URL`                  | prod URL                | staging URL           | staging URL              |
+| `UPSTASH_REDIS_TOKEN`                | prod token              | staging token         | staging token            |
 
 #### Configure Preview Deployments
 
 In **Project Settings > Git**:
+
 - Enable **Automatic Preview Deployments** for all branches
 - Enable **Comment on Pull Requests** (posts deployment URL as PR comment)
 
@@ -1398,13 +1466,13 @@ In **Stripe Dashboard > Settings > Billing > Customer portal**:
 
 #### Test Mode vs Live Mode
 
-| Concern | Test Mode | Live Mode |
-|---------|-----------|-----------|
-| **API Keys** | `sk_test_...` / `pk_test_...` | `sk_live_...` / `pk_live_...` |
-| **Used in** | Local dev, preview, staging | Production only |
-| **Test cards** | `4242 4242 4242 4242` (success) | Real cards |
-| **Webhook endpoint** | `localhost` via CLI forward | Production URL |
-| **Dashboard toggle** | Top-left "Test mode" toggle | Same |
+| Concern              | Test Mode                       | Live Mode                     |
+| -------------------- | ------------------------------- | ----------------------------- |
+| **API Keys**         | `sk_test_...` / `pk_test_...`   | `sk_live_...` / `pk_live_...` |
+| **Used in**          | Local dev, preview, staging     | Production only               |
+| **Test cards**       | `4242 4242 4242 4242` (success) | Real cards                    |
+| **Webhook endpoint** | `localhost` via CLI forward     | Production URL                |
+| **Dashboard toggle** | Top-left "Test mode" toggle     | Same                          |
 
 ### 1.6 Monitoring Setup
 
@@ -1421,6 +1489,7 @@ pnpm exec sentry-wizard --integration nextjs
 ```
 
 The wizard creates:
+
 - `sentry.client.config.ts`
 - `sentry.server.config.ts`
 - `sentry.edge.config.ts`
@@ -1429,18 +1498,16 @@ The wizard creates:
 Verify `sentry.client.config.ts`:
 
 ```typescript
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from '@sentry/nextjs'
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
-  integrations: [
-    Sentry.replayIntegration(),
-  ],
+  integrations: [Sentry.replayIntegration()],
   environment: process.env.VERCEL_ENV ?? 'development',
-});
+})
 ```
 
 #### Error Boundary
@@ -1493,8 +1560,8 @@ pnpm add @vercel/analytics @vercel/speed-insights
 Add to root layout (`apps/web/src/app/layout.tsx`):
 
 ```typescript
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 // Inside the layout JSX:
 // <Analytics />
@@ -1542,65 +1609,80 @@ pnpm add resend @react-email/components react-email
 Create `apps/web/src/lib/email/resend.ts`:
 
 ```typescript
-import { Resend } from 'resend';
+import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+export const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const sendEmail = async ({
   to,
   subject,
   react,
 }: {
-  to: string | string[];
-  subject: string;
-  react: React.ReactElement;
+  to: string | string[]
+  subject: string
+  react: React.ReactElement
 }) => {
   const { data, error } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL ?? 'PIPS <noreply@pips2.com>',
     to,
     subject,
     react,
-  });
+  })
 
   if (error) {
-    console.error('Email send failed:', error);
-    throw new Error(`Failed to send email: ${error.message}`);
+    console.error('Email send failed:', error)
+    throw new Error(`Failed to send email: ${error.message}`)
   }
 
-  return data;
-};
+  return data
+}
 ```
 
 ---
 
-## 2. Environment Management
+## 2. Environment Management [CONFIGURED]
 
 ### 2.1 Complete Environment Variables Reference
 
-| Variable | Description | Where to Get It | Environments |
-|----------|-------------|-----------------|-------------|
-| `NEXT_PUBLIC_APP_URL` | Public app URL (no trailing slash) | You define it | All |
-| `NEXT_PUBLIC_APP_NAME` | App display name | You define it | All |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase API URL | Supabase Dashboard > Settings > API | All |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key | Supabase Dashboard > Settings > API | All |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (bypasses RLS) | Supabase Dashboard > Settings > API | Server only |
-| `STRIPE_SECRET_KEY` | Stripe secret API key | Stripe Dashboard > Developers > API keys | Server only |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | Stripe Dashboard > Developers > API keys | All |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret | Stripe Dashboard > Developers > Webhooks | Server only |
-| `STRIPE_PRICE_STARTER_MONTHLY` | Stripe price ID for Starter monthly | Stripe Dashboard > Products | Server only |
-| `STRIPE_PRICE_STARTER_ANNUAL` | Stripe price ID for Starter annual | Stripe Dashboard > Products | Server only |
-| `STRIPE_PRICE_PROFESSIONAL_MONTHLY` | Stripe price ID for Professional monthly | Stripe Dashboard > Products | Server only |
-| `STRIPE_PRICE_PROFESSIONAL_ANNUAL` | Stripe price ID for Professional annual | Stripe Dashboard > Products | Server only |
-| `STRIPE_PRICE_ENTERPRISE_MONTHLY` | Stripe price ID for Enterprise monthly | Stripe Dashboard > Products | Server only |
-| `STRIPE_PRICE_ENTERPRISE_ANNUAL` | Stripe price ID for Enterprise annual | Stripe Dashboard > Products | Server only |
-| `RESEND_API_KEY` | Resend email API key | Resend Dashboard > API Keys | Server only |
-| `RESEND_FROM_EMAIL` | "From" address for emails | Your verified domain | Server only |
-| `NEXT_PUBLIC_SENTRY_DSN` | Sentry Data Source Name | Sentry > Project Settings > Client Keys | All |
-| `SENTRY_AUTH_TOKEN` | Sentry auth token (for source maps) | Sentry > Settings > Auth Tokens | CI/CD only |
-| `SENTRY_ORG` | Sentry organization slug | Sentry Dashboard URL | CI/CD only |
-| `SENTRY_PROJECT` | Sentry project slug | Sentry Dashboard URL | CI/CD only |
-| `UPSTASH_REDIS_URL` | Upstash Redis REST URL | Upstash Console > Database > REST API | Server only |
-| `UPSTASH_REDIS_TOKEN` | Upstash Redis REST token | Upstash Console > Database > REST API | Server only |
+> **Actual `.env.example`** (at `apps/web/.env.example`):
+>
+> ```
+> NEXT_PUBLIC_APP_URL=http://localhost:3000
+> NEXT_PUBLIC_APP_NAME=PIPS
+> NEXT_PUBLIC_SUPABASE_URL=
+> NEXT_PUBLIC_SUPABASE_ANON_KEY=
+> SUPABASE_SERVICE_ROLE_KEY=
+> RESEND_API_KEY=
+> NEXT_PUBLIC_SENTRY_DSN=
+> SENTRY_AUTH_TOKEN=
+> ```
+>
+> **Note:** Stripe, Upstash Redis, and Stripe price ID env vars listed below are [PLANNED] -- they exist in this runbook for future use but are not required by the current MVP. Billing is [DEFERRED].
+
+| Variable                             | Description                              | Where to Get It                          | Environments |
+| ------------------------------------ | ---------------------------------------- | ---------------------------------------- | ------------ |
+| `NEXT_PUBLIC_APP_URL`                | Public app URL (no trailing slash)       | You define it                            | All          |
+| `NEXT_PUBLIC_APP_NAME`               | App display name                         | You define it                            | All          |
+| `NEXT_PUBLIC_SUPABASE_URL`           | Supabase API URL                         | Supabase Dashboard > Settings > API      | All          |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | Supabase anonymous/public key            | Supabase Dashboard > Settings > API      | All          |
+| `SUPABASE_SERVICE_ROLE_KEY`          | Supabase service role key (bypasses RLS) | Supabase Dashboard > Settings > API      | Server only  |
+| `STRIPE_SECRET_KEY`                  | Stripe secret API key                    | Stripe Dashboard > Developers > API keys | Server only  |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key                   | Stripe Dashboard > Developers > API keys | All          |
+| `STRIPE_WEBHOOK_SECRET`              | Stripe webhook signing secret            | Stripe Dashboard > Developers > Webhooks | Server only  |
+| `STRIPE_PRICE_STARTER_MONTHLY`       | Stripe price ID for Starter monthly      | Stripe Dashboard > Products              | Server only  |
+| `STRIPE_PRICE_STARTER_ANNUAL`        | Stripe price ID for Starter annual       | Stripe Dashboard > Products              | Server only  |
+| `STRIPE_PRICE_PROFESSIONAL_MONTHLY`  | Stripe price ID for Professional monthly | Stripe Dashboard > Products              | Server only  |
+| `STRIPE_PRICE_PROFESSIONAL_ANNUAL`   | Stripe price ID for Professional annual  | Stripe Dashboard > Products              | Server only  |
+| `STRIPE_PRICE_ENTERPRISE_MONTHLY`    | Stripe price ID for Enterprise monthly   | Stripe Dashboard > Products              | Server only  |
+| `STRIPE_PRICE_ENTERPRISE_ANNUAL`     | Stripe price ID for Enterprise annual    | Stripe Dashboard > Products              | Server only  |
+| `RESEND_API_KEY`                     | Resend email API key                     | Resend Dashboard > API Keys              | Server only  |
+| `RESEND_FROM_EMAIL`                  | "From" address for emails                | Your verified domain                     | Server only  |
+| `NEXT_PUBLIC_SENTRY_DSN`             | Sentry Data Source Name                  | Sentry > Project Settings > Client Keys  | All          |
+| `SENTRY_AUTH_TOKEN`                  | Sentry auth token (for source maps)      | Sentry > Settings > Auth Tokens          | CI/CD only   |
+| `SENTRY_ORG`                         | Sentry organization slug                 | Sentry Dashboard URL                     | CI/CD only   |
+| `SENTRY_PROJECT`                     | Sentry project slug                      | Sentry Dashboard URL                     | CI/CD only   |
+| `UPSTASH_REDIS_URL`                  | Upstash Redis REST URL                   | Upstash Console > Database > REST API    | Server only  |
+| `UPSTASH_REDIS_TOKEN`                | Upstash Redis REST token                 | Upstash Console > Database > REST API    | Server only  |
 
 ### 2.2 Environment Strategy
 
@@ -1669,13 +1751,13 @@ pnpm dev
 
 #### Secrets Management
 
-| Where | What | Rotation |
-|-------|------|----------|
-| **Vercel Environment Variables** | All env vars per environment | Quarterly or on compromise |
-| **GitHub Secrets** | `VERCEL_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `SENTRY_AUTH_TOKEN` | Quarterly |
-| **Supabase Dashboard** | Database password, service role key | On compromise only (regenerate via dashboard) |
-| **Stripe Dashboard** | API keys, webhook secrets | On compromise (roll keys in dashboard) |
-| **Local `.env.local`** | Developer's local copy of all vars | As needed |
+| Where                            | What                                                         | Rotation                                      |
+| -------------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
+| **Vercel Environment Variables** | All env vars per environment                                 | Quarterly or on compromise                    |
+| **GitHub Secrets**               | `VERCEL_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `SENTRY_AUTH_TOKEN` | Quarterly                                     |
+| **Supabase Dashboard**           | Database password, service role key                          | On compromise only (regenerate via dashboard) |
+| **Stripe Dashboard**             | API keys, webhook secrets                                    | On compromise (roll keys in dashboard)        |
+| **Local `.env.local`**           | Developer's local copy of all vars                           | As needed                                     |
 
 Key rotation procedure:
 
@@ -1691,7 +1773,29 @@ vercel --prod
 
 ---
 
-## 3. Database Operations
+## 3. Database Operations [CONFIGURED]
+
+### 3.0 Current Migration Inventory (11 Applied)
+
+The following migrations have been applied to the production Supabase project (`cmrribhjgfybbxhrsxqi`):
+
+| #   | Migration File                                     | Description                                                                                                                                                                                                                                           | Category                 |
+| --- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| 1   | `20260303000000_initial_schema.sql`                | Core tables: organizations, profiles, org_members, org_invitations, org_settings, projects, tickets, comments, teams, team_members, audit_log, notifications, pips_form_data                                                                          | MVP                      |
+| 2   | `20260303120000_notification_triggers.sql`         | Notification trigger functions for ticket and comment events                                                                                                                                                                                          | MVP                      |
+| 3   | `20260303180000_security_hardening.sql`            | RLS policy hardening across all tables                                                                                                                                                                                                                | Security                 |
+| 4   | `20260303190000_fix_audit_trigger.sql`             | Fix audit trigger function signature                                                                                                                                                                                                                  | Bugfix                   |
+| 5   | `20260303200000_notification_preferences.sql`      | User notification preferences table                                                                                                                                                                                                                   | MVP                      |
+| 6   | `20260303210000_ticket_parent_child.sql`           | Parent/child ticket relationship columns                                                                                                                                                                                                              | MVP                      |
+| 7   | `20260303220000_fix_profile_trigger.sql`           | Fix profile creation trigger on auth signup                                                                                                                                                                                                           | Bugfix                   |
+| 8   | `20260303230000_fix_org_creation_rls.sql`          | Fix RLS for organization creation flow                                                                                                                                                                                                                | Bugfix                   |
+| 9   | `20260303240000_fix_org_members_rls_recursion.sql` | Fix infinite recursion in org_members RLS policies                                                                                                                                                                                                    | Bugfix                   |
+| 10  | `20260303250000_fix_profile_display_name.sql`      | Fix profile display_name population                                                                                                                                                                                                                   | Bugfix                   |
+| 11  | `20260304000000_knowledge_hub_tables.sql`          | Knowledge Hub tables: content_nodes, content_bookmarks, content_reading_sessions, content_tags, content_node_tags + Training tables: training_paths, training_modules, training_exercises, user_training_progress + Workshop table: workshop_sessions | Knowledge Hub + Training |
+
+**Table count:** 33 tables total
+**Enum count:** 11 enums
+**RLS:** Enabled on every tenant-scoped table; global catalog tables (content_nodes, training_paths, training_modules, training_exercises) are public read
 
 ### 3.1 Migration Strategy
 
@@ -1702,6 +1806,7 @@ supabase/migrations/YYYYMMDDHHMMSS_description.sql
 ```
 
 Examples:
+
 - `20260302120000_initial_schema.sql`
 - `20260302120100_storage_buckets.sql`
 - `20260305093000_add_ticket_labels.sql`
@@ -1812,12 +1917,12 @@ The seed script (`supabase/seed.sql`) creates a realistic development dataset. S
 Create `tests/integration/helpers/seed.ts`:
 
 ```typescript
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role for admin operations
-);
+)
 
 export const seedDevData = async () => {
   // 1. Create test users via auth API
@@ -1826,17 +1931,17 @@ export const seedDevData = async () => {
     { email: 'manager@acme-test.com', password: 'Test1234!', name: 'Bob Manager' },
     { email: 'member@acme-test.com', password: 'Test1234!', name: 'Carol Member' },
     { email: 'viewer@acme-test.com', password: 'Test1234!', name: 'Dave Viewer' },
-  ];
+  ]
 
-  const createdUsers = [];
+  const createdUsers = []
   for (const user of users) {
     const { data } = await supabase.auth.admin.createUser({
       email: user.email,
       password: user.password,
       email_confirm: true,
       user_metadata: { full_name: user.name },
-    });
-    if (data.user) createdUsers.push(data.user);
+    })
+    if (data.user) createdUsers.push(data.user)
   }
 
   // 2. Create test organization
@@ -1850,16 +1955,16 @@ export const seedDevData = async () => {
       max_members: 50,
     })
     .select()
-    .single();
+    .single()
 
   // 3. Add members with roles
-  const roles = ['owner', 'admin', 'member', 'viewer'] as const;
+  const roles = ['owner', 'admin', 'member', 'viewer'] as const
   for (let i = 0; i < createdUsers.length; i++) {
     await supabase.from('org_members').insert({
       org_id: org!.id,
       user_id: createdUsers[i].id,
       role: roles[i],
-    });
+    })
   }
 
   // 4. Create org settings
@@ -1867,7 +1972,7 @@ export const seedDevData = async () => {
     org_id: org!.id,
     primary_color: '#06b6d4',
     secondary_color: '#8b5cf6',
-  });
+  })
 
   // 5. Create a sample team
   const { data: team } = await supabase
@@ -1878,25 +1983,27 @@ export const seedDevData = async () => {
       created_by: createdUsers[0].id,
     })
     .select()
-    .single();
+    .single()
 
   // 6. Create a sample PIPS project
   await supabase.from('projects').insert({
     org_id: org!.id,
     title: 'Reduce Customer Complaint Response Time',
-    description: 'Customer complaints are taking an average of 72 hours to resolve. Target is 24 hours.',
+    description:
+      'Customer complaints are taking an average of 72 hours to resolve. Target is 24 hours.',
     status: 'active',
     current_step: 'analyze',
     owner_id: createdUsers[1].id,
     team_id: team!.id,
-    problem_statement: 'Customer complaint response time averages 72 hours, exceeding our 24-hour SLA.',
+    problem_statement:
+      'Customer complaint response time averages 72 hours, exceeding our 24-hour SLA.',
     priority: 'high',
-  });
+  })
 
-  console.log('Seed data created successfully');
-  console.log('Test accounts:');
-  users.forEach((u) => console.log(`  ${u.email} / ${u.password} (${u.name})`));
-};
+  console.log('Seed data created successfully')
+  console.log('Test accounts:')
+  users.forEach((u) => console.log(`  ${u.email} / ${u.password} (${u.name})`))
+}
 ```
 
 #### Reset to Clean State
@@ -1913,12 +2020,12 @@ supabase db reset --seed-only
 
 #### Supabase Automatic Backups
 
-| Plan | Backup Frequency | Retention | PITR |
-|------|-----------------|-----------|------|
-| Free | Daily | 7 days | No |
-| Pro | Daily | 7 days | Yes (7 days) |
-| Team | Daily | 14 days | Yes (14 days) |
-| Enterprise | Daily | 30 days | Yes (30 days) |
+| Plan       | Backup Frequency | Retention | PITR          |
+| ---------- | ---------------- | --------- | ------------- |
+| Free       | Daily            | 7 days    | No            |
+| Pro        | Daily            | 7 days    | Yes (7 days)  |
+| Team       | Daily            | 14 days   | Yes (14 days) |
+| Enterprise | Daily            | 30 days   | Yes (30 days) |
 
 **Recommendation**: Use Pro plan minimum. Enable PITR for production.
 
@@ -1947,11 +2054,11 @@ pg_dump "$DATABASE_URL" --schema=public --no-owner > backups/schema_backup.sql
 
 #### Recovery Time Objectives
 
-| Metric | Target | How |
-|--------|--------|-----|
-| **RPO** (Recovery Point Objective) | 5 minutes | PITR with WAL archiving |
-| **RTO** (Recovery Time Objective) | 1 hour | Restore from backup + redeploy |
-| **MTTR** (Mean Time to Recover) | 30 minutes | Automated health checks + runbook |
+| Metric                             | Target     | How                               |
+| ---------------------------------- | ---------- | --------------------------------- |
+| **RPO** (Recovery Point Objective) | 5 minutes  | PITR with WAL archiving           |
+| **RTO** (Recovery Time Objective)  | 1 hour     | Restore from backup + redeploy    |
+| **MTTR** (Mean Time to Recover)    | 30 minutes | Automated health checks + runbook |
 
 ### 3.4 Database Monitoring
 
@@ -1974,6 +2081,7 @@ SELECT count(*) FROM pg_stat_activity WHERE state = 'idle';
 ```
 
 Limits by plan:
+
 - Free: 20 direct, 200 pooled
 - Pro: 60 direct, 400 pooled
 - Team: 100 direct, 600 pooled
@@ -1985,14 +2093,28 @@ Pro plan includes 8GB; alert at 6GB (75%).
 
 ---
 
-## 4. CI/CD Pipeline
+## 4. CI/CD Pipeline [CONFIGURED]
+
+### 4.0 Actual Workflow Inventory
+
+The following 4 workflow files exist in `.github/workflows/` and are operational:
+
+| Workflow        | File                  | Trigger                                   | Status           |
+| --------------- | --------------------- | ----------------------------------------- | ---------------- |
+| CI              | `ci.yml`              | Push to main/develop, PRs to main/develop | **[CONFIGURED]** |
+| E2E Tests       | `e2e.yml`             | PRs to main, manual dispatch              | **[CONFIGURED]** |
+| Deploy Preview  | `deploy-preview.yml`  | PR opened/synchronized                    | **[CONFIGURED]** |
+| Migration Check | `migration-check.yml` | PRs touching `supabase/**`                | **[CONFIGURED]** |
+
+> **Note:** The `deploy-production.yml`, `labeler.yml`, and `bundle-size` check documented in v1.0 are [PLANNED] -- they do not yet exist as workflow files. Production deployment is currently handled by Vercel's Git integration (auto-deploy on push to main). The smoke test and Sentry release creation will be added when the custom domain and Sentry are configured.
 
 ### 4.1 GitHub Actions Workflows
 
-#### ci.yml -- Runs on Every PR
+#### ci.yml -- Runs on Every Push/PR [CONFIGURED]
+
+This is the actual workflow file at `.github/workflows/ci.yml`:
 
 ```yaml
-# .github/workflows/ci.yml
 name: CI
 
 on:
@@ -2007,7 +2129,7 @@ concurrency:
 
 env:
   NODE_VERSION: '22'
-  PNPM_VERSION: '9'
+  PNPM_VERSION: '10'
 
 jobs:
   install:
@@ -2022,19 +2144,21 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - uses: actions/cache/save@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Cache node_modules
+        uses: actions/cache/save@v4
         with:
           path: |
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: modules-${{ hashFiles('pnpm-lock.yaml') }}
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
   typecheck:
-    name: TypeScript Check
-    needs: install
+    name: Type Check
     runs-on: ubuntu-latest
+    needs: install
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -2043,19 +2167,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@v4
+          cache: 'pnpm'
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: modules-${{ hashFiles('pnpm-lock.yaml') }}
-      - run: pnpm typecheck
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Run typecheck
+        run: pnpm typecheck
 
   lint:
-    name: Lint
-    needs: install
+    name: Lint & Format
     runs-on: ubuntu-latest
+    needs: install
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -2064,20 +2191,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@v4
+          cache: 'pnpm'
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: modules-${{ hashFiles('pnpm-lock.yaml') }}
-      - run: pnpm lint
-      - run: pnpm format:check
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Run lint
+        run: pnpm lint
+      - name: Check formatting
+        run: pnpm format:check
 
   test:
-    name: Unit Tests
-    needs: install
+    name: Tests
     runs-on: ubuntu-latest
+    needs: install
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -2086,25 +2217,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@v4
+          cache: 'pnpm'
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: modules-${{ hashFiles('pnpm-lock.yaml') }}
-      - run: pnpm test:unit -- --coverage
-      - uses: actions/upload-artifact@v4
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Run tests with coverage
+        run: pnpm test -- --coverage
+      - name: Upload coverage
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: apps/web/coverage/
-          retention-days: 14
+          path: |
+            apps/*/coverage
+            packages/*/coverage
+          retention-days: 7
 
   build:
     name: Build
+    runs-on: ubuntu-latest
     needs: [typecheck, lint]
-    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+      NEXT_PUBLIC_APP_URL: https://placeholder.vercel.app
+      NEXT_PUBLIC_APP_NAME: PIPS
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -2113,94 +2255,52 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@v4
+          cache: 'pnpm'
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: modules-${{ hashFiles('pnpm-lock.yaml') }}
-      - run: pnpm build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
-          NEXT_PUBLIC_SENTRY_DSN: https://placeholder@sentry.io/0
-          NEXT_PUBLIC_APP_URL: https://placeholder.vercel.app
-          NEXT_PUBLIC_APP_NAME: PIPS
-
-  migration-check:
-    name: Migration Check
-    if: contains(github.event.pull_request.labels.*.name, 'database') || github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
-      - run: supabase db lint
-      - run: supabase init
-      - run: supabase db start
-      - run: supabase db reset
-        env:
-          SUPABASE_DB_PORT: 54322
-
-  bundle-size:
-    name: Bundle Size Check
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@v4
-        with:
-          path: |
-            node_modules
-            apps/*/node_modules
-            packages/*/node_modules
-          key: modules-${{ hashFiles('pnpm-lock.yaml') }}
-      - run: pnpm build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
-          NEXT_PUBLIC_SENTRY_DSN: https://placeholder@sentry.io/0
-          NEXT_PUBLIC_APP_URL: https://placeholder.vercel.app
-          NEXT_PUBLIC_APP_NAME: PIPS
-          ANALYZE: true
-      - name: Check bundle size
-        run: |
-          # Check if the initial JS bundle exceeds 200KB
-          BUNDLE_SIZE=$(du -sb apps/web/.next/static/chunks/ | cut -f1)
-          MAX_SIZE=204800  # 200KB in bytes
-          echo "Bundle size: $BUNDLE_SIZE bytes (max: $MAX_SIZE)"
-          if [ "$BUNDLE_SIZE" -gt "$MAX_SIZE" ]; then
-            echo "::warning::Bundle size ($BUNDLE_SIZE bytes) exceeds budget ($MAX_SIZE bytes)"
-          fi
+          key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Build all packages
+        run: pnpm build
 ```
 
-#### e2e.yml -- E2E Tests on PRs to Main
+**Key differences from v1.0 plan:**
+
+- `PNPM_VERSION` is `'10'` (not `'9'`)
+- No `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (billing is deferred)
+- No `NEXT_PUBLIC_SENTRY_DSN` in CI build env (Sentry not yet configured)
+- Build env vars set as job-level env, not step-level
+- `bundle-size` and `migration-check` jobs are NOT in this workflow (they are in separate files)
+- Coverage uploaded from `apps/*/coverage` and `packages/*/coverage`
+
+#### e2e.yml -- E2E Tests [CONFIGURED]
+
+This is the actual workflow at `.github/workflows/e2e.yml`:
 
 ```yaml
-# .github/workflows/e2e.yml
 name: E2E Tests
 
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL to test against'
+        required: false
+        default: 'https://pips-app.vercel.app'
 
 concurrency:
-  group: e2e-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   NODE_VERSION: '22'
-  PNPM_VERSION: '9'
+  PNPM_VERSION: '10'
 
 jobs:
   e2e:
@@ -2216,139 +2316,105 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-
-      - run: pnpm install --frozen-lockfile
-
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Start Supabase
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-      - run: supabase start
-
-      - name: Build application
-        run: pnpm build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.LOCAL_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
-          NEXT_PUBLIC_SENTRY_DSN: ''
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
-          NEXT_PUBLIC_APP_NAME: PIPS
-
+        run: pnpm --filter @pips/web exec playwright install --with-deps chromium
       - name: Run E2E tests
-        run: pnpm test:e2e
+        working-directory: apps/web
+        run: pnpm exec playwright test
         env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.LOCAL_SUPABASE_SERVICE_KEY }}
-
-      - uses: actions/upload-artifact@v4
+          BASE_URL: ${{ inputs.base_url || secrets.E2E_BASE_URL || 'https://pips-app.vercel.app' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+      - name: Upload Playwright report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: playwright-report/
+          path: apps/web/playwright-report/
           retention-days: 14
+      - name: Upload test traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/web/test-results/
+          retention-days: 7
 ```
 
-#### deploy-production.yml -- Production Deployment
+**Key differences from v1.0 plan:**
+
+- Supports `workflow_dispatch` with configurable `base_url` (can test against prod)
+- Tests run against live `pips-app.vercel.app` by default (not local Supabase)
+- Uses secrets for E2E user credentials (`E2E_USER_EMAIL`, `E2E_USER_PASSWORD`)
+- Uploads both report AND traces (traces only on failure)
+- No local Supabase start -- tests run against the real deployment
+
+#### deploy-preview.yml -- PR Preview Status [CONFIGURED]
+
+This is the actual workflow at `.github/workflows/deploy-preview.yml`:
 
 ```yaml
-# .github/workflows/deploy-production.yml
-name: Deploy to Production
+name: Deploy Preview
 
 on:
-  push:
-    branches: [main]
+  pull_request:
+    types: [opened, synchronize]
 
 concurrency:
-  group: deploy-production
-  cancel-in-progress: false  # Never cancel a production deploy mid-flight
-
-env:
-  NODE_VERSION: '22'
-  PNPM_VERSION: '9'
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: Deploy to Production
+  preview-comment:
+    name: Preview Deployment Status
     runs-on: ubuntu-latest
-    environment: production
+    permissions:
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
         with:
-          version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- vercel-preview -->'
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - run: pnpm install --frozen-lockfile
-
-      # Run database migrations BEFORE deploying new code
-      - name: Apply database migrations
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-      - run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      - run: supabase db push
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-      # Vercel handles the actual deployment via Git integration
-      # This step verifies the deployment succeeded
-      - name: Wait for Vercel deployment
-        run: |
-          echo "Vercel deploys automatically on push to main."
-          echo "Check https://vercel.com/alberamarcs-projects/pips2/deployments for status."
-
-      # Create Sentry release
-      - name: Create Sentry Release
-        uses: getsentry/action-release@v1
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        with:
-          environment: production
-          version: ${{ github.sha }}
-
-  smoke-test:
-    name: Post-Deploy Smoke Test
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Health check
-        run: |
-          for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://app.pips2.com/api/v1/health)
-            if [ "$STATUS" = "200" ]; then
-              echo "Health check passed (attempt $i)"
-              exit 0
-            fi
-            echo "Health check returned $STATUS (attempt $i/5), retrying in 30s..."
-            sleep 30
-          done
-          echo "Health check failed after 5 attempts"
-          exit 1
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            <!-- vercel-preview -->
+            ## Vercel Preview Deployment
+            Vercel automatically deploys preview builds for this PR via their GitHub integration.
+            **Preview URL:** Check the Vercel bot comment below or the deployment status checks.
+            | Check | Status |
+            |-------|--------|
+            | CI | ${{ github.event.pull_request.head.sha && '...' || 'Pending' }} |
+            | Preview Deploy | Managed by Vercel |
+            > This comment is updated automatically on each push.
 ```
 
-#### migration-check.yml -- Validates SQL Migrations
+#### migration-check.yml -- Validates SQL Migrations [CONFIGURED]
+
+This is the actual workflow at `.github/workflows/migration-check.yml`:
 
 ```yaml
-# .github/workflows/migration-check.yml
-name: Migration Validation
+name: Migration Check
 
 on:
   pull_request:
     paths:
-      - 'supabase/migrations/**'
+      - 'supabase/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -2356,48 +2422,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v1
         with:
           version: latest
-
-      - name: Start local Supabase
-        run: |
-          supabase start
-          supabase db reset
-
       - name: Lint migrations
         run: supabase db lint
-
-      - name: Check RLS policies
-        run: |
-          # Verify all public tables have RLS enabled
-          TABLES_WITHOUT_RLS=$(supabase db execute --local "
-            SELECT schemaname || '.' || tablename
-            FROM pg_tables
-            WHERE schemaname = 'public'
-            AND tablename NOT IN ('schema_migrations')
-            AND tablename NOT IN (
-              SELECT tablename FROM pg_tables t
-              JOIN pg_class c ON c.relname = t.tablename
-              WHERE c.relrowsecurity = true
-            );
-          ")
-          if [ -n "$TABLES_WITHOUT_RLS" ]; then
-            echo "::error::Tables without RLS: $TABLES_WITHOUT_RLS"
-            exit 1
-          fi
-          echo "All public tables have RLS enabled."
-
-      - name: Check for breaking changes
-        run: |
-          # Compare new migrations against the base branch
-          git diff origin/${{ github.base_ref }}..HEAD -- supabase/migrations/ | \
-            grep -E "^(\+.*(DROP|ALTER.*DROP|ALTER.*TYPE|ALTER.*RENAME))" && \
-            echo "::warning::Potentially breaking migration detected. Review carefully." || \
-            echo "No breaking changes detected."
 ```
+
+**Key differences from v1.0 plan:**
+
+- Simpler than planned -- only runs `supabase db lint`
+- Does NOT start local Supabase or run `db reset` (faster, lightweight check)
+- Does NOT check RLS policies or breaking changes (those checks are [PLANNED])
+
+#### deploy-production.yml [PLANNED]
+
+This workflow does NOT yet exist as a file. Production deployment is currently handled by:
+
+1. **Vercel Git integration** auto-deploys on push to `main`
+2. **Database migrations** are applied manually via `supabase db push`
+3. **Sentry releases** are not yet automated
+
+The v1.0 plan for `deploy-production.yml` remains the target. Implementation depends on:
+
+- Custom domain (`app.pips2.com`) being configured
+- Sentry project being created and DSN configured
+- GitHub secrets being set for `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`
 
 ### 4.2 Branch Strategy
 
@@ -2419,6 +2469,7 @@ main (protected)
 **Branch protection rules** (configure in GitHub > Settings > Branches):
 
 `main`:
+
 - Require pull request reviews: 1 approval
 - Require status checks: `typecheck`, `lint`, `test`, `build`
 - Require branches to be up to date before merging
@@ -2426,6 +2477,7 @@ main (protected)
 - Do not allow deletions
 
 `develop`:
+
 - Require status checks: `typecheck`, `lint`, `test`, `build`
 - Allow force pushes: No
 - Allow deletions: No
@@ -2482,31 +2534,31 @@ Create `.github/labeler.yml`:
 ```yaml
 database:
   - changed-files:
-    - any-glob-to-any-file: 'supabase/migrations/**'
+      - any-glob-to-any-file: 'supabase/migrations/**'
 
 frontend:
   - changed-files:
-    - any-glob-to-any-file: 'apps/web/src/components/**'
-    - any-glob-to-any-file: 'apps/web/src/app/**'
+      - any-glob-to-any-file: 'apps/web/src/components/**'
+      - any-glob-to-any-file: 'apps/web/src/app/**'
 
 api:
   - changed-files:
-    - any-glob-to-any-file: 'apps/web/src/app/api/**'
+      - any-glob-to-any-file: 'apps/web/src/app/api/**'
 
 ci:
   - changed-files:
-    - any-glob-to-any-file: '.github/workflows/**'
+      - any-glob-to-any-file: '.github/workflows/**'
 
 deps:
   - changed-files:
-    - any-glob-to-any-file: '**/package.json'
-    - any-glob-to-any-file: 'pnpm-lock.yaml'
+      - any-glob-to-any-file: '**/package.json'
+      - any-glob-to-any-file: 'pnpm-lock.yaml'
 
 tests:
   - changed-files:
-    - any-glob-to-any-file: '**/*.test.{ts,tsx}'
-    - any-glob-to-any-file: '**/*.spec.{ts,tsx}'
-    - any-glob-to-any-file: 'tests/**'
+      - any-glob-to-any-file: '**/*.test.{ts,tsx}'
+      - any-glob-to-any-file: '**/*.spec.{ts,tsx}'
+      - any-glob-to-any-file: 'tests/**'
 ```
 
 Create `.github/workflows/labeler.yml`:
@@ -2533,7 +2585,9 @@ jobs:
 
 ---
 
-## 5. Deployment Procedures
+## 5. Deployment Procedures [CONFIGURED]
+
+> **Current production deployment model:** Vercel auto-deploys on push to `main`. Database migrations are applied manually via `supabase db push`. There is no `develop` branch or staging environment at this time -- all work merges directly to `main`.
 
 ### 5.1 Standard Deployment (Feature)
 
@@ -2639,6 +2693,7 @@ vercel rollback
 #### Database Rollback
 
 Option A: **Reverse migration** (preferred for simple changes)
+
 ```bash
 supabase migration new revert_bad_change
 # Write reverse SQL
@@ -2646,6 +2701,7 @@ supabase db push
 ```
 
 Option B: **Point-in-Time Recovery** (for complex/data-loss scenarios)
+
 1. Supabase Dashboard > Database > Backups > Point in Time
 2. Select timestamp before the bad migration
 3. Restore
@@ -2688,27 +2744,29 @@ Next steps:
 
 ---
 
-## 6. Monitoring & Alerting
+## 6. Monitoring & Alerting [PLANNED]
 
-### 6.1 Health Checks
+> **Current state:** Sentry SDK is installed (`@sentry/nextjs`) and Vercel Analytics (`@vercel/analytics`, `@vercel/speed-insights`) are integrated in the app code. However, the Sentry DSN is not yet configured in production, the health check endpoint does not exist yet, and alerting rules are not set up. This section is [PLANNED] until those are operational.
+
+### 6.1 Health Checks [PLANNED]
 
 Create `apps/web/src/app/api/v1/health/route.ts`:
 
 ```typescript
-import { NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/service';
+import { NextResponse } from 'next/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 type HealthStatus = {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  timestamp: string;
-  version: string;
+  status: 'healthy' | 'degraded' | 'unhealthy'
+  timestamp: string
+  version: string
   checks: {
-    database: { status: string; latency_ms: number };
-    supabase_auth: { status: string };
-    stripe: { status: string };
-    resend: { status: string };
-  };
-};
+    database: { status: string; latency_ms: number }
+    supabase_auth: { status: string }
+    stripe: { status: string }
+    resend: { status: string }
+  }
+}
 
 export const GET = async () => {
   const checks: HealthStatus['checks'] = {
@@ -2716,58 +2774,58 @@ export const GET = async () => {
     supabase_auth: { status: 'unknown' },
     stripe: { status: 'unknown' },
     resend: { status: 'unknown' },
-  };
+  }
 
-  let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
+  let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
 
   // Database check
   try {
-    const start = Date.now();
-    const supabase = createServiceClient();
-    const { error } = await supabase.from('organizations').select('id').limit(1);
+    const start = Date.now()
+    const supabase = createServiceClient()
+    const { error } = await supabase.from('organizations').select('id').limit(1)
     checks.database = {
       status: error ? 'error' : 'ok',
       latency_ms: Date.now() - start,
-    };
-    if (error) overallStatus = 'degraded';
+    }
+    if (error) overallStatus = 'degraded'
   } catch {
-    checks.database = { status: 'error', latency_ms: -1 };
-    overallStatus = 'unhealthy';
+    checks.database = { status: 'error', latency_ms: -1 }
+    overallStatus = 'unhealthy'
   }
 
   // Supabase Auth check
   try {
-    const supabase = createServiceClient();
-    const { error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 });
-    checks.supabase_auth = { status: error ? 'error' : 'ok' };
-    if (error) overallStatus = 'degraded';
+    const supabase = createServiceClient()
+    const { error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 })
+    checks.supabase_auth = { status: error ? 'error' : 'ok' }
+    if (error) overallStatus = 'degraded'
   } catch {
-    checks.supabase_auth = { status: 'error' };
-    overallStatus = 'degraded';
+    checks.supabase_auth = { status: 'error' }
+    overallStatus = 'degraded'
   }
 
   // Stripe check (lightweight)
   try {
     const res = await fetch('https://api.stripe.com/v1/balance', {
       headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
-    });
-    checks.stripe = { status: res.ok ? 'ok' : 'error' };
-    if (!res.ok) overallStatus = 'degraded';
+    })
+    checks.stripe = { status: res.ok ? 'ok' : 'error' }
+    if (!res.ok) overallStatus = 'degraded'
   } catch {
-    checks.stripe = { status: 'error' };
-    overallStatus = 'degraded';
+    checks.stripe = { status: 'error' }
+    overallStatus = 'degraded'
   }
 
   // Resend check (lightweight)
   try {
     const res = await fetch('https://api.resend.com/domains', {
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-    });
-    checks.resend = { status: res.ok ? 'ok' : 'error' };
-    if (!res.ok) overallStatus = 'degraded';
+    })
+    checks.resend = { status: res.ok ? 'ok' : 'error' }
+    if (!res.ok) overallStatus = 'degraded'
   } catch {
-    checks.resend = { status: 'error' };
-    overallStatus = 'degraded';
+    checks.resend = { status: 'error' }
+    overallStatus = 'degraded'
   }
 
   const response: HealthStatus = {
@@ -2775,30 +2833,30 @@ export const GET = async () => {
     timestamp: new Date().toISOString(),
     version: process.env.VERCEL_GIT_COMMIT_SHA ?? 'local',
     checks,
-  };
+  }
 
   return NextResponse.json(response, {
     status: overallStatus === 'unhealthy' ? 503 : 200,
     headers: {
       'Cache-Control': 'no-store',
     },
-  });
-};
+  })
+}
 ```
 
 ### 6.2 Alerting Rules
 
-| Alert | Threshold | Severity | Channel |
-|-------|-----------|----------|---------|
-| Error rate spike | >10 errors/minute (new) | P1 | Email + Sentry |
-| Health check failure | 2 consecutive failures | P0 | Email |
-| API response time | p95 > 2 seconds | P2 | Sentry |
-| Database connections | > 80% of pool limit | P1 | Email |
-| Stripe webhook failure | 3 consecutive failures | P1 | Email |
-| Build failure on main | Any failure | P1 | GitHub notification |
-| SSL certificate expiry | < 14 days | P2 | Email |
-| Storage usage | > 75% of plan limit | P3 | Email |
-| Disk usage (Supabase) | > 80% of plan limit | P2 | Email |
+| Alert                  | Threshold               | Severity | Channel             |
+| ---------------------- | ----------------------- | -------- | ------------------- |
+| Error rate spike       | >10 errors/minute (new) | P1       | Email + Sentry      |
+| Health check failure   | 2 consecutive failures  | P0       | Email               |
+| API response time      | p95 > 2 seconds         | P2       | Sentry              |
+| Database connections   | > 80% of pool limit     | P1       | Email               |
+| Stripe webhook failure | 3 consecutive failures  | P1       | Email               |
+| Build failure on main  | Any failure             | P1       | GitHub notification |
+| SSL certificate expiry | < 14 days               | P2       | Email               |
+| Storage usage          | > 75% of plan limit     | P3       | Email               |
+| Disk usage (Supabase)  | > 80% of plan limit     | P2       | Email               |
 
 ### 6.3 Logging Strategy
 
@@ -2806,48 +2864,55 @@ export const GET = async () => {
 
 ```typescript
 // lib/logger.ts
-type LogLevel = 'error' | 'warn' | 'info' | 'debug';
+type LogLevel = 'error' | 'warn' | 'info' | 'debug'
 
 type LogEntry = {
-  level: LogLevel;
-  message: string;
-  timestamp: string;
-  context?: Record<string, unknown>;
+  level: LogLevel
+  message: string
+  timestamp: string
+  context?: Record<string, unknown>
   // NEVER include: passwords, tokens, PII, credit card numbers
-};
+}
 
 export const logger = {
   info: (message: string, context?: Record<string, unknown>) => {
-    console.log(JSON.stringify({
-      level: 'info',
-      message,
-      timestamp: new Date().toISOString(),
-      context,
-    }));
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        message,
+        timestamp: new Date().toISOString(),
+        context,
+      }),
+    )
   },
   warn: (message: string, context?: Record<string, unknown>) => {
-    console.warn(JSON.stringify({
-      level: 'warn',
-      message,
-      timestamp: new Date().toISOString(),
-      context,
-    }));
+    console.warn(
+      JSON.stringify({
+        level: 'warn',
+        message,
+        timestamp: new Date().toISOString(),
+        context,
+      }),
+    )
   },
   error: (message: string, error?: Error, context?: Record<string, unknown>) => {
-    console.error(JSON.stringify({
-      level: 'error',
-      message,
-      timestamp: new Date().toISOString(),
-      error: error ? { name: error.name, message: error.message, stack: error.stack } : undefined,
-      context,
-    }));
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        message,
+        timestamp: new Date().toISOString(),
+        error: error ? { name: error.name, message: error.message, stack: error.stack } : undefined,
+        context,
+      }),
+    )
   },
-};
+}
 ```
 
 #### What to Log vs. Not Log
 
 **Log these:**
+
 - API request method, path, status code, duration
 - Authentication events (login, logout, failed attempts)
 - Business events (org created, subscription changed, project completed)
@@ -2855,6 +2920,7 @@ export const logger = {
 - External service calls (Stripe, Resend, integrations) with status
 
 **Never log these:**
+
 - Passwords or password hashes
 - API keys, tokens, secrets
 - Credit card numbers or payment details
@@ -2864,16 +2930,18 @@ export const logger = {
 
 #### Log Retention
 
-| Source | Retention | Access |
-|--------|-----------|--------|
-| Vercel Function Logs | 1 hour (free), 3 days (Pro) | Vercel Dashboard > Logs |
-| Supabase Postgres Logs | 7 days | Supabase Dashboard > Logs |
-| Sentry Events | 90 days | Sentry Dashboard |
-| Audit Log (database) | 2 years | Application UI (admin only) |
+| Source                 | Retention                   | Access                      |
+| ---------------------- | --------------------------- | --------------------------- |
+| Vercel Function Logs   | 1 hour (free), 3 days (Pro) | Vercel Dashboard > Logs     |
+| Supabase Postgres Logs | 7 days                      | Supabase Dashboard > Logs   |
+| Sentry Events          | 90 days                     | Sentry Dashboard            |
+| Audit Log (database)   | 2 years                     | Application UI (admin only) |
 
 ---
 
-## 7. Security Operations
+## 7. Security Operations [CONFIGURED]
+
+> **Current state:** Security headers are configured in `next.config.ts` (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy). RLS is enabled on all tenant-scoped tables. 3 security-related migrations have been applied. Dependency scanning and rate limiting are [PLANNED].
 
 ### 7.1 Security Checklist
 
@@ -2906,12 +2974,12 @@ grep -r "sk_live_" apps/web/src/    # Live Stripe key leak check
 
 #### Severity Levels
 
-| Level | Definition | Response Time | Examples |
-|-------|-----------|---------------|----------|
-| **P0** | Service completely down | 15 minutes | Database unreachable, auth broken, app crashes on load |
-| **P1** | Major feature broken | 1 hour | Payments failing, data not saving, cross-tenant data leak |
-| **P2** | Minor feature broken | 4 hours | Email not sending, one integration down, slow queries |
-| **P3** | Cosmetic / non-urgent | 24 hours | UI glitch, typo, non-critical error in logs |
+| Level  | Definition              | Response Time | Examples                                                  |
+| ------ | ----------------------- | ------------- | --------------------------------------------------------- |
+| **P0** | Service completely down | 15 minutes    | Database unreachable, auth broken, app crashes on load    |
+| **P1** | Major feature broken    | 1 hour        | Payments failing, data not saving, cross-tenant data leak |
+| **P2** | Minor feature broken    | 4 hours       | Email not sending, one integration down, slow queries     |
+| **P3** | Cosmetic / non-urgent   | 24 hours      | UI glitch, typo, non-critical error in logs               |
 
 #### Response Procedure
 
@@ -2928,22 +2996,24 @@ grep -r "sk_live_" apps/web/src/    # Live Stripe key leak check
 
 ---
 
-## 8. Performance Operations
+## 8. Performance Operations [PLANNED]
+
+> **Current state:** `@vercel/speed-insights` and `@vercel/analytics` are installed and active. Performance budgets and Lighthouse CI are [PLANNED].
 
 ### 8.1 Performance Budgets
 
-| Metric | Target | Tool |
-|--------|--------|------|
-| **LCP** (Largest Contentful Paint) | < 2.5 seconds | Vercel Analytics |
-| **FID** (First Input Delay) | < 100 ms | Vercel Analytics |
-| **CLS** (Cumulative Layout Shift) | < 0.1 | Vercel Analytics |
-| **TTFB** (Time to First Byte) | < 200 ms | Vercel Analytics |
-| **Initial JS bundle** | < 200 KB (gzipped) | Build output |
-| **API response time (p50)** | < 200 ms | Sentry Performance |
-| **API response time (p95)** | < 500 ms | Sentry Performance |
-| **API response time (p99)** | < 1 second | Sentry Performance |
-| **Database query time** | < 100 ms (common queries) | Supabase Dashboard |
-| **Lighthouse Performance** | > 90 | Lighthouse CI |
+| Metric                             | Target                    | Tool               |
+| ---------------------------------- | ------------------------- | ------------------ |
+| **LCP** (Largest Contentful Paint) | < 2.5 seconds             | Vercel Analytics   |
+| **FID** (First Input Delay)        | < 100 ms                  | Vercel Analytics   |
+| **CLS** (Cumulative Layout Shift)  | < 0.1                     | Vercel Analytics   |
+| **TTFB** (Time to First Byte)      | < 200 ms                  | Vercel Analytics   |
+| **Initial JS bundle**              | < 200 KB (gzipped)        | Build output       |
+| **API response time (p50)**        | < 200 ms                  | Sentry Performance |
+| **API response time (p95)**        | < 500 ms                  | Sentry Performance |
+| **API response time (p99)**        | < 1 second                | Sentry Performance |
+| **Database query time**            | < 100 ms (common queries) | Supabase Dashboard |
+| **Lighthouse Performance**         | > 90                      | Lighthouse CI      |
 
 ### 8.2 Performance Monitoring
 
@@ -2961,9 +3031,9 @@ Vercel Analytics provides RUM automatically. For custom metrics:
 export const reportWebVitals = (metric: { name: string; value: number; id: string }) => {
   // Send to analytics
   if (typeof window !== 'undefined' && 'sendBeacon' in navigator) {
-    navigator.sendBeacon('/api/v1/analytics/vitals', JSON.stringify(metric));
+    navigator.sendBeacon('/api/v1/analytics/vitals', JSON.stringify(metric))
   }
-};
+}
 ```
 
 #### Database Query Analysis
@@ -2971,6 +3041,7 @@ export const reportWebVitals = (metric: { name: string; value: number; id: strin
 Check slow queries in **Supabase Dashboard > Database > Query Performance**.
 
 Common optimizations:
+
 - Add indexes on columns used in WHERE/JOIN/ORDER BY
 - Use `SELECT` only the columns you need (not `SELECT *`)
 - Use pagination (`LIMIT`/`OFFSET` or cursor-based)
@@ -2978,7 +3049,7 @@ Common optimizations:
 
 ---
 
-## 9. Operational Playbooks
+## 9. Operational Playbooks [CONFIGURED]
 
 ### 9.1 Common Operations
 
@@ -3147,7 +3218,7 @@ ANALYZE=true pnpm build      # Generate bundle analysis
 
 ---
 
-## 10. Agent-Specific Infrastructure
+## 10. Agent-Specific Infrastructure [CONFIGURED]
 
 ### 10.1 Worktree Infrastructure
 
@@ -3217,16 +3288,16 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### 10.3 Shared Resources
 
-| Resource | Shared? | Notes |
-|----------|---------|-------|
-| GitHub repo | Yes | All agents push to the same repo, different branches |
-| Supabase project (local) | Yes | One local instance, agents use unique test data |
-| Supabase project (staging) | Yes | Shared staging database |
-| Supabase project (production) | Yes | Only main branch deploys here |
-| Vercel project | Yes | Each PR gets its own preview deployment |
-| Stripe (test mode) | Yes | Shared test account |
-| Sentry project | Yes | Errors tagged by environment/version |
-| Upstash Redis | Yes | Namespaced by key prefix |
+| Resource                      | Shared? | Notes                                                |
+| ----------------------------- | ------- | ---------------------------------------------------- |
+| GitHub repo                   | Yes     | All agents push to the same repo, different branches |
+| Supabase project (local)      | Yes     | One local instance, agents use unique test data      |
+| Supabase project (staging)    | Yes     | Shared staging database                              |
+| Supabase project (production) | Yes     | Only main branch deploys here                        |
+| Vercel project                | Yes     | Each PR gets its own preview deployment              |
+| Stripe (test mode)            | Yes     | Shared test account                                  |
+| Sentry project                | Yes     | Errors tagged by environment/version                 |
+| Upstash Redis                 | Yes     | Namespaced by key prefix                             |
 
 **Preventing Resource Contention:**
 
@@ -3236,34 +3307,34 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-## 11. Cost Management
+## 11. Cost Management [PLANNED]
 
 ### 11.1 Service Pricing Summary
 
-| Service | Plan | Monthly Cost | Notes |
-|---------|------|-------------|-------|
-| **Vercel** | Pro | $20/member | Includes 100GB bandwidth, 1TB edge, 100 hrs serverless |
-| **Supabase** | Pro | $25/project | 8GB storage, 50GB bandwidth, 500MB RAM, PITR |
-| **Stripe** | Pay-as-you-go | 2.9% + $0.30/txn | No monthly fee. Volume discounts available. |
-| **Resend** | Free tier | $0 | 3,000 emails/month. Pro at $20/mo for 50K emails. |
-| **Sentry** | Developer | $0 | 5K errors/month. Team at $26/mo for 50K errors. |
-| **Upstash Redis** | Pay-as-you-go | ~$0-10 | 10K commands/day free. $0.20 per 100K commands after. |
-| **GitHub** | Free (private repos) | $0 | 2,000 CI minutes/month free. |
-| **Domain** | Annual | ~$12/year | Standard .com domain |
-| **Better Uptime** | Free | $0 | 5 monitors. Pro at $20/mo for 50 monitors. |
+| Service           | Plan                 | Monthly Cost     | Notes                                                  |
+| ----------------- | -------------------- | ---------------- | ------------------------------------------------------ |
+| **Vercel**        | Pro                  | $20/member       | Includes 100GB bandwidth, 1TB edge, 100 hrs serverless |
+| **Supabase**      | Pro                  | $25/project      | 8GB storage, 50GB bandwidth, 500MB RAM, PITR           |
+| **Stripe**        | Pay-as-you-go        | 2.9% + $0.30/txn | No monthly fee. Volume discounts available.            |
+| **Resend**        | Free tier            | $0               | 3,000 emails/month. Pro at $20/mo for 50K emails.      |
+| **Sentry**        | Developer            | $0               | 5K errors/month. Team at $26/mo for 50K errors.        |
+| **Upstash Redis** | Pay-as-you-go        | ~$0-10           | 10K commands/day free. $0.20 per 100K commands after.  |
+| **GitHub**        | Free (private repos) | $0               | 2,000 CI minutes/month free.                           |
+| **Domain**        | Annual               | ~$12/year        | Standard .com domain                                   |
+| **Better Uptime** | Free                 | $0               | 5 monitors. Pro at $20/mo for 50 monitors.             |
 
 ### 11.2 Monthly Cost Projections
 
-| Scale | Vercel | Supabase | Stripe Fees | Resend | Sentry | Total |
-|-------|--------|----------|-------------|--------|--------|-------|
-| **Pre-launch** (dev only) | $20 | $25 | $0 | $0 | $0 | ~$45/mo |
-| **10 users** (5 orgs) | $20 | $25 | ~$15 | $0 | $0 | ~$60/mo |
-| **100 users** (20 orgs) | $20 | $25 | ~$150 | $0 | $0 | ~$195/mo |
-| **1,000 users** (100 orgs) | $20 | $25-75* | ~$1,500 | $20 | $26 | ~$1,590-1,640/mo |
-| **5,000 users** (500 orgs) | $20** | $75-150* | ~$7,500 | $20 | $26 | ~$7,640-7,715/mo |
+| Scale                      | Vercel  | Supabase  | Stripe Fees | Resend | Sentry | Total            |
+| -------------------------- | ------- | --------- | ----------- | ------ | ------ | ---------------- |
+| **Pre-launch** (dev only)  | $20     | $25       | $0          | $0     | $0     | ~$45/mo          |
+| **10 users** (5 orgs)      | $20     | $25       | ~$15        | $0     | $0     | ~$60/mo          |
+| **100 users** (20 orgs)    | $20     | $25       | ~$150       | $0     | $0     | ~$195/mo         |
+| **1,000 users** (100 orgs) | $20     | $25-75\*  | ~$1,500     | $20    | $26    | ~$1,590-1,640/mo |
+| **5,000 users** (500 orgs) | $20\*\* | $75-150\* | ~$7,500     | $20    | $26    | ~$7,640-7,715/mo |
 
 \* Supabase scales with storage and compute needs. May need Team plan ($599/mo) at scale.
-\** Vercel may need Enterprise at very high traffic. Pro includes generous limits.
+\*\* Vercel may need Enterprise at very high traffic. Pro includes generous limits.
 
 ### 11.3 Cost Optimization Recommendations
 
@@ -3293,7 +3364,8 @@ pnpm dev                     # Start dev server
 pnpm build                   # Build all
 pnpm typecheck               # TypeScript check
 pnpm lint                    # ESLint
-pnpm test:unit               # Run unit tests
+pnpm test                    # Run unit tests (via turbo)
+pnpm test:unit               # Run unit tests (explicit)
 pnpm test:e2e                # Run E2E tests
 
 # === Database ===
@@ -3307,18 +3379,22 @@ supabase db push --dry-run    # Preview what would be pushed
 supabase db lint              # Lint SQL migrations
 pnpm db:types                 # Regenerate TypeScript types
 
-# === Stripe ===
+# === Content Pipeline ===
+pnpm content:compile          # Compile Book markdown into JSON (scripts/compile-content.ts)
+pnpm content:seed             # Upsert content nodes to Supabase (scripts/seed-content.ts)
+pnpm content:build            # Compile + seed in one step
+pnpm training:seed            # Seed training paths/modules/exercises (scripts/seed-training.ts)
+
+# === Stripe (DEFERRED — not yet configured) ===
 stripe login                  # Authenticate Stripe CLI
 stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe
 stripe trigger checkout.session.completed
 stripe events list --limit 10
-stripe products list
-stripe prices list
 
 # === Git ===
-git checkout -b feature/description develop
+git checkout -b feature/description main
 git push -u origin feature/description
-gh pr create --base develop --title "feat: description"
+gh pr create --base main --title "feat: description"
 gh pr list
 gh pr checks <pr-number>
 
@@ -3334,44 +3410,255 @@ vercel env ls                 # List environment variables
 
 Key files created or referenced in this runbook:
 
-| File | Purpose |
-|------|---------|
-| `package.json` | Root workspace scripts |
-| `pnpm-workspace.yaml` | Monorepo workspace definition |
-| `turbo.json` | Build pipeline configuration |
-| `.prettierrc` | Code formatting rules |
-| `.eslintrc.json` | Linting rules |
-| `.husky/pre-commit` | Pre-commit hook (lint-staged) |
-| `.gitignore` | Git ignore rules |
-| `.nvmrc` | Node.js version |
-| `CLAUDE.md` | AI agent instructions |
-| `apps/web/.env.example` | Environment variable template |
-| `apps/web/next.config.ts` | Next.js configuration |
-| `apps/web/tsconfig.json` | TypeScript configuration |
-| `apps/web/tailwind.config.ts` | Tailwind CSS configuration |
-| `apps/web/vitest.config.ts` | Test configuration |
-| `apps/web/playwright.config.ts` | E2E test configuration |
-| `apps/web/src/middleware.ts` | Next.js middleware (auth, routing) |
-| `apps/web/src/lib/supabase/client.ts` | Browser Supabase client |
-| `apps/web/src/lib/supabase/server.ts` | Server Component Supabase client |
-| `apps/web/src/lib/supabase/middleware.ts` | Middleware Supabase client |
-| `apps/web/src/lib/supabase/service.ts` | Service role Supabase client |
-| `apps/web/src/lib/email/resend.ts` | Email sending utility |
-| `apps/web/src/lib/logger.ts` | Structured logging |
-| `apps/web/src/app/api/v1/health/route.ts` | Health check endpoint |
-| `apps/web/src/components/error-boundary.tsx` | Global error boundary |
-| `supabase/config.toml` | Local Supabase configuration |
-| `supabase/seed.sql` | Development seed data |
-| `supabase/migrations/` | Database migration files |
-| `.github/workflows/ci.yml` | CI pipeline |
-| `.github/workflows/e2e.yml` | E2E test pipeline |
-| `.github/workflows/deploy-production.yml` | Production deployment |
-| `.github/workflows/migration-check.yml` | Migration validation |
-| `.github/workflows/labeler.yml` | PR auto-labeling |
-| `.github/pull_request_template.md` | PR template |
-| `.github/labeler.yml` | Label rules |
+| File                                      | Purpose                                             | Status       |
+| ----------------------------------------- | --------------------------------------------------- | ------------ |
+| `package.json`                            | Root workspace scripts (including content pipeline) | [CONFIGURED] |
+| `pnpm-workspace.yaml`                     | Monorepo workspace definition                       | [CONFIGURED] |
+| `turbo.json`                              | Build pipeline configuration                        | [CONFIGURED] |
+| `vercel.json`                             | Vercel config (turbo-ignore)                        | [CONFIGURED] |
+| `.prettierrc`                             | Code formatting rules                               | [CONFIGURED] |
+| `.husky/pre-commit`                       | Pre-commit hook (lint-staged)                       | [CONFIGURED] |
+| `.gitignore`                              | Git ignore rules                                    | [CONFIGURED] |
+| `.nvmrc`                                  | Node.js version                                     | [CONFIGURED] |
+| `CLAUDE.md`                               | AI agent instructions                               | [CONFIGURED] |
+| `apps/web/.env.example`                   | Environment variable template                       | [CONFIGURED] |
+| `apps/web/package.json`                   | Web app scripts and dependencies                    | [CONFIGURED] |
+| `apps/web/next.config.ts`                 | Next.js configuration                               | [CONFIGURED] |
+| `apps/web/tsconfig.json`                  | TypeScript configuration                            | [CONFIGURED] |
+| `apps/web/vitest.config.ts`               | Test configuration                                  | [CONFIGURED] |
+| `apps/web/playwright.config.ts`           | E2E test configuration                              | [CONFIGURED] |
+| `apps/web/src/middleware.ts`              | Next.js middleware (auth, routing)                  | [CONFIGURED] |
+| `apps/web/src/lib/supabase/client.ts`     | Browser Supabase client                             | [CONFIGURED] |
+| `apps/web/src/lib/supabase/server.ts`     | Server Component Supabase client                    | [CONFIGURED] |
+| `apps/web/src/lib/supabase/middleware.ts` | Middleware Supabase client                          | [CONFIGURED] |
+| `apps/web/src/lib/supabase/admin.ts`      | Service role Supabase client                        | [CONFIGURED] |
+| `apps/web/src/lib/email/resend.ts`        | Email sending utility                               | [CONFIGURED] |
+| `supabase/config.toml`                    | Local Supabase configuration                        | [CONFIGURED] |
+| `supabase/seed.sql`                       | Development seed data                               | [CONFIGURED] |
+| `supabase/migrations/`                    | 11 database migration files                         | [CONFIGURED] |
+| `scripts/compile-content.ts`              | Content compiler (Book md to JSON)                  | [CONFIGURED] |
+| `scripts/seed-content.ts`                 | Content seeder (JSON to Supabase)                   | [CONFIGURED] |
+| `scripts/seed-training.ts`                | Training data seeder                                | [CONFIGURED] |
+| `scripts/output/`                         | Compiled content output directory                   | [CONFIGURED] |
+| `packages/shared/src/content-taxonomy.ts` | Content taxonomy definitions                        | [CONFIGURED] |
+| `.github/workflows/ci.yml`                | CI pipeline (typecheck, lint, test, build)          | [CONFIGURED] |
+| `.github/workflows/e2e.yml`               | E2E test pipeline (Playwright)                      | [CONFIGURED] |
+| `.github/workflows/deploy-preview.yml`    | PR preview deployment status                        | [CONFIGURED] |
+| `.github/workflows/migration-check.yml`   | Migration validation (lint)                         | [CONFIGURED] |
+| `apps/web/src/lib/logger.ts`              | Structured logging                                  | [PLANNED]    |
+| `apps/web/src/app/api/v1/health/route.ts` | Health check endpoint                               | [PLANNED]    |
+| `.github/workflows/deploy-production.yml` | Production deployment automation                    | [PLANNED]    |
+| `.github/workflows/labeler.yml`           | PR auto-labeling                                    | [PLANNED]    |
+| `.github/pull_request_template.md`        | PR template                                         | [PLANNED]    |
+| `.github/labeler.yml`                     | Label rules                                         | [PLANNED]    |
 
 ---
 
-> **End of DevOps Runbook v1.0.0**
-> Next review: After Phase 0 completion (adjust based on lessons learned)
+## 12. Content Pipeline Operations [CONFIGURED]
+
+### 12.1 Overview
+
+The content pipeline transforms PIPS Book markdown source files into structured data in the Supabase database. It consists of three scripts:
+
+```
+Book Markdown (.md)
+       │
+       ▼
+compile-content.ts ──► scripts/output/content-nodes.json (205 nodes)
+       │
+       ▼
+seed-content.ts ──► Supabase: content_nodes table (upsert by id)
+
+seed-training.ts ──► Supabase: training_paths, training_modules, training_exercises
+```
+
+### 12.2 Content Compiler (`scripts/compile-content.ts`)
+
+**Input:** `../PIPS/Book/*.md` (the PIPS book source files, outside the repo)
+**Output:** `scripts/output/content-nodes.json`
+
+The compiler:
+
+1. Reads each markdown file from the PIPS Book directory
+2. Splits on `##` headings into sections
+3. Tags each section with steps, tools, and principles based on `BOOK_CHAPTER_MAP` from the shared content taxonomy
+4. Generates unique IDs and slugs
+5. Writes structured ContentNode JSON
+
+```bash
+# Run the compiler
+pnpm content:compile
+
+# Verify output
+ls -la scripts/output/content-nodes.json
+# Expected: 205 content nodes (21 chapters + 184 sections)
+```
+
+### 12.3 Content Seeder (`scripts/seed-content.ts`)
+
+**Input:** `scripts/output/content-nodes.json`
+**Target:** Supabase `content_nodes` table (upsert by id)
+
+**Required env vars:**
+
+- `SUPABASE_URL` (or `NEXT_PUBLIC_SUPABASE_URL`)
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+```bash
+# Seed content to Supabase
+pnpm content:seed
+
+# Verify in Supabase
+# SQL: SELECT count(*) FROM content_nodes;
+# Expected: 205
+```
+
+### 12.4 Training Seeder (`scripts/seed-training.ts`)
+
+**Target tables:** `training_paths`, `training_modules`, `training_exercises` (upsert by id)
+
+Seeds 4 learning paths, 27 modules, and 59 exercises with structured training data.
+
+**Required env vars:**
+
+- `SUPABASE_URL` (or `NEXT_PUBLIC_SUPABASE_URL`)
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+```bash
+# Seed training data
+pnpm training:seed
+
+# Verify
+# SQL: SELECT count(*) FROM training_paths;     -- Expected: 4
+# SQL: SELECT count(*) FROM training_modules;    -- Expected: 27
+# SQL: SELECT count(*) FROM training_exercises;  -- Expected: 59
+```
+
+### 12.5 Full Content Build (Compile + Seed)
+
+```bash
+# Compile content from markdown, then seed to Supabase
+pnpm content:build
+
+# This runs both scripts sequentially:
+# 1. npx tsx scripts/compile-content.ts
+# 2. npx tsx scripts/seed-content.ts
+```
+
+### 12.6 Content Pipeline Runbook
+
+**When to run the content pipeline:**
+
+| Scenario                 | Command                                    | Notes                                     |
+| ------------------------ | ------------------------------------------ | ----------------------------------------- |
+| Book content changed     | `pnpm content:build`                       | Re-compiles and re-seeds all 205 nodes    |
+| Training content changed | `pnpm training:seed`                       | Re-seeds all paths/modules/exercises      |
+| New Supabase project     | `pnpm content:build && pnpm training:seed` | Seed everything from scratch              |
+| Content hotfix           | `pnpm content:seed`                        | Re-seed existing JSON without recompiling |
+| Verify content           | Check Supabase SQL editor                  | `SELECT count(*) FROM content_nodes;`     |
+
+**Important:** The content pipeline uses `upsert` (ON CONFLICT UPDATE), so it is safe to re-run at any time without duplicating data.
+
+---
+
+## 13. Disaster Recovery [PLANNED]
+
+### 13.1 Recovery Scenarios
+
+| Scenario                            | RTO Target | RPO Target       | Recovery Method                                |
+| ----------------------------------- | ---------- | ---------------- | ---------------------------------------------- |
+| Application crash / bad deploy      | 5 minutes  | 0 (no data loss) | Vercel instant rollback                        |
+| Database corruption / bad migration | 1 hour     | 5 minutes        | Supabase PITR or reverse migration             |
+| Content data loss                   | 30 minutes | 0                | Re-run content pipeline (`pnpm content:build`) |
+| Training data loss                  | 15 minutes | 0                | Re-run training seed (`pnpm training:seed`)    |
+| Complete Supabase project loss      | 4 hours    | Last backup      | Restore from daily backup, re-run seeds        |
+| DNS / Vercel outage                 | N/A        | N/A              | Wait for provider resolution                   |
+
+### 13.2 Application Rollback
+
+Vercel supports instant rollback to any previous deployment:
+
+1. Go to **Vercel Dashboard > Deployments** (https://vercel.com/alberamarcs-projects/)
+2. Find the last known-good deployment
+3. Click the three-dot menu > **Promote to Production**
+4. The rollback is instant (no rebuild needed)
+
+```bash
+# Or via CLI:
+vercel rollback
+```
+
+### 13.3 Database Recovery
+
+**Option A: Reverse migration** (preferred for schema changes)
+
+```bash
+# Create a new migration that reverses the bad change
+supabase migration new revert_bad_change
+# Write reverse SQL in the generated file
+supabase db push
+```
+
+**Option B: Point-in-Time Recovery** (for data corruption)
+
+1. Go to Supabase Dashboard > Database > Backups > Point in Time
+2. Select timestamp before the incident
+3. Restore (creates a new database branch)
+4. Verify data integrity
+5. If correct, promote to production
+6. Update Vercel env vars if connection string changed
+7. Trigger Vercel redeployment
+
+**Warning:** PITR reverts ALL changes since the selected timestamp, not just the problematic migration.
+
+### 13.4 Content Recovery
+
+Content and training data can be fully regenerated from source files:
+
+```bash
+# Recover all content nodes (205 nodes from Book markdown)
+pnpm content:build
+
+# Recover all training data (4 paths, 27 modules, 59 exercises)
+pnpm training:seed
+
+# Both use upsert -- safe to run on existing data
+```
+
+### 13.5 Full Recovery Procedure
+
+In the worst case (complete rebuild):
+
+```bash
+# 1. Ensure Supabase project exists and is accessible
+supabase link --project-ref cmrribhjgfybbxhrsxqi
+
+# 2. Apply all 11 migrations
+supabase db push
+
+# 3. Seed content
+pnpm content:build
+
+# 4. Seed training data
+pnpm training:seed
+
+# 5. Verify deployment
+vercel --prod
+```
+
+### 13.6 Monitoring Recommendations [PLANNED]
+
+The following monitoring should be configured before the next major release:
+
+1. **Uptime monitoring** -- Set up Better Uptime or equivalent to ping `https://pips-app.vercel.app/api/health` every 60 seconds
+2. **Error alerting** -- Configure Sentry alerts for error rate spikes (>10 errors/minute)
+3. **Database monitoring** -- Review Supabase Dashboard > Database > Query Performance weekly
+4. **Build failure alerts** -- GitHub notification settings should email on CI failures
+5. **SSL certificate expiry** -- Managed by Vercel, no action needed for `.vercel.app` domains
+6. **Log retention** -- Consider upgrading Vercel plan if 1-hour log retention is insufficient (Pro gives 3 days)
+
+---
+
+> **End of DevOps Runbook v1.1**
+> Updated: 2026-03-04 by DevOps Agent
+> Next review: After Workshop Facilitation phase (Phase 5) or when custom domain is configured

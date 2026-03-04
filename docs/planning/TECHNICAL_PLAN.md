@@ -1,9 +1,46 @@
 # PIPS 2.0 — Technical Architecture Plan
 
-> **Version:** 1.0.0
-> **Date:** 2026-03-02
-> **Status:** Draft
-> **Author:** Marc Albers + Claude
+> **Version:** 1.1
+> **Date:** 2026-03-04
+> **Status:** Active — MVP Complete, Post-MVP Phases 1.5 through 4 Complete
+> **Author:** Development Lead Agent (Claude Opus 4.6)
+> **Original Author:** Marc Albers + Claude
+>
+> **v1.1 changes (2026-03-04):**
+>
+> - Added build-status markers ([BUILT], [SCAFFOLDED], [PLANNED], [DEFERRED]) throughout
+> - New sections: Knowledge Hub Architecture (11), Training Mode Architecture (12), Content Pipeline Architecture (13), Marketing & SEO Architecture (14)
+> - Updated Schema Overview with 11 new tables (33 total)
+> - Updated API Design with new server action locations (Knowledge, Training, Exercise)
+> - Updated project structure to reflect actual codebase (knowledge/, training/, seo/, knowledge-cadence/ component directories)
+> - Aligned with SYSTEM_ARCHITECTURE.md v1.1 and actual deployed state
+> - Next.js version updated to 16.x (from 15.x)
+> - Added build status summary reflecting 896 unit tests, 0 type errors
+
+---
+
+## Build Status Legend
+
+Throughout this document, section headers and descriptions include a status marker:
+
+- **[BUILT]** — Implemented, tested, and deployed at pips-app.vercel.app
+- **[SCAFFOLDED]** — DB tables and/or page routes exist, UI is partial or placeholder
+- **[PLANNED]** — Specified in planning docs but not yet implemented
+- **[DEFERRED]** — Explicitly out of scope for current phases
+
+---
+
+## Current Build Status
+
+> **MVP:** Live at https://pips-app.vercel.app since March 3, 2026
+> **Unit tests:** 896 passing (56 files)
+> **E2E tests:** 160 specs (18 files)
+> **Type errors:** 0
+> **Lint errors:** 0
+> **DB migrations:** 11 applied to production
+> **Content nodes:** 205 seeded (FTS active)
+> **Training data:** 4 paths, 27 modules, 59 exercises seeded
+> **Marketing pages:** 83+ SEO pages (6 step, 22 tool, 20 book preview, 35 glossary, 17 templates)
 
 ---
 
@@ -19,10 +56,14 @@
 8. [Performance & Scalability](#8-performance--scalability)
 9. [DevOps & Infrastructure](#9-devops--infrastructure)
 10. [Project Structure](#10-project-structure)
+11. [Knowledge Hub Architecture](#11-knowledge-hub-architecture)
+12. [Training Mode Architecture](#12-training-mode-architecture)
+13. [Content Pipeline Architecture](#13-content-pipeline-architecture)
+14. [Marketing & SEO Architecture](#14-marketing--seo-architecture)
 
 ---
 
-## 1. Architecture Overview
+## 1. Architecture Overview [BUILT]
 
 ### 1.1 System Architecture
 
@@ -87,6 +128,7 @@
 **Decision: Shared schema with Row-Level Security (RLS) on every table.**
 
 Justification:
+
 - **Schema-per-tenant** requires DDL operations per signup, complicates migrations, and does not scale well past ~50 tenants on Supabase.
 - **Shared schema with RLS** is Supabase's native pattern. Every row has an `org_id` column. RLS policies ensure users only see data belonging to their organization.
 - Simpler migrations (one schema to manage), simpler connection pooling, and Supabase's RLS is battle-tested.
@@ -102,30 +144,30 @@ Justification:
 
 ---
 
-## 2. Technology Stack
+## 2. Technology Stack [BUILT]
 
 ### 2.1 Core Stack
 
-| Layer | Technology | Version | Justification |
-|-------|-----------|---------|---------------|
-| **Framework** | Next.js | 15.x | App Router, RSC, API routes, middleware, ISR, Vercel-native |
-| **Language** | TypeScript | 5.7+ | Strict mode, satisfies Marc's preference |
-| **Backend** | Supabase | Latest | Auth, Postgres, Storage, Realtime, Edge Functions — single platform |
-| **Database** | PostgreSQL | 15+ | Via Supabase. RLS, full-text search, JSONB, triggers |
-| **Hosting** | Vercel | Pro plan | SSR, edge middleware, preview deployments, custom domains |
-| **Payments** | Stripe | API v2024+ | Subscriptions, usage-based billing, invoicing |
-| **State** | Zustand | 5.x | Lightweight, TypeScript-native, for complex client state (ticket boards, form builders) |
-| **UI** | shadcn/ui | Latest | Radix primitives + Tailwind. Copy-paste components, fully customizable, accessible |
-| **Styling** | Tailwind CSS | 4.x | Note: differs from Marc's React Native preference but is standard for Next.js web apps. shadcn/ui requires it. CSS custom properties for white-label theming layer on top. |
-| **Email** | Resend | Latest | Transactional + marketing email. React Email templates |
-| **Error Tracking** | Sentry | Latest | Already used in ForgePIPS v1 |
-| **Search** | Postgres FTS | Built-in | `tsvector` + `ts_rank` for ticket/project search. Upgrade to Typesense if >100K tickets |
-| **Real-time** | Supabase Realtime | Built-in | Live ticket updates, presence, notifications |
-| **File Storage** | Supabase Storage | Built-in | Avatars, logos, attachments, exports |
-| **Charts** | Recharts | 2.x | Lightweight, React-native charting for dashboards (Victory Native is mobile-only) |
-| **Forms** | React Hook Form + Zod | Latest | Type-safe form validation, dynamic PIPS forms |
-| **Date/Time** | date-fns | 4.x | Tree-shakeable, immutable |
-| **Icons** | Lucide React | Latest | Consistent icon set, tree-shakeable |
+| Layer              | Technology            | Version    | Justification                                                                                                                                                              |
+| ------------------ | --------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Framework**      | Next.js               | 16.x       | App Router, RSC, API routes, middleware, ISR, Vercel-native                                                                                                                |
+| **Language**       | TypeScript            | 5.7+       | Strict mode, satisfies Marc's preference                                                                                                                                   |
+| **Backend**        | Supabase              | Latest     | Auth, Postgres, Storage, Realtime, Edge Functions — single platform                                                                                                        |
+| **Database**       | PostgreSQL            | 15+        | Via Supabase. RLS, full-text search, JSONB, triggers                                                                                                                       |
+| **Hosting**        | Vercel                | Pro plan   | SSR, edge middleware, preview deployments, custom domains                                                                                                                  |
+| **Payments**       | Stripe                | API v2024+ | Subscriptions, usage-based billing, invoicing                                                                                                                              |
+| **State**          | Zustand               | 5.x        | Lightweight, TypeScript-native, for complex client state (ticket boards, form builders)                                                                                    |
+| **UI**             | shadcn/ui             | Latest     | Radix primitives + Tailwind. Copy-paste components, fully customizable, accessible                                                                                         |
+| **Styling**        | Tailwind CSS          | 4.x        | Note: differs from Marc's React Native preference but is standard for Next.js web apps. shadcn/ui requires it. CSS custom properties for white-label theming layer on top. |
+| **Email**          | Resend                | Latest     | Transactional + marketing email. React Email templates                                                                                                                     |
+| **Error Tracking** | Sentry                | Latest     | Already used in ForgePIPS v1                                                                                                                                               |
+| **Search**         | Postgres FTS          | Built-in   | `tsvector` + `ts_rank` for ticket/project search. Upgrade to Typesense if >100K tickets                                                                                    |
+| **Real-time**      | Supabase Realtime     | Built-in   | Live ticket updates, presence, notifications                                                                                                                               |
+| **File Storage**   | Supabase Storage      | Built-in   | Avatars, logos, attachments, exports                                                                                                                                       |
+| **Charts**         | Recharts              | 2.x        | Lightweight, React-native charting for dashboards (Victory Native is mobile-only)                                                                                          |
+| **Forms**          | React Hook Form + Zod | Latest     | Type-safe form validation, dynamic PIPS forms                                                                                                                              |
+| **Date/Time**      | date-fns              | 4.x        | Tree-shakeable, immutable                                                                                                                                                  |
+| **Icons**          | Lucide React          | Latest     | Consistent icon set, tree-shakeable                                                                                                                                        |
 
 ### 2.2 Styling Decision Note
 
@@ -133,27 +175,27 @@ While Marc's CLAUDE.md specifies `React Native StyleSheet (no Tailwind/NativeWin
 
 ### 2.3 Development Tools
 
-| Tool | Purpose |
-|------|---------|
-| **pnpm** | Package manager (faster, stricter than npm) |
-| **Turborepo** | Monorepo build orchestration |
-| **ESLint** | Linting (Next.js + TypeScript config) |
-| **Prettier** | Code formatting |
-| **Vitest** | Unit + integration testing |
-| **Playwright** | E2E testing |
-| **Supabase CLI** | Local dev, migrations, type generation |
-| **GitHub Actions** | CI/CD |
-| **Husky + lint-staged** | Pre-commit hooks |
+| Tool                    | Purpose                                     |
+| ----------------------- | ------------------------------------------- |
+| **pnpm**                | Package manager (faster, stricter than npm) |
+| **Turborepo**           | Monorepo build orchestration                |
+| **ESLint**              | Linting (Next.js + TypeScript config)       |
+| **Prettier**            | Code formatting                             |
+| **Vitest**              | Unit + integration testing                  |
+| **Playwright**          | E2E testing                                 |
+| **Supabase CLI**        | Local dev, migrations, type generation      |
+| **GitHub Actions**      | CI/CD                                       |
+| **Husky + lint-staged** | Pre-commit hooks                            |
 
 ---
 
-## 3. Database Schema Design
+## 3. Database Schema Design [BUILT]
 
-### 3.1 Schema Overview
+### 3.1 Schema Overview (33 Tables)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        CORE TABLES                               │
+│                    CORE TABLES (12) [BUILT]                       │
 │                                                                   │
 │  organizations ─┬── org_members ──── profiles (auth.users)       │
 │                 ├── org_invitations                                │
@@ -171,14 +213,69 @@ While Marc's CLAUDE.md specifies `React Native StyleSheet (no Tailwind/NativeWin
 │                               ├── ticket_activity                 │
 │                               └── ticket_relations (parent/child) │
 │                                                                   │
-│  CROSS-CUTTING                                                    │
+│  CROSS-CUTTING (5) [BUILT]                                       │
 │  ├── audit_log (immutable, trigger-populated)                    │
 │  ├── notifications                                                │
 │  ├── file_attachments (metadata, Supabase Storage refs)          │
 │  ├── comments (polymorphic: project, ticket, step)               │
 │  └── integration_connections (per-org Jira/ADO/AHA! configs)     │
+│                                                                   │
+│  TICKET SYSTEM (3) [BUILT]                                       │
+│  ├── ticket_relations                                             │
+│  ├── ticket_transitions                                           │
+│  └── comments                                                     │
+│                                                                   │
+│  WEBHOOKS (2) [PLANNED — schema only]                            │
+│  ├── webhook_subscriptions                                        │
+│  └── webhook_deliveries                                           │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                 KNOWLEDGE HUB (4) [BUILT]                        │
+│                                                                   │
+│  content_nodes ─── Global catalog (no RLS), 205 nodes seeded    │
+│       ├── reading_sessions (user-scoped RLS)                     │
+│       ├── content_bookmarks (user-scoped RLS)                    │
+│       └── content_read_history (user-scoped RLS)                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                 TRAINING MODE (5) [SCAFFOLDED]                   │
+│                                                                   │
+│  training_paths ── Global catalog (no RLS), 4 paths seeded      │
+│       └── training_modules (27 seeded)                           │
+│              └── training_exercises (59 seeded)                   │
+│  training_progress (user-scoped RLS)                             │
+│  training_exercise_data (user-scoped RLS)                        │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                 WORKSHOP (1) [SCAFFOLDED]                         │
+│                                                                   │
+│  workshop_sessions (org-scoped RLS)                              │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+### 3.1.1 Table Summary
+
+| Group         | Tables                                                                                                                                                     | Count  | Status           |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------- |
+| Core          | profiles, organizations, org_members, org_invitations, org_settings, teams, team_members, projects, project_members, project_steps, project_forms, tickets | 12     | **[BUILT]**      |
+| Ticket System | ticket_relations, ticket_transitions, comments                                                                                                             | 3      | **[BUILT]**      |
+| Cross-Cutting | file_attachments, notifications, audit_log, integration_connections, org_api_keys                                                                          | 5      | **[BUILT]**      |
+| Webhooks      | webhook_subscriptions, webhook_deliveries                                                                                                                  | 2      | **[PLANNED]**    |
+| Knowledge Hub | content_nodes, reading_sessions, content_bookmarks, content_read_history                                                                                   | 4      | **[BUILT]**      |
+| Training      | training_paths, training_modules, training_exercises, training_progress, training_exercise_data                                                            | 5      | **[SCAFFOLDED]** |
+| Workshop      | workshop_sessions                                                                                                                                          | 1      | **[SCAFFOLDED]** |
+| **Total**     |                                                                                                                                                            | **33** |                  |
+
+### 3.1.2 Key Data Design Decisions
+
+- **UUIDs** as primary keys for tenant tables; **TEXT** primary keys for global catalogs (`content_nodes`, `training_paths`, `training_modules`, `training_exercises`) for human-readable IDs
+- **JSONB** for flexible form data, content tags, exercise config, workshop timer state, and feature flags
+- **No RLS on global catalogs** — `content_nodes`, `training_paths`, `training_modules`, `training_exercises` are readable by all authenticated users. Access differentiation handled at application layer via `content_nodes.access_level`
+- **User-scoped RLS** on progress tables — `reading_sessions`, `content_bookmarks`, `content_read_history`, `training_progress`, `training_exercise_data` use `user_id = auth.uid()` policy
+- **Org-scoped RLS** on `workshop_sessions` — standard org membership check
 
 ### 3.2 Core SQL — Organizations & Users
 
@@ -913,9 +1010,45 @@ CREATE TRIGGER audit_org_members
 
 ---
 
-## 4. API Design
+## 4. API Design [BUILT]
 
-### 4.1 API Route Structure
+### 4.0 Server Actions (Primary Mutation Pattern) [BUILT]
+
+Server Actions are the primary mutation mechanism in the built system. They live co-located with their pages as `actions.ts` files. The REST API route structure defined below (Section 4.1) exists as a specification for future external API access but is NOT the primary data access pattern in the deployed application.
+
+**Deployed Server Action Locations:**
+
+| Feature            | Actions File                                 | Key Actions                                                                                                                      | Status      |
+| ------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Auth               | `(auth)/actions.ts`                          | login, signup, forgotPassword, resetPassword                                                                                     | **[BUILT]** |
+| Onboarding         | `onboarding/actions.ts`                      | createOrganization                                                                                                               | **[BUILT]** |
+| Dashboard          | `dashboard/actions.ts`                       | getDashboardData, createSampleProject                                                                                            | **[BUILT]** |
+| Projects           | `projects/new/actions.ts`                    | createProject                                                                                                                    | **[BUILT]** |
+| Project Detail     | `projects/[projectId]/actions.ts`            | updateProject, advanceStep, getProjectData                                                                                       | **[BUILT]** |
+| Forms              | `projects/.../forms/actions.ts`              | saveFormData, getFormData                                                                                                        | **[BUILT]** |
+| Tickets            | `tickets/actions.ts`                         | createTicket, updateTicket, deleteTicket, getTickets                                                                             | **[BUILT]** |
+| Ticket Comments    | `tickets/[ticketId]/comment-actions.ts`      | addComment, updateComment, deleteComment                                                                                         | **[BUILT]** |
+| Teams              | `teams/actions.ts`                           | createTeam, updateTeam, deleteTeam, addMember                                                                                    | **[BUILT]** |
+| Settings           | `settings/actions.ts`                        | updateOrgSettings                                                                                                                | **[BUILT]** |
+| Members            | `settings/members/actions.ts`                | inviteMember, updateMemberRole, removeMember                                                                                     | **[BUILT]** |
+| Notifications      | `notifications/actions.ts`                   | markAsRead, markAllAsRead                                                                                                        | **[BUILT]** |
+| Search             | `search/actions.ts`                          | globalSearch                                                                                                                     | **[BUILT]** |
+| Profile            | `profile/actions.ts`                         | updateProfile                                                                                                                    | **[BUILT]** |
+| Knowledge          | `knowledge/actions.ts`                       | getContentBySlug, searchContent, toggleBookmark, recordReadHistory, getUserBookmarks, getRecentReadHistory, updateReadingSession | **[BUILT]** |
+| Training           | `training/actions.ts`                        | getTrainingPaths, getPathDetail, updateTrainingProgress                                                                          | **[BUILT]** |
+| Training Exercises | `training/exercise-actions.ts`               | submitExercise, getExerciseData                                                                                                  | **[BUILT]** |
+| Audit Log          | `settings/audit-log/actions.ts`              | getAuditLog                                                                                                                      | **[BUILT]** |
+| Export             | `export/actions.ts`, `export/pdf-actions.ts` | exportCSV, exportPDF                                                                                                             | **[BUILT]** |
+
+**API Routes (Webhooks and Health) [BUILT]:**
+
+| Route                      | Method | Purpose                                |
+| -------------------------- | ------ | -------------------------------------- |
+| `/api/health`              | GET    | Health check (returns 200 + status)    |
+| `/api/health/ping`         | GET    | Lightweight ping (Vercel uptime check) |
+| `/api/notifications/email` | POST   | Email notification webhook handler     |
+
+### 4.1 REST API Route Structure [PLANNED — for future external API access]
 
 All API routes live under `/api/v1/` using Next.js App Router route handlers. Authentication is required for all routes except public health check and webhook endpoints.
 
@@ -1018,15 +1151,17 @@ All API routes live under `/api/v1/` using Next.js App Router route handlers. Au
 
 ```typescript
 // app/api/v1/tickets/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { createRouteClient } from '@/lib/supabase/server';
-import { requireAuth } from '@/lib/auth/middleware';
-import { requireOrgAccess } from '@/lib/auth/org-access';
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createRouteClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth/middleware'
+import { requireOrgAccess } from '@/lib/auth/org-access'
 
 const listTicketsSchema = z.object({
   orgId: z.string().uuid(),
-  status: z.enum(['backlog', 'todo', 'in_progress', 'in_review', 'blocked', 'done', 'cancelled']).optional(),
+  status: z
+    .enum(['backlog', 'todo', 'in_progress', 'in_review', 'blocked', 'done', 'cancelled'])
+    .optional(),
   assigneeId: z.string().uuid().optional(),
   projectId: z.string().uuid().optional(),
   type: z.enum(['pips_project', 'task', 'bug', 'feature', 'general']).optional(),
@@ -1035,43 +1170,47 @@ const listTicketsSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(25),
   sort: z.enum(['created_at', 'updated_at', 'priority', 'due_date']).default('updated_at'),
   order: z.enum(['asc', 'desc']).default('desc'),
-});
+})
 
 export const GET = async (req: NextRequest) => {
-  const session = await requireAuth(req);
-  const params = listTicketsSchema.parse(
-    Object.fromEntries(req.nextUrl.searchParams)
-  );
+  const session = await requireAuth(req)
+  const params = listTicketsSchema.parse(Object.fromEntries(req.nextUrl.searchParams))
 
-  await requireOrgAccess(session.user.id, params.orgId, ['owner', 'admin', 'manager', 'member', 'viewer']);
+  await requireOrgAccess(session.user.id, params.orgId, [
+    'owner',
+    'admin',
+    'manager',
+    'member',
+    'viewer',
+  ])
 
-  const supabase = createRouteClient();
+  const supabase = createRouteClient()
   let query = supabase
     .from('tickets')
     .select('*, assignee:profiles!assignee_id(id, full_name, avatar_url)', { count: 'exact' })
-    .eq('org_id', params.orgId);
+    .eq('org_id', params.orgId)
 
-  if (params.status) query = query.eq('status', params.status);
-  if (params.assigneeId) query = query.eq('assignee_id', params.assigneeId);
-  if (params.projectId) query = query.eq('project_id', params.projectId);
-  if (params.type) query = query.eq('type', params.type);
+  if (params.status) query = query.eq('status', params.status)
+  if (params.assigneeId) query = query.eq('assignee_id', params.assigneeId)
+  if (params.projectId) query = query.eq('project_id', params.projectId)
+  if (params.type) query = query.eq('type', params.type)
 
   if (params.search) {
     query = query.textSearch('search_vector', params.search, {
       type: 'websearch',
       config: 'english',
-    });
+    })
   }
 
-  const offset = (params.page - 1) * params.limit;
+  const offset = (params.page - 1) * params.limit
   query = query
     .order(params.sort, { ascending: params.order === 'asc' })
-    .range(offset, offset + params.limit - 1);
+    .range(offset, offset + params.limit - 1)
 
-  const { data, error, count } = await query;
+  const { data, error, count } = await query
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   return NextResponse.json({
@@ -1082,8 +1221,8 @@ export const GET = async (req: NextRequest) => {
       total: count ?? 0,
       totalPages: Math.ceil((count ?? 0) / params.limit),
     },
-  });
-};
+  })
+}
 
 const createTicketSchema = z.object({
   orgId: z.string().uuid(),
@@ -1098,15 +1237,15 @@ const createTicketSchema = z.object({
   teamId: z.string().uuid().optional(),
   dueDate: z.string().date().optional(),
   tags: z.array(z.string().max(50)).max(20).default([]),
-});
+})
 
 export const POST = async (req: NextRequest) => {
-  const session = await requireAuth(req);
-  const body = createTicketSchema.parse(await req.json());
+  const session = await requireAuth(req)
+  const body = createTicketSchema.parse(await req.json())
 
-  await requireOrgAccess(session.user.id, body.orgId, ['owner', 'admin', 'manager', 'member']);
+  await requireOrgAccess(session.user.id, body.orgId, ['owner', 'admin', 'manager', 'member'])
 
-  const supabase = createRouteClient();
+  const supabase = createRouteClient()
   const { data, error } = await supabase
     .from('tickets')
     .insert({
@@ -1125,14 +1264,14 @@ export const POST = async (req: NextRequest) => {
       tags: body.tags,
     })
     .select()
-    .single();
+    .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ data }, { status: 201 });
-};
+  return NextResponse.json({ data }, { status: 201 })
+}
 ```
 
 ### 4.3 Authentication Strategy
@@ -1162,13 +1301,13 @@ Three auth methods:
 
 ```typescript
 // lib/rate-limit.ts
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_URL!,
   token: process.env.UPSTASH_REDIS_TOKEN!,
-});
+})
 
 // Different limits for different auth types
 export const rateLimits = {
@@ -1190,7 +1329,7 @@ export const rateLimits = {
     limiter: Ratelimit.slidingWindow(20, '1 m'),
     prefix: 'rl:anon',
   }),
-};
+}
 ```
 
 ### 4.5 Webhook System (Outbound)
@@ -1231,9 +1370,9 @@ When a subscribed event occurs (e.g., `ticket.created`), the system:
 
 ---
 
-## 5. Security Architecture
+## 5. Security Architecture [BUILT]
 
-### 5.1 Row-Level Security (RLS) Policies
+### 5.1 Row-Level Security (RLS) Policies [BUILT]
 
 Every table with an `org_id` column gets RLS policies. The core pattern: extract the user's org memberships from the JWT or via a helper function, then check if the row's `org_id` is in that set.
 
@@ -1443,33 +1582,33 @@ CREATE POLICY "Only admins can read audit log"
 
 ### 5.4 Data Security
 
-| Concern | Solution |
-|---------|----------|
-| **Encryption in transit** | TLS 1.3 enforced by Vercel + Supabase (HTTPS only) |
-| **Encryption at rest** | Supabase encrypts all data at rest (AES-256). Integration secrets additionally encrypted via `pgcrypto` before storing in JSONB. |
-| **Password hashing** | Supabase Auth uses bcrypt with configurable rounds |
-| **JWT security** | Short-lived access tokens (1hr), httpOnly refresh tokens, SameSite=Lax |
-| **API key storage** | Only SHA-256 hash stored. Full key shown once at creation. |
-| **File uploads** | Validated MIME types, max size limits (50MB), virus scanning via ClamAV edge function |
-| **SQL injection** | Supabase client uses parameterized queries. Zod validates all inputs. |
-| **XSS** | React's automatic escaping + Content-Security-Policy headers + DOMPurify for user HTML |
-| **CSRF** | SameSite cookies + Supabase Auth's built-in CSRF protection |
+| Concern                   | Solution                                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Encryption in transit** | TLS 1.3 enforced by Vercel + Supabase (HTTPS only)                                                                               |
+| **Encryption at rest**    | Supabase encrypts all data at rest (AES-256). Integration secrets additionally encrypted via `pgcrypto` before storing in JSONB. |
+| **Password hashing**      | Supabase Auth uses bcrypt with configurable rounds                                                                               |
+| **JWT security**          | Short-lived access tokens (1hr), httpOnly refresh tokens, SameSite=Lax                                                           |
+| **API key storage**       | Only SHA-256 hash stored. Full key shown once at creation.                                                                       |
+| **File uploads**          | Validated MIME types, max size limits (50MB), virus scanning via ClamAV edge function                                            |
+| **SQL injection**         | Supabase client uses parameterized queries. Zod validates all inputs.                                                            |
+| **XSS**                   | React's automatic escaping + Content-Security-Policy headers + DOMPurify for user HTML                                           |
+| **CSRF**                  | SameSite cookies + Supabase Auth's built-in CSRF protection                                                                      |
 
 ### 5.5 GDPR / SOC2 Considerations
 
-| Requirement | Implementation |
-|-------------|----------------|
-| **Right to erasure** | `DELETE /api/v1/account` cascade-deletes all user data. Supabase Storage files purged. Audit log entries anonymized (user_id set to NULL). |
-| **Data portability** | `GET /api/v1/account/export` returns JSON archive of all user data |
-| **Consent tracking** | `user_consents` table tracks marketing, analytics, cookie consent with timestamps |
-| **Data retention** | Audit logs retained 2 years, then archived. Deleted org data purged after 30-day grace period. |
-| **Access logging** | Every API request logged with user_id, IP, timestamp, endpoint |
-| **Breach notification** | Sentry alerts + automated incident response playbook |
-| **SOC2 Type II** | Audit log, access controls, encryption, change management (GitHub PRs), monitoring — all foundational elements in place |
+| Requirement             | Implementation                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Right to erasure**    | `DELETE /api/v1/account` cascade-deletes all user data. Supabase Storage files purged. Audit log entries anonymized (user_id set to NULL). |
+| **Data portability**    | `GET /api/v1/account/export` returns JSON archive of all user data                                                                         |
+| **Consent tracking**    | `user_consents` table tracks marketing, analytics, cookie consent with timestamps                                                          |
+| **Data retention**      | Audit logs retained 2 years, then archived. Deleted org data purged after 30-day grace period.                                             |
+| **Access logging**      | Every API request logged with user_id, IP, timestamp, endpoint                                                                             |
+| **Breach notification** | Sentry alerts + automated incident response playbook                                                                                       |
+| **SOC2 Type II**        | Audit log, access controls, encryption, change management (GitHub PRs), monitoring — all foundational elements in place                    |
 
 ---
 
-## 6. Integration Architecture
+## 6. Integration Architecture [DEFERRED — schema only, no active integrations]
 
 ### 6.1 Integration Pattern Overview
 
@@ -1495,52 +1634,65 @@ CREATE POLICY "Only admins can read audit log"
 
 ```typescript
 // lib/integrations/jira/client.ts
-import { z } from 'zod';
+import { z } from 'zod'
 
 const jiraConfigSchema = z.object({
-  baseUrl: z.string().url(),        // e.g., "https://acme.atlassian.net"
+  baseUrl: z.string().url(), // e.g., "https://acme.atlassian.net"
   email: z.string().email(),
   apiToken: z.string().min(1),
-  projectKey: z.string().min(1),    // e.g., "ACME"
-});
+  projectKey: z.string().min(1), // e.g., "ACME"
+})
 
-type JiraConfig = z.infer<typeof jiraConfigSchema>;
+type JiraConfig = z.infer<typeof jiraConfigSchema>
 
 export const createJiraClient = (config: JiraConfig) => {
   const headers = {
-    'Authorization': `Basic ${btoa(`${config.email}:${config.apiToken}`)}`,
+    Authorization: `Basic ${btoa(`${config.email}:${config.apiToken}`)}`,
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+    Accept: 'application/json',
+  }
 
   const request = async (path: string, options?: RequestInit) => {
-    const url = `${config.baseUrl}/rest/api/3${path}`;
-    const res = await fetch(url, { ...options, headers: { ...headers, ...options?.headers } });
-    if (!res.ok) throw new Error(`Jira API error: ${res.status} ${await res.text()}`);
-    return res.json();
-  };
+    const url = `${config.baseUrl}/rest/api/3${path}`
+    const res = await fetch(url, { ...options, headers: { ...headers, ...options?.headers } })
+    if (!res.ok) throw new Error(`Jira API error: ${res.status} ${await res.text()}`)
+    return res.json()
+  }
 
   return {
     // Fetch issues updated since cursor
     getUpdatedIssues: async (since: string, maxResults = 50) => {
-      const jql = `project = ${config.projectKey} AND updated >= "${since}" ORDER BY updated ASC`;
-      return request(`/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,description,status,priority,assignee,created,updated`);
+      const jql = `project = ${config.projectKey} AND updated >= "${since}" ORDER BY updated ASC`
+      return request(
+        `/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,description,status,priority,assignee,created,updated`,
+      )
     },
 
     // Create issue in Jira from PIPS ticket
-    createIssue: async (ticket: { title: string; description: string; type: string; priority: string }) => {
+    createIssue: async (ticket: {
+      title: string
+      description: string
+      type: string
+      priority: string
+    }) => {
       return request('/issue', {
         method: 'POST',
         body: JSON.stringify({
           fields: {
             project: { key: config.projectKey },
             summary: ticket.title,
-            description: { type: 'doc', version: 1, content: [{ type: 'paragraph', content: [{ type: 'text', text: ticket.description }] }] },
+            description: {
+              type: 'doc',
+              version: 1,
+              content: [
+                { type: 'paragraph', content: [{ type: 'text', text: ticket.description }] },
+              ],
+            },
             issuetype: { name: mapTicketTypeToJira(ticket.type) },
             priority: { name: mapPriorityToJira(ticket.priority) },
           },
         }),
-      });
+      })
     },
 
     // Update issue in Jira
@@ -1548,7 +1700,7 @@ export const createJiraClient = (config: JiraConfig) => {
       return request(`/issue/${issueKey}`, {
         method: 'PUT',
         body: JSON.stringify({ fields }),
-      });
+      })
     },
 
     // Transition issue status
@@ -1556,144 +1708,151 @@ export const createJiraClient = (config: JiraConfig) => {
       return request(`/issue/${issueKey}/transitions`, {
         method: 'POST',
         body: JSON.stringify({ transition: { id: transitionId } }),
-      });
+      })
     },
-  };
-};
+  }
+}
 
 // Field mapping utilities
 const mapTicketTypeToJira = (type: string): string => {
   const map: Record<string, string> = {
-    'pips_project': 'Epic',
-    'task': 'Task',
-    'bug': 'Bug',
-    'feature': 'Story',
-    'general': 'Task',
-  };
-  return map[type] ?? 'Task';
-};
+    pips_project: 'Epic',
+    task: 'Task',
+    bug: 'Bug',
+    feature: 'Story',
+    general: 'Task',
+  }
+  return map[type] ?? 'Task'
+}
 
 const mapPriorityToJira = (priority: string): string => {
   const map: Record<string, string> = {
-    'critical': 'Highest',
-    'high': 'High',
-    'medium': 'Medium',
-    'low': 'Low',
-    'none': 'Lowest',
-  };
-  return map[priority] ?? 'Medium';
-};
+    critical: 'Highest',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    none: 'Lowest',
+  }
+  return map[priority] ?? 'Medium'
+}
 ```
 
 ### 6.3 Azure DevOps Connector
 
 ```typescript
 // lib/integrations/azure-devops/client.ts
-import { z } from 'zod';
+import { z } from 'zod'
 
 const adoConfigSchema = z.object({
-  orgUrl: z.string().url(),       // e.g., "https://dev.azure.com/acme"
-  pat: z.string().min(1),         // Personal Access Token
+  orgUrl: z.string().url(), // e.g., "https://dev.azure.com/acme"
+  pat: z.string().min(1), // Personal Access Token
   project: z.string().min(1),
-});
+})
 
-type AzureDevOpsConfig = z.infer<typeof adoConfigSchema>;
+type AzureDevOpsConfig = z.infer<typeof adoConfigSchema>
 
 export const createAzureDevOpsClient = (config: AzureDevOpsConfig) => {
   const headers = {
-    'Authorization': `Basic ${btoa(`:${config.pat}`)}`,
+    Authorization: `Basic ${btoa(`:${config.pat}`)}`,
     'Content-Type': 'application/json',
-  };
+  }
 
   const request = async (path: string, options?: RequestInit) => {
-    const url = `${config.orgUrl}/${config.project}/_apis${path}`;
-    const separator = path.includes('?') ? '&' : '?';
+    const url = `${config.orgUrl}/${config.project}/_apis${path}`
+    const separator = path.includes('?') ? '&' : '?'
     const res = await fetch(`${url}${separator}api-version=7.1`, {
       ...options,
       headers: { ...headers, ...options?.headers },
-    });
-    if (!res.ok) throw new Error(`ADO API error: ${res.status} ${await res.text()}`);
-    return res.json();
-  };
+    })
+    if (!res.ok) throw new Error(`ADO API error: ${res.status} ${await res.text()}`)
+    return res.json()
+  }
 
   return {
     getWorkItems: async (ids: number[]) => {
-      return request(`/wit/workitems?ids=${ids.join(',')}&$expand=all`);
+      return request(`/wit/workitems?ids=${ids.join(',')}&$expand=all`)
     },
 
-    createWorkItem: async (type: string, fields: Array<{ op: string; path: string; value: unknown }>) => {
+    createWorkItem: async (
+      type: string,
+      fields: Array<{ op: string; path: string; value: unknown }>,
+    ) => {
       return request(`/wit/workitems/$${type}`, {
         method: 'POST',
         headers: { ...headers, 'Content-Type': 'application/json-patch+json' },
         body: JSON.stringify(fields),
-      });
+      })
     },
 
     queryWorkItems: async (wiql: string) => {
       return request('/wit/wiql', {
         method: 'POST',
         body: JSON.stringify({ query: wiql }),
-      });
+      })
     },
-  };
-};
+  }
+}
 ```
 
 ### 6.4 AHA! Connector
 
 ```typescript
 // lib/integrations/aha/client.ts
-import { z } from 'zod';
+import { z } from 'zod'
 
 const ahaConfigSchema = z.object({
-  domain: z.string(),            // e.g., "acme" for acme.aha.io
+  domain: z.string(), // e.g., "acme" for acme.aha.io
   apiKey: z.string().min(1),
   productId: z.string().min(1),
-});
+})
 
-type AhaConfig = z.infer<typeof ahaConfigSchema>;
+type AhaConfig = z.infer<typeof ahaConfigSchema>
 
 export const createAhaClient = (config: AhaConfig) => {
-  const baseUrl = `https://${config.domain}.aha.io/api/v1`;
+  const baseUrl = `https://${config.domain}.aha.io/api/v1`
   const headers = {
-    'Authorization': `Bearer ${config.apiKey}`,
+    Authorization: `Bearer ${config.apiKey}`,
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+    Accept: 'application/json',
+  }
 
   const request = async (path: string, options?: RequestInit) => {
     const res = await fetch(`${baseUrl}${path}`, {
       ...options,
       headers: { ...headers, ...options?.headers },
-    });
-    if (!res.ok) throw new Error(`AHA! API error: ${res.status} ${await res.text()}`);
-    return res.json();
-  };
+    })
+    if (!res.ok) throw new Error(`AHA! API error: ${res.status} ${await res.text()}`)
+    return res.json()
+  }
 
   return {
     getFeatures: async (page = 1, perPage = 50) => {
-      return request(`/products/${config.productId}/features?page=${page}&per_page=${perPage}`);
+      return request(`/products/${config.productId}/features?page=${page}&per_page=${perPage}`)
     },
 
-    createFeature: async (feature: { name: string; description: string; workflow_status?: string }) => {
+    createFeature: async (feature: {
+      name: string
+      description: string
+      workflow_status?: string
+    }) => {
       return request(`/products/${config.productId}/features`, {
         method: 'POST',
         body: JSON.stringify({ feature }),
-      });
+      })
     },
 
     updateFeature: async (featureId: string, updates: Record<string, unknown>) => {
       return request(`/features/${featureId}`, {
         method: 'PUT',
         body: JSON.stringify({ feature: updates }),
-      });
+      })
     },
 
     getIdeas: async (page = 1) => {
-      return request(`/products/${config.productId}/ideas?page=${page}`);
+      return request(`/products/${config.productId}/ideas?page=${page}`)
     },
-  };
-};
+  }
+}
 ```
 
 ### 6.5 Integration Sync Engine
@@ -1702,11 +1861,11 @@ export const createAhaClient = (config: AhaConfig) => {
 // lib/integrations/sync-engine.ts
 
 export type SyncResult = {
-  created: number;
-  updated: number;
-  errors: Array<{ id: string; error: string }>;
-  cursor: string;
-};
+  created: number
+  updated: number
+  errors: Array<{ id: string; error: string }>
+  cursor: string
+}
 
 export const createSyncEngine = (provider: 'jira' | 'azure_devops' | 'aha') => {
   return {
@@ -1724,7 +1883,7 @@ export const createSyncEngine = (provider: 'jira' | 'azure_devops' | 'aha') => {
       //    c. If no: create new ticket with external_id set
       // 5. Update sync_cursor
       // 6. Return results
-      throw new Error('Implementation per provider');
+      throw new Error('Implementation per provider')
     },
 
     /**
@@ -1736,7 +1895,7 @@ export const createSyncEngine = (provider: 'jira' | 'azure_devops' | 'aha') => {
       // 2. Map PIPS fields to provider fields
       // 3. If ticket has external_id: update in external system
       // 4. If no external_id: create in external system, save external_id
-      throw new Error('Implementation per provider');
+      throw new Error('Implementation per provider')
     },
 
     /**
@@ -1750,10 +1909,10 @@ export const createSyncEngine = (provider: 'jira' | 'azure_devops' | 'aha') => {
       externalData: Record<string, unknown>,
     ): Promise<'local' | 'external'> => {
       // Compare timestamps, log both versions to audit_log
-      throw new Error('Implementation per provider');
+      throw new Error('Implementation per provider')
     },
-  };
-};
+  }
+}
 ```
 
 ### 6.6 Sync Scheduling
@@ -1779,7 +1938,7 @@ SELECT cron.schedule(
 
 ---
 
-## 7. White-Label System
+## 7. White-Label System [DEFERRED — schema exists, no UI]
 
 ### 7.1 Theming Architecture
 
@@ -1787,14 +1946,14 @@ The white-label system uses CSS custom properties (variables) that are dynamical
 
 ```typescript
 // lib/theme/org-theme.ts
-import { type OrgSettings } from '@/types/database';
+import { type OrgSettings } from '@/types/database'
 
 export type ThemeVariables = {
-  '--brand-primary': string;
-  '--brand-secondary': string;
-  '--brand-primary-foreground': string;
-  '--brand-name': string;
-};
+  '--brand-primary': string
+  '--brand-secondary': string
+  '--brand-primary-foreground': string
+  '--brand-name': string
+}
 
 export const buildThemeVariables = (settings: OrgSettings): ThemeVariables => {
   return {
@@ -1802,34 +1961,34 @@ export const buildThemeVariables = (settings: OrgSettings): ThemeVariables => {
     '--brand-secondary': settings.secondary_color ?? '#8b5cf6',
     '--brand-primary-foreground': getContrastColor(settings.primary_color ?? '#06b6d4'),
     '--brand-name': settings.brand_name ?? 'PIPS',
-  };
-};
+  }
+}
 
 // Determine black or white foreground based on background luminance
 const getContrastColor = (hex: string): string => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? '#000000' : '#ffffff';
-};
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.5 ? '#000000' : '#ffffff'
+}
 ```
 
 ```tsx
 // app/[orgSlug]/layout.tsx
-import { buildThemeVariables } from '@/lib/theme/org-theme';
-import { getOrgSettings } from '@/lib/data/org';
+import { buildThemeVariables } from '@/lib/theme/org-theme'
+import { getOrgSettings } from '@/lib/data/org'
 
 export const OrgLayout = async ({
   children,
   params,
 }: {
-  children: React.ReactNode;
-  params: Promise<{ orgSlug: string }>;
+  children: React.ReactNode
+  params: Promise<{ orgSlug: string }>
 }) => {
-  const { orgSlug } = await params;
-  const settings = await getOrgSettings(orgSlug);
-  const theme = buildThemeVariables(settings);
+  const { orgSlug } = await params
+  const settings = await getOrgSettings(orgSlug)
+  const theme = buildThemeVariables(settings)
 
   return (
     <div
@@ -1839,11 +1998,7 @@ export const OrgLayout = async ({
       <header className="border-b">
         <div className="container flex items-center gap-3 py-4">
           {settings.logo_dark_url ? (
-            <img
-              src={settings.logo_dark_url}
-              alt={settings.brand_name ?? 'PIPS'}
-              className="h-8"
-            />
+            <img src={settings.logo_dark_url} alt={settings.brand_name ?? 'PIPS'} className="h-8" />
           ) : (
             <span className="text-lg font-bold" style={{ color: 'var(--brand-primary)' }}>
               {settings.brand_name ?? 'PIPS'}
@@ -1852,12 +2007,10 @@ export const OrgLayout = async ({
         </div>
       </header>
       {children}
-      {settings.custom_css && (
-        <style dangerouslySetInnerHTML={{ __html: settings.custom_css }} />
-      )}
+      {settings.custom_css && <style dangerouslySetInnerHTML={{ __html: settings.custom_css }} />}
     </div>
-  );
-};
+  )
+}
 ```
 
 ### 7.2 Custom Domain Support
@@ -1865,6 +2018,7 @@ export const OrgLayout = async ({
 Each organization can optionally configure a custom domain (e.g., `pips.acmecorp.com`).
 
 **Setup flow:**
+
 1. Org admin enters their desired domain in Settings.
 2. System displays a CNAME record they need to add: `pips.acmecorp.com CNAME cname.vercel-dns.com`
 3. System calls Vercel API to add the domain to the project.
@@ -1873,39 +2027,39 @@ Each organization can optionally configure a custom domain (e.g., `pips.acmecorp
 
 ```typescript
 // middleware.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { createMiddlewareClient } from '@/lib/supabase/middleware';
+import { NextRequest, NextResponse } from 'next/server'
+import { createMiddlewareClient } from '@/lib/supabase/middleware'
 
 export const middleware = async (req: NextRequest) => {
-  const hostname = req.headers.get('host') ?? '';
+  const hostname = req.headers.get('host') ?? ''
 
   // Check if this is a custom domain (not the main app domain)
   if (!hostname.endsWith('pips.app') && !hostname.includes('localhost')) {
     // Look up org by custom domain
-    const supabase = createMiddlewareClient(req);
+    const supabase = createMiddlewareClient(req)
     const { data: settings } = await supabase
       .from('org_settings')
       .select('org_id, organizations!inner(slug)')
       .eq('custom_domain', hostname)
-      .single();
+      .single()
 
     if (settings) {
-      const orgSlug = (settings.organizations as { slug: string }).slug;
+      const orgSlug = (settings.organizations as { slug: string }).slug
       // Rewrite to the org-scoped route
-      const url = req.nextUrl.clone();
-      url.pathname = `/${orgSlug}${url.pathname}`;
-      return NextResponse.rewrite(url);
+      const url = req.nextUrl.clone()
+      url.pathname = `/${orgSlug}${url.pathname}`
+      return NextResponse.rewrite(url)
     }
   }
 
   // Standard auth session refresh
-  const { response } = await createMiddlewareClient(req);
-  return response;
-};
+  const { response } = await createMiddlewareClient(req)
+  return response
+}
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|api/v1/health).*)'],
-};
+}
 ```
 
 ### 7.3 Email Template Branding
@@ -1952,55 +2106,55 @@ The 6 PIPS steps have a default color coding system that organizations can overr
 // lib/theme/pips-colors.ts
 
 export const DEFAULT_STEP_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  identify:     { bg: '#ef4444', text: '#ffffff', label: 'Identify' },
-  analyze:      { bg: '#f97316', text: '#ffffff', label: 'Analyze' },
-  generate:     { bg: '#eab308', text: '#000000', label: 'Generate' },
-  select_plan:  { bg: '#22c55e', text: '#ffffff', label: 'Select & Plan' },
-  implement:    { bg: '#3b82f6', text: '#ffffff', label: 'Implement' },
-  evaluate:     { bg: '#8b5cf6', text: '#ffffff', label: 'Evaluate' },
-};
+  identify: { bg: '#ef4444', text: '#ffffff', label: 'Identify' },
+  analyze: { bg: '#f97316', text: '#ffffff', label: 'Analyze' },
+  generate: { bg: '#eab308', text: '#000000', label: 'Generate' },
+  select_plan: { bg: '#22c55e', text: '#ffffff', label: 'Select & Plan' },
+  implement: { bg: '#3b82f6', text: '#ffffff', label: 'Implement' },
+  evaluate: { bg: '#8b5cf6', text: '#ffffff', label: 'Evaluate' },
+}
 
 export const getStepColors = (
   step: string,
-  orgOverrides?: Record<string, { bg: string; text: string; label: string }>
+  orgOverrides?: Record<string, { bg: string; text: string; label: string }>,
 ) => {
-  return orgOverrides?.[step] ?? DEFAULT_STEP_COLORS[step] ?? DEFAULT_STEP_COLORS['identify'];
-};
+  return orgOverrides?.[step] ?? DEFAULT_STEP_COLORS[step] ?? DEFAULT_STEP_COLORS['identify']
+}
 ```
 
 ---
 
-## 8. Performance & Scalability
+## 8. Performance & Scalability [PARTIALLY BUILT]
 
 ### 8.1 Caching Strategy
 
-| Layer | Technology | TTL | Purpose |
-|-------|-----------|-----|---------|
-| **CDN** | Vercel Edge Network | ISR (60s) | Static pages, marketing, docs |
-| **Server** | Next.js `unstable_cache` | 30-300s | Org settings, team lists, user profiles |
-| **Database** | Materialized views | Refresh on write | Dashboard aggregations, ticket counts |
-| **Client** | Zustand + SWR | staleWhileRevalidate | Ticket lists, project data |
-| **Search** | Postgres FTS | Real-time | No cache needed — query is fast with GIN index |
-| **Redis** | Upstash Redis | Varies | Rate limiting, session data, feature flags |
+| Layer        | Technology               | TTL                  | Purpose                                        |
+| ------------ | ------------------------ | -------------------- | ---------------------------------------------- |
+| **CDN**      | Vercel Edge Network      | ISR (60s)            | Static pages, marketing, docs                  |
+| **Server**   | Next.js `unstable_cache` | 30-300s              | Org settings, team lists, user profiles        |
+| **Database** | Materialized views       | Refresh on write     | Dashboard aggregations, ticket counts          |
+| **Client**   | Zustand + SWR            | staleWhileRevalidate | Ticket lists, project data                     |
+| **Search**   | Postgres FTS             | Real-time            | No cache needed — query is fast with GIN index |
+| **Redis**    | Upstash Redis            | Varies               | Rate limiting, session data, feature flags     |
 
 ```typescript
 // Example: Cached org settings fetch
-import { unstable_cache } from 'next/cache';
-import { createServiceClient } from '@/lib/supabase/service';
+import { unstable_cache } from 'next/cache'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export const getOrgSettings = unstable_cache(
   async (orgSlug: string) => {
-    const supabase = createServiceClient();
+    const supabase = createServiceClient()
     const { data } = await supabase
       .from('org_settings')
       .select('*, organizations!inner(id, name, slug, plan)')
       .eq('organizations.slug', orgSlug)
-      .single();
-    return data;
+      .single()
+    return data
   },
   ['org-settings'],
-  { revalidate: 300, tags: ['org-settings'] }
-);
+  { revalidate: 300, tags: ['org-settings'] },
+)
 ```
 
 ### 8.2 Database Indexing Strategy
@@ -2054,16 +2208,16 @@ Supabase uses PgBouncer in transaction mode by default. Key settings:
 
 ### 8.5 Expected Load and Scaling Plan
 
-| Phase | Users | Orgs | Tickets/mo | Approach |
-|-------|-------|------|------------|----------|
-| **Launch** | 1-100 | 1-10 | <1K | Supabase Free/Pro, Vercel Pro |
-| **Growth** | 100-1K | 10-50 | 1K-10K | Supabase Pro, add read replicas if needed |
-| **Scale** | 1K-10K | 50-500 | 10K-100K | Supabase Team, Upstash Redis, consider Typesense for search |
-| **Enterprise** | 10K+ | 500+ | 100K+ | Supabase Enterprise, dedicated Postgres, edge caching, CDN for all assets |
+| Phase          | Users  | Orgs   | Tickets/mo | Approach                                                                  |
+| -------------- | ------ | ------ | ---------- | ------------------------------------------------------------------------- |
+| **Launch**     | 1-100  | 1-10   | <1K        | Supabase Free/Pro, Vercel Pro                                             |
+| **Growth**     | 100-1K | 10-50  | 1K-10K     | Supabase Pro, add read replicas if needed                                 |
+| **Scale**      | 1K-10K | 50-500 | 10K-100K   | Supabase Team, Upstash Redis, consider Typesense for search               |
+| **Enterprise** | 10K+   | 500+   | 100K+      | Supabase Enterprise, dedicated Postgres, edge caching, CDN for all assets |
 
 ---
 
-## 9. DevOps & Infrastructure
+## 9. DevOps & Infrastructure [BUILT]
 
 ### 9.1 CI/CD Pipeline (GitHub Actions)
 
@@ -2143,23 +2297,23 @@ jobs:
 
 ### 9.2 Environment Strategy
 
-| Environment | URL | Database | Branch | Purpose |
-|-------------|-----|----------|--------|---------|
-| **Local** | localhost:3000 | Supabase local (Docker) | feature/* | Development |
-| **Preview** | pr-123.pips.app | Supabase branching (preview DB) | PR branches | PR review |
-| **Staging** | staging.pips.app | Staging Supabase project | main | Pre-production validation |
-| **Production** | app.pips.app | Production Supabase project | main (via release tag) | Live |
+| Environment    | URL              | Database                        | Branch                 | Purpose                   |
+| -------------- | ---------------- | ------------------------------- | ---------------------- | ------------------------- |
+| **Local**      | localhost:3000   | Supabase local (Docker)         | feature/\*             | Development               |
+| **Preview**    | pr-123.pips.app  | Supabase branching (preview DB) | PR branches            | PR review                 |
+| **Staging**    | staging.pips.app | Staging Supabase project        | main                   | Pre-production validation |
+| **Production** | app.pips.app     | Production Supabase project     | main (via release tag) | Live                      |
 
 ### 9.3 Monitoring & Alerting
 
-| Concern | Tool | Details |
-|---------|------|---------|
-| **Error tracking** | Sentry | Source maps uploaded at build. Alert on new errors, error spikes. |
-| **Performance** | Vercel Analytics | Web Vitals (LCP, FID, CLS), Real User Monitoring |
-| **Uptime** | Better Uptime or Vercel | Health endpoint checks every 60s |
-| **Database** | Supabase Dashboard | Query performance, connection count, storage usage |
-| **Logs** | Vercel Logs + Supabase Logs | Structured JSON logging. Ship to Axiom or Datadog if needed. |
-| **Alerting** | Sentry + PagerDuty | Error rate thresholds, downtime, slow queries |
+| Concern            | Tool                        | Details                                                           |
+| ------------------ | --------------------------- | ----------------------------------------------------------------- |
+| **Error tracking** | Sentry                      | Source maps uploaded at build. Alert on new errors, error spikes. |
+| **Performance**    | Vercel Analytics            | Web Vitals (LCP, FID, CLS), Real User Monitoring                  |
+| **Uptime**         | Better Uptime or Vercel     | Health endpoint checks every 60s                                  |
+| **Database**       | Supabase Dashboard          | Query performance, connection count, storage usage                |
+| **Logs**           | Vercel Logs + Supabase Logs | Structured JSON logging. Ship to Axiom or Datadog if needed.      |
+| **Alerting**       | Sentry + PagerDuty          | Error rate thresholds, downtime, slow queries                     |
 
 ### 9.4 Database Migration Strategy
 
@@ -2183,6 +2337,7 @@ pnpm supabase db push --linked
 ```
 
 Migration rules:
+
 1. **Never modify existing migrations** — Always create new ones.
 2. **Backward-compatible changes only** — Add columns as nullable, never drop columns in the same release as code that stops using them.
 3. **Test with production data volume** — Use `supabase db dump` from staging to test migrations.
@@ -2190,18 +2345,18 @@ Migration rules:
 
 ### 9.5 Backup & Disaster Recovery
 
-| Concern | Strategy |
-|---------|----------|
-| **Database backups** | Supabase Pro: daily automated backups, 7-day retention. Point-in-time recovery (PITR) on Team/Enterprise plans. |
-| **Storage backups** | Supabase Storage is backed up with the database. Critical files also replicated to a separate S3 bucket monthly. |
-| **Code** | GitHub repository with branch protection. Tags for every production release. |
-| **Secrets** | Stored in Vercel environment variables (encrypted). Rotated quarterly. Documented in a secrets inventory. |
-| **RTO/RPO** | RTO: 1 hour. RPO: 24 hours (daily backup), 1 minute (with PITR on Team plan). |
-| **Disaster recovery** | Restore from Supabase backup to a new project. Update Vercel env vars. DNS failover. Documented runbook. |
+| Concern               | Strategy                                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Database backups**  | Supabase Pro: daily automated backups, 7-day retention. Point-in-time recovery (PITR) on Team/Enterprise plans.  |
+| **Storage backups**   | Supabase Storage is backed up with the database. Critical files also replicated to a separate S3 bucket monthly. |
+| **Code**              | GitHub repository with branch protection. Tags for every production release.                                     |
+| **Secrets**           | Stored in Vercel environment variables (encrypted). Rotated quarterly. Documented in a secrets inventory.        |
+| **RTO/RPO**           | RTO: 1 hour. RPO: 24 hours (daily backup), 1 minute (with PITR on Team plan).                                    |
+| **Disaster recovery** | Restore from Supabase backup to a new project. Update Vercel env vars. DNS failover. Documented runbook.         |
 
 ---
 
-## 10. Project Structure
+## 10. Project Structure [BUILT]
 
 ### 10.1 Monorepo Structure
 
@@ -2280,15 +2435,17 @@ pips2/
 │       │   └── error.tsx
 │       │
 │       ├── components/
-│       │   ├── ui/                   # shadcn/ui components (Button, Dialog, etc.)
-│       │   ├── layout/               # Shell, Sidebar, Header, Breadcrumbs
-│       │   ├── tickets/              # TicketCard, TicketBoard, TicketForm
-│       │   ├── projects/             # ProjectCard, StepWizard, FormRenderer
-│       │   ├── forms/                # PIPS form components (Fishbone, 5Why, etc.)
-│       │   ├── teams/
-│       │   ├── comments/
-│       │   ├── notifications/
-│       │   └── shared/               # Avatar, Badge, EmptyState, LoadingSkeleton
+│       │   ├── ui/                   # [BUILT] shadcn/ui components (Button, Dialog, etc.)
+│       │   ├── layout/               # [BUILT] Shell, Sidebar, Header, Breadcrumbs
+│       │   ├── pips/                 # [BUILT] StepStepper, StepView, FormShell, ProjectCard
+│       │   ├── tickets/              # [BUILT] KanbanBoard, TicketCard, TicketForm, CommentSection
+│       │   ├── dashboard/            # [BUILT] StatCards, ProjectsByStepChart, RecentActivity
+│       │   ├── knowledge/            # [BUILT] ContentReader, BookmarkButton, MarkdownContent
+│       │   ├── knowledge-cadence/    # [BUILT] KnowledgeCadenceBar (contextual content)
+│       │   ├── training/             # [SCAFFOLDED] TrainingLanding, ProgressRing, ExerciseComponents
+│       │   ├── seo/                  # [BUILT] JSON-LD structured data component
+│       │   ├── landing/              # [BUILT] HeroSection, FeaturesSection, MethodologySection
+│       │   └── shared/               # [BUILT] Avatar, Badge, EmptyState, LoadingSkeleton
 │       │
 │       ├── lib/
 │       │   ├── supabase/
@@ -2384,37 +2541,37 @@ pips2/
 
 ### 10.2 Code Conventions
 
-| Convention | Rule |
-|-----------|------|
-| **Components** | Functional, arrow functions, named exports |
-| **Files** | kebab-case for files, PascalCase for components |
-| **Imports** | Path aliases: `@/` for `apps/web/`, no relative imports beyond `./` or `../` |
-| **Types** | Colocated with their module. Shared types in `types/` directory |
-| **File size** | Target <200 lines. Extract hooks, utilities, sub-components |
-| **Indentation** | 2 spaces |
-| **Naming** | `use-` prefix for hooks, `-store` suffix for Zustand stores |
-| **API routes** | One file per HTTP method grouping. Zod schema at top. |
-| **Database** | Snake_case columns, camelCase in TypeScript (Supabase handles conversion) |
+| Convention      | Rule                                                                         |
+| --------------- | ---------------------------------------------------------------------------- |
+| **Components**  | Functional, arrow functions, named exports                                   |
+| **Files**       | kebab-case for files, PascalCase for components                              |
+| **Imports**     | Path aliases: `@/` for `apps/web/`, no relative imports beyond `./` or `../` |
+| **Types**       | Colocated with their module. Shared types in `types/` directory              |
+| **File size**   | Target <200 lines. Extract hooks, utilities, sub-components                  |
+| **Indentation** | 2 spaces                                                                     |
+| **Naming**      | `use-` prefix for hooks, `-store` suffix for Zustand stores                  |
+| **API routes**  | One file per HTTP method grouping. Zod schema at top.                        |
+| **Database**    | Snake_case columns, camelCase in TypeScript (Supabase handles conversion)    |
 
 ### 10.3 Component Pattern Example
 
 ```tsx
 // components/tickets/ticket-card.tsx
-'use client';
+'use client'
 
-import { type FC, memo } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getStepColors } from '@/lib/theme/pips-colors';
-import { formatDistanceToNow } from 'date-fns';
-import { type Ticket } from '@/types/database';
+import { type FC, memo } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getStepColors } from '@/lib/theme/pips-colors'
+import { formatDistanceToNow } from 'date-fns'
+import { type Ticket } from '@/types/database'
 
 type TicketCardProps = {
   ticket: Ticket & {
-    assignee?: { id: string; full_name: string; avatar_url: string | null };
-  };
-  onClick?: (ticketId: string) => void;
-};
+    assignee?: { id: string; full_name: string; avatar_url: string | null }
+  }
+  onClick?: (ticketId: string) => void
+}
 
 export const TicketCard: FC<TicketCardProps> = memo(({ ticket, onClick }) => {
   const priorityColors: Record<string, string> = {
@@ -2423,7 +2580,7 @@ export const TicketCard: FC<TicketCardProps> = memo(({ ticket, onClick }) => {
     medium: 'bg-yellow-500',
     low: 'bg-blue-500',
     none: 'bg-gray-400',
-  };
+  }
 
   return (
     <button
@@ -2432,9 +2589,7 @@ export const TicketCard: FC<TicketCardProps> = memo(({ ticket, onClick }) => {
       aria-label={`Ticket ${ticket.sequence_number}: ${ticket.title}`}
     >
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground">
-          #{ticket.sequence_number}
-        </span>
+        <span className="text-xs font-medium text-muted-foreground">#{ticket.sequence_number}</span>
         <div className={`h-2 w-2 rounded-full ${priorityColors[ticket.priority]}`} />
       </div>
 
@@ -2466,44 +2621,44 @@ export const TicketCard: FC<TicketCardProps> = memo(({ ticket, onClick }) => {
         </span>
       </div>
     </button>
-  );
-});
+  )
+})
 
-TicketCard.displayName = 'TicketCard';
+TicketCard.displayName = 'TicketCard'
 ```
 
 ### 10.4 Testing Strategy
 
-| Type | Tool | Scope | Target Coverage |
-|------|------|-------|-----------------|
-| **Unit** | Vitest | Utility functions, hooks, Zustand stores, Zod schemas | 80%+ |
-| **Component** | Vitest + Testing Library | UI components in isolation | Key interactive components |
-| **Integration** | Vitest + Supabase local | API routes, database queries, RLS policies | All API endpoints |
-| **E2E** | Playwright | Full user flows (signup, create project, manage tickets) | Critical paths |
-| **Visual** | Playwright screenshots | Component appearance across themes | White-label variants |
+| Type            | Tool                     | Scope                                                    | Target Coverage            |
+| --------------- | ------------------------ | -------------------------------------------------------- | -------------------------- |
+| **Unit**        | Vitest                   | Utility functions, hooks, Zustand stores, Zod schemas    | 80%+                       |
+| **Component**   | Vitest + Testing Library | UI components in isolation                               | Key interactive components |
+| **Integration** | Vitest + Supabase local  | API routes, database queries, RLS policies               | All API endpoints          |
+| **E2E**         | Playwright               | Full user flows (signup, create project, manage tickets) | Critical paths             |
+| **Visual**      | Playwright screenshots   | Component appearance across themes                       | White-label variants       |
 
 ```typescript
 // tests/integration/api/tickets.test.ts
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createTestClient, createTestOrg, createTestUser } from '../helpers';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { createTestClient, createTestOrg, createTestUser } from '../helpers'
 
 describe('POST /api/v1/tickets', () => {
-  let orgId: string;
-  let authToken: string;
+  let orgId: string
+  let authToken: string
 
   beforeAll(async () => {
-    const user = await createTestUser();
-    const org = await createTestOrg(user.id);
-    orgId = org.id;
-    authToken = user.token;
-  });
+    const user = await createTestUser()
+    const org = await createTestOrg(user.id)
+    orgId = org.id
+    authToken = user.token
+  })
 
   it('creates a ticket with valid data', async () => {
     const res = await fetch('/api/v1/tickets', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
         orgId,
@@ -2511,48 +2666,259 @@ describe('POST /api/v1/tickets', () => {
         type: 'pips_project',
         priority: 'high',
       }),
-    });
+    })
 
-    expect(res.status).toBe(201);
-    const { data } = await res.json();
-    expect(data.title).toBe('Reduce checkout abandonment by 15%');
-    expect(data.sequence_number).toBe(1);
-    expect(data.type).toBe('pips_project');
-  });
+    expect(res.status).toBe(201)
+    const { data } = await res.json()
+    expect(data.title).toBe('Reduce checkout abandonment by 15%')
+    expect(data.sequence_number).toBe(1)
+    expect(data.type).toBe('pips_project')
+  })
 
   it('rejects ticket creation for viewers', async () => {
-    const viewer = await createTestUser();
-    await addOrgMember(orgId, viewer.id, 'viewer');
+    const viewer = await createTestUser()
+    await addOrgMember(orgId, viewer.id, 'viewer')
 
     const res = await fetch('/api/v1/tickets', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${viewer.token}`,
+        Authorization: `Bearer ${viewer.token}`,
       },
       body: JSON.stringify({
         orgId,
         title: 'Should not work',
       }),
-    });
+    })
 
-    expect(res.status).toBe(403);
-  });
+    expect(res.status).toBe(403)
+  })
 
   it('validates required fields', async () => {
     const res = await fetch('/api/v1/tickets', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({ orgId }),
-    });
+    })
 
-    expect(res.status).toBe(400);
-  });
-});
+    expect(res.status).toBe(400)
+  })
+})
 ```
+
+---
+
+## 11. Knowledge Hub Architecture [BUILT]
+
+### 11.1 Overview
+
+The Knowledge Hub is a 4-pillar content system that provides contextual methodology education within the PIPS application. It is the primary differentiator: "the methodology IS the software."
+
+**Four Pillars:**
+
+| Pillar   | Content Type         | Route                                                        | Description                                     |
+| -------- | -------------------- | ------------------------------------------------------------ | ----------------------------------------------- |
+| Book     | Chapter reading      | `/knowledge/book/[chapterSlug]`                              | Full PIPS methodology book (205 content nodes)  |
+| Guide    | Step and tool guides | `/knowledge/guide/step/[n]`, `/knowledge/guide/tools/[slug]` | Interactive step-by-step methodology guides     |
+| Workbook | Practice exercises   | `/knowledge/workbook/[stepNumber]`                           | Hands-on exercises using PIPS forms             |
+| Workshop | Facilitated modules  | `/knowledge/workshop/modules/[slug]`                         | Workshop session modules with facilitator notes |
+
+### 11.2 Content Data Model
+
+```sql
+-- Global catalog table (no RLS) — 205 nodes seeded
+CREATE TABLE content_nodes (
+  id          TEXT PRIMARY KEY,                -- e.g., 'book-ch04-s01'
+  pillar      TEXT NOT NULL CHECK (pillar IN ('book', 'guide', 'workbook', 'workshop')),
+  title       TEXT NOT NULL,
+  slug        TEXT NOT NULL,
+  summary     TEXT,
+  body_md     TEXT NOT NULL,                   -- Markdown content
+  parent_id   TEXT REFERENCES content_nodes(id),
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  tags        JSONB NOT NULL DEFAULT '{}',     -- { steps: [], tools: [], roles: [], principles: [], difficulty: '' }
+  access_level TEXT NOT NULL DEFAULT 'public'
+               CHECK (access_level IN ('public', 'free-registered', 'paid')),
+  search_vector TSVECTOR GENERATED ALWAYS AS (
+    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(summary, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(body_md, '')), 'C')
+  ) STORED,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+### 11.3 User Interaction Tables
+
+- **`reading_sessions`** — Per-user, per-pillar "continue where you left off" tracking (scroll position, last content node)
+- **`content_bookmarks`** — User saved content nodes with optional note (unique per user per node)
+- **`content_read_history`** — Track reads per node (first/last read, read count)
+
+All three tables use user-scoped RLS: `user_id = auth.uid()`.
+
+### 11.4 Cadence Bar [BUILT]
+
+The Cadence Bar is a contextual content widget that surfaces relevant methodology content on:
+
+- All 18 PIPS form pages (via `form-shell.tsx`)
+- Step view page
+- Ticket detail page (when linked to a PIPS step)
+- Dashboard (overview content)
+
+**Implementation:** `components/knowledge-cadence/knowledge-cadence-bar.tsx` uses `buildProductContext()` and `matchContentNodes()` from the content taxonomy to find relevant content for the current context.
+
+### 11.5 Search [BUILT]
+
+Full-text search across all content nodes using Postgres `tsvector` + `ts_rank`. The search page at `/knowledge/search` provides debounced input with results grouped by pillar.
+
+---
+
+## 12. Training Mode Architecture [SCAFFOLDED]
+
+### 12.1 Overview
+
+Training Mode provides structured learning paths for PIPS methodology mastery. Users progress through paths containing modules with exercises, tracking completion and scores.
+
+### 12.2 Data Model
+
+```
+training_paths (4 seeded) — Global catalog (no RLS)
+  └── training_modules (27 seeded)
+       └── training_exercises (59 seeded)
+
+training_progress — Per-user, per-module progress (user-scoped RLS)
+training_exercise_data — Per-user, per-exercise submissions (user-scoped RLS)
+```
+
+**Seeded Paths:**
+
+| Path                      | Modules  | Audience               | Duration    |
+| ------------------------- | -------- | ---------------------- | ----------- |
+| Quick Start               | 3        | First-time users       | 1 hour      |
+| PIPS Fundamentals         | 8        | New team members       | 4-6 hours   |
+| Facilitator Certification | 6        | Managers, facilitators | 8-10 hours  |
+| Tool Mastery              | Per-tool | Anyone                 | 30 min each |
+
+### 12.3 Exercise Types
+
+| Type                | Description                    | Config (JSONB)                         |
+| ------------------- | ------------------------------ | -------------------------------------- |
+| `multiple-choice`   | Quiz with answer key           | `{ question, options, correctAnswer }` |
+| `reflection`        | Open-ended prompt              | `{ prompt, minLength }`                |
+| `scenario-practice` | Real-world scenario simulation | `{ scenarioData, expectedOutcomes }`   |
+| `fill-form`         | Practice filling a PIPS form   | `{ formType, sampleData }`             |
+
+### 12.4 Pages [SCAFFOLDED]
+
+- `/training` — Landing page with path cards and progress rings
+- `/training/path/[pathSlug]` — Path detail with module list
+- `/training/path/[pathSlug]/[moduleSlug]` — Module detail with exercises
+- `/training/progress` — Progress dashboard across all paths
+
+### 12.5 Components
+
+- `training-landing.tsx` — Hub landing with path cards
+- `training-progress-ring.tsx` — SVG circular progress indicator
+- `training-module-card.tsx` — Module card with status badge
+- `training-exercise.tsx` — Exercise shell/router
+- `training-multiple-choice.tsx` — MC quiz component
+- `training-reflection.tsx` — Reflection prompt component
+- `scenario-runner.tsx` — Scenario practice runner
+
+---
+
+## 13. Content Pipeline Architecture [BUILT]
+
+### 13.1 Overview
+
+The content pipeline converts PIPS Book markdown source files into structured `content_nodes` database records. It is a build-time process, not a runtime process.
+
+### 13.2 Pipeline Flow
+
+```
+Source: C:/Users/marca/Projects/PIPS/Book/*.md (15+ chapters)
+    │
+    ▼
+Compile: pnpm content:compile (scripts/compile-content.ts)
+    │ Parses markdown, splits on ## headings
+    │ Auto-tags by step/tool detection
+    │ Generates cross-links via relatedNodes
+    │ Strips branding, maps chapters to PIPS steps
+    │ Uses BOOK_CHAPTER_MAP for step/tool assignment
+    │
+    ▼
+Output: scripts/output/content-nodes.json (205 nodes)
+    │
+    ▼
+Seed: pnpm content:seed (scripts/seed-content.ts)
+    │ Reads JSON, upserts into content_nodes via Supabase REST API
+    │ Uses service role key (bypasses RLS)
+    │ Idempotent (upsert by ID)
+    │
+    ▼
+Result: 205 content_nodes in Supabase (FTS active)
+```
+
+### 13.3 Training Seed Script [BUILT]
+
+```
+Script: scripts/seed-training.ts
+    │ Creates 4 paths, 27 modules, 59 exercises
+    │ Links modules to content_nodes via content_node_ids[]
+    │ Idempotent (upsert)
+    │
+    ▼
+Result: Training data in Supabase
+```
+
+### 13.4 Recompile Procedure
+
+If the PIPS Book source files are edited:
+
+```bash
+pnpm content:compile   # Regenerates content-nodes.json
+pnpm content:seed      # Upserts to production
+```
+
+---
+
+## 14. Marketing & SEO Architecture [BUILT]
+
+### 14.1 Overview
+
+Marketing pages live under the `(marketing)` route group and are publicly accessible (no auth required). They serve dual purposes: SEO content for organic search and methodology education for prospective users.
+
+### 14.2 Page Inventory
+
+| Type           | Route Pattern                               | Count   | Status      |
+| -------------- | ------------------------------------------- | ------- | ----------- |
+| Step pages     | `(marketing)/methodology/step/[stepNumber]` | 6       | **[BUILT]** |
+| Tool pages     | `(marketing)/methodology/tools/[toolSlug]`  | 22      | **[BUILT]** |
+| Book previews  | `(marketing)/book/[chapterSlug]`            | 20      | **[BUILT]** |
+| Glossary terms | `(marketing)/resources/glossary/[term]`     | 35      | **[BUILT]** |
+| Templates      | `(marketing)/resources/templates`           | 17      | **[BUILT]** |
+| Resources hub  | `(marketing)/resources`                     | 1       | **[BUILT]** |
+| **Total**      |                                             | **101** |             |
+
+### 14.3 SEO Infrastructure [BUILT]
+
+- **`sitemap.ts`** — Dynamic sitemap generation at `/sitemap.xml` listing all public pages
+- **`robots.ts`** — Robots.txt at `/robots.txt` allowing search engine crawling
+- **JSON-LD** — `components/seo/json-ld.tsx` server component rendering structured data (Organization, WebApplication, Article schemas)
+- **Open Graph** — Per-page title, description, OG image metadata via Next.js `generateMetadata()`
+
+### 14.4 Content Strategy
+
+Each marketing page includes:
+
+- Rich methodology content (not just placeholder text)
+- SEO metadata (title, description, keywords)
+- Related tool/step cross-links
+- CTA to sign up and use the tool in PIPS 2.0
 
 ---
 
@@ -2560,34 +2926,34 @@ describe('POST /api/v1/tickets', () => {
 
 The 26 existing HTML form templates map to these `form_type` values in `project_forms`:
 
-| Step | Form Type | Description |
-|------|-----------|-------------|
-| **Identify** | `problem_statement` | Structured problem definition |
-| **Identify** | `stakeholder_analysis` | Stakeholder identification and impact |
-| **Identify** | `scope_definition` | Project scope and boundaries |
-| **Identify** | `checksheet` | Data collection checksheet |
-| **Analyze** | `fishbone` | Ishikawa cause-and-effect diagram |
-| **Analyze** | `five_why` | 5-Why root cause analysis |
-| **Analyze** | `force_field` | Force field analysis (drivers vs restrainers) |
-| **Analyze** | `pareto` | Pareto chart data (80/20 analysis) |
-| **Analyze** | `process_map` | Current state process mapping |
-| **Generate** | `brainstorming` | Free-form brainstorming session |
-| **Generate** | `brainwriting` | Structured written brainstorming (6-3-5) |
-| **Generate** | `affinity_diagram` | Grouping ideas into themes |
-| **Select & Plan** | `decision_matrix` | Weighted criteria evaluation |
-| **Select & Plan** | `weighted_voting` | Team voting with weights |
-| **Select & Plan** | `cost_benefit` | Cost-benefit analysis |
-| **Select & Plan** | `implementation_plan` | Action items, owners, timeline |
-| **Select & Plan** | `risk_assessment` | Risk identification and mitigation |
-| **Implement** | `raci` | RACI responsibility matrix |
-| **Implement** | `milestone_tracker` | Key milestones and deadlines |
-| **Implement** | `checklist` | Implementation task checklist |
-| **Implement** | `communication_plan` | Stakeholder communication schedule |
-| **Implement** | `change_management` | Change impact and readiness |
-| **Evaluate** | `outcome_measurement` | Before/after metrics comparison |
-| **Evaluate** | `lessons_learned` | What worked, what didn't, recommendations |
-| **Evaluate** | `sustainability_plan` | Control plan for maintaining improvements |
-| **Evaluate** | `project_evaluation` | Overall project evaluation scorecard |
+| Step              | Form Type              | Description                                   |
+| ----------------- | ---------------------- | --------------------------------------------- |
+| **Identify**      | `problem_statement`    | Structured problem definition                 |
+| **Identify**      | `stakeholder_analysis` | Stakeholder identification and impact         |
+| **Identify**      | `scope_definition`     | Project scope and boundaries                  |
+| **Identify**      | `checksheet`           | Data collection checksheet                    |
+| **Analyze**       | `fishbone`             | Ishikawa cause-and-effect diagram             |
+| **Analyze**       | `five_why`             | 5-Why root cause analysis                     |
+| **Analyze**       | `force_field`          | Force field analysis (drivers vs restrainers) |
+| **Analyze**       | `pareto`               | Pareto chart data (80/20 analysis)            |
+| **Analyze**       | `process_map`          | Current state process mapping                 |
+| **Generate**      | `brainstorming`        | Free-form brainstorming session               |
+| **Generate**      | `brainwriting`         | Structured written brainstorming (6-3-5)      |
+| **Generate**      | `affinity_diagram`     | Grouping ideas into themes                    |
+| **Select & Plan** | `decision_matrix`      | Weighted criteria evaluation                  |
+| **Select & Plan** | `weighted_voting`      | Team voting with weights                      |
+| **Select & Plan** | `cost_benefit`         | Cost-benefit analysis                         |
+| **Select & Plan** | `implementation_plan`  | Action items, owners, timeline                |
+| **Select & Plan** | `risk_assessment`      | Risk identification and mitigation            |
+| **Implement**     | `raci`                 | RACI responsibility matrix                    |
+| **Implement**     | `milestone_tracker`    | Key milestones and deadlines                  |
+| **Implement**     | `checklist`            | Implementation task checklist                 |
+| **Implement**     | `communication_plan`   | Stakeholder communication schedule            |
+| **Implement**     | `change_management`    | Change impact and readiness                   |
+| **Evaluate**      | `outcome_measurement`  | Before/after metrics comparison               |
+| **Evaluate**      | `lessons_learned`      | What worked, what didn't, recommendations     |
+| **Evaluate**      | `sustainability_plan`  | Control plan for maintaining improvements     |
+| **Evaluate**      | `project_evaluation`   | Overall project evaluation scorecard          |
 
 Each form type's `data` column stores a JSONB structure specific to that form. The frontend renders the appropriate form UI based on the `form_type` value.
 
@@ -2630,25 +2996,25 @@ NEXT_PUBLIC_MARKETING_URL=https://www.pips.app
 
 The existing ForgePIPS site (static HTML on Vercel) will continue to operate as the marketing/sales site. PIPS 2.0 is a separate application.
 
-| v1 Asset | v2 Migration Path |
-|----------|-------------------|
-| 10 HTML pages | Rebuild as Next.js marketing pages (or keep separate) |
-| 5 API routes | Replace with v2 API. Stripe webhook logic moves to v2. |
-| Supabase tables (`forgepips_*`) | Separate from v2 schema. v1 remains operational. |
+| v1 Asset                         | v2 Migration Path                                            |
+| -------------------------------- | ------------------------------------------------------------ |
+| 10 HTML pages                    | Rebuild as Next.js marketing pages (or keep separate)        |
+| 5 API routes                     | Replace with v2 API. Stripe webhook logic moves to v2.       |
+| Supabase tables (`forgepips_*`)  | Separate from v2 schema. v1 remains operational.             |
 | Stripe products (Team Kit, etc.) | Keep as one-time purchases. v2 adds SaaS subscription model. |
-| Branding (teal `#06b6d4`) | Becomes the default theme. Per-org overrides in v2. |
+| Branding (teal `#06b6d4`)        | Becomes the default theme. Per-org overrides in v2.          |
 
 ---
 
 ## Appendix D: Subscription Tiers (Stripe)
 
-| Plan | Price | Limits | Features |
-|------|-------|--------|----------|
-| **Free** | $0/mo | 3 users, 1 project, 50 tickets | Core PIPS workflow, basic ticketing |
-| **Starter** | $29/mo | 10 users, 5 projects, 500 tickets | All PIPS forms, teams, file attachments |
-| **Professional** | $79/mo | 50 users, unlimited projects, unlimited tickets | Integrations, API access, custom forms, dashboard analytics |
-| **Enterprise** | Custom | Unlimited | SSO/SAML, white-label, custom domain, SLA, dedicated support, audit log export |
+| Plan             | Price  | Limits                                          | Features                                                                       |
+| ---------------- | ------ | ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Free**         | $0/mo  | 3 users, 1 project, 50 tickets                  | Core PIPS workflow, basic ticketing                                            |
+| **Starter**      | $29/mo | 10 users, 5 projects, 500 tickets               | All PIPS forms, teams, file attachments                                        |
+| **Professional** | $79/mo | 50 users, unlimited projects, unlimited tickets | Integrations, API access, custom forms, dashboard analytics                    |
+| **Enterprise**   | Custom | Unlimited                                       | SSO/SAML, white-label, custom domain, SLA, dedicated support, audit log export |
 
 ---
 
-*End of Technical Architecture Plan*
+_End of Technical Architecture Plan — v1.1 (2026-03-04)_

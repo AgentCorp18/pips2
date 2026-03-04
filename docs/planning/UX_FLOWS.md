@@ -1,7 +1,18 @@
 # PIPS 2.0 — UX Flows & User Journey Document
 
-> Version 1.0 | March 2026
+> **Version 1.1 — Updated 2026-03-04**
 > Defines user journeys, critical UX flows, navigation architecture, key screens, and interaction patterns for the PIPS 2.0 SaaS platform.
+> **v1.1 changes:** Added Knowledge Hub flows, Training Mode flows, Marketing page flows, Workshop flows, Cadence Bar navigation, and build-status markers throughout.
+
+---
+
+## Build Status Legend
+
+Throughout this document, section headers and flow descriptions include a status marker:
+
+- **[BUILT]** — Implemented and deployed at pips-app.vercel.app
+- **[SCAFFOLDED]** — DB tables and/or page routes exist, UI is partial or placeholder
+- **[PLANNED]** — Specified but not yet implemented
 
 ---
 
@@ -17,6 +28,10 @@
 8. [Error & Edge Cases](#8-error--edge-cases)
 9. [Responsive Design](#9-responsive-design)
 10. [Onboarding System](#10-onboarding-system)
+11. [Knowledge Hub UX Flows](#11-knowledge-hub-ux-flows)
+12. [Training Mode UX Flows](#12-training-mode-ux-flows)
+13. [Workshop Facilitation UX Flows](#13-workshop-facilitation-ux-flows)
+14. [Marketing Pages UX Flows](#14-marketing-pages-ux-flows)
 
 ---
 
@@ -27,6 +42,7 @@
 Sarah is the primary buyer and power user. Her journey is detailed below because she drives adoption, proves ROI, and expands usage across the organization.
 
 **Stage 1: Awareness**
+
 - Trigger: Sarah's department has recurring quality issues. Leadership is pressuring her to "fix the process." She's been running improvement efforts with spreadsheets, sticky notes in meetings, and email threads — it's chaotic.
 - Discovery channels: LinkedIn article about structured process improvement, Google search for "process improvement software," peer recommendation at a management conference, or PIPS consulting firm referral.
 - First impression: Lands on the PIPS 2.0 marketing site. Sees the tagline connecting methodology to software. Recognizes the 6-step framework if she has PIPS training; if not, the landing page educates her on the approach.
@@ -35,6 +51,7 @@ Sarah is the primary buyer and power user. Her journey is detailed below because
 - Exit criteria: She clicks "Start Free Trial" or "Request Demo."
 
 **Stage 2: Evaluation**
+
 - Trial signup: Email + password, or SSO. She enters her company name and department. No credit card required for 14-day trial.
 - First 10 minutes: The onboarding wizard asks about her role (she selects "Manager / Process Lead"), team size, and whether she's familiar with PIPS methodology. Based on answers, the system tailors the experience.
 - Evaluation checklist (mental): Can I set up a real improvement project? Can I invite my team without IT involvement? Does it guide me through the methodology or just give me empty boards? Can I show my VP a dashboard?
@@ -43,6 +60,7 @@ Sarah is the primary buyer and power user. Her journey is detailed below because
 - Exit criteria: She creates her first real PIPS project and invites at least 2 team members.
 
 **Stage 3: Onboarding**
+
 - Org setup: Names her workspace (e.g., "Acme Manufacturing — Quality"), uploads logo (optional), selects time zone.
 - Team invites: She enters 4-6 email addresses. Each gets an invite with a personalized message. She assigns roles: herself as Admin, her supervisor as Viewer, team leads as Members.
 - First project creation: The onboarding wizard walks her through creating her first PIPS project. She names it something like "Reduce Customer Complaint Resolution Time." The system guides her through Step 1 (Identify) immediately.
@@ -50,6 +68,7 @@ Sarah is the primary buyer and power user. Her journey is detailed below because
 - Exit criteria: Her first PIPS project exists with a real problem statement, and at least one team member has accepted the invite.
 
 **Stage 4: First Value (The Critical 48 Hours)**
+
 - Hour 1: She completes Step 1 (Identify). The transformation card feature turns her vague "customers are unhappy" into "Average complaint resolution time is 4.2 days vs. target of 2 days, resulting in 15% customer churn." She screenshots this and shares it in her team Slack — this is the aha moment.
 - Hour 2-4: She moves to Step 2 (Analyze) and uses the fishbone diagram tool. She drags in potential causes, invites team members to add their own asynchronously. The digital format beats the whiteboard because remote team members can participate.
 - Day 2: Her team has added root causes. She uses the 5-why drill-down on the top 3 causes. The system auto-generates a summary she can paste into her weekly leadership email.
@@ -57,6 +76,7 @@ Sarah is the primary buyer and power user. Her journey is detailed below because
 - Exit criteria: She has a completed Step 2 (Analyze) with team input and has shared or exported a summary.
 
 **Stage 5: Regular Use (Weeks 2-8)**
+
 - Weekly rhythm: Monday morning, she opens PIPS 2.0 dashboard. She sees project progress across all active PIPS projects, overdue tickets, and team workload.
 - Project progression: She advances through Steps 3-6, using brainstorming tools (Step 3), decision matrices (Step 4), milestone tracking (Step 5), and results measurement (Step 6).
 - Ticket management: She creates tickets for implementation tasks in Step 5, assigns them to team members with due dates, and tracks completion on the board view.
@@ -65,6 +85,7 @@ Sarah is the primary buyer and power user. Her journey is detailed below because
 - Exit criteria: She has completed at least one full 6-step PIPS cycle and started a second project.
 
 **Stage 6: Expansion**
+
 - Second department: Her VP (Diana) sees the results dashboard and asks another department to adopt PIPS 2.0. Sarah becomes the internal champion, helping onboard the new team.
 - Upgrade trigger: Free trial or basic plan limits hit — she needs more projects, more users, or advanced analytics. She submits a purchase request with ROI data the platform generated.
 - Integration requests: She asks Raj (IT admin) to connect PIPS 2.0 to their Jira instance so implementation tickets sync bidirectionally.
@@ -72,6 +93,7 @@ Sarah is the primary buyer and power user. Her journey is detailed below because
 - Exit criteria: Organization moves from trial to paid plan; second team is onboarded.
 
 **Stage 7: Advocacy**
+
 - Internal champion: Sarah presents PIPS 2.0 results at a company all-hands. She uses the exported analytics deck.
 - External advocacy: She writes a LinkedIn post about her improvement results. She agrees to be a case study. She refers a peer at another company.
 - Community: She joins the PIPS 2.0 user community, shares templates she's created, answers questions from new users.
@@ -81,63 +103,65 @@ Sarah is the primary buyer and power user. Her journey is detailed below because
 
 ### 1.2 James — Team Member (IC, 25-35)
 
-| Stage | Experience |
-|-------|-----------|
-| **Awareness** | Receives email invite from Sarah: "Join our process improvement project on PIPS 2.0." Has no prior context on the methodology. |
-| **Evaluation** | Clicks invite link. Sees a brief explainer: "PIPS helps teams fix recurring problems in 6 structured steps. Your manager has started a project and needs your input." Decides it looks simple enough. |
-| **Onboarding** | Creates account via invite link (name + password). Lands directly in the project Sarah created, not an empty dashboard. Sees a 60-second interactive tooltip tour: "Here's your project. Here are your assigned tasks. Here's where to add your ideas." |
-| **First Value** | Within 5 minutes, he contributes a root cause to the fishbone diagram in Step 2 (Analyze). He sees his contribution appear in real time alongside teammates'. Feels heard — his frontline knowledge is captured. |
-| **Regular Use** | Daily: Opens PIPS 2.0, checks "My Work" for assigned tickets. Works tickets through the workflow (To Do → In Progress → Done). Adds comments, attaches files. Weekly: Participates in brainstorming sessions (Step 3) and votes on solutions (Step 4). |
-| **Expansion** | Starts using PIPS 2.0 for general tickets beyond the PIPS project — bug tracking, small tasks. Suggests the tool to his previous team at another company. |
-| **Advocacy** | Tells new hires "use PIPS 2.0 for everything, it's way better than the old spreadsheet." Becomes a go-to resource for tips. |
+| Stage           | Experience                                                                                                                                                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Awareness**   | Receives email invite from Sarah: "Join our process improvement project on PIPS 2.0." Has no prior context on the methodology.                                                                                                                          |
+| **Evaluation**  | Clicks invite link. Sees a brief explainer: "PIPS helps teams fix recurring problems in 6 structured steps. Your manager has started a project and needs your input." Decides it looks simple enough.                                                   |
+| **Onboarding**  | Creates account via invite link (name + password). Lands directly in the project Sarah created, not an empty dashboard. Sees a 60-second interactive tooltip tour: "Here's your project. Here are your assigned tasks. Here's where to add your ideas." |
+| **First Value** | Within 5 minutes, he contributes a root cause to the fishbone diagram in Step 2 (Analyze). He sees his contribution appear in real time alongside teammates'. Feels heard — his frontline knowledge is captured.                                        |
+| **Regular Use** | Daily: Opens PIPS 2.0, checks "My Work" for assigned tickets. Works tickets through the workflow (To Do → In Progress → Done). Adds comments, attaches files. Weekly: Participates in brainstorming sessions (Step 3) and votes on solutions (Step 4).  |
+| **Expansion**   | Starts using PIPS 2.0 for general tickets beyond the PIPS project — bug tracking, small tasks. Suggests the tool to his previous team at another company.                                                                                               |
+| **Advocacy**    | Tells new hires "use PIPS 2.0 for everything, it's way better than the old spreadsheet." Becomes a go-to resource for tips.                                                                                                                             |
 
 ---
 
 ### 1.3 Diana — Executive Sponsor (VP/C-Level, 45-55)
 
-| Stage | Experience |
-|-------|-----------|
-| **Awareness** | Sarah pitches PIPS 2.0 in a leadership meeting, showing the problem statement and root cause analysis. Diana is intrigued by the structured output — it's more rigorous than past improvement efforts. |
-| **Evaluation** | Diana does not sign up herself. She asks Sarah to send her a dashboard link. She wants to see: How many projects are active? What's the estimated ROI? Are timelines being met? She opens the executive dashboard (read-only) and sees portfolio-level metrics. |
-| **Onboarding** | Raj (IT admin) creates Diana's account with the "Executive / Viewer" role. She receives a welcome email with a direct link to the analytics dashboard. No project setup required. |
+| Stage           | Experience                                                                                                                                                                                                                                                             |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Awareness**   | Sarah pitches PIPS 2.0 in a leadership meeting, showing the problem statement and root cause analysis. Diana is intrigued by the structured output — it's more rigorous than past improvement efforts.                                                                 |
+| **Evaluation**  | Diana does not sign up herself. She asks Sarah to send her a dashboard link. She wants to see: How many projects are active? What's the estimated ROI? Are timelines being met? She opens the executive dashboard (read-only) and sees portfolio-level metrics.        |
+| **Onboarding**  | Raj (IT admin) creates Diana's account with the "Executive / Viewer" role. She receives a welcome email with a direct link to the analytics dashboard. No project setup required.                                                                                      |
 | **First Value** | In under 2 minutes, she sees a portfolio dashboard: 3 active PIPS projects, estimated $120K annual savings in progress, 2 projects on track, 1 at risk. She can drill into any project for details. This replaces the monthly status email she used to get from Sarah. |
-| **Regular Use** | Weekly: Glances at the portfolio dashboard (2-3 minutes). Monthly: Reviews completed PIPS cycles and their measured outcomes. Quarterly: Uses the ROI summary in board presentations. |
-| **Expansion** | Approves budget for enterprise plan. Mandates that all departments use PIPS 2.0 for process improvement initiatives. |
-| **Advocacy** | Mentions PIPS 2.0 results in earnings calls or board meetings as evidence of operational excellence. Refers the tool to peers at other companies. |
+| **Regular Use** | Weekly: Glances at the portfolio dashboard (2-3 minutes). Monthly: Reviews completed PIPS cycles and their measured outcomes. Quarterly: Uses the ROI summary in board presentations.                                                                                  |
+| **Expansion**   | Approves budget for enterprise plan. Mandates that all departments use PIPS 2.0 for process improvement initiatives.                                                                                                                                                   |
+| **Advocacy**    | Mentions PIPS 2.0 results in earnings calls or board meetings as evidence of operational excellence. Refers the tool to peers at other companies.                                                                                                                      |
 
 ---
 
 ### 1.4 Raj — System Admin (IT/Ops, 30-40)
 
-| Stage | Experience |
-|-------|-----------|
-| **Awareness** | Sarah or Diana asks IT to "set up that process improvement tool." Raj receives a forwarded email or Slack message with the PIPS 2.0 link. |
-| **Evaluation** | Raj checks: SSO support (SAML/OIDC)? SOC 2 compliance? Data residency options? API documentation? Integration with existing tools (Jira, Azure DevOps)? He reviews the security whitepaper and admin docs. |
-| **Onboarding** | Creates the organization account. Configures SSO, sets up RBAC roles (Admin, Manager, Member, Viewer, External). Configures integrations: connects Jira instance, sets up webhook for Slack notifications. Imports user list via CSV or directory sync. |
-| **First Value** | All invited users can log in via SSO without creating separate passwords. The Jira integration syncs implementation tickets bidirectionally. Raj's work is done in under an hour. |
-| **Regular Use** | Monthly: Reviews user activity, deactivates departed employees, adjusts roles. Quarterly: Reviews audit logs, updates integrations if APIs change. As needed: Troubleshoots access issues, manages API keys. |
-| **Expansion** | Adds new departments, configures white-label theming for different business units, sets up additional integrations. |
-| **Advocacy** | Recommends PIPS 2.0 to IT peers as "one of the easier SaaS tools to admin — good SSO, clean API, no drama." |
+| Stage           | Experience                                                                                                                                                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Awareness**   | Sarah or Diana asks IT to "set up that process improvement tool." Raj receives a forwarded email or Slack message with the PIPS 2.0 link.                                                                                                               |
+| **Evaluation**  | Raj checks: SSO support (SAML/OIDC)? SOC 2 compliance? Data residency options? API documentation? Integration with existing tools (Jira, Azure DevOps)? He reviews the security whitepaper and admin docs.                                              |
+| **Onboarding**  | Creates the organization account. Configures SSO, sets up RBAC roles (Admin, Manager, Member, Viewer, External). Configures integrations: connects Jira instance, sets up webhook for Slack notifications. Imports user list via CSV or directory sync. |
+| **First Value** | All invited users can log in via SSO without creating separate passwords. The Jira integration syncs implementation tickets bidirectionally. Raj's work is done in under an hour.                                                                       |
+| **Regular Use** | Monthly: Reviews user activity, deactivates departed employees, adjusts roles. Quarterly: Reviews audit logs, updates integrations if APIs change. As needed: Troubleshoots access issues, manages API keys.                                            |
+| **Expansion**   | Adds new departments, configures white-label theming for different business units, sets up additional integrations.                                                                                                                                     |
+| **Advocacy**    | Recommends PIPS 2.0 to IT peers as "one of the easier SaaS tools to admin — good SSO, clean API, no drama."                                                                                                                                             |
 
 ---
 
 ### 1.5 Maria — White-Label Client (External)
 
-| Stage | Experience |
-|-------|-----------|
-| **Awareness** | Maria's consulting firm uses PIPS 2.0 under their own brand (e.g., "AcmeConsulting Improve"). She receives an invite from her consulting engagement lead. She never sees the PIPS 2.0 brand. |
-| **Evaluation** | None — the tool is presented as part of the consulting engagement. She trusts the consulting firm's recommendation. |
-| **Onboarding** | Clicks invite link. Sees the consulting firm's logo, colors, and domain. Creates account. Lands in a pre-configured project for her organization's improvement initiative. |
+| Stage           | Experience                                                                                                                                                                                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Awareness**   | Maria's consulting firm uses PIPS 2.0 under their own brand (e.g., "AcmeConsulting Improve"). She receives an invite from her consulting engagement lead. She never sees the PIPS 2.0 brand.        |
+| **Evaluation**  | None — the tool is presented as part of the consulting engagement. She trusts the consulting firm's recommendation.                                                                                 |
+| **Onboarding**  | Clicks invite link. Sees the consulting firm's logo, colors, and domain. Creates account. Lands in a pre-configured project for her organization's improvement initiative.                          |
 | **First Value** | Participates in a guided Step 1 (Identify) session led by her consultant, who screen-shares the tool. Maria adds her problem observations. Sees the collaborative input from her team in real time. |
-| **Regular Use** | Logs in 2-3 times per week during the engagement (typically 8-12 weeks). Completes assigned tasks, reviews progress, participates in methodology steps as guided by the consultant. |
-| **Expansion** | If the consulting engagement ends but Maria's team wants to continue, they can transition to a direct PIPS 2.0 subscription — a growth channel for the platform. |
-| **Advocacy** | Refers other departments within her organization to the consulting firm, which in turn brings more white-label users to the platform. |
+| **Regular Use** | Logs in 2-3 times per week during the engagement (typically 8-12 weeks). Completes assigned tasks, reviews progress, participates in methodology steps as guided by the consultant.                 |
+| **Expansion**   | If the consulting engagement ends but Maria's team wants to continue, they can transition to a direct PIPS 2.0 subscription — a growth channel for the platform.                                    |
+| **Advocacy**    | Refers other departments within her organization to the consulting firm, which in turn brings more white-label users to the platform.                                                               |
 
 ---
 
 ## 2. Critical UX Flows
 
-### 2.1 Signup & Onboarding
+### 2.1 Signup & Onboarding [PARTIAL — see notes]
+
+> **Build status:** Signup (email/password) and email verification are [BUILT]. Organization creation is [BUILT]. Role & Context Survey (step 4) is [PLANNED] — not implemented. Invite Team (step 6) is [BUILT] but not part of the onboarding wizard. First Project Prompt (step 7) is [PLANNED]. Guided Step 1 (step 8) is [PLANNED]. The actual onboarding flow collects org name and slug only, then lands on the dashboard. See CUSTOMER_INSIGHTS_REPORT.md friction item F2 for details.
 
 ```
 FLOW: New User Signup → First Value
@@ -196,7 +220,7 @@ FLOW: New User Signup → First Value
 
 ---
 
-### 2.2 Creating a PIPS Project (Full 6-Step Flow)
+### 2.2 Creating a PIPS Project (Full 6-Step Flow) [BUILT]
 
 ```
 FLOW: PIPS Project Creation → Completion
@@ -353,7 +377,7 @@ FLOW: PIPS Project Creation → Completion
 
 ---
 
-### 2.3 Ticket Lifecycle
+### 2.3 Ticket Lifecycle [BUILT]
 
 ```
 FLOW: Ticket Creation → Closure
@@ -402,7 +426,7 @@ FLOW: Ticket Creation → Closure
 
 ---
 
-### 2.4 Daily Workflow — Team Member (James)
+### 2.4 Daily Workflow — Team Member (James) [BUILT]
 
 ```
 FLOW: James's Daily Workflow
@@ -450,7 +474,7 @@ FLOW: James's Daily Workflow
 
 ---
 
-### 2.5 Weekly Workflow — Manager (Sarah)
+### 2.5 Weekly Workflow — Manager (Sarah) [PARTIAL — analytics/reports PLANNED]
 
 ```
 FLOW: Sarah's Weekly Workflow
@@ -497,7 +521,7 @@ FLOW: Sarah's Weekly Workflow
 
 ---
 
-### 2.6 Admin Setup (Raj)
+### 2.6 Admin Setup (Raj) [PARTIAL — SSO, integrations, white-label PLANNED]
 
 ```
 FLOW: System Admin Initial Configuration
@@ -591,20 +615,23 @@ The transformation card is the core UX element of the aha moment:
 └─────────────────────────────────────────────────────────┘
 ```
 
-The user sees 2-3 examples, then is prompted to enter their own vague problem statement. The guided form (What's happening? What should happen? What's the gap? Who's affected?) walks them through the transformation. The before/after is shown side by side. This is visceral — they can *see* the quality difference.
+The user sees 2-3 examples, then is prompted to enter their own vague problem statement. The guided form (What's happening? What should happen? What's the gap? Who's affected?) walks them through the transformation. The before/after is shown side by side. This is visceral — they can _see_ the quality difference.
 
 ### 3.3 Engineering the Aha Moment in 5 Minutes
 
 **Minute 0-1: Signup**
+
 - Minimal friction signup (email + password or SSO)
 - Role selection: "I'm a Manager/Process Lead" (enables guided path)
 
 **Minute 1-2: Context**
+
 - Skip org setup details (accept defaults)
 - "Let's create your first improvement project"
 - User types a project name (e.g., "Reduce wait times")
 
 **Minute 2-4: The Transformation**
+
 - Land directly in Step 1 (Identify)
 - Show 2 transformation card examples relevant to their industry (if selected during signup) or generic ones
 - Prompt: "Now describe YOUR problem — we'll help you sharpen it"
@@ -612,6 +639,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 - As user fills fields, the problem statement auto-composes in a preview panel on the right
 
 **Minute 4-5: The Payoff**
+
 - Problem statement displayed in a polished card format
 - Below it: "This is the foundation of your improvement project. Everything else builds on this."
 - CTA: "Share with your team" (invite flow) or "Continue to Step 2" (analyze)
@@ -619,14 +647,14 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ### 3.4 Activation Metrics That Correlate with Retention
 
-| Metric | Definition | Target | Rationale |
-|--------|-----------|--------|-----------|
+| Metric                        | Definition                                                           | Target               | Rationale                                                                |
+| ----------------------------- | -------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------ |
 | **Problem statement created** | User completes Step 1 (Identify) with a measurable problem statement | Within first session | Core aha moment — if they don't do this, they treat it like another Jira |
-| **Team member invited** | User sends at least 1 invite | Within 48 hours | Collaboration is sticky; solo users churn |
-| **Second step entered** | User opens Step 2 (Analyze) and adds at least 1 root cause | Within 7 days | Proves they see the methodology as valuable, not just the tool |
-| **Ticket created** | User creates at least 1 ticket (PIPS or general) | Within 7 days | Shows integration into daily work, not just methodology exploration |
-| **Weekly return** | User logs in during week 2 after signup | Week 2 | Early retention signal; if they skip week 2, churn risk is 3x |
-| **Step 4 reached** | Project advances to Select & Plan | Within 30 days | Deep engagement — they're using the full methodology |
+| **Team member invited**       | User sends at least 1 invite                                         | Within 48 hours      | Collaboration is sticky; solo users churn                                |
+| **Second step entered**       | User opens Step 2 (Analyze) and adds at least 1 root cause           | Within 7 days        | Proves they see the methodology as valuable, not just the tool           |
+| **Ticket created**            | User creates at least 1 ticket (PIPS or general)                     | Within 7 days        | Shows integration into daily work, not just methodology exploration      |
+| **Weekly return**             | User logs in during week 2 after signup                              | Week 2               | Early retention signal; if they skip week 2, churn risk is 3x            |
+| **Step 4 reached**            | Project advances to Select & Plan                                    | Within 30 days       | Deep engagement — they're using the full methodology                     |
 
 **Leading indicator of conversion (trial → paid):** Users who complete Steps 1-3 within 14 days convert at 4-5x the rate of users who only create general tickets.
 
@@ -634,7 +662,31 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ## 4. Navigation Architecture
 
-### 4.1 Site Map (All Routes)
+### 4.1 Site Map (All Routes) [BUILT — core routes; PLANNED — integrations, API keys, billing, analytics]
+
+> **v1.1 note:** The following routes have been added since v1.0:
+>
+> - `/app/knowledge` — Knowledge Hub landing [BUILT]
+> - `/app/knowledge/book` — Book content reader [BUILT]
+> - `/app/knowledge/guide` — Guide content [BUILT]
+> - `/app/knowledge/workbook` — Workbook exercises [SCAFFOLDED]
+> - `/app/knowledge/workshop` — Workshop templates [SCAFFOLDED]
+> - `/app/knowledge/bookmarks` — User bookmarks [BUILT]
+> - `/app/knowledge/search` — Content search [BUILT]
+> - `/app/training` — Training landing [SCAFFOLDED]
+> - `/app/training/path/[pathSlug]` — Training path detail [SCAFFOLDED]
+> - `/app/training/practice/[exerciseSlug]` — Exercise page [SCAFFOLDED]
+> - `/app/training/progress` — Progress dashboard [SCAFFOLDED]
+> - `/methodology` — Methodology overview [BUILT]
+> - `/methodology/step/[1-6]` — Step pages [BUILT]
+> - `/methodology/tools/[slug]` — Tool pages (22) [BUILT]
+> - `/book` — Book landing [BUILT]
+> - `/book/[chapterSlug]` — Chapter previews (20) [BUILT]
+> - `/resources` — Resources hub [BUILT]
+> - `/resources/glossary/[term]` — Glossary (35) [BUILT]
+> - `/resources/templates/[slug]` — Templates (17) [BUILT]
+> - `/sitemap.ts` — Dynamic sitemap [BUILT]
+> - `/robots.ts` — Search engine config [BUILT]
 
 ```
 /                                   → Marketing landing page
@@ -692,7 +744,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 /app/settings/api-keys              → API key management (admin only)
 ```
 
-### 4.2 Sidebar Navigation Structure
+### 4.2 Sidebar Navigation Structure [BUILT — updated in v1.1 with Knowledge Hub and Training]
 
 ```
 ┌──────────────────────────┐
@@ -705,8 +757,11 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 │     + New Project        │
 │  🎫 Tickets              │
 │  👥 Team                 │
-│  📊 Analytics            │
-│  📋 Forms                │
+│                          │
+│  ─────────────────────   │
+│  LEARN                   │
+│  📖 Knowledge Hub        │  ← [BUILT]
+│  🎓 Training             │  ← [SCAFFOLDED]
 │                          │
 │  ─────────────────────   │
 │                          │
@@ -720,6 +775,8 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 │  Admin                   │
 └──────────────────────────┘
 ```
+
+> **v1.1 note:** The sidebar now includes a "LEARN" section with Knowledge Hub and Training. Analytics and Forms entries are present but link to pages that are [PLANNED] for fuller build-out. The Knowledge Hub is the primary content learning surface; Training Mode is the structured course surface.
 
 - Sidebar is collapsible (icon-only mode) on desktop
 - Active item highlighted with left border accent + background tint
@@ -775,32 +832,37 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ## 5. Key Screen Descriptions
 
-### 5.1 Dashboard (My Work)
+### 5.1 Dashboard (My Work) [BUILT]
 
 **Layout:**
+
 - Full-width content area with the sidebar collapsed or docked left
 - Top bar: Page title ("My Work"), date, notification bell, user avatar, command palette trigger
 - Content organized in 4 sections, vertically stacked (2x2 grid on wide screens)
 
 **Components:**
+
 1. **Due Today** (top-left): Card list of tickets due today, sorted by priority. Each card shows: ticket ID, title, project name, priority badge, assignee avatar (self). Click → ticket detail. Empty state: "Nothing due today — nice work."
 2. **In Progress** (top-right): Tickets currently in "In Progress" status. Same card format. Drag-to-reorder for personal prioritization.
 3. **PIPS Project Progress** (bottom-left): Compact cards for each active PIPS project showing: project name, current step (e.g., "Step 3: Generate"), progress bar (steps 1-6), days since last activity. Click → project view.
 4. **Recent Activity** (bottom-right): Feed of recent events: ticket assignments, comments mentioning you, status changes on your tickets, PIPS step completions. Timestamp + actor + action format.
 
 **Manager Toggle:**
+
 - Toggle switch in top bar: "My Work" ↔ "Manager View"
 - Manager View replaces sections with: Team Workload Heatmap, Overdue Tickets by Assignee, Project Status Summary, Blocked Items
 
 **Key Actions:**
+
 - "+ New Ticket" floating action button (bottom-right on mobile, top bar on desktop)
 - Click any item to navigate to its detail view
 
 ---
 
-### 5.2 PIPS Project View (6-Step Workflow)
+### 5.2 PIPS Project View (6-Step Workflow) [BUILT]
 
 **Layout:**
+
 - Header: Project name, project lead avatar, status badge (Active/Completed/On Hold), settings gear
 - Below header: Horizontal step indicator — 6 connected circles labeled with step names
   - Completed steps: filled circle with checkmark, green
@@ -815,6 +877,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
   - Quick links: Board view, Timeline, Reports
 
 **Key Actions:**
+
 - "Mark Step Complete" button (visible only on current step, for project lead/manager)
 - "Add Team Members" link in sidebar
 - "Export Project" dropdown (PDF summary, CSV data)
@@ -822,9 +885,10 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ---
 
-### 5.3 Step Detail (e.g., Step 2: Analyze)
+### 5.3 Step Detail (e.g., Step 2: Analyze) [BUILT]
 
 **Layout:**
+
 - Step header: Step number + name, status (In Progress / Complete), description
 - Methodology guidance panel (collapsible left panel, ~300px):
   - "What is root cause analysis?"
@@ -839,6 +903,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
   - "Mark Step Complete" button (right-aligned)
 
 **Tool-Specific Content (Fishbone example):**
+
 - Interactive canvas (zoomable, pannable)
 - Central spine with problem statement from Step 1
 - 6 category branches (customizable labels)
@@ -848,6 +913,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 - Toolbar: Zoom in/out, fit to screen, export as image, full-screen mode
 
 **Key Actions:**
+
 - Add content (causes, ideas, data) depending on the tool
 - Switch between tools via tabs
 - Toggle methodology guidance panel
@@ -856,13 +922,15 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ---
 
-### 5.4 Ticket Detail
+### 5.4 Ticket Detail [BUILT]
 
 **Layout:**
+
 - Full-page view with breadcrumb: Projects > [Project] > [Ticket ID]
 - Two-column layout on desktop; single column on mobile
 
 **Left Column (65% width):**
+
 1. **Title** — Editable inline (click to edit)
 2. **Description** — Rich text editor (Markdown support, inline images, code blocks)
 3. **Activity Feed** — Chronological list of:
@@ -873,6 +941,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 4. **Comment input** — Rich text box at bottom, "@" triggers mention autocomplete, file drag-and-drop
 
 **Right Column (35% width) — Metadata Panel:**
+
 - Status: Dropdown (To Do / In Progress / In Review / Done)
 - Assignee: Avatar + name, click to change
 - Reviewer: Avatar + name (optional)
@@ -888,6 +957,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 - Updated: Timestamp
 
 **Key Actions:**
+
 - Edit any metadata field inline
 - Add comment
 - Attach file (drag-and-drop or file picker)
@@ -897,15 +967,17 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ---
 
-### 5.5 Board / Kanban View
+### 5.5 Board / Kanban View [BUILT]
 
 **Layout:**
+
 - Top bar: Project name, view switcher (Board | List | Timeline), filter bar
 - Filter bar: Assignee (multi-select), Priority, Labels, Due date range, Search
 - Main content: Horizontal scrolling columns
 
 **Columns (default):**
 | To Do | In Progress | In Review | Done |
+
 - Each column: header with count, "+" button to quick-add a ticket
 - Tickets rendered as cards:
   - Ticket ID + Title (truncated)
@@ -918,10 +990,12 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 - Click card → opens ticket detail (slide-over panel or full page)
 
 **Swimlanes (optional):**
+
 - Group by: Assignee, Priority, PIPS Step, Label
 - Each swimlane is a collapsible horizontal row of columns
 
 **Key Actions:**
+
 - Drag-and-drop to change status or reorder
 - Quick-add ticket in any column
 - Filter and group
@@ -929,13 +1003,15 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ---
 
-### 5.6 Project List
+### 5.6 Project List [BUILT]
 
 **Layout:**
+
 - Top bar: "Projects" title, "+ New Project" button, view toggle (Card | Table), search bar
 - Filter tabs: All | Active | Completed | On Hold
 
 **Card View (default):**
+
 - Grid of project cards (3 per row on desktop, 1 on mobile)
 - Each card:
   - Project name (bold)
@@ -947,11 +1023,13 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
   - Star icon to favorite (favorited projects appear in sidebar)
 
 **Table View:**
+
 - Columns: Name, Type, Status, Current Step, Progress, Lead, Team Size, Last Activity, Created
 - Sortable by any column
 - Row click → project detail
 
 **Key Actions:**
+
 - Create new project
 - Search/filter projects
 - Favorite/unfavorite
@@ -960,18 +1038,21 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ---
 
-### 5.7 Team View
+### 5.7 Team View [BUILT]
 
 **Layout:**
+
 - Top bar: "Team" title, "+ Invite Members" button, search bar
 - Two sub-views (tabs): Members | Workload
 
 **Members Tab:**
+
 - Table: Avatar, Name, Email, Role, Department, Last Active, Status
 - Click row → member profile (see their assigned tickets, projects, activity)
 - Action menu per row: Change role, Deactivate, Remove (admin only)
 
 **Workload Tab:**
+
 - Heatmap grid: Team members (rows) × Days of week or sprint (columns)
 - Cell color intensity indicates ticket count/effort
 - Click cell → see specific tickets for that person on that day
@@ -979,6 +1060,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 - "Rebalance" suggestion: System highlights overloaded members and underloaded ones
 
 **Key Actions:**
+
 - Invite new members
 - Change roles
 - View individual workload
@@ -986,35 +1068,41 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ---
 
-### 5.8 Admin Settings
+### 5.8 Admin Settings [PARTIAL — profile, org, users BUILT; SSO, integrations, billing, branding PLANNED]
 
 **Layout:**
+
 - Left navigation (vertical tabs within settings page):
   - Profile, Preferences, Organization, Users, Roles, Integrations, Branding, Billing, Security, Audit Log, API Keys
 - Right content area: Form/table for selected section
 
 **Organization Section:**
+
 - Org name, logo upload, default time zone, work week days, fiscal year start
 - Danger zone: Delete organization (requires re-authentication + type org name to confirm)
 
 **Users Section:**
+
 - User table with status badges (Active, Invited, Deactivated)
 - Bulk invite button → modal with email list + role assignment
 - CSV import button
 - Per-user actions: Edit role, Deactivate, Remove
 
 **Integrations Section:**
+
 - Card grid of available integrations (Jira, Azure DevOps, Slack, Teams, Email, Webhooks)
 - Each card: Integration logo, name, status (Connected / Not configured), "Configure" button
 - Configuration flow: OAuth for Jira/Azure DevOps, webhook URL for Slack/Teams, SMTP settings for email
 
 **Billing Section:**
+
 - Current plan card: Plan name, price, seats used/total, renewal date
 - Usage summary: Projects, users, storage
 - "Upgrade" / "Change Plan" button → plan comparison modal
 - Invoice history table with download links
 
 **Key Actions:**
+
 - All settings are saved on change (no global "Save" button — each field auto-saves with a subtle confirmation toast)
 - Dangerous actions require confirmation modals
 - Admin actions are logged to audit log automatically
@@ -1026,6 +1114,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 ### 6.1 Dashboard (My Work) — Empty
 
 **What the user sees:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
@@ -1048,6 +1137,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 ```
 
 **Design principles:**
+
 - Warm, personal greeting using the user's first name
 - Brief explanation of what will populate this page
 - Primary CTA: Create first project (aligns with aha moment path)
@@ -1059,6 +1149,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 ### 6.2 Project List — Empty
 
 **What the user sees:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
@@ -1092,6 +1183,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 ### 6.3 Ticket Board — Empty
 
 **What the user sees:**
+
 ```
 ┌──────────┬──────────┬──────────┬──────────┐
 │  To Do   │In Progress│In Review │  Done    │
@@ -1119,6 +1211,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 ### 6.4 Team Page — Empty
 
 **What the user sees:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
@@ -1148,6 +1241,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 ### 6.5 Analytics — Empty
 
 **What the user sees:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
@@ -1192,22 +1286,23 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 
 ### 7.1 Notification Types
 
-| Type | Trigger | Priority | Default Delivery |
-|------|---------|----------|-----------------|
-| **Assignment** | Ticket assigned to you or you're added to a project | High | In-app + email |
-| **Status Change** | A ticket you're watching changes status | Medium | In-app |
-| **@Mention** | Someone mentions you in a comment | High | In-app + email |
-| **Comment** | New comment on a ticket you're assigned to or watching | Medium | In-app |
-| **Due Date Reminder** | Ticket due in 24 hours / Ticket overdue | High | In-app + email |
-| **PIPS Step Prompt** | A PIPS step requires your input (brainstorming, voting) | Medium | In-app + email |
-| **Step Completed** | A PIPS step is marked complete on a project you're on | Low | In-app |
-| **Weekly Digest** | Summary of week's activity across your projects | Low | Email only (Monday 8 AM local) |
-| **System** | Maintenance, new features, security alerts | Low | In-app |
+| Type                  | Trigger                                                 | Priority | Default Delivery               |
+| --------------------- | ------------------------------------------------------- | -------- | ------------------------------ |
+| **Assignment**        | Ticket assigned to you or you're added to a project     | High     | In-app + email                 |
+| **Status Change**     | A ticket you're watching changes status                 | Medium   | In-app                         |
+| **@Mention**          | Someone mentions you in a comment                       | High     | In-app + email                 |
+| **Comment**           | New comment on a ticket you're assigned to or watching  | Medium   | In-app                         |
+| **Due Date Reminder** | Ticket due in 24 hours / Ticket overdue                 | High     | In-app + email                 |
+| **PIPS Step Prompt**  | A PIPS step requires your input (brainstorming, voting) | Medium   | In-app + email                 |
+| **Step Completed**    | A PIPS step is marked complete on a project you're on   | Low      | In-app                         |
+| **Weekly Digest**     | Summary of week's activity across your projects         | Low      | Email only (Monday 8 AM local) |
+| **System**            | Maintenance, new features, security alerts              | Low      | In-app                         |
 
 ### 7.2 In-App Notification Bell
 
 **Location:** Top bar, right side, next to user avatar
 **Behavior:**
+
 - Red badge with unread count (shows "9+" if more than 9)
 - Click → dropdown panel (max 10 recent, "View all" link to full page)
 - Each notification: icon + actor avatar + action text + timestamp + unread dot
@@ -1216,6 +1311,7 @@ The user sees 2-3 examples, then is prompted to enter their own vague problem st
 - Notifications grouped by time: Today, Yesterday, This Week, Earlier
 
 **Full notification page (`/app/notifications`):**
+
 - Filter by type (Assignment, Mention, Due Date, etc.)
 - Filter by read/unread
 - Paginated list with 50 per page
@@ -1266,6 +1362,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 **Approach:** Inline validation, displayed on blur (not on every keystroke), plus full validation on submit.
 
 **Visual pattern:**
+
 - Error: Red border on field + red error text below field
 - Warning: Amber border + amber text (e.g., "This title is very long — it may get truncated in list views")
 - Success: No border change (clean field = valid)
@@ -1282,6 +1379,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 | @Mention | Must match an existing team member | No error — simply doesn't resolve. Treated as plain text. |
 
 **Submit behavior:**
+
 - If validation errors exist on submit, scroll to first error field, focus it, show all errors
 - Submit button shows loading spinner during API call
 - Disable button during submission to prevent double-submit
@@ -1291,6 +1389,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 ### 8.2 API Error Display
 
 **Transient errors (network issues, server 500s):**
+
 ```
 ┌─────────────────────────────────────────┐
 │  ⚠ Something went wrong                │
@@ -1298,19 +1397,23 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 │  [Try Again]   [Dismiss]                │
 └─────────────────────────────────────────┘
 ```
+
 - Displayed as a toast notification (bottom-right, auto-dismiss after 8 seconds if user takes no action)
 - "Try Again" retries the exact same API call
 - Automatic retry for GET requests: retry 2x with exponential backoff before showing error
 
 **Authorization errors (403):**
+
 - Inline message in the relevant area: "You don't have permission to perform this action. Contact your admin."
 - Do not show a generic error page — keep the user in context
 
 **Not found (404):**
+
 - Full-page: "This page doesn't exist. It may have been deleted or you may have followed an outdated link."
 - CTA: "Go to Dashboard" button
 
 **Rate limiting (429):**
+
 - Toast: "You're making changes too quickly. Please wait a moment and try again."
 - Auto-retry after delay specified in response header
 
@@ -1319,6 +1422,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 ### 8.3 Offline Behavior
 
 **Detection:**
+
 - Monitor `navigator.onLine` and periodic heartbeat fetch to `/api/health`
 - When offline detected, show persistent banner at top of screen:
 
@@ -1329,6 +1433,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 ```
 
 **Behavior while offline:**
+
 - Read: Cached pages remain viewable (service worker caches last-visited views)
 - Write: Comment and status changes queued in IndexedDB
 - Queue indicator: Show pending changes count in the banner: "3 changes pending sync"
@@ -1345,6 +1450,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 **Remember me:** 30-day persistent session (refreshed on each visit).
 
 **Timeout flow:**
+
 1. 5 minutes before timeout: Modal appears — "Your session is about to expire. [Stay logged in] [Log out]"
 2. If no action: Session expires, user sees login page
 3. Any unsaved work (draft comment in progress): Saved to localStorage, restored after re-login
@@ -1357,7 +1463,9 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 **Scenario:** User navigates to a URL they don't have access to (e.g., Member visits `/app/settings/security`).
 
 **Behavior:**
+
 - Do NOT show the page content and then an error. Instead, replace the content area with:
+
 ```
 ┌─────────────────────────────────────────┐
 │                                         │
@@ -1371,6 +1479,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 │                                         │
 └─────────────────────────────────────────┘
 ```
+
 - Sidebar remains visible and functional — the user is not locked out of the app
 - Admin-only sidebar items are hidden from non-admin users (so this case should be rare; it mainly catches direct URL access)
 
@@ -1393,6 +1502,7 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 4. Full edit history is preserved (ticket audit log shows all versions)
 
 **For PIPS collaborative tools (fishbone, brainstorming):**
+
 - These are designed for concurrent editing — additions don't conflict
 - Real-time sync via WebSocket: new items appear immediately for all viewers
 - Deletes/edits trigger a brief lock on the specific item (2-second optimistic lock)
@@ -1403,39 +1513,45 @@ Quiet hours: ☐ Enable (suppress email 10 PM - 8 AM local)
 
 ### 9.1 Breakpoints
 
-| Breakpoint | Width | Layout |
-|-----------|-------|--------|
-| Desktop | >= 1280px | Sidebar + full content area, 2-column layouts |
-| Tablet | 768px - 1279px | Collapsed sidebar (icon-only), simplified content |
-| Mobile | < 768px | No sidebar (bottom tab nav), single-column, stacked layouts |
+| Breakpoint | Width          | Layout                                                      |
+| ---------- | -------------- | ----------------------------------------------------------- |
+| Desktop    | >= 1280px      | Sidebar + full content area, 2-column layouts               |
+| Tablet     | 768px - 1279px | Collapsed sidebar (icon-only), simplified content           |
+| Mobile     | < 768px        | No sidebar (bottom tab nav), single-column, stacked layouts |
 
 ### 9.2 Major View Adaptations
 
 **Dashboard:**
+
 - Desktop: 2x2 grid of sections
 - Tablet: 2x2 grid, smaller cards
 - Mobile: Single column stack (Due Today → In Progress → PIPS Projects → Activity)
 
 **Board/Kanban:**
+
 - Desktop: All 4 columns visible, horizontal scroll for many tickets
 - Tablet: 2 columns visible, horizontal swipe for more
 - Mobile: Single column visible, swipe left/right between columns, column selector tabs at top
 
 **PIPS Project View (6-step indicator):**
+
 - Desktop: Full horizontal step bar with labels
 - Tablet: Full horizontal step bar with abbreviated labels
 - Mobile: Current step prominently shown with left/right arrows to navigate; full step list in a dropdown
 
 **Ticket Detail:**
+
 - Desktop: 2-column (content left, metadata right)
 - Tablet: 2-column, narrower metadata panel
 - Mobile: Single column — metadata shown as a collapsible section above the activity feed
 
 **Fishbone Diagram:**
+
 - Desktop: Full interactive canvas with drag-and-drop
 - Mobile: Read-only view with zoom/pan; editing via a simplified list interface ("Add cause to [category]")
 
 **Decision Matrix:**
+
 - Desktop: Full table with all criteria columns
 - Mobile: Card-per-idea view with swipeable criteria scores
 
@@ -1471,6 +1587,7 @@ These features are desktop-only in MVP; mobile support added in later releases:
 Tooltips appear as small popovers anchored to UI elements, triggered by specific user states (not by page load).
 
 **Tooltip Design:**
+
 ```
 ┌──────────────────────────────────┐
 │  Step indicator                  │
@@ -1486,6 +1603,7 @@ Tooltips appear as small popovers anchored to UI elements, triggered by specific
 ```
 
 **Tooltip placement rules:**
+
 - Maximum 1 tooltip visible at a time
 - Tooltip appears on first visit to a view, not on every visit
 - "Got it" dismisses and advances to next tooltip (if in a sequence)
@@ -1495,16 +1613,16 @@ Tooltips appear as small popovers anchored to UI elements, triggered by specific
 
 **Tooltip triggers and locations:**
 
-| Trigger | Location | Content |
-|---------|----------|---------|
-| First visit to dashboard | "My Work" header | "This is your personal dashboard. You'll see your assigned tickets and project progress here." |
-| First visit to project list | "+ New Project" button | "Click here to start your first improvement project." |
-| First time opening a PIPS project | Step indicator bar | "These are the 6 steps of the PIPS methodology. You'll work through them left to right." |
-| First time on Step 1 (Identify) | Transformation card area | "This is where the magic happens. Transform vague complaints into measurable problem statements." |
-| First time on board view | Column headers | "Drag tickets between columns to change their status. Create new tickets with the + button." |
-| First time opening ticket detail | Metadata panel | "Set the priority, assignee, and due date in this panel. Everything saves automatically." |
-| First visit to analytics | Chart area | "Charts populate as your team works. Complete a few tickets to see trends emerge." |
-| First time @mentioning | Comment box (after typing @) | "Type a name to mention a team member. They'll get a notification with your comment." |
+| Trigger                           | Location                     | Content                                                                                           |
+| --------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| First visit to dashboard          | "My Work" header             | "This is your personal dashboard. You'll see your assigned tickets and project progress here."    |
+| First visit to project list       | "+ New Project" button       | "Click here to start your first improvement project."                                             |
+| First time opening a PIPS project | Step indicator bar           | "These are the 6 steps of the PIPS methodology. You'll work through them left to right."          |
+| First time on Step 1 (Identify)   | Transformation card area     | "This is where the magic happens. Transform vague complaints into measurable problem statements." |
+| First time on board view          | Column headers               | "Drag tickets between columns to change their status. Create new tickets with the + button."      |
+| First time opening ticket detail  | Metadata panel               | "Set the priority, assignee, and due date in this panel. Everything saves automatically."         |
+| First visit to analytics          | Chart area                   | "Charts populate as your team works. Complete a few tickets to see trends emerge."                |
+| First time @mentioning            | Comment box (after typing @) | "Type a name to mention a team member. They'll get a notification with your comment."             |
 
 ---
 
@@ -1563,6 +1681,7 @@ User action: Clicks "Invite Team" or "Explore on my own"
 ```
 
 **Walkthrough behavior:**
+
 - Dim overlay (dark scrim) with spotlight cutout on the active element
 - Content panel appears near the spotlighted element (auto-positioned to avoid overflow)
 - "Back" and "Next" buttons (Back not available on Step 1)
@@ -1602,6 +1721,7 @@ A floating card in the bottom-left of the dashboard that tracks onboarding compl
 - Items link to the relevant flow (clicking "Invite a team member" opens the invite modal)
 
 **PIPS Project Progress:**
+
 - Step indicator (1-6) on every project view
 - Percentage overlay: "Step 3 of 6 (50%)"
 - Each step shows sub-progress: "5 of 8 items completed in this step"
@@ -1614,17 +1734,18 @@ The PIPS methodology has extensive educational content (books, training material
 
 **Integration points:**
 
-| Location | Content Type | Format |
-|----------|-------------|--------|
-| Step guidance panel (left sidebar in step view) | What this step is about, why it matters, tips | Short paragraphs with expandable "Learn more" sections |
-| Tool instructions (above each analysis tool) | How to use this specific tool (fishbone, 5-why, etc.) | Step-by-step numbered instructions with visual examples |
-| Transformation cards (Step 1) | Good vs. bad examples of problem statements | Side-by-side comparison cards |
-| Decision matrix help (Step 4) | How to set criteria, how to score, how to interpret results | Inline tooltips on column headers + "How scoring works" expandable |
-| Empty states | Methodology context for what belongs in this view | Educational text in empty state messages |
-| Loading screens | Methodology tips (while waiting) | "Did you know? The average 5-why analysis reveals the root cause in 3-4 levels." |
-| Help panel | Full methodology reference | Searchable knowledge base accessible from "?" icon |
+| Location                                        | Content Type                                                | Format                                                                           |
+| ----------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Step guidance panel (left sidebar in step view) | What this step is about, why it matters, tips               | Short paragraphs with expandable "Learn more" sections                           |
+| Tool instructions (above each analysis tool)    | How to use this specific tool (fishbone, 5-why, etc.)       | Step-by-step numbered instructions with visual examples                          |
+| Transformation cards (Step 1)                   | Good vs. bad examples of problem statements                 | Side-by-side comparison cards                                                    |
+| Decision matrix help (Step 4)                   | How to set criteria, how to score, how to interpret results | Inline tooltips on column headers + "How scoring works" expandable               |
+| Empty states                                    | Methodology context for what belongs in this view           | Educational text in empty state messages                                         |
+| Loading screens                                 | Methodology tips (while waiting)                            | "Did you know? The average 5-why analysis reveals the root cause in 3-4 levels." |
+| Help panel                                      | Full methodology reference                                  | Searchable knowledge base accessible from "?" icon                               |
 
 **"Learn More" content structure:**
+
 - Each methodology concept has a 3-tier content depth:
   1. **Inline hint** (1-2 sentences): Shown directly in the UI near the relevant tool
   2. **Expandable section** (1-2 paragraphs): "Learn more" expands below the hint
@@ -1634,10 +1755,599 @@ The PIPS methodology has extensive educational content (books, training material
 - All content is searchable via the Help panel and command palette
 
 **Methodology content governance:**
+
 - Content is managed as structured data (not hardcoded strings)
 - Each piece has: ID, step association, tool association, difficulty level, content tiers
 - Content can be updated without code deployment (CMS-backed or database-stored)
 - White-label clients can customize methodology content to match their consulting firm's flavor
+
+---
+
+## 11. Knowledge Hub UX Flows
+
+> **Status: [BUILT]** — 205 content nodes compiled, full-text search, reading experience, Cadence Bar, bookmarks. Deployed at pips-app.vercel.app.
+
+### 11.1 Knowledge Hub Overview
+
+The Knowledge Hub is the in-product methodology learning system. It transforms PIPS from a tool into a learning platform by providing the complete PIPS methodology book content structured into searchable, bookmarkable, and trackable reading experiences. The Knowledge Hub is accessible from the left sidebar navigation under the `(app)/knowledge` route group.
+
+**Four Content Pillars:**
+
+| Pillar       | Purpose                                                                      | Status       |
+| ------------ | ---------------------------------------------------------------------------- | ------------ |
+| **Book**     | Full PIPS methodology text (205 content nodes from "The Never-Ending Quest") | [BUILT]      |
+| **Guide**    | Step-by-step practitioner guides organized by PIPS step                      | [BUILT]      |
+| **Workbook** | Interactive practice exercises tied to methodology concepts                  | [SCAFFOLDED] |
+| **Workshop** | Facilitated session templates and agendas                                    | [SCAFFOLDED] |
+
+### 11.2 Knowledge Hub Landing Page Flow [BUILT]
+
+```
+FLOW: Knowledge Hub Entry
+
+1.  NAVIGATE TO KNOWLEDGE HUB
+    - Entry: Click "Knowledge" in sidebar navigation
+    - Route: /app/knowledge
+    - Landing page shows the Knowledge Hub landing component
+
+2.  KNOWLEDGE HUB LANDING
+    - Hero section: "Learn the PIPS Methodology" with brief intro text
+    - Four pillar cards arranged in 2x2 grid:
+      a) Book — "Read the full methodology"
+      b) Guide — "Step-by-step practitioner guides"
+      c) Workbook — "Practice with exercises"
+      d) Workshop — "Facilitated session templates"
+    - Each card shows: pillar icon, title, description, content count, CTA button
+    - Cadence Bar integration: Shows overall reading progress across all content
+
+3.  SELECT A PILLAR
+    - Click any pillar card to enter that content section
+    - Routes: /app/knowledge/book, /app/knowledge/guide, etc.
+```
+
+### 11.3 Content Reading Flow [BUILT]
+
+```
+FLOW: Reading Methodology Content
+
+1.  ENTER CONTENT SECTION
+    - Navigate to a pillar (e.g., /app/knowledge/book)
+    - See table of contents: list of chapters/sections organized hierarchically
+    - Each entry shows: title, description, estimated reading time, completion status
+
+2.  SELECT CONTENT NODE
+    - Click a chapter or section title
+    - Content Reader component loads the selected node
+
+3.  READING EXPERIENCE
+    - Content Reader renders the full markdown content
+    - Left sidebar (collapsible): Table of contents with current position highlighted
+    - Main area: Rendered markdown with typography following BRAND_GUIDE_V2.md
+    - Components within reader:
+      a) Heading anchors — click to copy link to specific section
+      b) Bookmark button — toggle bookmark on/off for current node
+      c) Cadence Bar — shows reading progress for current session
+      d) Previous/Next navigation at bottom of content
+
+4.  BOOKMARK CONTENT [BUILT]
+    - Click bookmark icon (top-right of content reader)
+    - Bookmarked items appear in /app/knowledge/bookmarks
+    - Bookmarks show: content title, pillar, date bookmarked
+    - Click a bookmark to return directly to that content node
+    - Remove bookmark by clicking the bookmark icon again
+
+5.  EXIT READING
+    - Navigate away using sidebar or breadcrumbs
+    - Reading position persisted automatically
+    - Cadence Bar updates to reflect progress
+```
+
+### 11.4 Knowledge Hub Search Flow [BUILT]
+
+```
+FLOW: Search Methodology Content
+
+1.  INITIATE SEARCH
+    - Entry: /app/knowledge/search or search input on Knowledge Hub landing
+    - Full-text search powered by Postgres FTS across all 205 content nodes
+
+2.  ENTER SEARCH QUERY
+    - Type query into search input
+    - Results appear below as content cards
+    - Each result shows: title, pillar badge, snippet with highlighted match, relevance score
+
+3.  SELECT RESULT
+    - Click a result card
+    - Navigates directly to the Content Reader for that node
+    - Search term highlighted in the content (if supported)
+
+4.  REFINE SEARCH
+    - Filter by pillar: Book, Guide, Workbook, Workshop
+    - Filter by PIPS step: Steps 1-6
+    - Sort by: Relevance (default), Title A-Z, Recently updated
+```
+
+### 11.5 Cadence Bar Navigation Flow [BUILT]
+
+```
+FLOW: Cadence Bar Interaction
+
+The Cadence Bar is a contextual methodology content widget integrated across
+multiple product surfaces: step-view, ticket detail, dashboard, and Knowledge Hub.
+
+1.  CADENCE BAR CONTEXT
+    - Appears at the top or side of the current view
+    - Shows: current PIPS step context, progress indicator, relevant content links
+    - Collapsible: defaultCollapsed prop controls initial state
+
+2.  CADENCE BAR ON STEP VIEW [BUILT]
+    - When viewing a PIPS project step (e.g., Step 2: Analyze)
+    - Cadence Bar shows: relevant methodology content for that step
+    - Links: "Learn about root cause analysis", "Fishbone diagram guide", etc.
+    - Click link → opens Knowledge Hub reader for that content node
+    - Progress: shows what percentage of that step's content has been read
+
+3.  CADENCE BAR ON DASHBOARD [BUILT]
+    - Shows overall methodology learning progress
+    - Links to next unread content or recently bookmarked items
+    - Collapsed by default on dashboard (uses defaultCollapsed)
+
+4.  CADENCE BAR ON TICKET DETAIL [BUILT]
+    - If ticket is linked to a PIPS step, shows relevant content for that step
+    - Helps team members understand the methodology context of their work
+    - "Learn about this step" link opens Knowledge Hub
+
+5.  CADENCE BAR STATES
+    - Collapsed: Thin bar with progress indicator and expand button
+    - Expanded: Full panel with content links, progress, and reading stats
+    - Empty: Hidden entirely when no contextual content is available
+```
+
+### 11.6 Bookmarks Management Flow [BUILT]
+
+```
+FLOW: Managing Bookmarks
+
+1.  VIEW ALL BOOKMARKS
+    - Route: /app/knowledge/bookmarks
+    - List of all bookmarked content nodes
+    - Grouped by pillar or by PIPS step (toggle)
+    - Each bookmark shows: title, pillar, step association, date bookmarked
+
+2.  NAVIGATE FROM BOOKMARK
+    - Click any bookmark → opens Content Reader for that node
+    - Bookmark is highlighted as "current" in the reader sidebar
+
+3.  REMOVE BOOKMARK
+    - Click bookmark icon to toggle off (both from reader and from bookmarks list)
+    - Confirmation not required (simple toggle)
+
+4.  EMPTY STATE
+    - "No bookmarks yet. As you read the methodology, bookmark sections
+      you want to reference later."
+    - CTA: "Start reading" → navigates to Knowledge Hub landing
+```
+
+---
+
+## 12. Training Mode UX Flows
+
+> **Status: [SCAFFOLDED]** — DB tables and seed data ready (4 paths, 27 modules, 59 exercises). Page routes exist. UI components built (training-landing, training-module-card, training-exercise, training-progress-ring, scenario-runner, training-multiple-choice, training-reflection). Full wiring and polish are pending.
+
+### 12.1 Training Mode Overview
+
+Training Mode provides structured learning paths that teach users the PIPS methodology through interactive modules and exercises. Unlike the Knowledge Hub (which is reference-oriented), Training Mode is course-oriented with sequential progression, exercises, and measurable completion.
+
+**Training Structure:**
+
+| Level         | Description                                                                    | Count |
+| ------------- | ------------------------------------------------------------------------------ | ----- |
+| **Paths**     | High-level learning tracks (e.g., "PIPS Fundamentals", "Advanced Analysis")    | 4     |
+| **Modules**   | Individual learning units within a path                                        | 27    |
+| **Exercises** | Interactive activities within a module (multiple-choice, reflection, scenario) | 59    |
+
+### 12.2 Training Landing Page Flow [SCAFFOLDED]
+
+```
+FLOW: Training Mode Entry
+
+1.  NAVIGATE TO TRAINING
+    - Entry: Click "Training" in sidebar or from Knowledge Hub
+    - Route: /app/training
+    - Training landing page renders
+
+2.  TRAINING LANDING PAGE
+    - Hero: "Master the PIPS Methodology" with description
+    - Progress overview: Overall completion percentage, paths started, exercises done
+    - Path cards arranged vertically:
+      a) Each card shows: path title, description, module count, exercise count,
+         progress ring (% complete), estimated duration
+      b) Cards sorted by recommended order (fundamentals first)
+      c) In-progress paths shown first, then not started, then completed
+
+3.  SELECT A PATH
+    - Click a path card → navigates to path detail page
+    - Route: /app/training/path/[pathSlug]
+```
+
+### 12.3 Path Selection and Module Progression Flow [SCAFFOLDED]
+
+```
+FLOW: Working Through a Training Path
+
+1.  PATH DETAIL PAGE
+    - Route: /app/training/path/[pathSlug]
+    - Header: Path title, description, total progress ring
+    - Module list rendered as vertical cards with sequence numbers:
+      a) Module card shows: title, description, exercise count, completion status
+      b) Completed modules: checkmark badge, green accent
+      c) Current module: highlighted border, "Continue" CTA
+      d) Locked modules: dimmed, lock icon (sequential unlock by default)
+      e) Module card component: training-module-card.tsx
+
+2.  SELECT MODULE
+    - Click a module card (if unlocked) → navigates to module page
+    - Route: /app/training/path/[pathSlug]/module/[moduleSlug]
+
+3.  MODULE PAGE
+    - Module header: title, path breadcrumb, module number (e.g., "Module 3 of 8")
+    - Content section: educational material (rendered markdown)
+    - Exercise list: exercises within this module, shown as numbered items
+    - Progress: "3 of 5 exercises complete" with visual bar
+    - CTA: "Start next exercise" or "Continue exercise"
+
+4.  PROGRESSION RULES
+    - Exercises within a module are sequential
+    - Modules within a path are sequential (configurable: strict vs. flexible)
+    - User can revisit completed exercises
+    - Progress persisted per user in training_progress DB table
+```
+
+### 12.4 Exercise Completion Flow [SCAFFOLDED]
+
+```
+FLOW: Completing a Training Exercise
+
+1.  EXERCISE PAGE
+    - Route: /app/training/practice/[exerciseSlug] or inline within module page
+    - Exercise types and their UX:
+
+    a) MULTIPLE CHOICE [BUILT]
+       - Component: training-multiple-choice.tsx
+       - Question text displayed prominently
+       - Options rendered as clickable cards (radio-style, single select)
+       - Submit button enabled after selection
+       - Feedback: correct answer highlighted green, wrong answer red with explanation
+       - "Next exercise" CTA appears after submission
+
+    b) SCENARIO RUNNER [BUILT]
+       - Component: scenario-runner.tsx
+       - Presents a real-world scenario (workplace situation)
+       - User chooses from decision options
+       - System reveals consequences of the choice
+       - May have multiple stages (branching scenarios)
+       - Summary at end: what they learned, connection to PIPS methodology
+
+    c) REFLECTION [BUILT]
+       - Component: training-reflection.tsx
+       - Open-ended prompt (no right/wrong answer)
+       - Text area for user to write reflection
+       - Submit saves response
+       - Optional: see sample responses or "expert perspective" after submitting
+       - Always marked as complete after submission
+
+2.  EXERCISE SUBMISSION
+    - Server action: exercise-actions.ts
+    - Saves response, updates completion status
+    - Progress ring and module progress update immediately
+
+3.  EXERCISE COMPLETION FEEDBACK
+    - Brief celebration micro-animation on correct/submit
+    - Progress updates: "4 of 5 exercises complete"
+    - Auto-advance prompt: "Ready for the next one?" → [Continue] / [Review]
+
+4.  MODULE COMPLETION
+    - When all exercises in a module are complete:
+    - Celebration: module completion card with summary stats
+    - Next module unlocked (if sequential)
+    - CTA: "Continue to Module N" or "Return to path overview"
+```
+
+### 12.5 Training Progress Tracking Flow [SCAFFOLDED]
+
+```
+FLOW: Tracking Training Progress
+
+1.  PROGRESS PAGE
+    - Route: /app/training/progress
+    - Overall dashboard showing all training activity
+
+2.  PROGRESS METRICS
+    - Component: training-progress-ring.tsx (circular progress indicator)
+    - Metrics shown:
+      a) Overall completion: "12 of 27 modules complete (44%)"
+      b) Per-path progress: ring + percentage for each of the 4 paths
+      c) Total exercises completed: count
+      d) Current streak: consecutive days with training activity
+      e) Time invested: estimated based on module durations
+
+3.  PROGRESS VISUALIZATION
+    - Progress rings use PIPS step colors (paths map to step color families)
+    - Completed items show checkmark overlay
+    - Active items show pulsing ring (matching Cadence Bar animation language)
+
+4.  RESUME TRAINING
+    - "Continue where you left off" card at top
+    - Shows: current module, current exercise, path context
+    - Single click to resume
+
+5.  CERTIFICATE / COMPLETION [PLANNED]
+    - When a full path is completed, show completion badge
+    - Future: downloadable certificate, shareable achievement
+```
+
+---
+
+## 13. Workshop Facilitation UX Flows
+
+> **Status: [SCAFFOLDED]** — DB tables created and applied to production. UI scaffolded at /app/knowledge/workshop. Full facilitation features are pending.
+
+### 13.1 Workshop Overview
+
+Workshop Facilitation provides structured session templates that PIPS facilitators can use to run improvement workshops with their teams. Workshops are tied to specific PIPS steps and provide agendas, activities, timing guides, and participant materials.
+
+### 13.2 Workshop Landing Flow [SCAFFOLDED]
+
+```
+FLOW: Workshop Entry
+
+1.  NAVIGATE TO WORKSHOPS
+    - Entry: /app/knowledge/workshop (via Knowledge Hub)
+    - Shows available workshop templates organized by PIPS step
+
+2.  WORKSHOP TEMPLATE LIST
+    - Grouped by PIPS step (Step 1 workshops, Step 2 workshops, etc.)
+    - Each template card shows:
+      a) Workshop title (e.g., "Root Cause Analysis Workshop")
+      b) PIPS step badge with step color
+      c) Duration estimate (e.g., "90 minutes")
+      d) Participant count range (e.g., "4-12 participants")
+      e) Materials needed
+      f) Description
+
+3.  SELECT WORKSHOP TEMPLATE
+    - Click a template → view workshop detail
+    - Workshop detail shows:
+      a) Full agenda with timed sections
+      b) Facilitator notes per section
+      c) Participant activities
+      d) Required PIPS forms (linked to form system)
+      e) Preparation checklist
+```
+
+### 13.3 Workshop Session Flow [PLANNED]
+
+```
+FLOW: Running a Live Workshop Session
+
+1.  START SESSION
+    - Click "Start This Workshop" from template detail
+    - Creates a workshop session record in DB
+    - Links to a PIPS project (select existing or create new)
+    - Assigns facilitator (current user by default)
+
+2.  FACILITATION VIEW
+    - Timer-driven view with current agenda section highlighted
+    - Facilitator sees: current section instructions, next section preview, timer
+    - Participant actions: links to the PIPS forms participants should fill out
+    - Progress bar: shows where in the agenda the session currently is
+
+3.  PARTICIPANT INTERACTION
+    - Participants contribute via standard PIPS forms (fishbone, brainstorming, etc.)
+    - Facilitator can see real-time submissions
+    - Voting and ranking happen through existing PIPS form tools
+
+4.  SESSION WRAP-UP
+    - Facilitator marks session complete
+    - Auto-generated session summary: decisions made, action items, next steps
+    - Action items converted to tickets (linked to PIPS project)
+    - Session record saved with all participant contributions
+
+5.  POST-SESSION
+    - Session summary available in project history
+    - Participants receive notification with summary and assigned action items
+    - Follow-up workshop can be scheduled
+```
+
+---
+
+## 14. Marketing Pages UX Flows
+
+> **Status: [BUILT]** — 83+ SEO-optimized pages deployed. 6 methodology step pages, 22 tool pages, 20 book preview pages, 35 glossary pages, resources hub, methodology overview. All server-rendered with structured metadata.
+
+### 14.1 Marketing Pages Overview
+
+The marketing page system serves dual purposes: attracting organic search traffic AND educating visitors about the PIPS methodology. All marketing pages are publicly accessible (no auth required) and live under the `(marketing)` route group.
+
+**Marketing Page Types:**
+
+| Type                   | Count | Route Pattern                 | Status  |
+| ---------------------- | ----- | ----------------------------- | ------- |
+| Methodology step pages | 6     | `/methodology/step/[1-6]`     | [BUILT] |
+| Tool pages             | 22    | `/methodology/tools/[slug]`   | [BUILT] |
+| Book chapter previews  | 20    | `/book/[chapterSlug]`         | [BUILT] |
+| Glossary terms         | 35    | `/resources/glossary/[term]`  | [BUILT] |
+| Resources hub          | 1     | `/resources`                  | [BUILT] |
+| Methodology overview   | 1     | `/methodology`                | [BUILT] |
+| Template downloads     | 17    | `/resources/templates/[slug]` | [BUILT] |
+
+### 14.2 Methodology Pages Flow [BUILT]
+
+```
+FLOW: Exploring the PIPS Methodology (Public)
+
+1.  METHODOLOGY OVERVIEW
+    - Route: /methodology
+    - Hero section: "The PIPS 6-Step Framework" with brief intro
+    - Visual: 6-step diagram with step colors (interactive — click any step)
+    - Brief description of each step with step-colored accent
+    - CTA: "Try PIPS Free" or "Read the full book"
+
+2.  METHODOLOGY STEP PAGE
+    - Route: /methodology/step/[1-6]
+    - Step-specific content:
+      a) Step name, number, and step color accent
+      b) Detailed explanation of what this step accomplishes
+      c) Tools available in this step (linked to tool pages)
+      d) Example scenarios
+      e) Connection to next/previous steps
+    - Sidebar or bottom: links to related tool pages
+    - SEO: structured metadata, JSON-LD for educational content
+    - CTA: "Use this step in PIPS" → signup flow
+
+3.  TOOL PAGES
+    - Route: /methodology/tools/[slug]
+    - 22 pages, one per PIPS improvement tool
+    - Content: what the tool is, when to use it, step-by-step instructions,
+      visual example, connection to PIPS steps
+    - Examples: fishbone-diagram, five-whys, decision-matrix, raci-chart,
+      force-field-analysis, cost-benefit-analysis, brainstorming, etc.
+    - SEO target: high-volume informational keywords ("fishbone diagram tool",
+      "decision matrix template", "5 whys analysis")
+    - CTA: "Build this in PIPS" → signup flow
+
+4.  NAVIGATION BETWEEN PAGES
+    - Breadcrumb: Home > Methodology > Step N or Home > Methodology > Tools > [Tool]
+    - Related content links at bottom of each page
+    - Step color accents maintain visual connection to the methodology
+```
+
+### 14.3 Book Preview Pages Flow [BUILT]
+
+```
+FLOW: Browsing Book Chapter Previews (Public)
+
+1.  BOOK LANDING
+    - Route: /book
+    - Hero: "The Never-Ending Quest" book cover/title
+    - Chapter list with preview summaries
+    - CTA: "Read the full book inside PIPS" → signup
+
+2.  CHAPTER PREVIEW PAGE
+    - Route: /book/[chapterSlug]
+    - Shows teaser content from the methodology book (first ~20% of chapter)
+    - Chapter title, author, estimated read time
+    - Content rendered with marketing typography (DM Serif Display for title)
+    - Gated content indicator: "Continue reading inside PIPS" after preview ends
+    - Related chapters listed at bottom
+
+3.  CONVERSION POINT
+    - After the preview content, a clear gated content CTA:
+      "Sign up for free to read the full chapter and access all 205 content nodes"
+    - The preview serves as a lead magnet — demonstrates content quality
+    - Drives users from SEO traffic → product signup → Knowledge Hub
+```
+
+### 14.4 Glossary and Resources Flow [BUILT]
+
+```
+FLOW: Resources and Glossary (Public)
+
+1.  RESOURCES HUB
+    - Route: /resources
+    - Central navigation page for all public content
+    - Sections: Glossary, Templates, Methodology Guides
+    - Card-based layout with content counts per section
+
+2.  GLOSSARY TERM PAGE
+    - Route: /resources/glossary/[term]
+    - 35 process improvement terms defined
+    - Each page: term, definition, related terms, connection to PIPS steps
+    - SEO target: long-tail terminology traffic ("root cause analysis definition",
+      "continuous improvement meaning")
+    - Cross-links to related tool pages and methodology step pages
+
+3.  TEMPLATE PAGES
+    - Route: /resources/templates/[slug]
+    - 17 downloadable/viewable templates
+    - Template preview with description
+    - CTA: "Use this template in PIPS" → signup flow or "Download PDF"
+    - Templates serve as lead magnets for organic traffic
+
+4.  SEO INFRASTRUCTURE [BUILT]
+    - sitemap.ts generates dynamic sitemap for all marketing pages
+    - robots.ts configured for search engine crawling
+    - JSON-LD structured data on all pages (Article, HowTo, DefinedTerm schemas)
+    - Server-side rendering ensures full content is indexable
+```
+
+### 14.5 Marketing-to-Product Conversion Flow [BUILT]
+
+```
+FLOW: Marketing Page → Product Signup
+
+1.  VISITOR LANDS ON MARKETING PAGE
+    - Via organic search, social media link, or direct URL
+    - Content loads immediately (SSR, no auth required)
+
+2.  VISITOR READS CONTENT
+    - Methodology pages, tool pages, book previews, or glossary terms
+    - Content demonstrates expertise and product value
+
+3.  CONVERSION TOUCHPOINTS
+    - Every marketing page includes at least one CTA:
+      a) Primary: "Try PIPS Free" or "Start Free" → /signup
+      b) Secondary: "Read more in PIPS" or "Use this tool" → /signup
+      c) Gated content: "Sign up to access full content" → /signup
+    - CTAs use PIPS Indigo primary button styling per BRAND_GUIDE_V2.md
+
+4.  SIGNUP FLOW
+    - Marketing CTA leads to standard signup flow (Section 2.1)
+    - After signup + org creation, user lands in dashboard
+    - The content they were reading is available in full in the Knowledge Hub
+
+5.  RETURN PATH
+    - Navigation bar on marketing pages includes "Sign In" for existing users
+    - Authenticated users who visit marketing pages see "Go to Dashboard" instead
+```
+
+### 14.6 Landing Page Component Architecture [BUILT]
+
+```
+COMPONENTS: Marketing Landing Page System
+
+1.  LANDING NAV (landing-nav.tsx) [BUILT]
+    - Top navigation bar for marketing pages
+    - Logo, main navigation links, "Sign In" / "Get Started" buttons
+    - Transparent background on hero, solid on scroll
+
+2.  HERO SECTION (hero-section.tsx) [BUILT]
+    - Full-width hero with DM Serif Display headline
+    - Subtitle, dual CTAs, PIPS Deep background with dot grid pattern
+    - Step Gradient Stripe as decorative divider
+
+3.  HOW IT WORKS SECTION (how-it-works-section.tsx) [BUILT]
+    - 6-step visual walkthrough
+    - Each step shown with step color accent, icon, and brief description
+    - Interactive: click a step to see more detail
+
+4.  FEATURES SECTION (features-section.tsx) [BUILT]
+    - Product feature highlights with screenshots or illustrations
+    - Alternating left/right layout per BRAND_GUIDE_V2.md guidelines
+
+5.  METHODOLOGY SECTION (methodology-section.tsx) [BUILT]
+    - Deeper dive into the PIPS framework
+    - Links to individual step and tool pages
+
+6.  CTA SECTION (cta-section.tsx) [BUILT]
+    - Conversion-focused section at bottom of pages
+    - "Ready to start solving problems?" with signup CTA
+
+7.  LANDING FOOTER (landing-footer.tsx) [BUILT]
+    - 4-column footer: Product, Resources, Company, Legal
+    - Step Gradient Stripe above footer
+    - PIPS logo and tagline
+```
 
 ---
 
