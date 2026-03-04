@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Circle, Clock, PlayCircle } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Clock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { TrainingProgressRing } from '@/components/training/training-progress-ring'
+import { TrainingModuleCard } from '@/components/training/training-module-card'
 import { getTrainingPath, getTrainingModules, getUserTrainingProgress } from '../../actions'
 
 type PathPageProps = {
@@ -24,9 +24,24 @@ const PathPage = async ({ params }: PathPageProps) => {
   ])
 
   const pathProgress = progress.filter((p) => p.path_id === path.id)
-  const completedCount = pathProgress.filter((p) => p.status === 'completed').length
+  const completedModuleIds = new Set(
+    pathProgress.filter((p) => p.status === 'completed').map((p) => p.module_id),
+  )
+  const completedCount = completedModuleIds.size
   const totalCount = modules.length
   const overallProgress = totalCount > 0 ? completedCount / totalCount : 0
+
+  // Find the first incomplete module for the "Continue" button
+  const nextModule = modules.find((m) => !completedModuleIds.has(m.id))
+
+  // Build a map of module statuses
+  const statusMap = new Map(pathProgress.map((p) => [p.module_id, p.status]))
+
+  // Determine which modules are locked (prerequisites not completed)
+  const isModuleLocked = (prerequisites: string[]): boolean => {
+    if (prerequisites.length === 0) return false
+    return prerequisites.some((prereqId) => !completedModuleIds.has(prereqId))
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -55,58 +70,34 @@ const PathPage = async ({ params }: PathPageProps) => {
             </span>
           </div>
         </div>
+        {nextModule && (
+          <Link href={`/training/path/${path.id}/${nextModule.id}`}>
+            <Button size="sm" className="shrink-0">
+              {completedCount > 0 ? 'Continue' : 'Start'}
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Modules */}
       <div className="space-y-3">
         <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Modules</h2>
         {modules.map((module, index) => {
-          const moduleProgress = pathProgress.find((p) => p.module_id === module.id)
-          const status = moduleProgress?.status ?? 'not_started'
-          const isCompleted = status === 'completed'
-          const isInProgress = status === 'in_progress'
+          const status = (statusMap.get(module.id) ?? 'not_started') as
+            | 'not_started'
+            | 'in_progress'
+            | 'completed'
+          const locked = isModuleLocked(module.prerequisites)
 
           return (
-            <Link key={module.id} href={`/training/path/${path.id}/${module.id}`}>
-              <Card
-                className={`group cursor-pointer transition-all hover:shadow-sm ${isCompleted ? 'border-[var(--color-success)]/30' : ''}`}
-              >
-                <CardContent className="flex items-center gap-4 py-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center">
-                    {isCompleted ? (
-                      <CheckCircle2 size={20} className="text-[var(--color-success)]" />
-                    ) : isInProgress ? (
-                      <PlayCircle size={20} className="text-[var(--color-primary)]" />
-                    ) : (
-                      <Circle size={20} className="text-[var(--color-text-tertiary)]" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-[var(--color-text-tertiary)]">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <h3 className="text-sm font-medium text-[var(--color-text-primary)]">
-                        {module.title}
-                      </h3>
-                      {isInProgress && (
-                        <Badge variant="secondary" className="text-[10px]">
-                          In Progress
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                      {module.description}
-                    </p>
-                  </div>
-                  <span className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)]">
-                    <Clock size={11} />
-                    {module.estimated_minutes} min
-                  </span>
-                  <ArrowRight size={14} className="text-[var(--color-text-tertiary)]" />
-                </CardContent>
-              </Card>
-            </Link>
+            <TrainingModuleCard
+              key={module.id}
+              module={module}
+              index={index}
+              status={status}
+              isLocked={locked}
+              pathId={path.id}
+            />
           )
         })}
 

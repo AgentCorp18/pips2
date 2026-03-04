@@ -1,10 +1,14 @@
 import { TrainingLanding } from '@/components/training/training-landing'
-import { getTrainingPaths, getUserTrainingProgress } from './actions'
+import { getTrainingPaths, getUserTrainingProgress, getPathModuleCounts } from './actions'
 
 const TrainingPage = async () => {
-  const [paths, progress] = await Promise.all([getTrainingPaths(), getUserTrainingProgress()])
+  const [paths, progress, moduleCounts] = await Promise.all([
+    getTrainingPaths(),
+    getUserTrainingProgress(),
+    getPathModuleCounts(),
+  ])
 
-  return <TrainingLanding paths={paths} progress={progress} />
+  return <TrainingLanding paths={paths} progress={progress} moduleCounts={moduleCounts} />
 }
 
 export default TrainingPage

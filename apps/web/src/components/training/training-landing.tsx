@@ -8,70 +8,29 @@ import {
   BarChart3,
   ArrowRight,
   Circle,
+  BookOpen,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { TrainingProgressRing } from './training-progress-ring'
-import type { TrainingPathRow, TrainingProgressRow } from '@/app/(app)/training/actions'
-
-const DEFAULT_PATHS: TrainingPathRow[] = [
-  {
-    id: 'quick-start',
-    title: 'Quick Start',
-    description:
-      'Get up and running with PIPS in under an hour. Learn the 6-step framework, key principles, and try your first problem statement.',
-    estimated_hours: 1,
-    target_audience: 'First-time users',
-    sort_order: 0,
-    is_active: true,
-  },
-  {
-    id: 'pips-fundamentals',
-    title: 'PIPS Fundamentals',
-    description:
-      'A comprehensive walkthrough of all 6 PIPS steps with guided exercises. Build real skills with each methodology tool.',
-    estimated_hours: 5,
-    target_audience: 'New team members',
-    sort_order: 1,
-    is_active: true,
-  },
-  {
-    id: 'facilitator-cert',
-    title: 'Facilitator Certification',
-    description:
-      'Master the art of PIPS facilitation. Learn advanced techniques for guiding teams, managing resistance, and running effective workshops.',
-    estimated_hours: 9,
-    target_audience: 'Managers, facilitators',
-    sort_order: 2,
-    is_active: true,
-  },
-  {
-    id: 'tool-mastery',
-    title: 'Tool Mastery',
-    description:
-      'Deep dives into individual PIPS tools — fishbone diagrams, criteria matrices, RACI charts, and more. Take them in any order.',
-    estimated_hours: 0.5,
-    target_audience: 'Anyone',
-    sort_order: 3,
-    is_active: true,
-  },
-]
+import type {
+  TrainingPathRow,
+  TrainingProgressRow,
+  PathModuleCounts,
+} from '@/app/(app)/training/actions'
 
 type TrainingLandingProps = {
   paths: TrainingPathRow[]
   progress: TrainingProgressRow[]
+  moduleCounts: PathModuleCounts
 }
 
-export const TrainingLanding = ({ paths, progress }: TrainingLandingProps) => {
-  // Use DB paths if available, otherwise show defaults
-  const displayPaths = paths.length > 0 ? paths : DEFAULT_PATHS
-
-  // Calculate overall completion stats
-  const totalModules = progress.length
+export const TrainingLanding = ({ paths, progress, moduleCounts }: TrainingLandingProps) => {
   const completedModules = progress.filter((p) => p.status === 'completed').length
   const inProgressModules = progress.filter((p) => p.status === 'in_progress').length
   const totalTimeSpent = progress.reduce((acc, p) => acc + p.time_spent_minutes, 0)
+  const totalModulesAcrossAllPaths = Object.values(moduleCounts).reduce((a, b) => a + b, 0)
+  const hasProgress = progress.length > 0
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -92,17 +51,19 @@ export const TrainingLanding = ({ paths, progress }: TrainingLandingProps) => {
       </div>
 
       {/* Stats row (only if user has progress) */}
-      {totalModules > 0 && (
+      {hasProgress && (
         <div className="grid grid-cols-3 gap-4">
           <Card>
             <CardContent className="flex items-center gap-3 py-4">
               <TrainingProgressRing
-                progress={totalModules > 0 ? completedModules / totalModules : 0}
+                progress={
+                  totalModulesAcrossAllPaths > 0 ? completedModules / totalModulesAcrossAllPaths : 0
+                }
                 size={40}
               />
               <div>
                 <p className="text-lg font-bold text-[var(--color-text-primary)]">
-                  {completedModules}/{totalModules}
+                  {completedModules}/{totalModulesAcrossAllPaths}
                 </p>
                 <p className="text-xs text-[var(--color-text-tertiary)]">Modules completed</p>
               </div>
@@ -140,78 +101,87 @@ export const TrainingLanding = ({ paths, progress }: TrainingLandingProps) => {
       {/* Learning Paths */}
       <div className="space-y-4">
         <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Learning Paths</h2>
-        {displayPaths.map((path) => {
+        {paths.map((path) => {
           const pathProgress = progress.filter((p) => p.path_id === path.id)
           const pathCompleted = pathProgress.filter((p) => p.status === 'completed').length
-          const pathTotal = pathProgress.length
-          const isStarted = pathTotal > 0
+          const pathModuleCount = moduleCounts[path.id] ?? 0
+          const pathPct =
+            pathModuleCount > 0 ? Math.round((pathCompleted / pathModuleCount) * 100) : 0
+          const isStarted = pathProgress.length > 0
+          const isComplete = pathModuleCount > 0 && pathCompleted === pathModuleCount
 
           return (
-            <Link key={path.id} href={`/training/path/${path.id}`}>
-              <Card className="group cursor-pointer transition-all hover:border-[var(--color-primary)] hover:shadow-md">
-                <CardContent className="flex items-center gap-4 py-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)]/10">
-                    <GraduationCap size={24} className="text-[var(--color-primary)]" />
+            <Card
+              key={path.id}
+              className="group transition-all hover:border-[var(--color-primary)] hover:shadow-md"
+            >
+              <CardContent className="flex items-center gap-4 py-5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)]/10">
+                  <GraduationCap size={24} className="text-[var(--color-primary)]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                    {path.title}
+                  </h3>
+                  <p className="mt-0.5 line-clamp-2 text-xs text-[var(--color-text-secondary)]">
+                    {path.description}
+                  </p>
+                  <div className="mt-2 flex items-center gap-4 text-xs text-[var(--color-text-tertiary)]">
+                    <span className="flex items-center gap-1">
+                      <BookOpen size={11} />
+                      {pathModuleCount} {pathModuleCount === 1 ? 'module' : 'modules'}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock size={11} />
+                      {path.estimated_hours < 1
+                        ? `${Math.round(path.estimated_hours * 60)} min`
+                        : `${path.estimated_hours} hours`}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <UsersIcon size={11} />
+                      {path.target_audience}
+                    </span>
+                    {isStarted && (
+                      <span className="font-medium text-[var(--color-primary)]">{pathPct}%</span>
+                    )}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                        {path.title}
-                      </h3>
-                      {isStarted && (
-                        <Badge
-                          variant={pathCompleted === pathTotal ? 'default' : 'secondary'}
-                          className="text-[10px]"
-                        >
-                          {pathCompleted === pathTotal ? 'Completed' : 'In Progress'}
-                        </Badge>
-                      )}
+                  {/* Progress bar */}
+                  {isStarted && (
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-surface-secondary)]">
+                      <div
+                        className="h-full rounded-full bg-[var(--color-primary)] transition-all"
+                        style={{ width: `${pathPct}%` }}
+                      />
                     </div>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-[var(--color-text-secondary)]">
-                      {path.description}
-                    </p>
-                    <div className="mt-2 flex items-center gap-4 text-xs text-[var(--color-text-tertiary)]">
-                      <span className="flex items-center gap-1">
-                        <Clock size={11} />
-                        {path.estimated_hours < 1
-                          ? `${Math.round(path.estimated_hours * 60)} min each`
-                          : `${path.estimated_hours} hours`}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <UsersIcon size={11} />
-                        {path.target_audience}
-                      </span>
-                    </div>
-                  </div>
-                  <ArrowRight
-                    size={16}
-                    className="shrink-0 text-[var(--color-text-tertiary)] transition-transform group-hover:translate-x-0.5"
-                  />
-                </CardContent>
-              </Card>
-            </Link>
+                  )}
+                </div>
+                <Link href={`/training/path/${path.id}`}>
+                  <Button
+                    size="sm"
+                    variant={isComplete ? 'outline' : isStarted ? 'default' : 'default'}
+                    className="shrink-0 gap-1.5"
+                  >
+                    {isComplete ? 'Review' : isStarted ? 'Continue' : 'Start'}
+                    <ArrowRight size={14} />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           )
         })}
-      </div>
 
-      {/* Practice Scenarios Quick Link */}
-      <Card>
-        <CardContent className="flex items-center justify-between py-4">
-          <div>
-            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-              Practice Scenarios
-            </h3>
-            <p className="text-xs text-[var(--color-text-secondary)]">
-              Work through real-world case studies in a sandboxed environment
+        {paths.length === 0 && (
+          <div className="rounded-lg border border-dashed border-[var(--color-border)] px-6 py-12 text-center">
+            <GraduationCap size={32} className="mx-auto text-[var(--color-text-tertiary)]" />
+            <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+              No training paths available yet
+            </p>
+            <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
+              Training paths will appear once content is seeded
             </p>
           </div>
-          <Link href="/training/practice">
-            <Button variant="outline" size="sm" className="gap-2">
-              Start Practice <ArrowRight size={14} />
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   )
 }

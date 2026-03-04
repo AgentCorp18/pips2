@@ -1,18 +1,38 @@
 import Link from 'next/link'
-import { BarChart3, CheckCircle2, Clock, TrendingUp } from 'lucide-react'
+import { ArrowRight, BarChart3, CheckCircle2, Clock, TrendingUp } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { TrainingProgressRing } from '@/components/training/training-progress-ring'
-import { getUserTrainingProgress, getTrainingPaths } from '../actions'
+import { getUserTrainingProgress, getTrainingPaths, getAllModules } from '../actions'
 
 const ProgressPage = async () => {
-  const [progress, paths] = await Promise.all([getUserTrainingProgress(), getTrainingPaths()])
+  const [progress, paths, allModules] = await Promise.all([
+    getUserTrainingProgress(),
+    getTrainingPaths(),
+    getAllModules(),
+  ])
 
-  const totalModules = progress.length
+  // Build module counts and first-incomplete-module per path
+  const modulesByPath = new Map<string, typeof allModules>()
+  for (const m of allModules) {
+    const list = modulesByPath.get(m.path_id) ?? []
+    list.push(m)
+    modulesByPath.set(m.path_id, list)
+  }
+
+  const totalModuleCount = allModules.length
   const completedModules = progress.filter((p) => p.status === 'completed').length
   const totalTimeMinutes = progress.reduce((acc, p) => acc + p.time_spent_minutes, 0)
-  const avgScore = progress
-    .filter((p) => p.assessment_score !== null)
-    .reduce((acc, p, _, arr) => acc + (p.assessment_score ?? 0) / arr.length, 0)
+  const scoredProgress = progress.filter((p) => p.assessment_score !== null)
+  const avgScore =
+    scoredProgress.length > 0
+      ? scoredProgress.reduce((acc, p) => acc + (p.assessment_score ?? 0), 0) /
+        scoredProgress.length
+      : 0
+
+  const completedModuleIds = new Set(
+    progress.filter((p) => p.status === 'completed').map((p) => p.module_id),
+  )
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -31,12 +51,12 @@ const ProgressPage = async () => {
         <Card>
           <CardContent className="py-4 text-center">
             <TrainingProgressRing
-              progress={totalModules > 0 ? completedModules / totalModules : 0}
+              progress={totalModuleCount > 0 ? completedModules / totalModuleCount : 0}
               size={48}
               strokeWidth={4}
             />
             <p className="mt-2 text-lg font-bold text-[var(--color-text-primary)]">
-              {completedModules}/{totalModules}
+              {completedModules}/{totalModuleCount}
             </p>
             <p className="text-xs text-[var(--color-text-tertiary)]">Completed</p>
           </CardContent>
@@ -80,12 +100,15 @@ const ProgressPage = async () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {paths.map((path) => {
-                const pathProgress = progress.filter((p) => p.path_id === path.id)
-                const pathCompleted = pathProgress.filter((p) => p.status === 'completed').length
-                const pathTotal = pathProgress.length
+                const pathModules = modulesByPath.get(path.id) ?? []
+                const pathTotal = pathModules.length
+                const pathCompleted = pathModules.filter((m) => completedModuleIds.has(m.id)).length
                 const pct = pathTotal > 0 ? Math.round((pathCompleted / pathTotal) * 100) : 0
+
+                // Find first incomplete module for "Continue" link
+                const nextModule = pathModules.find((m) => !completedModuleIds.has(m.id))
 
                 return (
                   <div key={path.id}>
@@ -96,9 +119,18 @@ const ProgressPage = async () => {
                       >
                         {path.title}
                       </Link>
-                      <span className="text-xs text-[var(--color-text-tertiary)]">
-                        {pathCompleted}/{pathTotal} ({pct}%)
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-[var(--color-text-tertiary)]">
+                          {pathCompleted}/{pathTotal} ({pct}%)
+                        </span>
+                        {nextModule && (
+                          <Link href={`/training/path/${path.id}/${nextModule.id}`}>
+                            <Button variant="ghost" size="xs" className="gap-1">
+                              Continue <ArrowRight size={12} />
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
                     </div>
                     <div className="mt-1 h-2 overflow-hidden rounded-full bg-[var(--color-surface-secondary)]">
                       <div
@@ -114,7 +146,7 @@ const ProgressPage = async () => {
         </Card>
       )}
 
-      {totalModules === 0 && (
+      {totalModuleCount === 0 && (
         <div className="rounded-lg border border-dashed border-[var(--color-border)] px-6 py-12 text-center">
           <BarChart3 size={32} className="mx-auto text-[var(--color-text-tertiary)]" />
           <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
@@ -123,6 +155,11 @@ const ProgressPage = async () => {
           <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
             Start a learning path to begin tracking your progress
           </p>
+          <Link href="/training" className="mt-4 inline-block">
+            <Button size="sm" className="gap-1.5">
+              Browse Training Paths <ArrowRight size={14} />
+            </Button>
+          </Link>
         </div>
       )}
     </div>

@@ -34,6 +34,9 @@ export type TrainingProgressRow = {
   time_spent_minutes: number
 }
 
+/** Module counts keyed by path_id */
+export type PathModuleCounts = Record<string, number>
+
 /** Get all active training paths */
 export const getTrainingPaths = async (): Promise<TrainingPathRow[]> => {
   const supabase = await createClient()
@@ -45,6 +48,35 @@ export const getTrainingPaths = async (): Promise<TrainingPathRow[]> => {
 
   if (error) {
     console.error('getTrainingPaths error:', error)
+    return []
+  }
+  return data ?? []
+}
+
+/** Get module counts grouped by path_id */
+export const getPathModuleCounts = async (): Promise<PathModuleCounts> => {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('training_modules').select('path_id')
+
+  if (error) {
+    console.error('getPathModuleCounts error:', error)
+    return {}
+  }
+
+  const counts: PathModuleCounts = {}
+  for (const row of data ?? []) {
+    counts[row.path_id] = (counts[row.path_id] ?? 0) + 1
+  }
+  return counts
+}
+
+/** Get all modules across all paths */
+export const getAllModules = async (): Promise<TrainingModuleRow[]> => {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('training_modules').select('*').order('sort_order')
+
+  if (error) {
+    console.error('getAllModules error:', error)
     return []
   }
   return data ?? []
