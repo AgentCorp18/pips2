@@ -47,11 +47,12 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 
 ### Technical & Operations
 
-| Document              | File                       | Lines  | Description                                                                                                            |
-| --------------------- | -------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------- |
-| Technical Plan        | `TECHNICAL_PLAN.md`        | ~2,654 | Architecture, 20+ SQL tables, 60+ API endpoints, RLS policies, integration design, performance scaling                 |
-| DevOps Runbook        | `DEVOPS_RUNBOOK.md`        | ~3,377 | Day-1 setup commands, 5 CI/CD workflow YAMLs, environment management, deployment procedures, troubleshooting playbooks |
-| AI Agent Coordination | `AI_AGENT_COORDINATION.md` | ~1,300 | Worktree strategy, 25+ agent work packages across 7 phases, file ownership matrix, session management, templates       |
+| Document                | File                       | Lines  | Description                                                                                                                                     |
+| ----------------------- | -------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **System Architecture** | `SYSTEM_ARCHITECTURE.md`   | ~900   | **ARCHITECTURAL REFERENCE.** System topology, domain model, 32+ tables, RLS patterns, component tree, API design, security, deployment, scaling |
+| Technical Plan          | `TECHNICAL_PLAN.md`        | ~2,654 | Architecture, 20+ SQL tables, 60+ API endpoints, RLS policies, integration design, performance scaling                                          |
+| DevOps Runbook          | `DEVOPS_RUNBOOK.md`        | ~3,377 | Day-1 setup commands, 5 CI/CD workflow YAMLs, environment management, deployment procedures, troubleshooting playbooks                          |
+| AI Agent Coordination   | `AI_AGENT_COORDINATION.md` | ~1,300 | Worktree strategy, 25+ agent work packages across 7 phases, file ownership matrix, session management, templates                                |
 
 ### Execution
 
