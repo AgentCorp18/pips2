@@ -20,6 +20,7 @@ export const PERMISSIONS = {
   'ticket.comment': ['owner', 'admin', 'manager', 'member'],
   'step.complete': ['owner', 'admin', 'manager'],
   'step.override': ['owner', 'admin', 'manager'],
+  'workshop.manage': ['owner', 'admin', 'manager'],
   'data.view': ['owner', 'admin', 'manager', 'member', 'viewer'],
   'profile.edit': ['owner', 'admin', 'manager', 'member', 'viewer'],
 } as const satisfies Record<string, readonly OrgRole[]>
