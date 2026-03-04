@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { stepEnumToNumber } from '@pips/shared'
 import { Button } from '@/components/ui/button'
 import { ProjectCard } from '@/components/pips/project-card'
 import { Plus, FolderKanban } from 'lucide-react'
@@ -45,14 +46,14 @@ const ProjectsPage = async () => {
       description,
       status,
       current_step,
-      target_completion_date,
+      target_end,
       owner_id,
       profiles!projects_owner_id_fkey ( display_name ),
-      project_steps ( step_number, status )
+      project_steps ( step, status )
     `,
     )
     .eq('org_id', membership.org_id)
-    .is('archived_at', null)
+    .neq('status', 'archived')
     .order('created_at', { ascending: false })
 
   const projectList = projects ?? []
@@ -91,13 +92,14 @@ const ProjectsPage = async () => {
             const ownerProfile = Array.isArray(profilesRaw)
               ? ((profilesRaw[0] as { display_name: string } | undefined) ?? null)
               : (profilesRaw as { display_name: string } | null)
-            const steps = (project.project_steps ?? []) as Array<{
-              step_number: number
+            const stepsRaw = (project.project_steps ?? []) as Array<{
+              step: string
               status: string
             }>
-            const stepsCompleted = steps.filter(
+            const stepsCompleted = stepsRaw.filter(
               (s) => s.status === 'completed' || s.status === 'skipped',
             ).length
+            const currentStepNum = stepEnumToNumber((project.current_step as string) ?? 'identify')
 
             return (
               <ProjectCard
@@ -106,10 +108,10 @@ const ProjectsPage = async () => {
                 name={project.title as string}
                 description={project.description}
                 status={project.status ?? 'active'}
-                currentStep={project.current_step ?? 1}
+                currentStep={currentStepNum}
                 ownerName={ownerProfile?.display_name ?? 'Unknown'}
                 stepsCompleted={stepsCompleted}
-                targetDate={project.target_completion_date}
+                targetDate={project.target_end}
               />
             )
           })}

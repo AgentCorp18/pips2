@@ -75,7 +75,7 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
     .from('projects')
     .select('id, title')
     .eq('org_id', membership.org_id)
-    .is('archived_at', null)
+    .neq('status', 'archived')
     .order('title')
 
   const projects = (projectsRaw ?? []).map((p) => ({

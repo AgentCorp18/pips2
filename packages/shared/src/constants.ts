@@ -55,6 +55,38 @@ export const PIPS_STEPS = [
 
 export type PipsStepNumber = 1 | 2 | 3 | 4 | 5 | 6
 
+/** Database pips_step enum values */
+export type PipsStepEnum =
+  | 'identify'
+  | 'analyze'
+  | 'generate'
+  | 'select_plan'
+  | 'implement'
+  | 'evaluate'
+
+/** Ordered list of pips_step enum values (index 0 = step 1, etc.) */
+export const PIPS_STEP_ENUMS: readonly PipsStepEnum[] = [
+  'identify',
+  'analyze',
+  'generate',
+  'select_plan',
+  'implement',
+  'evaluate',
+] as const
+
+/** Convert a DB pips_step enum string to its 1-based step number */
+export const stepEnumToNumber = (step: string): PipsStepNumber => {
+  const index = PIPS_STEP_ENUMS.indexOf(step as PipsStepEnum)
+  if (index === -1) return 1
+  return (index + 1) as PipsStepNumber
+}
+
+/** Convert a 1-based step number to its DB pips_step enum string */
+export const stepNumberToEnum = (num: number): PipsStepEnum => {
+  if (num < 1 || num > 6) return 'identify'
+  return PIPS_STEP_ENUMS[num - 1] ?? 'identify'
+}
+
 export const PIPS_STEP_NAMES = PIPS_STEPS.map((s) => s.name)
 
 export const PIPS_STEP_COLORS = PIPS_STEPS.map((s) => s.color)

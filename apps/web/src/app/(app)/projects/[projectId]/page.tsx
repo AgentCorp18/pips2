@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { stepEnumToNumber, PIPS_STEPS } from '@pips/shared'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProjectOverviewClient } from './project-overview-client'
@@ -9,15 +10,6 @@ import { ActivityFeed } from './activity-feed'
 import { MembersList } from './members-list'
 import { ExportPDFButton } from '@/components/export-pdf-button'
 import { Calendar, User } from 'lucide-react'
-
-const STEP_LABELS: Record<number, string> = {
-  1: 'Identify',
-  2: 'Analyze',
-  3: 'Generate',
-  4: 'Select & Plan',
-  5: 'Implement',
-  6: 'Evaluate',
-}
 
 const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params
@@ -36,8 +28,8 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     .select(
       `
       id, title, description, status, current_step,
-      target_completion_date, created_at, owner_id,
-      project_steps ( id, step_number, status, started_at, completed_at ),
+      target_end, created_at, owner_id,
+      project_steps ( id, step, status, started_at, completed_at ),
       project_members ( id, user_id, role ),
       profiles!projects_owner_id_fkey ( display_name )
     `,
@@ -56,13 +48,17 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     .limit(1)
     .single()
 
-  const steps = (project.project_steps ?? []) as Array<{
+  const stepsRaw = (project.project_steps ?? []) as Array<{
     id: string
-    step_number: number
+    step: string
     status: string
     started_at: string | null
     completed_at: string | null
   }>
+  const steps = stepsRaw.map((s) => ({
+    ...s,
+    step_number: stepEnumToNumber(s.step),
+  }))
 
   const [stats, members, activity] = await Promise.all([
     getProjectStats(projectId),
@@ -75,13 +71,15 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     ? ((profilesRaw[0] as { display_name: string } | undefined) ?? null)
     : (profilesRaw as { display_name: string } | null)
 
-  const currentStepLabel = STEP_LABELS[project.current_step ?? 1] ?? 'Unknown'
+  const currentStepNum = stepEnumToNumber((project.current_step as string) ?? 'identify')
+  const currentStepDef = PIPS_STEPS.find((s) => s.number === currentStepNum)
+  const currentStepLabel = currentStepDef?.name ?? 'Unknown'
 
   return (
     <div className="space-y-6">
       <ProjectOverviewClient
         projectId={project.id}
-        currentStep={project.current_step ?? 1}
+        currentStep={currentStepNum}
         steps={steps.map((s) => ({
           step_number: s.step_number,
           status: s.status as 'not_started' | 'in_progress' | 'completed' | 'skipped',
@@ -119,8 +117,8 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
               </span>
             </MetaRow>
             <MetaRow label="Target Date">
-              {project.target_completion_date
-                ? new Date(project.target_completion_date).toLocaleDateString()
+              {project.target_end
+                ? new Date(project.target_end as string).toLocaleDateString()
                 : 'Not set'}
             </MetaRow>
             <MetaRow label="Owner">

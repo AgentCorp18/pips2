@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
+import { stepNumberToEnum } from '@pips/shared'
 
 export type StepActionResult = {
   success: boolean
@@ -42,7 +43,8 @@ export const advanceStep = async (
     return { success: false, error: 'Insufficient permissions to advance steps' }
   }
 
-  if (project.current_step !== stepNumber) {
+  const currentStepEnum = stepNumberToEnum(stepNumber)
+  if (project.current_step !== currentStepEnum) {
     return { success: false, error: 'Can only advance the current step' }
   }
 
@@ -56,7 +58,7 @@ export const advanceStep = async (
       completed_by: user.id,
     })
     .eq('project_id', projectId)
-    .eq('step_number', stepNumber)
+    .eq('step', currentStepEnum)
 
   if (updateError) {
     return { success: false, error: 'Failed to complete step' }
@@ -64,12 +66,12 @@ export const advanceStep = async (
 
   // If not the last step, advance to next
   if (stepNumber < 6) {
-    const nextStep = stepNumber + 1
+    const nextStepEnum = stepNumberToEnum(stepNumber + 1)
 
     // Update project current_step
     await supabase
       .from('projects')
-      .update({ current_step: nextStep, updated_at: now })
+      .update({ current_step: nextStepEnum, updated_at: now })
       .eq('id', projectId)
 
     // Start next step
@@ -77,7 +79,7 @@ export const advanceStep = async (
       .from('project_steps')
       .update({ status: 'in_progress', started_at: now })
       .eq('project_id', projectId)
-      .eq('step_number', nextStep)
+      .eq('step', nextStepEnum)
   } else {
     // All 6 steps complete — mark project as completed
     await supabase
@@ -123,7 +125,8 @@ export const overrideStep = async (
     return { success: false, error: 'Insufficient permissions to override steps' }
   }
 
-  if (project.current_step !== stepNumber) {
+  const currentStepEnum = stepNumberToEnum(stepNumber)
+  if (project.current_step !== currentStepEnum) {
     return { success: false, error: 'Can only override the current step' }
   }
 
@@ -138,7 +141,7 @@ export const overrideStep = async (
       completed_by: user.id,
     })
     .eq('project_id', projectId)
-    .eq('step_number', stepNumber)
+    .eq('step', currentStepEnum)
 
   if (updateError) {
     return { success: false, error: 'Failed to skip step' }
@@ -146,18 +149,18 @@ export const overrideStep = async (
 
   // Advance to next step or complete project
   if (stepNumber < 6) {
-    const nextStep = stepNumber + 1
+    const nextStepEnum = stepNumberToEnum(stepNumber + 1)
 
     await supabase
       .from('projects')
-      .update({ current_step: nextStep, updated_at: now })
+      .update({ current_step: nextStepEnum, updated_at: now })
       .eq('id', projectId)
 
     await supabase
       .from('project_steps')
       .update({ status: 'in_progress', started_at: now })
       .eq('project_id', projectId)
-      .eq('step_number', nextStep)
+      .eq('step', nextStepEnum)
   } else {
     await supabase
       .from('projects')

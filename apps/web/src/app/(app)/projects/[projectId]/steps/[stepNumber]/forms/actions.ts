@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { stepNumberToEnum } from '@pips/shared'
 
 export type FormActionResult = {
   success: boolean
@@ -25,16 +26,18 @@ export const saveFormData = async (
     return { success: false, error: 'Not authenticated' }
   }
 
+  const stepEnum = stepNumberToEnum(stepNumber)
   const { error } = await supabase.from('project_forms').upsert(
     {
       project_id: projectId,
-      step_number: stepNumber,
+      step: stepEnum,
       form_type: formType,
+      title: formType,
       data,
-      last_edited_by: user.id,
+      created_by: user.id,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: 'project_id,step_number,form_type' },
+    { onConflict: 'project_id,step,form_type' },
   )
 
   if (error) {
@@ -62,11 +65,12 @@ export const loadFormData = async (
     return null
   }
 
+  const stepEnum = stepNumberToEnum(stepNumber)
   const { data } = await supabase
     .from('project_forms')
     .select('data')
     .eq('project_id', projectId)
-    .eq('step_number', stepNumber)
+    .eq('step', stepEnum)
     .eq('form_type', formType)
     .single()
 

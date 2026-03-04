@@ -93,7 +93,7 @@ describe('advanceStep', () => {
   it('returns error when user lacks permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     // from('projects') -> project found
-    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 1 } }]
+    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 'identify' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const result = await advanceStep('proj-1', 1)
@@ -105,7 +105,7 @@ describe('advanceStep', () => {
 
   it('returns error when trying to advance a non-current step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 2 } }]
+    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 'analyze' } }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await advanceStep('proj-1', 1)
@@ -116,7 +116,7 @@ describe('advanceStep', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // from('projects').select().eq().single() -> project found
-      { data: { id: 'proj-1', org_id: 'org-1', current_step: 1 } },
+      { data: { id: 'proj-1', org_id: 'org-1', current_step: 'identify' } },
       // from('project_steps').update().eq().eq() -> error
       { error: { message: 'DB error' } },
     ]
@@ -130,7 +130,7 @@ describe('advanceStep', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // from('projects').select().eq().single() -> project found
-      { data: { id: 'proj-1', org_id: 'org-1', current_step: 3 } },
+      { data: { id: 'proj-1', org_id: 'org-1', current_step: 'generate' } },
       // from('project_steps').update().eq().eq() -> success
       { error: null },
       // from('projects').update().eq() -> success
@@ -147,7 +147,7 @@ describe('advanceStep', () => {
   it('checks step.complete permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      { data: { id: 'proj-1', org_id: 'org-1', current_step: 1 } },
+      { data: { id: 'proj-1', org_id: 'org-1', current_step: 'identify' } },
       { error: null },
       { error: null },
       { error: null },
@@ -183,7 +183,7 @@ describe('overrideStep', () => {
 
   it('returns error when user lacks permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 1 } }]
+    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 'identify' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const result = await overrideStep('proj-1', 1)
@@ -195,7 +195,7 @@ describe('overrideStep', () => {
 
   it('returns error when trying to override a non-current step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 3 } }]
+    fromResults = [{ data: { id: 'proj-1', org_id: 'org-1', current_step: 'generate' } }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await overrideStep('proj-1', 2)
@@ -205,7 +205,7 @@ describe('overrideStep', () => {
   it('checks step.override permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      { data: { id: 'proj-1', org_id: 'org-1', current_step: 1 } },
+      { data: { id: 'proj-1', org_id: 'org-1', current_step: 'identify' } },
       { error: null },
       { error: null },
       { error: null },
@@ -219,7 +219,7 @@ describe('overrideStep', () => {
   it('returns success when step is overridden correctly', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      { data: { id: 'proj-1', org_id: 'org-1', current_step: 2 } },
+      { data: { id: 'proj-1', org_id: 'org-1', current_step: 'analyze' } },
       { error: null },
       { error: null },
       { error: null },
@@ -233,7 +233,7 @@ describe('overrideStep', () => {
   it('returns error when skip fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      { data: { id: 'proj-1', org_id: 'org-1', current_step: 2 } },
+      { data: { id: 'proj-1', org_id: 'org-1', current_step: 'analyze' } },
       { error: { message: 'DB fail' } },
     ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
