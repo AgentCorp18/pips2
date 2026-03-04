@@ -13,12 +13,18 @@
 
 PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step process improvement methodology (Identify → Analyze → Generate → Select & Plan → Implement → Evaluate) into enterprise-grade project management and ticketing software. It's the first "methodology-embedded project management" platform — the process tells you _how_ to solve problems, not just _what tasks exist_.
 
-**Tech Stack:** Next.js 15 + TypeScript + Supabase + Vercel + Stripe
+**Tech Stack:** Next.js 16 + TypeScript + Supabase + Vercel + Stripe
 **Brand Identity:** Indigo-violet primary (#4F46E5), DM Sans + DM Serif Display, pip dot motif
 
 ---
 
 ## Planning Documents
+
+### Post-MVP (Start Here)
+
+| Document              | File                   | Lines | Description                                                                                                                                                                |
+| --------------------- | ---------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Full Project Plan** | `FULL_PROJECT_PLAN.md` | ~600  | **START HERE for post-MVP work.** Stabilization bugs, Knowledge Hub, Training Mode, Marketing, Workshop, Polish -- phases, dependencies, agent coordination, quality gates |
 
 ### Business & Strategy
 
@@ -48,9 +54,9 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 
 ### Execution
 
-| Document              | File                   | Lines  | Description                                                                                                                           |
-| --------------------- | ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **MVP Specification** | `MVP_SPECIFICATION.md` | ~1,886 | **START HERE for development.** Minimum viable feature set, 8-week build sequence, 25 agent work packages, quality gates, build order |
+| Document          | File                   | Lines  | Description                                                                                                        |
+| ----------------- | ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| MVP Specification | `MVP_SPECIFICATION.md` | ~1,886 | MVP build guide (complete). Feature set, 8-week build sequence, 25 agent work packages, quality gates, build order |
 
 ### Visual Mockups
 
@@ -78,7 +84,14 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 
 ## How to Use This Planning Suite
 
-### If you're starting development:
+### If you're working on post-MVP features (current phase):
+
+1. Read `FULL_PROJECT_PLAN.md` — **the single source of truth for all post-MVP work**
+2. Check Phase 1.5 (Stabilization) for critical bug fixes to resolve first
+3. Follow the dependency graph before starting any Knowledge Hub, Training, or Marketing work
+4. Use the Agent Coordination Plan (Section 10) for parallel agent assignment
+
+### If you're starting MVP development (completed):
 
 1. Read `MVP_SPECIFICATION.md` — the definitive guide to what gets built first
 2. Reference `TECHNICAL_PLAN.md` for architecture and schema details
@@ -102,19 +115,20 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 ### If you need the full picture:
 
 1. This file (`PROJECT_INDEX.md`) for orientation
-2. `BUSINESS_PLAN.md` for the "why"
-3. `PRODUCT_ROADMAP.md` for the "when"
-4. `PRODUCT_REQUIREMENTS.md` for the "what"
-5. `TECHNICAL_PLAN.md` for the "how"
+2. `FULL_PROJECT_PLAN.md` for the current state and next steps
+3. `BUSINESS_PLAN.md` for the "why"
+4. `PRODUCT_ROADMAP.md` for the "when"
+5. `PRODUCT_REQUIREMENTS.md` for the "what"
+6. `TECHNICAL_PLAN.md` for the "how"
 
 ---
 
 ## Total Planning Output
 
-- **13 planning documents** totaling ~21,000+ lines
+- **14 planning documents** totaling ~21,600+ lines
 - **3 HTML mockups** totaling ~128KB
-- **~1.2 million characters** of planning content
-- **Coverage:** Business strategy, market analysis, product specs, technical architecture, database schemas, API design, UX flows, brand identity, marketing campaigns, DevOps procedures, agent coordination, MVP specification
+- **~1.3 million characters** of planning content
+- **Coverage:** Business strategy, market analysis, product specs, technical architecture, database schemas, API design, UX flows, brand identity, marketing campaigns, DevOps procedures, agent coordination, MVP specification, post-MVP project plan
 
 ---
 
@@ -122,9 +136,11 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 
 ## Build Status
 
+### MVP (Complete)
+
 | Milestone                               | Status       | Date          |
 | --------------------------------------- | ------------ | ------------- |
-| Planning (13 docs)                      | **Complete** | March 3, 2026 |
+| Planning (14 docs)                      | **Complete** | March 3, 2026 |
 | Sprint 0: Foundation                    | **Complete** | March 3, 2026 |
 | Sprint 1-4: Core Features               | **Complete** | March 3, 2026 |
 | Sprint 5: Invitations, Filters, Landing | **Complete** | March 3, 2026 |
@@ -132,6 +148,19 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 | Sprint 7: T3 Nice-to-Haves              | **Complete** | March 3, 2026 |
 | Post-MVP: Bug Fixes + E2E Suite         | **Complete** | March 3, 2026 |
 | Production Deployment                   | **Live**     | March 3, 2026 |
+
+### Post-MVP (In Progress)
+
+| Phase | Name                  | Status                                | Target    |
+| ----- | --------------------- | ------------------------------------- | --------- |
+| 1.5   | Stabilization         | **Not Started**                       | 3-5 days  |
+| 2     | Knowledge Hub         | Foundation DONE, Reading/Cadence TODO | Weeks 1-5 |
+| 3     | Training Mode         | Scaffolded, TODO                      | Weeks 6-7 |
+| 4     | Marketing Content     | Scaffolded, TODO                      | Week 8    |
+| 5     | Workshop Facilitation | DB tables DONE, UI TODO               | Week 9    |
+| 6     | Polish                | TODO                                  | Week 10   |
+
+See `FULL_PROJECT_PLAN.md` for detailed status, work packages, and dependencies.
 
 **Quality:** 832 unit tests, 160 E2E tests, 0 type errors, OWASP security audit passed
 

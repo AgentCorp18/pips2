@@ -25,6 +25,9 @@
     "db:lint": "supabase db lint",
     "db:types": "supabase gen types typescript --local > packages/shared/src/types/database.ts",
     "db:seed": "supabase db reset --seed-only",
+    "content:compile": "npx tsx scripts/compile-content.ts",
+    "content:seed": "npx tsx scripts/seed-content.ts",
+    "content:build": "npx tsx scripts/compile-content.ts && npx tsx scripts/seed-content.ts",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -11,6 +11,8 @@ import {
   Settings,
   Menu,
   X,
+  BookOpen,
+  GraduationCap,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
@@ -21,6 +23,8 @@ const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Projects', href: '/projects', icon: FolderKanban },
   { label: 'Tickets', href: '/tickets', icon: Ticket },
+  { label: 'Knowledge', href: '/knowledge', icon: BookOpen },
+  { label: 'Training', href: '/training', icon: GraduationCap },
   { label: 'Teams', href: '/teams', icon: Users },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]

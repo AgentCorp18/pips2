@@ -15,6 +15,8 @@ import {
   MessageSquare,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
+import { buildProductContext } from '@pips/shared'
 
 type FormStatus = {
   form_type: string
@@ -52,6 +54,8 @@ export const StepView = ({
     .every((f) => formStatuses.some((fs) => fs.form_type === f.type && fs.started))
 
   const canComplete = requiredFormsStarted && !isCompleted
+
+  const cadenceContext = buildProductContext(stepNumber)
 
   return (
     <div className="space-y-6">
@@ -152,6 +156,9 @@ export const StepView = ({
           </ul>
         </CardContent>
       </Card>
+
+      {/* Knowledge Cadence Bar */}
+      <KnowledgeCadenceBar context={cadenceContext} defaultCollapsed />
 
       {/* Actions */}
       {!isCompleted && (
