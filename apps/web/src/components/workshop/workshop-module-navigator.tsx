@@ -22,10 +22,13 @@ export const WorkshopModuleNavigator = ({
   const canGoForward = currentIndex < modules.length - 1
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="module-navigator">
       {/* Current module highlight */}
       {current && (
-        <div className="rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)]/5 p-3">
+        <div
+          data-testid="current-module"
+          className="rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)]/5 p-3"
+        >
           <p className="text-xs font-medium text-[var(--color-primary)]">
             Module {currentIndex + 1} of {modules.length}
           </p>
@@ -69,11 +72,13 @@ export const WorkshopModuleNavigator = ({
       )}
 
       {/* Module list */}
-      <div className="space-y-1">
+      <nav aria-label="Workshop modules" className="space-y-1">
         {modules.map((mod, i) => (
           <button
             key={i}
             type="button"
+            data-testid={`module-item-${i}`}
+            aria-current={i === currentIndex ? 'step' : undefined}
             onClick={() => showControls && onNavigate?.(i)}
             disabled={!showControls}
             className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
@@ -96,7 +101,7 @@ export const WorkshopModuleNavigator = ({
             <span className="shrink-0 text-[var(--color-text-tertiary)]">{mod.duration}</span>
           </button>
         ))}
-      </div>
+      </nav>
     </div>
   )
 }

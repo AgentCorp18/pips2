@@ -47,20 +47,34 @@ export const WorkshopTimer = ({
   const timeDisplay = formatTime(displaySeconds)
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="workshop-timer">
       {/* Timer Display */}
       <div
+        role="timer"
+        aria-label={
+          isCountdown ? `Countdown timer: ${timeDisplay}` : `Elapsed time: ${timeDisplay}`
+        }
+        aria-live="polite"
         className={`flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-secondary)] ${
           large ? 'py-8' : 'py-4'
         } ${isExpired ? 'animate-pulse border-red-400 bg-red-50 dark:bg-red-950/20' : ''}`}
       >
         <div className="flex items-center gap-3">
           {isCountdown ? (
-            <Timer size={large ? 28 : 18} className="text-[var(--color-text-tertiary)]" />
+            <Timer
+              size={large ? 28 : 18}
+              className="text-[var(--color-text-tertiary)]"
+              aria-hidden="true"
+            />
           ) : (
-            <Clock size={large ? 28 : 18} className="text-[var(--color-text-tertiary)]" />
+            <Clock
+              size={large ? 28 : 18}
+              className="text-[var(--color-text-tertiary)]"
+              aria-hidden="true"
+            />
           )}
           <span
+            data-testid="timer-display"
             className={`font-mono font-bold tabular-nums text-[var(--color-text-primary)] ${
               large ? 'text-6xl' : 'text-3xl'
             } ${isExpired ? 'text-red-600 dark:text-red-400' : ''}`}
@@ -71,7 +85,7 @@ export const WorkshopTimer = ({
       </div>
 
       {isExpired && (
-        <p className="text-center text-sm font-medium text-red-600 dark:text-red-400">
+        <p role="alert" className="text-center text-sm font-medium text-red-600 dark:text-red-400">
           Time&apos;s up!
         </p>
       )}
@@ -124,6 +138,7 @@ export const WorkshopTimer = ({
                   min={1}
                   max={180}
                   placeholder="Min"
+                  aria-label="Custom timer duration in minutes"
                   value={customMinutes}
                   onChange={(e) => setCustomMinutes(e.target.value)}
                   className="w-16 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-xs text-[var(--color-text-primary)]"

@@ -45,3 +45,12 @@ pnpm-debug.log*
 
 # Claude Code
 .claude/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Security — never commit credentials
+docs/security/TestAccounts.txt
+
+# Screenshots (temporary)
+*.png

@@ -135,11 +135,16 @@ export const WorkshopSessionManager = ({ initialSession }: SessionManagerProps) 
   const isCompleted = session.status === 'completed'
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="session-manager">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{session.title}</h1>
+          <h1
+            data-testid="session-title"
+            className="text-xl font-bold text-[var(--color-text-primary)]"
+          >
+            {session.title}
+          </h1>
           <div className="mt-1 flex items-center gap-2">
             <Badge variant={status.variant}>{status.label}</Badge>
             {isConnected && (
@@ -156,27 +161,37 @@ export const WorkshopSessionManager = ({ initialSession }: SessionManagerProps) 
         </div>
 
         {/* Session control buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-testid="session-controls">
           {isDraft && (
-            <Button onClick={handleStart} disabled={isPending}>
+            <Button data-testid="btn-start" onClick={handleStart} disabled={isPending}>
               <Play size={14} />
               Start Session
             </Button>
           )}
           {session.status === 'active' && (
-            <Button variant="outline" onClick={handlePause} disabled={isPending}>
+            <Button
+              data-testid="btn-pause"
+              variant="outline"
+              onClick={handlePause}
+              disabled={isPending}
+            >
               <Pause size={14} />
               Pause
             </Button>
           )}
           {session.status === 'paused' && (
-            <Button onClick={handleResume} disabled={isPending}>
+            <Button data-testid="btn-resume" onClick={handleResume} disabled={isPending}>
               <Play size={14} />
               Resume
             </Button>
           )}
           {isLive && (
-            <Button variant="destructive" onClick={handleComplete} disabled={isPending}>
+            <Button
+              data-testid="btn-end"
+              variant="destructive"
+              onClick={handleComplete}
+              disabled={isPending}
+            >
               <Square size={14} />
               End Session
             </Button>
