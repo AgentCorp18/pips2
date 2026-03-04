@@ -1,6 +1,11 @@
 import { notFound } from 'next/navigation'
 import { ContentReader } from '@/components/knowledge/content-reader'
-import { getContentBySlug, getContentChildren, getContentByPillar } from '../../actions'
+import {
+  getContentBySlug,
+  getContentChildren,
+  getContentByPillar,
+  getReadingSession,
+} from '../../actions'
 
 type ChapterPageProps = {
   params: Promise<{ chapterSlug: string }>
@@ -14,9 +19,10 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
     notFound()
   }
 
-  const [sections, allChapters] = await Promise.all([
+  const [sections, allChapters, readingSession] = await Promise.all([
     getContentChildren(chapter.id),
     getContentByPillar('book'),
+    getReadingSession('book'),
   ])
 
   // Find previous/next chapters for navigation
@@ -24,6 +30,10 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
   const prevChapter = currentIndex > 0 ? (allChapters[currentIndex - 1] ?? null) : null
   const nextChapter =
     currentIndex < allChapters.length - 1 ? (allChapters[currentIndex + 1] ?? null) : null
+
+  // Only restore scroll if this is the same content node the user last read
+  const scrollPosition =
+    readingSession?.contentNodeId === chapter.id ? readingSession.scrollPosition : undefined
 
   return (
     <ContentReader
@@ -36,6 +46,7 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
         { label: 'Book', href: '/knowledge/book' },
         { label: chapter.title, href: `/knowledge/book/${chapter.slug}` },
       ]}
+      initialScrollPosition={scrollPosition}
     />
   )
 }

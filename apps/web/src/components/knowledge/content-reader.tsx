@@ -17,6 +17,8 @@ type ContentReaderProps = {
   prevNode: ContentNodeRow | null
   nextNode: ContentNodeRow | null
   breadcrumbs: Breadcrumb[]
+  /** Saved scroll position (0-1) to restore on mount */
+  initialScrollPosition?: number
 }
 
 export const ContentReader = ({
@@ -25,11 +27,27 @@ export const ContentReader = ({
   prevNode,
   nextNode,
   breadcrumbs,
+  initialScrollPosition,
 }: ContentReaderProps) => {
   // Record read on mount
   useEffect(() => {
     recordReadHistory(node.id)
   }, [node.id])
+
+  // Restore scroll position on mount
+  useEffect(() => {
+    if (initialScrollPosition == null || initialScrollPosition <= 0) return
+    // Small delay to let content render before scrolling
+    const timer = setTimeout(() => {
+      const mainContent = document.getElementById('main-content')
+      if (mainContent) {
+        const scrollTarget =
+          initialScrollPosition * (mainContent.scrollHeight - mainContent.clientHeight)
+        mainContent.scrollTo({ top: scrollTarget, behavior: 'smooth' })
+      }
+    }, 100)
+    return () => clearTimeout(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save scroll position on unmount
   const saveScrollPosition = useCallback(() => {

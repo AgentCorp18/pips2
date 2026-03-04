@@ -330,6 +330,59 @@ export const getReadingSession = async (
   return { contentNodeId: data.content_node_id, scrollPosition: data.scroll_position }
 }
 
+/** Reading session with content details for "Continue Reading" UI */
+export type ReadingSessionWithContent = {
+  pillar: string
+  contentNodeId: string
+  scrollPosition: number
+  lastAccessedAt: string
+  title: string
+  slug: string
+}
+
+/** Get all reading sessions for the current user (one per pillar) */
+export const getAllReadingSessions = async (): Promise<ReadingSessionWithContent[]> => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: sessions, error } = await supabase
+    .from('reading_sessions')
+    .select('pillar, content_node_id, scroll_position, last_accessed_at')
+    .eq('user_id', user.id)
+    .order('last_accessed_at', { ascending: false })
+
+  if (error || !sessions?.length) {
+    if (error) console.error('getAllReadingSessions error:', error)
+    return []
+  }
+
+  const nodeIds = sessions.map((s) => s.content_node_id)
+  const { data: nodes } = await supabase
+    .from('content_nodes')
+    .select('id, title, slug')
+    .in('id', nodeIds)
+
+  const nodeMap = new Map((nodes ?? []).map((n) => [n.id, n]))
+
+  return sessions
+    .map((s) => {
+      const node = nodeMap.get(s.content_node_id)
+      if (!node) return null
+      return {
+        pillar: s.pillar,
+        contentNodeId: s.content_node_id,
+        scrollPosition: s.scroll_position,
+        lastAccessedAt: s.last_accessed_at,
+        title: node.title,
+        slug: node.slug,
+      }
+    })
+    .filter((item): item is ReadingSessionWithContent => item !== null)
+}
+
 /** Fetch content nodes tagged with a specific tool slug */
 export const getContentByTool = async (toolSlug: string): Promise<ContentNodeRow[]> => {
   const supabase = await createClient()

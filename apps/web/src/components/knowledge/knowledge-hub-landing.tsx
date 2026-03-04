@@ -15,7 +15,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import type { ReadHistoryWithContent } from '@/app/(app)/knowledge/actions'
+import type {
+  ReadHistoryWithContent,
+  ReadingSessionWithContent,
+} from '@/app/(app)/knowledge/actions'
 
 const PILLAR_CARDS = [
   {
@@ -69,11 +72,13 @@ const PILLAR_CONFIG: Record<string, { label: string; color: string }> = {
 type KnowledgeHubLandingProps = {
   recentReadHistory: ReadHistoryWithContent[]
   bookmarkCount: number
+  readingSessions?: ReadingSessionWithContent[]
 }
 
 export const KnowledgeHubLanding = ({
   recentReadHistory,
   bookmarkCount,
+  readingSessions = [],
 }: KnowledgeHubLandingProps) => {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -134,6 +139,66 @@ export const KnowledgeHubLanding = ({
           )
         })}
       </div>
+
+      {/* Continue Reading */}
+      {readingSessions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BookOpen size={16} className="text-[var(--color-primary)]" />
+              Continue Reading
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {readingSessions.map((session) => {
+                const config = PILLAR_CONFIG[session.pillar]
+                const href = `/knowledge/${session.pillar}/${session.slug}`
+                const progressPercent = Math.round(session.scrollPosition * 100)
+
+                return (
+                  <Link key={session.pillar} href={href}>
+                    <div className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2.5 text-sm transition-colors hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)]">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 text-[10px] capitalize"
+                          style={{
+                            borderColor: config?.color,
+                            color: config?.color,
+                          }}
+                        >
+                          {config?.label ?? session.pillar}
+                        </Badge>
+                        <div className="min-w-0">
+                          <span className="block truncate text-[var(--color-text-primary)]">
+                            {session.title}
+                          </span>
+                          <div className="mt-1 flex items-center gap-2">
+                            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-[var(--color-border)]">
+                              <div
+                                className="h-full rounded-full bg-[var(--color-primary)]"
+                                style={{ width: `${progressPercent}%` }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                              {progressPercent}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowRight
+                        size={12}
+                        className="shrink-0 text-[var(--color-text-tertiary)]"
+                      />
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recently Read */}
       {recentReadHistory.length > 0 && (
