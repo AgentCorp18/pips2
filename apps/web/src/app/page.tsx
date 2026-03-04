@@ -8,6 +8,9 @@ import {
   CtaSection,
   LandingFooter,
 } from '@/components/landing'
+import { JsonLd } from '@/components/seo/json-ld'
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
 
 export const metadata: Metadata = {
   title: 'Process Improvement Made Simple',
@@ -27,9 +30,37 @@ export const metadata: Metadata = {
   },
 }
 
+const webApplicationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'PIPS',
+  url: BASE_URL,
+  description:
+    'A 6-step process improvement methodology embedded in project management software that helps teams identify problems, analyze root causes, and deliver measurable results.',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: 'Free beta access',
+  },
+  featureList: [
+    'Problem Statement Builder',
+    'Fishbone Diagram Creator',
+    '5-Why Root Cause Analysis',
+    'Criteria Matrix Scoring',
+    'RACI Chart Builder',
+    'Implementation Plan Tracker',
+    'Before-After Comparison Reports',
+    'Team Collaboration',
+  ],
+}
+
 export const HomePage = () => {
   return (
     <main className="min-h-screen">
+      <JsonLd data={webApplicationJsonLd} />
       <LandingNav />
       <HeroSection />
       <MethodologySection />

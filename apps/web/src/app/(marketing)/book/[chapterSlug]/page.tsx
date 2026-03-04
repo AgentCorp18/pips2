@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight, BookOpen, Lock, Mail } from 'lucide-react'
 import { BOOK_CHAPTER_MAP } from '@pips/shared'
 import { CHAPTER_PREVIEWS } from './_chapter-previews'
+import { JsonLd } from '@/components/seo/json-ld'
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
 
 type ChapterPageProps = {
   params: Promise<{ chapterSlug: string }>
@@ -81,8 +84,37 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
     ...chapter.tools.map((t) => t.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())),
   ]
 
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: chapter.title,
+    description:
+      preview?.summary ??
+      `Read "${chapter.title}" from The Never-Ending Quest, the complete guide to the PIPS methodology.`,
+    author: {
+      '@type': 'Person',
+      name: 'Marc Albers',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'PIPS',
+      url: BASE_URL,
+    },
+    isPartOf: {
+      '@type': 'Book',
+      name: 'The Never-Ending Quest',
+      author: {
+        '@type': 'Person',
+        name: 'Marc Albers',
+      },
+    },
+    url: `${BASE_URL}/book/${chapterSlug}`,
+    isAccessibleForFree: accessLevel === 'free',
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
+      <JsonLd data={articleJsonLd} />
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/book" className="hover:text-[var(--color-primary)]">

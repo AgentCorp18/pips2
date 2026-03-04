@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, BookOpen, BookText, FileText, GraduationCap } from 'lucide-react'
+import { ArrowRight, BookOpen, BookText, Download, FileText, GraduationCap } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Resources — PIPS Process Improvement Learning Center',
@@ -47,6 +47,15 @@ const RESOURCES = [
     icon: BookText,
     badge: '35+ Terms',
     badgeColor: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
+  },
+  {
+    title: 'PIPS Templates',
+    description:
+      'Free, downloadable templates for every PIPS tool — Problem Statements, Fishbone Diagrams, RACI Charts, Criteria Matrices, and more. Print or use digitally.',
+    href: '/resources/templates',
+    icon: Download,
+    badge: '17 Templates',
+    badgeColor: 'bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400',
   },
   {
     title: 'Tool Guides',

@@ -2,6 +2,31 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { PIPS_STEPS, STEP_CONTENT } from '@pips/shared'
+import { JsonLd } from '@/components/seo/json-ld'
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'PIPS',
+  url: BASE_URL,
+  description:
+    'PIPS — Process Improvement & Problem Solving. A 6-step methodology for teams to identify problems, analyze root causes, and deliver measurable results.',
+  foundingDate: '2026',
+  sameAs: [],
+  knowsAbout: [
+    'Process Improvement',
+    'Problem Solving',
+    'Root Cause Analysis',
+    'Continuous Improvement',
+    'Lean',
+    'Six Sigma',
+    'PDCA',
+    'Fishbone Diagram',
+    'RACI Chart',
+  ],
+}
 
 export const metadata: Metadata = {
   title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
@@ -25,6 +50,7 @@ export const metadata: Metadata = {
 const MethodologyPage = () => {
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
+      <JsonLd data={organizationJsonLd} />
       {/* Hero */}
       <section className="text-center">
         <h1 className="font-serif text-4xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-5xl">
