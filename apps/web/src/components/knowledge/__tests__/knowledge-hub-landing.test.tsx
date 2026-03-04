@@ -46,13 +46,27 @@ describe('KnowledgeHubLanding', () => {
 
   it('shows recently read section with history items', () => {
     const history = [
-      { content_node_id: 'book/ch04', last_read_at: '2026-03-03T12:00:00Z', read_count: 1 },
-      { content_node_id: 'book/ch05', last_read_at: '2026-03-02T10:00:00Z', read_count: 2 },
+      {
+        content_node_id: 'book/ch04',
+        last_read_at: '2026-03-03T12:00:00Z',
+        read_count: 1,
+        title: 'Chapter 4: Analysis',
+        pillar: 'book',
+        slug: 'ch04',
+      },
+      {
+        content_node_id: 'book/ch05',
+        last_read_at: '2026-03-02T10:00:00Z',
+        read_count: 2,
+        title: 'Chapter 5: Generate',
+        pillar: 'book',
+        slug: 'ch05',
+      },
     ]
     render(<KnowledgeHubLanding recentReadHistory={history} bookmarkCount={0} />)
     expect(screen.getByText('Recently Read')).toBeTruthy()
-    expect(screen.getByText('book / ch04')).toBeTruthy()
-    expect(screen.getByText('book / ch05')).toBeTruthy()
+    expect(screen.getByText('Chapter 4: Analysis')).toBeTruthy()
+    expect(screen.getByText('Chapter 5: Generate')).toBeTruthy()
   })
 
   it('renders pillar cards as links', () => {

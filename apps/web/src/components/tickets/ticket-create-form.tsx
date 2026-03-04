@@ -1,6 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -42,7 +44,17 @@ type TicketCreateFormProps = {
 const initialState: TicketActionState = {}
 
 export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFormProps) => {
+  const router = useRouter()
+  const hasRedirected = useRef(false)
   const [state, formAction, pending] = useActionState(createTicket, initialState)
+
+  useEffect(() => {
+    if (state.success && state.redirectTo && !hasRedirected.current) {
+      hasRedirected.current = true
+      toast.success('Ticket created')
+      router.push(state.redirectTo)
+    }
+  }, [state, router])
 
   return (
     <form action={formAction} className="space-y-5">

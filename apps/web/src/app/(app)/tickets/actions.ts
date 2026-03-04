@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { createTicketSchema, updateTicketSchema, ticketFiltersSchema } from '@/lib/validations'
@@ -14,6 +13,8 @@ import type { TicketStatus, TicketPriority } from '@/types/tickets'
 export type TicketActionState = {
   error?: string
   fieldErrors?: Record<string, string>
+  success?: boolean
+  redirectTo?: string
 }
 
 /* ============================================================
@@ -103,7 +104,7 @@ export const createTicket = async (
   }
 
   revalidatePath('/tickets')
-  redirect('/tickets')
+  return { success: true, redirectTo: '/tickets' }
 }
 
 /* ============================================================

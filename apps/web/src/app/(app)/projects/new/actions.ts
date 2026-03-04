@@ -1,6 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createProjectSchema } from '@/lib/validations'
@@ -8,6 +7,8 @@ import { createProjectSchema } from '@/lib/validations'
 export type CreateProjectActionState = {
   error?: string
   fieldErrors?: Record<string, string>
+  success?: boolean
+  projectId?: string
 }
 
 export const createProject = async (
@@ -111,5 +112,5 @@ export const createProject = async (
     return { error: 'Failed to add you as project lead. Please try again.' }
   }
 
-  redirect(`/projects/${project.id}`)
+  return { success: true, projectId: project.id }
 }

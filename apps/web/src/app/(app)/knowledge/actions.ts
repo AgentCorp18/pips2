@@ -24,10 +24,23 @@ export type BookmarkRow = {
   created_at: string
 }
 
+export type BookmarkWithContent = BookmarkRow & {
+  title: string
+  pillar: string
+  slug: string
+  access_level: string
+}
+
 export type ReadHistoryRow = {
   content_node_id: string
   last_read_at: string
   read_count: number
+}
+
+export type ReadHistoryWithContent = ReadHistoryRow & {
+  title: string
+  pillar: string
+  slug: string
 }
 
 /** Fetch all top-level content nodes (chapters/sections without parents) by pillar */
@@ -146,7 +159,7 @@ export const getContentForContext = async (
   })
 }
 
-/** Get user's bookmarks */
+/** Get user's bookmarks (basic — no content join) */
 export const getUserBookmarks = async (): Promise<BookmarkRow[]> => {
   const supabase = await createClient()
   const {
@@ -165,6 +178,48 @@ export const getUserBookmarks = async (): Promise<BookmarkRow[]> => {
     return []
   }
   return data ?? []
+}
+
+/** Get user's bookmarks with content node details (title, pillar, slug) */
+export const getUserBookmarksWithContent = async (): Promise<BookmarkWithContent[]> => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: bookmarks, error } = await supabase
+    .from('content_bookmarks')
+    .select('id, content_node_id, note, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error || !bookmarks?.length) {
+    if (error) console.error('getUserBookmarksWithContent error:', error)
+    return []
+  }
+
+  const nodeIds = bookmarks.map((b) => b.content_node_id)
+  const { data: nodes } = await supabase
+    .from('content_nodes')
+    .select('id, title, pillar, slug, access_level')
+    .in('id', nodeIds)
+
+  const nodeMap = new Map((nodes ?? []).map((n) => [n.id, n]))
+
+  return bookmarks
+    .map((bm) => {
+      const node = nodeMap.get(bm.content_node_id)
+      if (!node) return null
+      return {
+        ...bm,
+        title: node.title,
+        pillar: node.pillar,
+        slug: node.slug,
+        access_level: node.access_level,
+      }
+    })
+    .filter((item): item is BookmarkWithContent => item !== null)
 }
 
 /** Toggle bookmark on a content node */
@@ -275,7 +330,51 @@ export const getReadingSession = async (
   return { contentNodeId: data.content_node_id, scrollPosition: data.scroll_position }
 }
 
-/** Get user's recent read history */
+/** Fetch content nodes tagged with a specific tool slug */
+export const getContentByTool = async (toolSlug: string): Promise<ContentNodeRow[]> => {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('content_nodes')
+    .select('*')
+    .order('sort_order')
+    .limit(50)
+
+  if (error) {
+    console.error('getContentByTool error:', error)
+    return []
+  }
+
+  return (data ?? []).filter((node) => {
+    const nodeTags = node.tags as { tools?: string[] }
+    const nodeTools = nodeTags.tools ?? []
+    return nodeTools.includes(toolSlug)
+  })
+}
+
+/** Fetch guide/book content nodes for a given PIPS step number */
+export const getGuideContentForStep = async (stepNumber: number): Promise<ContentNodeRow[]> => {
+  const stepTag = `step-${stepNumber}`
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('content_nodes')
+    .select('*')
+    .is('parent_id', null)
+    .order('sort_order')
+    .limit(50)
+
+  if (error) {
+    console.error('getGuideContentForStep error:', error)
+    return []
+  }
+
+  return (data ?? []).filter((node) => {
+    const nodeTags = node.tags as { steps?: string[] }
+    const nodeSteps = nodeTags.steps ?? []
+    return nodeSteps.includes(stepTag)
+  })
+}
+
+/** Get user's recent read history (basic — no content join) */
 export const getRecentReadHistory = async (limit = 10): Promise<ReadHistoryRow[]> => {
   const supabase = await createClient()
   const {
@@ -295,4 +394,48 @@ export const getRecentReadHistory = async (limit = 10): Promise<ReadHistoryRow[]
     return []
   }
   return data ?? []
+}
+
+/** Get user's recent read history with content node details (title, pillar, slug) */
+export const getRecentReadHistoryWithContent = async (
+  limit = 10,
+): Promise<ReadHistoryWithContent[]> => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: history, error } = await supabase
+    .from('content_read_history')
+    .select('content_node_id, last_read_at, read_count')
+    .eq('user_id', user.id)
+    .order('last_read_at', { ascending: false })
+    .limit(limit)
+
+  if (error || !history?.length) {
+    if (error) console.error('getRecentReadHistoryWithContent error:', error)
+    return []
+  }
+
+  const nodeIds = history.map((h) => h.content_node_id)
+  const { data: nodes } = await supabase
+    .from('content_nodes')
+    .select('id, title, pillar, slug')
+    .in('id', nodeIds)
+
+  const nodeMap = new Map((nodes ?? []).map((n) => [n.id, n]))
+
+  return history
+    .map((item) => {
+      const node = nodeMap.get(item.content_node_id)
+      if (!node) return null
+      return {
+        ...item,
+        title: node.title,
+        pillar: node.pillar,
+        slug: node.slug,
+      }
+    })
+    .filter((item): item is ReadHistoryWithContent => item !== null)
 }

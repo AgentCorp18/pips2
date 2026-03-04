@@ -1,6 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,7 +13,17 @@ import { createProject, type CreateProjectActionState } from './actions'
 const initialState: CreateProjectActionState = {}
 
 export const ProjectForm = () => {
+  const router = useRouter()
+  const hasRedirected = useRef(false)
   const [state, formAction, isPending] = useActionState(createProject, initialState)
+
+  useEffect(() => {
+    if (state.success && state.projectId && !hasRedirected.current) {
+      hasRedirected.current = true
+      toast.success('Project created')
+      router.push(`/projects/${state.projectId}`)
+    }
+  }, [state, router])
 
   return (
     <Card className="mx-auto max-w-lg">

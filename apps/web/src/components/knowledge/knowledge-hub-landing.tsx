@@ -10,11 +10,12 @@ import {
   Bookmark,
   Clock,
   ArrowRight,
+  Eye,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import type { ReadHistoryRow } from '@/app/(app)/knowledge/actions'
+import type { ReadHistoryWithContent } from '@/app/(app)/knowledge/actions'
 
 const PILLAR_CARDS = [
   {
@@ -58,8 +59,15 @@ const PILLAR_CARDS = [
   },
 ]
 
+const PILLAR_CONFIG: Record<string, { label: string; color: string }> = {
+  book: { label: 'Book', color: 'var(--color-primary)' },
+  guide: { label: 'Guide', color: 'var(--color-step-3, #059669)' },
+  workbook: { label: 'Workbook', color: 'var(--color-step-2, #D97706)' },
+  workshop: { label: 'Workshop', color: 'var(--color-step-6, #0891B2)' },
+}
+
 type KnowledgeHubLandingProps = {
-  recentReadHistory: ReadHistoryRow[]
+  recentReadHistory: ReadHistoryWithContent[]
   bookmarkCount: number
 }
 
@@ -127,7 +135,7 @@ export const KnowledgeHubLanding = ({
         })}
       </div>
 
-      {/* Recent Activity */}
+      {/* Recently Read */}
       {recentReadHistory.length > 0 && (
         <Card>
           <CardHeader>
@@ -138,19 +146,44 @@ export const KnowledgeHubLanding = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {recentReadHistory.map((item) => (
-                <div
-                  key={item.content_node_id}
-                  className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-sm"
-                >
-                  <span className="text-[var(--color-text-primary)]">
-                    {item.content_node_id.replace(/\//g, ' / ')}
-                  </span>
-                  <span className="text-xs text-[var(--color-text-tertiary)]">
-                    {new Date(item.last_read_at).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
+              {recentReadHistory.map((item) => {
+                const config = PILLAR_CONFIG[item.pillar]
+                const href = `/knowledge/${item.pillar}/${item.slug}`
+
+                return (
+                  <Link key={item.content_node_id} href={href}>
+                    <div className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-sm transition-colors hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)]">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 text-[10px] capitalize"
+                          style={{
+                            borderColor: config?.color,
+                            color: config?.color,
+                          }}
+                        >
+                          {config?.label ?? item.pillar}
+                        </Badge>
+                        <span className="truncate text-[var(--color-text-primary)]">
+                          {item.title}
+                        </span>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3">
+                        {item.read_count > 1 && (
+                          <span className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)]">
+                            <Eye size={11} />
+                            {item.read_count}x
+                          </span>
+                        )}
+                        <span className="text-xs text-[var(--color-text-tertiary)]">
+                          {new Date(item.last_read_at).toLocaleDateString()}
+                        </span>
+                        <ArrowRight size={12} className="text-[var(--color-text-tertiary)]" />
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           </CardContent>
         </Card>

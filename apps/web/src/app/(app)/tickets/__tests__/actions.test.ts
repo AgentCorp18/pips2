@@ -56,12 +56,8 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
-const mockRedirect = vi.fn()
 vi.mock('next/navigation', () => ({
-  redirect: (...args: unknown[]) => {
-    mockRedirect(...args)
-    throw new Error('NEXT_REDIRECT')
-  },
+  redirect: vi.fn(),
 }))
 
 /* ============================================================
@@ -164,7 +160,8 @@ describe('createTicket', () => {
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const fd = makeFormData(validTicketFields)
-    await expect(createTicket({}, fd)).rejects.toThrow('NEXT_REDIRECT')
+    const result = await createTicket({}, fd)
+    expect(result).toEqual({ success: true, redirectTo: '/tickets' })
     expect(requirePermission).toHaveBeenCalledWith('org-1', 'ticket.create')
   })
 
@@ -196,9 +193,9 @@ describe('createTicket', () => {
       tags: 'urgent, frontend, regression',
     })
 
-    await expect(createTicket({}, fd)).rejects.toThrow('NEXT_REDIRECT')
+    const result = await createTicket({}, fd)
+    expect(result).toEqual({ success: true, redirectTo: '/tickets' })
     expect(revalidatePath).toHaveBeenCalledWith('/tickets')
-    expect(mockRedirect).toHaveBeenCalledWith('/tickets')
   })
 
   it('creates ticket successfully with optional fields empty', async () => {
@@ -219,8 +216,8 @@ describe('createTicket', () => {
       tags: '',
     })
 
-    await expect(createTicket({}, fd)).rejects.toThrow('NEXT_REDIRECT')
-    expect(mockRedirect).toHaveBeenCalledWith('/tickets')
+    const result = await createTicket({}, fd)
+    expect(result).toEqual({ success: true, redirectTo: '/tickets' })
   })
 
   it('returns error when insert fails', async () => {

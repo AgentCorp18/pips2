@@ -57,12 +57,8 @@ vi.mock('@/lib/supabase/admin', () => ({
   })),
 }))
 
-const mockRedirect = vi.fn()
 vi.mock('next/navigation', () => ({
-  redirect: (...args: unknown[]) => {
-    mockRedirect(...args)
-    throw new Error('NEXT_REDIRECT')
-  },
+  redirect: vi.fn(),
 }))
 
 /* ============================================================
@@ -176,7 +172,7 @@ describe('createProject', () => {
 
   /* ---------- Success path ---------- */
 
-  it('redirects to project page on success', async () => {
+  it('returns success with projectId on success', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // from('org_members') -> membership
@@ -190,8 +186,8 @@ describe('createProject', () => {
     adminFromResults = [{ error: null }]
 
     const fd = makeFormData({ name: 'My Project', description: '', target_completion_date: '' })
-    await expect(createProject(emptyState, fd)).rejects.toThrow('NEXT_REDIRECT')
-    expect(mockRedirect).toHaveBeenCalledWith('/projects/proj-new')
+    const result = await createProject(emptyState, fd)
+    expect(result).toEqual({ success: true, projectId: 'proj-new' })
   })
 
   it('returns error and cleans up when project member insert fails', async () => {
@@ -233,7 +229,7 @@ describe('createProject', () => {
       description: 'Description here',
       target_completion_date: dateStr,
     })
-    await expect(createProject(emptyState, fd)).rejects.toThrow('NEXT_REDIRECT')
-    expect(mockRedirect).toHaveBeenCalledWith('/projects/proj-new')
+    const result = await createProject(emptyState, fd)
+    expect(result).toEqual({ success: true, projectId: 'proj-new' })
   })
 })
