@@ -127,7 +127,7 @@ export const ContentReader = ({
         <article className="min-w-0 flex-1">
           {/* Title header */}
           <div className="mb-6 border-b border-[var(--color-border)] pb-6">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div>
                 <h1
                   data-testid="content-title"

@@ -137,7 +137,7 @@ export const WorkshopSessionManager = ({ initialSession }: SessionManagerProps) 
   return (
     <div className="space-y-6" data-testid="session-manager">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1
             data-testid="session-title"
@@ -145,7 +145,7 @@ export const WorkshopSessionManager = ({ initialSession }: SessionManagerProps) 
           >
             {session.title}
           </h1>
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1 flex flex-wrap items-center gap-2">
             <Badge variant={status.variant}>{status.label}</Badge>
             {isConnected && (
               <span className="flex items-center gap-1 text-xs text-emerald-600">
@@ -161,7 +161,7 @@ export const WorkshopSessionManager = ({ initialSession }: SessionManagerProps) 
         </div>
 
         {/* Session control buttons */}
-        <div className="flex items-center gap-2" data-testid="session-controls">
+        <div className="flex flex-wrap items-center gap-2" data-testid="session-controls">
           {isDraft && (
             <Button data-testid="btn-start" onClick={handleStart} disabled={isPending}>
               <Play size={14} />

@@ -57,7 +57,7 @@ export const TrainingLanding = ({ paths, progress, moduleCounts }: TrainingLandi
 
       {/* Stats row (only if user has progress) */}
       {hasProgress && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
           <Card>
             <CardContent className="flex items-center gap-3 py-4">
               <TrainingProgressRing
