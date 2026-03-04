@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { STEP_CONTENT } from '@pips/shared'
+import { STEP_CONTENT, stepEnumToNumber } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -56,7 +56,7 @@ const ProjectFormsPage = async ({ params }: { params: Promise<{ projectId: strin
 
   const { data: forms } = await supabase
     .from('project_forms')
-    .select('form_type, step_number, data')
+    .select('form_type, step, data')
     .eq('project_id', projectId)
 
   const filledForms = new Set(
@@ -65,7 +65,7 @@ const ProjectFormsPage = async ({ params }: { params: Promise<{ projectId: strin
         const data = f.data as Record<string, unknown> | null
         return data && Object.keys(data).length > 0
       })
-      .map((f) => `${f.step_number}-${f.form_type}`),
+      .map((f) => `${stepEnumToNumber(f.step as string)}-${f.form_type}`),
   )
 
   return (

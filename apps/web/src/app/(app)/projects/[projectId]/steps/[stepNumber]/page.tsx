@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { stepNumberToEnum, stepEnumToNumber } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { StepPageClient } from './step-page-client'
 import { LinkedTickets } from '@/components/pips/linked-tickets'
@@ -41,11 +42,12 @@ const StepDetailPage = async ({
   }
 
   // Fetch step data
+  const stepEnum = stepNumberToEnum(stepNumber)
   const { data: step } = await supabase
     .from('project_steps')
-    .select('id, step_number, status, started_at, completed_at')
+    .select('id, step, status, started_at, completed_at')
     .eq('project_id', projectId)
-    .eq('step_number', stepNumber)
+    .eq('step', stepEnum)
     .single()
 
   if (!step) {
@@ -57,7 +59,7 @@ const StepDetailPage = async ({
     .from('project_forms')
     .select('id, form_type, data')
     .eq('project_id', projectId)
-    .eq('step_number', stepNumber)
+    .eq('step', stepEnum)
 
   const formStatuses = (forms ?? []).map((f) => ({
     form_type: f.form_type,
@@ -103,7 +105,7 @@ const StepDetailPage = async ({
         projectId={projectId}
         stepNumber={stepNumber}
         stepStatus={step.status as 'not_started' | 'in_progress' | 'completed' | 'skipped'}
-        currentStep={project.current_step ?? 1}
+        currentStep={stepEnumToNumber((project.current_step as string) ?? 'identify')}
         formStatuses={formStatuses}
         orgRole={orgRole}
       />

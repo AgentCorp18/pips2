@@ -174,7 +174,8 @@ describe('createTicket', () => {
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const fd = makeFormData(validTicketFields)
-    await expect(createTicket({}, fd)).rejects.toThrow('No permission')
+    const result = await createTicket({}, fd)
+    expect(result).toEqual({ error: 'You do not have permission to create tickets' })
   })
 
   it('creates ticket successfully with all fields', async () => {

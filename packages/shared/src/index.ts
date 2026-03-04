@@ -2,11 +2,14 @@ export {
   PIPS_STEPS,
   PIPS_STEP_NAMES,
   PIPS_STEP_COLORS,
+  PIPS_STEP_ENUMS,
   BRAND,
   APP_NAME,
   APP_DESCRIPTION,
+  stepEnumToNumber,
+  stepNumberToEnum,
 } from './constants'
-export type { PipsStepNumber } from './constants'
+export type { PipsStepNumber, PipsStepEnum } from './constants'
 
 export type {
   Organization,

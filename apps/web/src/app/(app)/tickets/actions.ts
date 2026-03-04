@@ -69,7 +69,11 @@ export const createTicket = async (
     return { error: 'You must belong to an organization' }
   }
 
-  await requirePermission(membership.org_id, 'ticket.create')
+  try {
+    await requirePermission(membership.org_id, 'ticket.create')
+  } catch {
+    return { error: 'You do not have permission to create tickets' }
+  }
 
   const tagsArray = result.data.tags
     ? result.data.tags
