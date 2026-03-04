@@ -169,7 +169,7 @@ export const POST = async (request: Request) => {
   const supabase = await createClient()
   const { data: profile } = await supabase
     .from('profiles')
-    .select('email, display_name')
+    .select('email, full_name, display_name')
     .eq('id', user_id)
     .single()
 
@@ -180,7 +180,7 @@ export const POST = async (request: Request) => {
   // Build email content
   const subject = NOTIFICATION_SUBJECTS[type] ?? 'PIPS — Notification'
   const entityUrl = buildEntityUrl(entity_type, entity_id)
-  const recipientName = profile.display_name || 'there'
+  const recipientName = profile.display_name || profile.full_name || 'there'
   const html = renderTemplate(
     type,
     title,

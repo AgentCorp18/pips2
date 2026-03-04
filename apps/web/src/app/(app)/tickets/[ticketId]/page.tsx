@@ -115,27 +115,39 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
   // Fetch org members for assignee selector and mentions
   const { data: membersRaw } = await supabase
     .from('org_members')
-    .select('user_id, profiles!org_members_user_id_fkey ( display_name )')
+    .select('user_id, profiles!org_members_user_id_fkey ( full_name, display_name )')
     .eq('org_id', ticket.org_id)
 
   const members = (membersRaw ?? []).map((m) => {
-    const profile = m.profiles as unknown as { display_name: string } | null
+    const profile = m.profiles as unknown as {
+      full_name: string
+      display_name: string | null
+    } | null
     return {
       user_id: m.user_id,
-      display_name: profile?.display_name ?? 'Unknown',
+      display_name: profile?.display_name || profile?.full_name || 'Unknown',
     }
   })
 
-  // Shape ticket data for client component
-  const assignee = ticket.assignee as unknown as {
+  // Shape ticket data for client component — use full_name as fallback when display_name is null
+  const rawAssignee = ticket.assignee as unknown as {
     id: string
-    display_name: string
+    full_name: string
+    display_name: string | null
     avatar_url: string | null
   } | null
-  const reporter = ticket.reporter as unknown as {
+  const assignee = rawAssignee
+    ? { ...rawAssignee, display_name: rawAssignee.display_name || rawAssignee.full_name }
+    : null
+  const rawReporter = ticket.reporter as unknown as {
     id: string
-    display_name: string
+    full_name: string
+    display_name: string | null
     avatar_url: string | null
+  }
+  const reporter = {
+    ...rawReporter,
+    display_name: rawReporter.display_name || rawReporter.full_name,
   }
   const project = ticket.project as unknown as {
     id: string

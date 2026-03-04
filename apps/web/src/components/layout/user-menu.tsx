@@ -46,13 +46,13 @@ export const UserMenu = () => {
 
       const { data } = await supabase
         .from('profiles')
-        .select('email, display_name, avatar_url')
+        .select('email, full_name, display_name, avatar_url')
         .eq('id', user.id)
         .single()
 
       if (data) {
         setProfile({
-          displayName: data.display_name ?? data.email ?? 'User',
+          displayName: data.display_name || data.full_name || data.email || 'User',
           email: data.email ?? user.email ?? '',
           avatarUrl: data.avatar_url ?? undefined,
         })

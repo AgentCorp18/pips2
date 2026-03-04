@@ -70,7 +70,7 @@ const StepDetailPage = async ({
     .select('role')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   const orgRole = (membership?.role as string) ?? null
 

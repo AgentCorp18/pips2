@@ -25,7 +25,7 @@ export const createSampleProject = async (): Promise<SampleProjectResult> => {
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     return { error: 'You must belong to an organization' }

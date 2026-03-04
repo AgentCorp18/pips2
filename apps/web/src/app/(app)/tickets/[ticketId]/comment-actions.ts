@@ -202,7 +202,7 @@ export const getComments = async (ticketId: string) => {
     .select(
       `
       *,
-      author:profiles!comments_author_id_fkey ( id, display_name, avatar_url )
+      author:profiles!comments_author_id_fkey ( id, full_name, display_name, avatar_url )
     `,
     )
     .eq('ticket_id', ticketId)
