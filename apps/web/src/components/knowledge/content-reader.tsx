@@ -3,9 +3,22 @@
 import { useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Clock, BookOpen, List } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { Card, CardContent } from '@/components/ui/card'
 import { BookmarkButton } from './bookmark-button'
-import { MarkdownContent } from './markdown-content'
+
+const MarkdownContent = dynamic(
+  () => import('./markdown-content').then((mod) => ({ default: mod.MarkdownContent })),
+  {
+    loading: () => (
+      <div className="animate-pulse space-y-3">
+        <div className="h-4 w-3/4 rounded bg-[var(--color-surface-secondary)]" />
+        <div className="h-4 w-full rounded bg-[var(--color-surface-secondary)]" />
+        <div className="h-4 w-5/6 rounded bg-[var(--color-surface-secondary)]" />
+      </div>
+    ),
+  },
+)
 import type { ContentNodeRow } from '@/app/(app)/knowledge/actions'
 import { recordReadHistory, updateReadingSession } from '@/app/(app)/knowledge/actions'
 
