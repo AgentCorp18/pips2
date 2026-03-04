@@ -83,22 +83,28 @@ export const KnowledgeCadenceBar = ({
       <button
         type="button"
         onClick={() => setCollapsed((prev) => !prev)}
+        aria-expanded={!collapsed}
+        aria-controls="cadence-bar-content"
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
         <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
           PIPS Knowledge
         </span>
         {collapsed ? (
-          <ChevronDown size={14} className="text-[var(--color-text-tertiary)]" />
+          <ChevronDown size={14} className="text-[var(--color-text-tertiary)]" aria-hidden="true" />
         ) : (
-          <ChevronUp size={14} className="text-[var(--color-text-tertiary)]" />
+          <ChevronUp size={14} className="text-[var(--color-text-tertiary)]" aria-hidden="true" />
         )}
       </button>
 
       {!collapsed && (
-        <CardContent className="px-4 pb-4 pt-0">
+        <CardContent id="cadence-bar-content" className="px-4 pb-4 pt-0">
           {loading ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div
+              className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+              aria-busy="true"
+              aria-label="Loading knowledge recommendations"
+            >
               {(['book', 'guide', 'workbook', 'workshop'] as ContentPillar[]).map((p) => (
                 <div
                   key={p}
@@ -107,11 +113,14 @@ export const KnowledgeCadenceBar = ({
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <nav
+              aria-label="Related knowledge content"
+              className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+            >
               {(['book', 'guide', 'workbook', 'workshop'] as ContentPillar[]).map((pillar) => (
                 <PillarCard key={pillar} pillar={pillar} node={byPillar[pillar]} />
               ))}
-            </div>
+            </nav>
           )}
         </CardContent>
       )}
@@ -145,7 +154,10 @@ const PillarCard = ({ pillar, node }: PillarCardProps) => {
           : 'Begin'
 
   return (
-    <Link href={href}>
+    <Link
+      href={href}
+      aria-label={node ? `${meta.label}: ${node.title}` : `${meta.label} — no match`}
+    >
       <div
         className="group flex h-full flex-col justify-between rounded-lg border border-[var(--color-border)] p-3 transition-all hover:shadow-sm"
         style={{ borderColor: node ? color : undefined }}
@@ -156,7 +168,7 @@ const PillarCard = ({ pillar, node }: PillarCardProps) => {
               className="flex h-6 w-6 items-center justify-center rounded"
               style={{ backgroundColor: bg }}
             >
-              <Icon size={12} style={{ color }} />
+              <Icon size={12} style={{ color }} aria-hidden="true" />
             </div>
             <span className="text-xs font-semibold text-[var(--color-text-primary)]">
               {meta.label}

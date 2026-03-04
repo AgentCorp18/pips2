@@ -33,9 +33,11 @@ export const TrainingMultipleChoice = ({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-medium text-[var(--color-text-primary)]">{config.question}</p>
+      <p id="mc-question" className="text-sm font-medium text-[var(--color-text-primary)]">
+        {config.question}
+      </p>
 
-      <div className="space-y-2">
+      <div className="space-y-2" role="radiogroup" aria-labelledby="mc-question">
         {config.options.map((option, index) => {
           const isSelected = selected === index
           const showCorrect = submitted && index === config.correctIndex
@@ -51,16 +53,25 @@ export const TrainingMultipleChoice = ({
             <button
               key={index}
               type="button"
+              role="radio"
+              aria-checked={isSelected}
               disabled={submitted}
               onClick={() => setSelected(index)}
               className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left text-sm transition-colors ${borderClass} ${!submitted ? 'cursor-pointer hover:border-[var(--color-primary)]/50' : ''}`}
             >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-medium">
+              <span
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-medium"
+                aria-hidden="true"
+              >
                 {String.fromCharCode(65 + index)}
               </span>
               <span className="flex-1 text-[var(--color-text-primary)]">{option}</span>
-              {showCorrect && <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />}
-              {showIncorrect && <XCircle size={18} className="shrink-0 text-red-600" />}
+              {showCorrect && (
+                <CheckCircle2 size={18} className="shrink-0 text-emerald-600" aria-hidden="true" />
+              )}
+              {showIncorrect && (
+                <XCircle size={18} className="shrink-0 text-red-600" aria-hidden="true" />
+              )}
             </button>
           )
         })}
@@ -68,6 +79,7 @@ export const TrainingMultipleChoice = ({
 
       {submitted && (
         <div
+          role="alert"
           className={`rounded-lg p-3 text-sm ${isCorrect ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}
         >
           {isCorrect

@@ -147,7 +147,14 @@ export const TrainingLanding = ({ paths, progress, moduleCounts }: TrainingLandi
                   </div>
                   {/* Progress bar */}
                   {isStarted && (
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-surface-secondary)]">
+                    <div
+                      role="progressbar"
+                      aria-valuenow={pathPct}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`${path.title} progress: ${pathPct}%`}
+                      className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-surface-secondary)]"
+                    >
                       <div
                         className="h-full rounded-full bg-[var(--color-primary)] transition-all"
                         style={{ width: `${pathPct}%` }}

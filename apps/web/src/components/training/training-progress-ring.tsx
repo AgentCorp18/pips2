@@ -18,8 +18,13 @@ export const TrainingProgressRing = ({
   const percent = Math.round(progress * 100)
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+    <div
+      className="relative"
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={`${percent}% complete`}
+    >
+      <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
         {/* Background circle */}
         <circle
           cx={size / 2}

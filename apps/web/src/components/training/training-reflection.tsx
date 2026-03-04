@@ -39,8 +39,8 @@ export const TrainingReflection = ({ config, savedText, onComplete }: TrainingRe
 
       {submitted ? (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm text-emerald-700">
-            <CheckCircle2 size={16} />
+          <div className="flex items-center gap-2 text-sm text-emerald-700" role="status">
+            <CheckCircle2 size={16} aria-hidden="true" />
             <span>Reflection submitted</span>
           </div>
           <div className="rounded-lg border border-[var(--color-border)] p-4 text-sm text-[var(--color-text-secondary)]">
@@ -56,10 +56,14 @@ export const TrainingReflection = ({ config, savedText, onComplete }: TrainingRe
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Write your reflection here..."
+            aria-label="Reflection response"
+            aria-describedby="reflection-word-count"
             className="min-h-[160px] text-sm"
           />
           <div className="flex items-center justify-between">
             <span
+              id="reflection-word-count"
+              aria-live="polite"
               className={`text-xs ${meetsMinimum ? 'text-emerald-600' : 'text-[var(--color-text-tertiary)]'}`}
             >
               {wordCount}/{minWords} words minimum

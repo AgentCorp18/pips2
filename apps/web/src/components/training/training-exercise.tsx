@@ -77,7 +77,7 @@ export const TrainingExercise = ({
       <CardContent className="space-y-4 py-4">
         {/* Exercise header */}
         <div className="flex items-start gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center" aria-hidden="true">
             {isCompleted ? (
               <CheckCircle2 size={20} className="text-emerald-600" />
             ) : (

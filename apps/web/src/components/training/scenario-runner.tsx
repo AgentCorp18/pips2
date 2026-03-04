@@ -71,7 +71,7 @@ export const ScenarioRunner = ({ scenario }: { scenario: ScenarioData }) => {
       </Card>
 
       {/* Step progress */}
-      <div className="flex items-center gap-2">
+      <nav aria-label="Scenario steps" className="flex items-center gap-2">
         {scenario.steps.map((step, index) => {
           const isDone = completedSteps.has(index)
           const isCurrent = index === currentStep
@@ -82,6 +82,8 @@ export const ScenarioRunner = ({ scenario }: { scenario: ScenarioData }) => {
               key={index}
               type="button"
               onClick={() => setCurrentStep(index)}
+              aria-current={isCurrent ? 'step' : undefined}
+              aria-label={`Step ${step.step}: ${STEP_LABELS[step.step] ?? ''}${isDone ? ' (completed)' : ''}`}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                 isCurrent ? 'ring-2 ring-offset-1' : 'opacity-70 hover:opacity-100'
               }`}
@@ -92,12 +94,16 @@ export const ScenarioRunner = ({ scenario }: { scenario: ScenarioData }) => {
                 ...(isCurrent ? { ringColor: color } : {}),
               }}
             >
-              {isDone ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+              {isDone ? (
+                <CheckCircle2 size={12} aria-hidden="true" />
+              ) : (
+                <Circle size={12} aria-hidden="true" />
+              )}
               Step {step.step}
             </button>
           )
         })}
-      </div>
+      </nav>
 
       {/* Active step */}
       {activeStep && !allDone && (
@@ -124,6 +130,7 @@ export const ScenarioRunner = ({ scenario }: { scenario: ScenarioData }) => {
               value={responses[currentStep] ?? ''}
               onChange={(e) => setResponses({ ...responses, [currentStep]: e.target.value })}
               placeholder="Write your response here..."
+              aria-label={`Response for Step ${activeStep.step}: ${activeStep.title}`}
               className="min-h-[120px] text-sm"
             />
             <div className="flex justify-end">
@@ -150,9 +157,9 @@ export const ScenarioRunner = ({ scenario }: { scenario: ScenarioData }) => {
 
       {/* Completion */}
       {allDone && (
-        <Card className="border-emerald-200 bg-emerald-50">
+        <Card className="border-emerald-200 bg-emerald-50" role="alert">
           <CardContent className="space-y-3 py-6 text-center">
-            <CheckCircle2 size={32} className="mx-auto text-emerald-600" />
+            <CheckCircle2 size={32} className="mx-auto text-emerald-600" aria-hidden="true" />
             <h3 className="text-lg font-semibold text-emerald-800">Scenario Complete!</h3>
             <p className="text-sm text-emerald-700">
               You have worked through all {scenario.steps.length} steps of this practice scenario.

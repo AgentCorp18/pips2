@@ -259,16 +259,17 @@ export const KnowledgeHubLanding = ({
 
 const ContentSearchBar = () => {
   return (
-    <div className="relative">
+    <search className="relative">
       <Search
         size={16}
         className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]"
+        aria-hidden="true"
       />
       <input
-        type="text"
+        type="search"
+        aria-label="Search the Knowledge Hub"
         placeholder="Search the Knowledge Hub — chapters, tools, concepts..."
         className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 pl-10 pr-4 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
-        // Search is handled via page navigation to /knowledge/search?q=...
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             const value = (e.target as HTMLInputElement).value.trim()
@@ -278,6 +279,6 @@ const ContentSearchBar = () => {
           }
         }}
       />
-    </div>
+    </search>
   )
 }
