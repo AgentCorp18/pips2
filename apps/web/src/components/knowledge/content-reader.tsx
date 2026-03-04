@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Clock, BookOpen, List } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { BookmarkButton } from './bookmark-button'
+import { MarkdownContent } from './markdown-content'
 import type { ContentNodeRow } from '@/app/(app)/knowledge/actions'
 import { recordReadHistory, updateReadingSession } from '@/app/(app)/knowledge/actions'
 
@@ -118,11 +119,7 @@ export const ContentReader = ({
           </div>
 
           {/* Chapter body */}
-          {node.body_md && (
-            <div className="prose prose-sm max-w-none text-[var(--color-text-primary)] prose-headings:text-[var(--color-text-primary)] prose-p:text-[var(--color-text-secondary)] prose-strong:text-[var(--color-text-primary)] prose-a:text-[var(--color-primary)]">
-              <MarkdownContent markdown={node.body_md} />
-            </div>
-          )}
+          {node.body_md && <MarkdownContent content={node.body_md} />}
 
           {/* Sections */}
           {sections.map((section) => (
@@ -130,11 +127,7 @@ export const ContentReader = ({
               <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-primary)]">
                 {section.title}
               </h2>
-              {section.body_md && (
-                <div className="prose prose-sm max-w-none text-[var(--color-text-primary)] prose-headings:text-[var(--color-text-primary)] prose-p:text-[var(--color-text-secondary)]">
-                  <MarkdownContent markdown={section.body_md} />
-                </div>
-              )}
+              {section.body_md && <MarkdownContent content={section.body_md} />}
             </div>
           ))}
 
@@ -168,59 +161,5 @@ export const ContentReader = ({
         </article>
       </div>
     </div>
-  )
-}
-
-/**
- * Simple markdown renderer — converts basic markdown to HTML.
- * For production, swap with react-markdown or a similar library.
- */
-const MarkdownContent = ({ markdown }: { markdown: string }) => {
-  const html = markdownToHtml(markdown)
-  return <div dangerouslySetInnerHTML={{ __html: html }} />
-}
-
-const markdownToHtml = (md: string): string => {
-  return (
-    md
-      // Headers (### to <h3>, etc.)
-      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-      // Bold and italic
-      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      // Inline code
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      // Unordered lists
-      .replace(/^- (.+)$/gm, '<li>$1</li>')
-      .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-      // Ordered lists
-      .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-      // Blockquotes
-      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-      // Horizontal rules
-      .replace(/^---$/gm, '<hr />')
-      // Links
-      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
-      // Paragraphs (double newline)
-      .replace(/\n\n/g, '</p><p>')
-      // Wrap in paragraph tags
-      .replace(/^(.+)$/gm, (match) => {
-        if (
-          match.startsWith('<h') ||
-          match.startsWith('<ul') ||
-          match.startsWith('<ol') ||
-          match.startsWith('<li') ||
-          match.startsWith('<block') ||
-          match.startsWith('<hr') ||
-          match.startsWith('</p') ||
-          match.startsWith('<p')
-        ) {
-          return match
-        }
-        return match
-      })
   )
 }
