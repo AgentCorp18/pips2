@@ -65,7 +65,18 @@ export const ForgotPasswordForm = () => {
               autoComplete="email"
               required
               disabled={isPending}
+              aria-invalid={!!state.fieldErrors?.email}
+              aria-describedby={state.fieldErrors?.email ? 'forgot-email-error' : undefined}
             />
+            {state.fieldErrors?.email && (
+              <p
+                id="forgot-email-error"
+                className="text-xs"
+                style={{ color: 'var(--color-error)' }}
+              >
+                {state.fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="mt-2 w-full" disabled={isPending}>

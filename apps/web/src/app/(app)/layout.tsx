@@ -18,6 +18,7 @@ import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
 import { UserMenu } from '@/components/layout/user-menu'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { useMounted } from '@/hooks/use-mounted'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -33,11 +34,12 @@ const MOBILE_BREAKPOINT = 768
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
+  const mounted = useMounted()
   const [commandOpen, setCommandOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  // Detect mobile viewport
+  // Detect mobile viewport — only after mount to avoid hydration mismatch
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < MOBILE_BREAKPOINT
@@ -86,7 +88,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       </a>
 
       {/* Mobile sidebar backdrop */}
-      {isMobile && sidebarOpen && (
+      {mounted && isMobile && sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 transition-opacity"
           onClick={closeSidebar}
@@ -98,7 +100,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <aside
         aria-label="Sidebar"
         className={`${
-          isMobile
+          mounted && isMobile
             ? `fixed inset-y-0 left-0 z-50 w-[var(--sidebar-width)] transform transition-transform duration-200 ease-in-out ${
                 sidebarOpen ? 'translate-x-0' : '-translate-x-full'
               }`
@@ -120,7 +122,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <span className="text-lg font-bold tracking-wide">PIPS</span>
           </div>
-          {isMobile && (
+          {mounted && isMobile && (
             <button
               type="button"
               onClick={closeSidebar}
@@ -143,7 +145,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <a
                 key={item.href}
                 href={item.href}
-                onClick={isMobile ? closeSidebar : undefined}
+                onClick={mounted && isMobile ? closeSidebar : undefined}
                 aria-current={isActive ? 'page' : undefined}
                 className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 ${
                   isActive ? 'bg-[var(--sidebar-accent)] opacity-100' : 'opacity-70'
@@ -168,7 +170,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         <header className="flex h-[var(--topbar-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:px-6">
           <div className="flex items-center gap-3">
             {/* Mobile hamburger menu */}
-            {isMobile && (
+            {mounted && isMobile && (
               <button
                 type="button"
                 onClick={toggleSidebar}

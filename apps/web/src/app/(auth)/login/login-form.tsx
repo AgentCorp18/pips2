@@ -53,7 +53,14 @@ export const LoginForm = () => {
               autoComplete="email"
               required
               disabled={isPending}
+              aria-invalid={!!state.fieldErrors?.email}
+              aria-describedby={state.fieldErrors?.email ? 'email-error' : undefined}
             />
+            {state.fieldErrors?.email && (
+              <p id="email-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
+                {state.fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -75,7 +82,14 @@ export const LoginForm = () => {
               autoComplete="current-password"
               required
               disabled={isPending}
+              aria-invalid={!!state.fieldErrors?.password}
+              aria-describedby={state.fieldErrors?.password ? 'password-error' : undefined}
             />
+            {state.fieldErrors?.password && (
+              <p id="password-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
+                {state.fieldErrors.password}
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="mt-2 w-full" disabled={isPending}>

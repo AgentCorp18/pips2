@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import {
+  LandingNav,
   HeroSection,
   MethodologySection,
   FeaturesSection,
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
 export const HomePage = () => {
   return (
     <main className="min-h-screen">
+      <LandingNav />
       <HeroSection />
       <MethodologySection />
       <FeaturesSection />

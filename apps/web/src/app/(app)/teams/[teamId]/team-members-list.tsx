@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Trash2, UserPlus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -118,7 +119,7 @@ export const TeamMembersList = ({
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {new Date(member.joined_at).toLocaleDateString()}
+                    <FormattedDate date={member.joined_at} />
                   </TableCell>
                   {canManage && (
                     <TableCell>

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { TableRow, TableCell } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Bug, CheckSquare, CircleDot, Lightbulb, FolderKanban, User } from 'lucide-react'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import { STATUS_CONFIG, PRIORITY_CONFIG, TYPE_CONFIG } from './ticket-config'
 import type { TicketRow } from './ticket-list-table'
 import type { TicketType } from '@/types/tickets'
@@ -98,10 +99,10 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
         )}
       </TableCell>
       <TableCell className="text-sm" onClick={navigate}>
-        {ticket.dueDate ? new Date(ticket.dueDate).toLocaleDateString() : '--'}
+        {ticket.dueDate ? <FormattedDate date={ticket.dueDate} fallback="--" /> : '--'}
       </TableCell>
       <TableCell className="text-sm text-muted-foreground" onClick={navigate}>
-        {new Date(ticket.createdAt).toLocaleDateString()}
+        <FormattedDate date={ticket.createdAt} />
       </TableCell>
     </TableRow>
   )

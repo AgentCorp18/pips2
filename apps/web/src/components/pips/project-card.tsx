@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { PIPS_STEPS } from '@pips/shared'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import { ArrowRight, Calendar, User } from 'lucide-react'
 
 type ProjectCardProps = {
@@ -87,7 +88,7 @@ export const ProjectCard = ({
               {targetDate && (
                 <span className="flex items-center gap-1">
                   <Calendar size={12} />
-                  {new Date(targetDate).toLocaleDateString()}
+                  <FormattedDate date={targetDate} />
                 </span>
               )}
             </div>

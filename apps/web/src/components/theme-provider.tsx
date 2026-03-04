@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useSyncExternalStore } from 'react'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -26,16 +26,47 @@ const applyTheme = (resolved: 'light' | 'dark') => {
   document.documentElement.classList.toggle('dark', resolved === 'dark')
 }
 
-const readStoredTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'system'
-  return (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? 'system'
+/* ---------------------------------------------------------------
+   External store for persisted theme preference (localStorage).
+   useSyncExternalStore lets React read from localStorage without
+   needing setState inside an effect, satisfying the lint rule.
+   --------------------------------------------------------------- */
+
+let listeners: Array<() => void> = []
+
+const themeStore = {
+  subscribe: (cb: () => void) => {
+    listeners = [...listeners, cb]
+    return () => {
+      listeners = listeners.filter((l) => l !== cb)
+    }
+  },
+  getSnapshot: (): Theme => {
+    return (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? 'system'
+  },
+  getServerSnapshot: (): Theme => {
+    // On the server, always return 'system' to match the initial client render.
+    return 'system'
+  },
+  set: (next: Theme) => {
+    localStorage.setItem(STORAGE_KEY, next)
+    // Notify all subscribers so useSyncExternalStore re-reads.
+    listeners.forEach((l) => l())
+  },
 }
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme>(readStoredTheme)
+  const theme = useSyncExternalStore(
+    themeStore.subscribe,
+    themeStore.getSnapshot,
+    themeStore.getServerSnapshot,
+  )
+
   const resolved = resolveTheme(theme)
 
-  // Apply theme class to <html> on mount and when theme changes
+  // Apply theme class to <html> when resolved theme changes.
+  // The inline script in layout.tsx handles the initial paint,
+  // so this effect just keeps it in sync on subsequent changes.
   useEffect(() => {
     applyTheme(resolved)
   }, [resolved])
@@ -52,8 +83,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }, [theme])
 
   const setTheme = useCallback((next: Theme) => {
-    setThemeState(next)
-    localStorage.setItem(STORAGE_KEY, next)
+    themeStore.set(next)
     applyTheme(resolveTheme(next))
   }, [])
 

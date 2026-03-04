@@ -22,9 +22,10 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 
 ### Post-MVP (Start Here)
 
-| Document              | File                   | Lines | Description                                                                                                                                                                |
-| --------------------- | ---------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Full Project Plan** | `FULL_PROJECT_PLAN.md` | ~600  | **START HERE for post-MVP work.** Stabilization bugs, Knowledge Hub, Training Mode, Marketing, Workshop, Polish -- phases, dependencies, agent coordination, quality gates |
+| Document                  | File                       | Lines  | Description                                                                                                                                                            |
+| ------------------------- | -------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Development Task List** | `DEVELOPMENT_TASK_LIST.md` | ~1,900 | **TACTICAL EXECUTION PLAN.** 56 tasks across 8 sub-phases with IDs, priorities, effort, dependencies, file paths, agent assignments, deploy order, parallelization map |
+| **Full Project Plan**     | `FULL_PROJECT_PLAN.md`     | ~730   | **STRATEGIC OVERVIEW.** Stabilization bugs, Knowledge Hub, Training Mode, Marketing, Workshop, Polish -- phases, dependencies, agent coordination, quality gates       |
 
 ### Business & Strategy
 
@@ -86,10 +87,11 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 
 ### If you're working on post-MVP features (current phase):
 
-1. Read `FULL_PROJECT_PLAN.md` — **the single source of truth for all post-MVP work**
-2. Check Phase 1.5 (Stabilization) for critical bug fixes to resolve first
-3. Follow the dependency graph before starting any Knowledge Hub, Training, or Marketing work
-4. Use the Agent Coordination Plan (Section 10) for parallel agent assignment
+1. Read `DEVELOPMENT_TASK_LIST.md` — **the tactical execution plan with every task, priority, and dependency**
+2. Read `FULL_PROJECT_PLAN.md` for strategic context and phase descriptions
+3. Check Phase 1.5 (Stabilization) for critical bug fixes to resolve first
+4. Follow the dependency graph and deploy order in the task list
+5. Use Section 12 (Parallelization Map) for agent wave assignments
 
 ### If you're starting MVP development (completed):
 
@@ -115,20 +117,21 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a proven 6-step proc
 ### If you need the full picture:
 
 1. This file (`PROJECT_INDEX.md`) for orientation
-2. `FULL_PROJECT_PLAN.md` for the current state and next steps
-3. `BUSINESS_PLAN.md` for the "why"
-4. `PRODUCT_ROADMAP.md` for the "when"
-5. `PRODUCT_REQUIREMENTS.md` for the "what"
-6. `TECHNICAL_PLAN.md` for the "how"
+2. `DEVELOPMENT_TASK_LIST.md` for the tactical "what to build next" with task IDs
+3. `FULL_PROJECT_PLAN.md` for the current state and next steps
+4. `BUSINESS_PLAN.md` for the "why"
+5. `PRODUCT_ROADMAP.md` for the "when"
+6. `PRODUCT_REQUIREMENTS.md` for the "what"
+7. `TECHNICAL_PLAN.md` for the "how"
 
 ---
 
 ## Total Planning Output
 
-- **14 planning documents** totaling ~21,600+ lines
+- **15 planning documents** totaling ~22,700+ lines
 - **3 HTML mockups** totaling ~128KB
-- **~1.3 million characters** of planning content
-- **Coverage:** Business strategy, market analysis, product specs, technical architecture, database schemas, API design, UX flows, brand identity, marketing campaigns, DevOps procedures, agent coordination, MVP specification, post-MVP project plan
+- **~1.4 million characters** of planning content
+- **Coverage:** Business strategy, market analysis, product specs, technical architecture, database schemas, API design, UX flows, brand identity, marketing campaigns, DevOps procedures, agent coordination, MVP specification, post-MVP project plan, tactical task list with deploy order
 
 ---
 

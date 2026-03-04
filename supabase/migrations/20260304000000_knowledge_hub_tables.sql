@@ -42,7 +42,7 @@ CREATE INDEX idx_content_nodes_search ON content_nodes USING GIN (search_vector)
 CREATE TRIGGER set_content_nodes_updated_at
   BEFORE UPDATE ON content_nodes
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================
 -- Reading sessions — track where user left off per pillar
@@ -228,7 +228,7 @@ CREATE POLICY "Users can update own training progress"
 CREATE TRIGGER set_training_progress_updated_at
   BEFORE UPDATE ON training_progress
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================
 -- Training exercise data (user-scoped RLS)
@@ -267,7 +267,7 @@ CREATE POLICY "Users can update own exercise data"
 CREATE TRIGGER set_training_exercise_data_updated_at
   BEFORE UPDATE ON training_exercise_data
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================
 -- Workshop sessions (org-scoped RLS)
@@ -334,4 +334,4 @@ CREATE POLICY "Org admins can delete workshop sessions"
 CREATE TRIGGER set_workshop_sessions_updated_at
   BEFORE UPDATE ON workshop_sessions
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  EXECUTE FUNCTION update_updated_at();

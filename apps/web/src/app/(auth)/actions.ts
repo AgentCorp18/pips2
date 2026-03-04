@@ -11,6 +11,7 @@ import {
 
 export type AuthActionState = {
   error?: string
+  fieldErrors?: Record<string, string>
   success?: string
 }
 
@@ -25,7 +26,14 @@ export const login = async (
 
   const result = loginSchema.safeParse(raw)
   if (!result.success) {
-    return { error: result.error.issues[0]?.message ?? 'Invalid input' }
+    const fieldErrors: Record<string, string> = {}
+    for (const issue of result.error.issues) {
+      const field = issue.path[0]
+      if (typeof field === 'string') {
+        fieldErrors[field] = issue.message
+      }
+    }
+    return { fieldErrors }
   }
 
   const supabase = await createClient()
@@ -59,7 +67,14 @@ export const signup = async (
 
   const result = signupSchema.safeParse(raw)
   if (!result.success) {
-    return { error: result.error.issues[0]?.message ?? 'Invalid input' }
+    const fieldErrors: Record<string, string> = {}
+    for (const issue of result.error.issues) {
+      const field = issue.path[0]
+      if (typeof field === 'string') {
+        fieldErrors[field] = issue.message
+      }
+    }
+    return { fieldErrors }
   }
 
   const supabase = await createClient()
@@ -94,7 +109,14 @@ export const forgotPassword = async (
 
   const result = forgotPasswordSchema.safeParse(raw)
   if (!result.success) {
-    return { error: result.error.issues[0]?.message ?? 'Invalid input' }
+    const fieldErrors: Record<string, string> = {}
+    for (const issue of result.error.issues) {
+      const field = issue.path[0]
+      if (typeof field === 'string') {
+        fieldErrors[field] = issue.message
+      }
+    }
+    return { fieldErrors }
   }
 
   const supabase = await createClient()
@@ -125,7 +147,14 @@ export const resetPassword = async (
 
   const result = resetPasswordSchema.safeParse(raw)
   if (!result.success) {
-    return { error: result.error.issues[0]?.message ?? 'Invalid input' }
+    const fieldErrors: Record<string, string> = {}
+    for (const issue of result.error.issues) {
+      const field = issue.path[0]
+      if (typeof field === 'string') {
+        fieldErrors[field] = issue.message
+      }
+    }
+    return { fieldErrors }
   }
 
   const supabase = await createClient()

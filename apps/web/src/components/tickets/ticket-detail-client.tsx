@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { updateTicket } from '@/app/(app)/tickets/actions'
 import { Pencil, Check, X, Calendar, User, Tag, FolderKanban } from 'lucide-react'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 
 /* ============================================================
@@ -320,7 +321,11 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
         {/* Due Date */}
         <SidebarField label="Due Date" icon={<Calendar size={14} />}>
           <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-            {ticket.due_date ? new Date(ticket.due_date).toLocaleDateString() : 'No due date'}
+            {ticket.due_date ? (
+              <FormattedDate date={ticket.due_date} fallback="..." />
+            ) : (
+              'No due date'
+            )}
           </p>
         </SidebarField>
 
@@ -345,8 +350,12 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
             color: 'var(--color-text-tertiary)',
           }}
         >
-          <p>Created {new Date(ticket.created_at).toLocaleDateString()}</p>
-          <p>Updated {new Date(ticket.updated_at).toLocaleDateString()}</p>
+          <p>
+            Created <FormattedDate date={ticket.created_at} />
+          </p>
+          <p>
+            Updated <FormattedDate date={ticket.updated_at} />
+          </p>
         </div>
       </div>
     </div>

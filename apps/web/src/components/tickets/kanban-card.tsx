@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Bug, CheckSquare, CircleDot, Lightbulb, FolderKanban, Calendar } from 'lucide-react'
+import { useMounted } from '@/hooks/use-mounted'
 import type { TicketPriority, TicketType } from '@/types/tickets'
 
 /* ============================================================
@@ -52,7 +53,8 @@ export const KanbanCard = ({
   assigneeName,
   dueDate,
 }: KanbanCardProps) => {
-  const isOverdue = dueDate ? new Date(dueDate) < new Date() : false
+  const mounted = useMounted()
+  const isOverdue = mounted && dueDate ? new Date(dueDate) < new Date() : false
 
   return (
     <Link
@@ -111,10 +113,12 @@ export const KanbanCard = ({
             style={{ color: isOverdue ? '#EF4444' : 'var(--color-text-tertiary)' }}
           >
             <Calendar size={10} aria-hidden="true" />
-            {new Date(dueDate).toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric',
-            })}
+            {mounted
+              ? new Date(dueDate).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                })
+              : '\u00A0'}
           </span>
         )}
       </div>

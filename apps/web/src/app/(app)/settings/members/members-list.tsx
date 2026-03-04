@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
 import { MoreHorizontal, Shield, Trash2 } from 'lucide-react'
 import {
   ROLE_LABELS,
@@ -42,6 +41,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import { changeMemberRole, removeMember } from './actions'
 
 export interface OrgMember {
@@ -147,7 +147,10 @@ export const MembersList = ({
                   <Badge variant={roleBadgeVariant(member.role)}>{ROLE_LABELS[member.role]}</Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {format(new Date(member.created_at), 'MMM d, yyyy')}
+                  <FormattedDate
+                    date={member.created_at}
+                    options={{ month: 'short', day: 'numeric', year: 'numeric' }}
+                  />
                 </TableCell>
                 {canManageMembers && (
                   <TableCell>

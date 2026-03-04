@@ -1,3 +1,4 @@
+export { LandingNav } from './landing-nav'
 export { HeroSection } from './hero-section'
 export { MethodologySection } from './methodology-section'
 export { FeaturesSection } from './features-section'

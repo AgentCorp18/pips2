@@ -65,7 +65,14 @@ export const SignupForm = () => {
               autoComplete="name"
               required
               disabled={isPending}
+              aria-invalid={!!state.fieldErrors?.displayName}
+              aria-describedby={state.fieldErrors?.displayName ? 'name-error' : undefined}
             />
+            {state.fieldErrors?.displayName && (
+              <p id="name-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
+                {state.fieldErrors.displayName}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -78,7 +85,18 @@ export const SignupForm = () => {
               autoComplete="email"
               required
               disabled={isPending}
+              aria-invalid={!!state.fieldErrors?.email}
+              aria-describedby={state.fieldErrors?.email ? 'signup-email-error' : undefined}
             />
+            {state.fieldErrors?.email && (
+              <p
+                id="signup-email-error"
+                className="text-xs"
+                style={{ color: 'var(--color-error)' }}
+              >
+                {state.fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -92,10 +110,22 @@ export const SignupForm = () => {
               minLength={8}
               required
               disabled={isPending}
+              aria-invalid={!!state.fieldErrors?.password}
+              aria-describedby={state.fieldErrors?.password ? 'signup-password-error' : undefined}
             />
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Must be at least 8 characters
-            </p>
+            {state.fieldErrors?.password ? (
+              <p
+                id="signup-password-error"
+                className="text-xs"
+                style={{ color: 'var(--color-error)' }}
+              >
+                {state.fieldErrors.password}
+              </p>
+            ) : (
+              <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                Must be at least 8 characters
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="mt-2 w-full" disabled={isPending}>

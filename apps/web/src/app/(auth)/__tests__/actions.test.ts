@@ -68,36 +68,36 @@ describe('login', () => {
 
   /* ---------- Validation errors ---------- */
 
-  it('returns error when email is missing', async () => {
+  it('returns field errors when email is missing', async () => {
     const fd = buildFormData({ password: 'password123' })
     const result = await login(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
     expect(result.success).toBeUndefined()
   })
 
-  it('returns error when password is missing', async () => {
+  it('returns field errors when password is missing', async () => {
     const fd = buildFormData({ email: 'user@example.com' })
     const result = await login(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
     expect(result.success).toBeUndefined()
   })
 
-  it('returns error when email is invalid', async () => {
+  it('returns field error when email is invalid', async () => {
     const fd = buildFormData({ email: 'not-an-email', password: 'password123' })
     const result = await login(emptyState, fd)
-    expect(result.error).toBe('Please enter a valid email address')
+    expect(result.fieldErrors?.email).toBe('Please enter a valid email address')
   })
 
-  it('returns error when password is empty string', async () => {
+  it('returns field error when password is empty string', async () => {
     const fd = buildFormData({ email: 'user@example.com', password: '' })
     const result = await login(emptyState, fd)
-    expect(result.error).toBe('Password is required')
+    expect(result.fieldErrors?.password).toBe('Password is required')
   })
 
-  it('returns error when both fields are missing', async () => {
+  it('returns field errors when both fields are missing', async () => {
     const fd = buildFormData({})
     const result = await login(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
   /* ---------- Supabase error path ---------- */
@@ -171,56 +171,56 @@ describe('signup', () => {
 
   /* ---------- Validation errors ---------- */
 
-  it('returns error when displayName is missing', async () => {
+  it('returns field errors when displayName is missing', async () => {
     const fd = buildFormData({ email: 'user@example.com', password: 'securepass1' })
     const result = await signup(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
-  it('returns error when displayName is too short', async () => {
+  it('returns field error when displayName is too short', async () => {
     const fd = buildFormData({
       displayName: 'A',
       email: 'user@example.com',
       password: 'securepass1',
     })
     const result = await signup(emptyState, fd)
-    expect(result.error).toBe('Name must be at least 2 characters')
+    expect(result.fieldErrors?.displayName).toBe('Name must be at least 2 characters')
   })
 
-  it('returns error when email is invalid', async () => {
+  it('returns field error when email is invalid', async () => {
     const fd = buildFormData({
       displayName: 'Marc',
       email: 'not-valid',
       password: 'securepass1',
     })
     const result = await signup(emptyState, fd)
-    expect(result.error).toBe('Please enter a valid email address')
+    expect(result.fieldErrors?.email).toBe('Please enter a valid email address')
   })
 
-  it('returns error when password is too short', async () => {
+  it('returns field error when password is too short', async () => {
     const fd = buildFormData({
       displayName: 'Marc',
       email: 'marc@example.com',
       password: 'short',
     })
     const result = await signup(emptyState, fd)
-    expect(result.error).toBe('Password must be at least 8 characters')
+    expect(result.fieldErrors?.password).toBe('Password must be at least 8 characters')
   })
 
-  it('returns error when password exceeds 72 characters', async () => {
+  it('returns field error when password exceeds 72 characters', async () => {
     const fd = buildFormData({
       displayName: 'Marc',
       email: 'marc@example.com',
       password: 'a'.repeat(73),
     })
     const result = await signup(emptyState, fd)
-    expect(result.error).toBe('Password must be less than 72 characters')
+    expect(result.fieldErrors?.password).toBe('Password must be less than 72 characters')
   })
 
-  it('returns error when all fields are missing', async () => {
+  it('returns field errors when all fields are missing', async () => {
     const fd = buildFormData({})
     const result = await signup(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
   /* ---------- Supabase error path ---------- */
@@ -302,22 +302,22 @@ describe('forgotPassword', () => {
 
   /* ---------- Validation errors ---------- */
 
-  it('returns error when email is missing', async () => {
+  it('returns field errors when email is missing', async () => {
     const fd = buildFormData({})
     const result = await forgotPassword(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
-  it('returns error when email is invalid', async () => {
+  it('returns field error when email is invalid', async () => {
     const fd = buildFormData({ email: 'not-an-email' })
     const result = await forgotPassword(emptyState, fd)
-    expect(result.error).toBe('Please enter a valid email address')
+    expect(result.fieldErrors?.email).toBe('Please enter a valid email address')
   })
 
-  it('returns error for empty email string', async () => {
+  it('returns field errors for empty email string', async () => {
     const fd = buildFormData({ email: '' })
     const result = await forgotPassword(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
   /* ---------- Supabase error path ---------- */
@@ -381,44 +381,44 @@ describe('resetPassword', () => {
 
   /* ---------- Validation errors ---------- */
 
-  it('returns error when password is missing', async () => {
+  it('returns field errors when password is missing', async () => {
     const fd = buildFormData({ confirmPassword: 'newpassword1' })
     const result = await resetPassword(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
-  it('returns error when confirmPassword is missing', async () => {
+  it('returns field errors when confirmPassword is missing', async () => {
     const fd = buildFormData({ password: 'newpassword1' })
     const result = await resetPassword(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
-  it('returns error when password is too short', async () => {
+  it('returns field error when password is too short', async () => {
     const fd = buildFormData({ password: 'short', confirmPassword: 'short' })
     const result = await resetPassword(emptyState, fd)
-    expect(result.error).toBe('Password must be at least 8 characters')
+    expect(result.fieldErrors?.password).toBe('Password must be at least 8 characters')
   })
 
-  it('returns error when password exceeds 72 characters', async () => {
+  it('returns field error when password exceeds 72 characters', async () => {
     const long = 'a'.repeat(73)
     const fd = buildFormData({ password: long, confirmPassword: long })
     const result = await resetPassword(emptyState, fd)
-    expect(result.error).toBe('Password must be less than 72 characters')
+    expect(result.fieldErrors?.password).toBe('Password must be less than 72 characters')
   })
 
-  it('returns error when passwords do not match', async () => {
+  it('returns field error when passwords do not match', async () => {
     const fd = buildFormData({
       password: 'newpassword1',
       confirmPassword: 'differentpass',
     })
     const result = await resetPassword(emptyState, fd)
-    expect(result.error).toBe('Passwords do not match')
+    expect(result.fieldErrors?.confirmPassword).toBe('Passwords do not match')
   })
 
-  it('returns error when both fields are empty', async () => {
+  it('returns field errors when both fields are empty', async () => {
     const fd = buildFormData({ password: '', confirmPassword: '' })
     const result = await resetPassword(emptyState, fd)
-    expect(result.error).toBeDefined()
+    expect(result.fieldErrors).toBeDefined()
   })
 
   /* ---------- Supabase error path ---------- */

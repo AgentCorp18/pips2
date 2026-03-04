@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Bug, CheckSquare, CircleDot, Lightbulb, FolderKanban, Calendar, User } from 'lucide-react'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 
 /* ============================================================
@@ -124,7 +125,7 @@ export const TicketCard = ({
               {dueDate && (
                 <span className="flex items-center gap-1">
                   <Calendar size={12} />
-                  {new Date(dueDate).toLocaleDateString()}
+                  <FormattedDate date={dueDate} />
                 </span>
               )}
             </div>

@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { formatDistanceToNow } from 'date-fns'
 import { PlusCircle, Pencil, Trash2, Activity } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { RelativeTime } from '@/components/ui/relative-time'
 import type { ActivityItem } from '@/app/(app)/dashboard/actions'
 
 type RecentActivityProps = {
@@ -53,9 +53,6 @@ export const RecentActivity = ({ items }: RecentActivityProps) => {
             {items.map((item) => {
               const Icon = ACTION_ICONS[item.action] ?? Activity
               const iconColor = ACTION_COLORS[item.action] ?? 'var(--color-text-secondary)'
-              const timeAgo = formatDistanceToNow(new Date(item.createdAt), {
-                addSuffix: true,
-              })
 
               return (
                 <div key={item.id} className="flex items-start gap-3">
@@ -70,7 +67,7 @@ export const RecentActivity = ({ items }: RecentActivityProps) => {
                       {item.description}
                     </p>
                     <p className="mt-0.5 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {timeAgo}
+                      <RelativeTime date={item.createdAt} />
                     </p>
                   </div>
                 </div>

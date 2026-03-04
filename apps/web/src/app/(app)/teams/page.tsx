@@ -6,9 +6,10 @@ import { getUserOrg } from '@/lib/permissions'
 import type { OrgRole } from '@pips/shared'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/layout/empty-state'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import { PermissionGate } from '@/components/pips/permission-gate'
 import { CreateTeamDialog } from './create-team-dialog'
+import { TeamsEmptyState } from './teams-empty-state'
 import { getTeams } from './actions'
 
 export const metadata: Metadata = {
@@ -78,7 +79,7 @@ const TeamsPage = async () => {
                   <div className="flex items-center justify-between text-xs text-[var(--color-text-tertiary)]">
                     <span className="flex items-center gap-1">
                       <Calendar size={12} />
-                      Created {new Date(team.created_at).toLocaleDateString()}
+                      Created <FormattedDate date={team.created_at} />
                     </span>
                     <ArrowRight
                       size={14}
@@ -91,11 +92,7 @@ const TeamsPage = async () => {
           ))}
         </div>
       ) : (
-        <EmptyState
-          icon={Users}
-          title="No teams yet"
-          description="Create your first team to start organizing members and collaborating on projects."
-        />
+        <TeamsEmptyState role={role} />
       )}
     </div>
   )

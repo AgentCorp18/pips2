@@ -5,6 +5,7 @@ import { getUserOrg } from '@/lib/permissions'
 import { createClient } from '@/lib/supabase/server'
 import { hasPermission, type OrgRole } from '@pips/shared'
 import { getTeamDetail } from '../actions'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import { TeamMembersList } from './team-members-list'
 import { DeleteTeamButton } from './delete-team-button'
 
@@ -72,7 +73,7 @@ const TeamDetailPage = async ({ params }: TeamDetailPageProps) => {
             </p>
           )}
           <p className="mt-2 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-            Created {new Date(team.created_at).toLocaleDateString()}
+            Created <FormattedDate date={team.created_at} />
           </p>
         </div>
         {canManage && <DeleteTeamButton teamId={team.id} teamName={team.name} />}
