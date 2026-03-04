@@ -28,7 +28,7 @@ const BASE_SESSION: WorkshopSession = {
   timer_state: { running: false },
   participant_count: 5,
   status: 'active',
-  modules: [{ title: 'Introduction', duration: '10 min', notes: null }],
+  modules: [{ title: 'Introduction', duration: '10 min', notes: '' }],
   started_at: '2026-01-01T00:00:00Z',
   completed_at: null,
   created_at: '2026-01-01T00:00:00Z',

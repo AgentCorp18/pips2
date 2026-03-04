@@ -26,7 +26,7 @@ const BASE_SESSION: WorkshopSession = {
   status: 'active',
   modules: [
     { title: 'Welcome & Icebreaker', duration: '10 min', notes: 'Introduce yourselves' },
-    { title: 'Problem Statement', duration: '20 min', notes: null },
+    { title: 'Problem Statement', duration: '20 min', notes: '' },
   ],
   started_at: '2026-01-01T00:00:00Z',
   completed_at: null,
