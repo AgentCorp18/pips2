@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useTransition } from 'react'
+import { Suspense, useState, useEffect, useRef, useTransition } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, Clock, ArrowRight, BookOpen, Compass, ClipboardList, Users } from 'lucide-react'
@@ -250,4 +250,22 @@ const SearchPage = () => {
   )
 }
 
-export default SearchPage
+const SearchPageSuspenseWrapper = () => (
+  <Suspense
+    fallback={
+      <div className="mx-auto max-w-4xl space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 w-full" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
+      </div>
+    }
+  >
+    <SearchPage />
+  </Suspense>
+)
+
+export default SearchPageSuspenseWrapper

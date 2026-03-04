@@ -7,14 +7,18 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
  * invitation acceptance where the user is not yet a member).
  */
 export const createAdminClient = () => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!url || !key) {
+  if (!rawUrl || !rawKey) {
     throw new Error(
       'Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables',
     )
   }
+
+  // Strip any trailing whitespace/newlines (Vercel CLI can inject \n into env values)
+  const url = rawUrl.trim()
+  const key = rawKey.trim()
 
   return createSupabaseClient(url, key, {
     auth: {

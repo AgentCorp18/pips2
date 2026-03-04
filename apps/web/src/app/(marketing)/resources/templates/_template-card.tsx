@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState, useEffect } from 'react'
+import { useActionState, useState } from 'react'
 import { Download, FileSpreadsheet, FileText, Mail, CheckCircle2, File } from 'lucide-react'
 import { requestTemplateDownload, type TemplateDownloadState } from './actions'
 import type { Template } from './_template-data'
@@ -26,18 +26,14 @@ const initialState: TemplateDownloadState = {
 
 export const TemplateCard = ({ template }: { template: Template }) => {
   const [showForm, setShowForm] = useState(false)
-  const [downloaded, setDownloaded] = useState(false)
   const [state, formAction, isPending] = useActionState(requestTemplateDownload, initialState)
 
   const categoryMeta = TEMPLATE_CATEGORIES[template.category]
   const FormatIcon = FORMAT_ICONS[template.format] ?? FileText
 
-  useEffect(() => {
-    if (state.success && state.templateId === template.id) {
-      setDownloaded(true)
-      setShowForm(false)
-    }
-  }, [state.success, state.templateId, template.id])
+  const isSuccess = state.success && state.templateId === template.id
+  const effectiveDownloaded = isSuccess
+  const effectiveShowForm = showForm && !isSuccess
 
   return (
     <div className="flex flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-all hover:shadow-sm">
@@ -67,12 +63,12 @@ export const TemplateCard = ({ template }: { template: Template }) => {
 
       {/* Action */}
       <div className="mt-4">
-        {downloaded ? (
+        {effectiveDownloaded ? (
           <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 size={16} />
             <span className="font-medium">Download link sent!</span>
           </div>
-        ) : showForm ? (
+        ) : effectiveShowForm ? (
           <form action={formAction} className="space-y-2">
             <input type="hidden" name="templateId" value={template.id} />
             <div className="flex gap-2">
