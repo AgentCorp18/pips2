@@ -157,6 +157,19 @@ export const updateTrainingProgress = async (
   await supabase.from('training_progress').upsert(update, { onConflict: 'user_id,module_id' })
 }
 
+/** Get a single training module by ID */
+export const getTrainingModule = async (moduleId: string): Promise<TrainingModuleRow | null> => {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('training_modules')
+    .select('*')
+    .eq('id', moduleId)
+    .single()
+
+  if (error) return null
+  return data
+}
+
 /** Get a single training path by slug/ID */
 export const getTrainingPath = async (pathId: string): Promise<TrainingPathRow | null> => {
   const supabase = await createClient()

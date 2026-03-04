@@ -2,8 +2,44 @@
 
 **Prepared by:** Marc Albers, Founder
 **Date:** March 2026
-**Version:** 1.0
+**Version:** 1.1
 **Classification:** Confidential
+**Last Updated:** March 3, 2026 (Product Strategy Agent — reflects marketing pages built, Knowledge Hub content ecosystem, SEO foundation in place)
+
+---
+
+## Current Marketing Asset Status
+
+> **Marketing pages are LIVE** at https://pips-app.vercel.app with SEO metadata.
+>
+> **What exists today:**
+>
+> - 6 methodology step pages (`/methodology/step/[1-6]`) — one page per PIPS step with detailed explanation
+> - 22 tool pages (`/methodology/tools/[slug]`) — dedicated SEO-optimized pages for every PIPS improvement tool (fishbone diagram, 5 whys, decision matrix, RACI, etc.)
+> - 20 book chapter preview pages (`/book/[chapterSlug]`) — teaser content from "The Never-Ending Quest" driving signups
+> - 35 glossary term pages (`/resources/glossary/[term]`) — process improvement terminology definitions for SEO long-tail capture
+> - 1 resources hub page (`/resources`) — central content navigation
+> - 1 methodology overview page (`/methodology`) — gateway to all step and tool content
+> - **Total: 85+ indexable marketing pages** with structured metadata, all server-rendered for SEO
+>
+> **What exists in-product (Knowledge Hub):**
+>
+> - 205 compiled book content nodes with full-text search
+> - Cadence Bar progress tracking for reading
+> - Bookmark system
+> - Workbook scaffolding (step-by-step practice)
+> - Workshop scaffolding (facilitated session UI)
+>
+> **What does NOT exist yet:**
+>
+> - Blog (no posts published)
+> - Video content (no videos recorded)
+> - Email marketing infrastructure (no sequences configured)
+> - Social media presence (no active posting)
+> - Paid advertising (no campaigns running)
+> - CRM / lead tracking
+> - Analytics beyond Vercel built-in
+> - Stripe integration / trial signup flow
 
 ---
 
@@ -62,6 +98,7 @@ Depth                               |                             Depth
 ```
 
 **What makes PIPS 2.0's position unique:**
+
 - Strategy execution platforms (top-left) track goals but have no ticketing or operational workflow
 - PM tools (bottom-right) track tasks brilliantly but provide zero methodology or strategic alignment
 - CI tools (bottom-left) are narrow and dated
@@ -106,6 +143,7 @@ Organizations have more project management tools than ever, yet improvement proj
 Unlike tools that track tasks without context, PIPS 2.0 embeds a complete problem-solving framework into every workflow. Your team doesn't need separate training binders, workshop facilitators, or Lean consultants to follow a structured improvement process -- the software guides them step by step.
 
 **Proof Points:**
+
 - 6-step structured workflow (Identify, Analyze, Generate, Select & Plan, Implement, Evaluate) built into every improvement ticket
 - 26+ native improvement tools (fishbone diagrams, 5 Whys, decision matrices, RACI builders, cost-benefit analysis) embedded directly in the workflow -- no switching to separate tools
 - Enforced problem-definition discipline: cannot advance without measurable problem statements
@@ -117,6 +155,7 @@ Unlike tools that track tasks without context, PIPS 2.0 embeds a complete proble
 Enterprise strategy execution software costs $30K-$50K+ per year and locks you into proprietary frameworks. PIPS 2.0 gives you the same strategic alignment capabilities -- cascading goals, portfolio dashboards, executive reporting -- at a fraction of the cost, with the flexibility to use YOUR methodology.
 
 **Proof Points:**
+
 - Starts at $12/user/month vs. Rhythm Systems' $40+/user/month (custom-quoted, typically $10K-$50K+/year)
 - No proprietary methodology lock-in -- PIPS is the default, but custom frameworks, OKRs, and Balanced Scorecard are supported
 - Modern, mobile-friendly interface vs. competitors built 10-15 years ago
@@ -128,6 +167,7 @@ Enterprise strategy execution software costs $30K-$50K+ per year and locks you i
 PIPS 2.0 is the only modern improvement platform built for white-labeling from day one. Consultants, agencies, and training firms can deploy it under their own brand, create recurring revenue, and stop losing clients when engagements end.
 
 **Proof Points:**
+
 - Full white-label: custom logo, colors, typography, domain (improve.yourcompany.com), and branded emails
 - Multi-client management portal for consultants managing multiple organizations
 - Revenue sharing model creates ongoing income for consulting partners
@@ -160,46 +200,46 @@ PIPS 2.0 is the only modern improvement platform built for white-labeling from d
 
 #### Problem-Focused Taglines
 
-| # | Tagline | Best Audience |
-|---|---------|---------------|
-| 1 | **"Stop managing tasks. Start solving problems."** | Operations leaders, PMO directors -- anyone frustrated that PM tools don't drive improvement |
-| 2 | **"Your project management tool doesn't know what the problem is."** | Mid-market managers using Jira/Asana who feel the gap between task tracking and real problem-solving |
-| 3 | **"67% of strategies fail. Yours doesn't have to."** | C-suite and strategy leaders worried about execution gaps |
-| 4 | **"Spreadsheets don't solve problems. Methodology does."** | Operations teams still running improvement projects in Excel |
+| #   | Tagline                                                              | Best Audience                                                                                        |
+| --- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1   | **"Stop managing tasks. Start solving problems."**                   | Operations leaders, PMO directors -- anyone frustrated that PM tools don't drive improvement         |
+| 2   | **"Your project management tool doesn't know what the problem is."** | Mid-market managers using Jira/Asana who feel the gap between task tracking and real problem-solving |
+| 3   | **"67% of strategies fail. Yours doesn't have to."**                 | C-suite and strategy leaders worried about execution gaps                                            |
+| 4   | **"Spreadsheets don't solve problems. Methodology does."**           | Operations teams still running improvement projects in Excel                                         |
 
 #### Solution-Focused Taglines
 
-| # | Tagline | Best Audience |
-|---|---------|---------------|
-| 5 | **"The improvement methodology that runs itself."** | Process improvement professionals and Lean/Six Sigma practitioners |
-| 6 | **"Project management with a brain."** | Tech-savvy buyers who want smarter tools, not just more tools |
-| 7 | **"Six steps. Every problem. Built into your workflow."** | Operations leaders who value structured frameworks |
-| 8 | **"Where every ticket teaches your team to solve problems."** | PMO directors and team leads responsible for capability building |
+| #   | Tagline                                                       | Best Audience                                                      |
+| --- | ------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 5   | **"The improvement methodology that runs itself."**           | Process improvement professionals and Lean/Six Sigma practitioners |
+| 6   | **"Project management with a brain."**                        | Tech-savvy buyers who want smarter tools, not just more tools      |
+| 7   | **"Six steps. Every problem. Built into your workflow."**     | Operations leaders who value structured frameworks                 |
+| 8   | **"Where every ticket teaches your team to solve problems."** | PMO directors and team leads responsible for capability building   |
 
 #### Outcome-Focused Taglines
 
-| # | Tagline | Best Audience |
-|---|---------|---------------|
-| 9 | **"From problem to proof. In one platform."** | Data-driven leaders who need measurable results |
-| 10 | **"Build a problem-solving organization."** | CEOs and COOs focused on organizational capability |
-| 11 | **"Better problems defined. Better solutions delivered. Better results measured."** | Operations leaders who value the full improvement lifecycle |
-| 12 | **"Turn improvement from an initiative into an instinct."** | Enterprise leaders trying to build a continuous improvement culture |
+| #   | Tagline                                                                             | Best Audience                                                       |
+| --- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 9   | **"From problem to proof. In one platform."**                                       | Data-driven leaders who need measurable results                     |
+| 10  | **"Build a problem-solving organization."**                                         | CEOs and COOs focused on organizational capability                  |
+| 11  | **"Better problems defined. Better solutions delivered. Better results measured."** | Operations leaders who value the full improvement lifecycle         |
+| 12  | **"Turn improvement from an initiative into an instinct."**                         | Enterprise leaders trying to build a continuous improvement culture |
 
 #### Methodology-Focused Taglines
 
-| # | Tagline | Best Audience |
-|---|---------|---------------|
-| 13 | **"Identify. Analyze. Generate. Select. Implement. Evaluate. Repeat."** | Process improvement professionals who recognize the methodology structure |
-| 14 | **"The operating system for organizational improvement."** | C-suite and strategy leaders who think in systems |
-| 15 | **"Structured problem-solving, meet modern project management."** | PMO directors and operations managers bridging methodology and execution |
+| #   | Tagline                                                                 | Best Audience                                                             |
+| --- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 13  | **"Identify. Analyze. Generate. Select. Implement. Evaluate. Repeat."** | Process improvement professionals who recognize the methodology structure |
+| 14  | **"The operating system for organizational improvement."**              | C-suite and strategy leaders who think in systems                         |
+| 15  | **"Structured problem-solving, meet modern project management."**       | PMO directors and operations managers bridging methodology and execution  |
 
 #### Provocative / Challenger Taglines
 
-| # | Tagline | Best Audience |
-|---|---------|---------------|
-| 16 | **"Jira knows WHAT you're working on. We know WHY."** | Jira users frustrated by lack of strategic context |
-| 17 | **"Your $50K strategy platform can't tell you if the problem was actually solved."** | Rhythm Systems / Cascade users questioning ROI |
-| 18 | **"Process improvement without software is just a workshop. Software without methodology is just a spreadsheet."** | Consulting firms and Lean/Six Sigma practitioners evaluating tools |
+| #   | Tagline                                                                                                            | Best Audience                                                      |
+| --- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| 16  | **"Jira knows WHAT you're working on. We know WHY."**                                                              | Jira users frustrated by lack of strategic context                 |
+| 17  | **"Your $50K strategy platform can't tell you if the problem was actually solved."**                               | Rhythm Systems / Cascade users questioning ROI                     |
+| 18  | **"Process improvement without software is just a workshop. Software without methodology is just a spreadsheet."** | Consulting firms and Lean/Six Sigma practitioners evaluating tools |
 
 **Recommended primary tagline:** #1 -- "Stop managing tasks. Start solving problems." -- It is concise, memorable, immediately communicates the differentiation, and works across all audience segments. It should appear on the homepage, in ad headlines, and on all brand materials.
 
@@ -209,7 +249,36 @@ PIPS 2.0 is the only modern improvement platform built for white-labeling from d
 
 ## 3. Content Marketing Strategy
 
+### Content Ecosystem: What's Already Built
+
+Before discussing the blog and content roadmap, it is important to recognize that a significant content marketing foundation already exists as part of the product itself. This is a strategic advantage — the content is not external marketing collateral that sits on a separate blog. It is server-rendered, SEO-optimized product content that serves dual purposes: attracting organic traffic AND retaining users inside the product.
+
+#### Marketing-Side Content Pages (LIVE)
+
+| Content Type           | Count   | URL Pattern                  | SEO Purpose                                                                                                                          |
+| ---------------------- | ------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Methodology step pages | 6       | `/methodology/step/[1-6]`    | Rank for "PIPS methodology," "6-step improvement process," step-specific queries                                                     |
+| Tool pages             | 22      | `/methodology/tools/[slug]`  | Rank for "fishbone diagram tool," "5 whys template," "decision matrix software," "RACI builder" — high-volume informational keywords |
+| Book chapter previews  | 20      | `/book/[chapterSlug]`        | Long-form content for topical authority, lead magnet for full book access in-product                                                 |
+| Glossary terms         | 35      | `/resources/glossary/[term]` | Long-tail SEO for process improvement terminology: "root cause analysis definition," "continuous improvement," etc.                  |
+| **Total**              | **83+** |                              | **Comprehensive SEO footprint covering the PIPS methodology content cluster**                                                        |
+
+**Strategic insight:** These 83+ pages create a content moat that would take a competitor months to replicate. Each tool page is a natural landing page for users searching for specific improvement tools (fishbone diagrams, decision matrices, etc.) and funnels them toward product signup. The glossary pages capture long-tail terminology traffic. The book chapter previews serve as gated content teasers that drive in-product engagement.
+
+#### In-Product Content (Knowledge Hub — FOUNDATION COMPLETE)
+
+| Content Type       | Count      | Purpose                                                                    |
+| ------------------ | ---------- | -------------------------------------------------------------------------- |
+| Book content nodes | 205        | Full PIPS methodology book compiled into searchable, structured content    |
+| Full-text search   | Active     | Users can search across all methodology content from within the product    |
+| Cadence Bar        | Integrated | Reading progress tracking encourages sustained engagement                  |
+| Bookmarks          | Active     | Users save methodology sections relevant to their current improvement work |
+
+**Strategic insight:** The Knowledge Hub transforms the product from a tool into a learning platform. Users who read the methodology content inside the product have higher activation rates, deeper engagement, and lower churn. This content is NOT available elsewhere — it is proprietary to the PIPS 2.0 product experience.
+
 ### Blog Strategy: 20 Post Titles by Funnel Stage
+
+> **STATUS: NOT YET STARTED — blog infrastructure needs to be set up. The 83+ marketing pages provide the SEO foundation; blog posts will amplify and link back to these pillar pages.**
 
 #### Awareness Stage (Top of Funnel) -- Educational content that attracts organic traffic
 
@@ -301,49 +370,60 @@ PIPS 2.0 is the only modern improvement platform built for white-labeling from d
 
 #### Primary Keywords (High Volume, High Competition)
 
-| # | Keyword | Monthly Search Volume (Est.) | Intent | Priority |
-|---|---------|------------------------------|--------|----------|
-| 1 | process improvement software | 1,200 | Commercial | High |
-| 2 | continuous improvement tools | 900 | Commercial | High |
-| 3 | strategy execution software | 600 | Commercial | High |
-| 4 | project management methodology | 1,500 | Informational | High |
-| 5 | root cause analysis tools | 2,000 | Informational/Commercial | High |
-| 6 | fishbone diagram template | 4,500 | Informational | High |
-| 7 | problem solving framework | 1,800 | Informational | Medium |
-| 8 | process improvement methodology | 700 | Informational | High |
-| 9 | Rhythm Systems alternative | 200 | Commercial | High |
-| 10 | white label project management | 350 | Commercial | High |
+| #   | Keyword                         | Monthly Search Volume (Est.) | Intent                   | Priority |
+| --- | ------------------------------- | ---------------------------- | ------------------------ | -------- |
+| 1   | process improvement software    | 1,200                        | Commercial               | High     |
+| 2   | continuous improvement tools    | 900                          | Commercial               | High     |
+| 3   | strategy execution software     | 600                          | Commercial               | High     |
+| 4   | project management methodology  | 1,500                        | Informational            | High     |
+| 5   | root cause analysis tools       | 2,000                        | Informational/Commercial | High     |
+| 6   | fishbone diagram template       | 4,500                        | Informational            | High     |
+| 7   | problem solving framework       | 1,800                        | Informational            | Medium   |
+| 8   | process improvement methodology | 700                          | Informational            | High     |
+| 9   | Rhythm Systems alternative      | 200                          | Commercial               | High     |
+| 10  | white label project management  | 350                          | Commercial               | High     |
 
 #### Long-Tail Keywords (Lower Volume, Lower Competition, Higher Intent)
 
-| # | Keyword | Monthly Search Volume (Est.) | Intent | Priority |
-|---|---------|------------------------------|--------|----------|
-| 11 | process improvement software for healthcare | 150 | Commercial | High |
-| 12 | structured problem solving software | 100 | Commercial | High |
-| 13 | methodology embedded project management | 10 | Informational | High (category creation) |
-| 14 | Lean Six Sigma project tracking tool | 200 | Commercial | Medium |
-| 15 | continuous improvement software for mid-market | 50 | Commercial | High |
-| 16 | 5 whys analysis tool online | 800 | Informational | Medium |
-| 17 | decision matrix template software | 400 | Informational/Commercial | Medium |
-| 18 | white label improvement platform for consultants | 30 | Commercial | High |
-| 19 | strategy execution platform affordable | 80 | Commercial | High |
-| 20 | how to track process improvement projects | 250 | Informational | Medium |
-| 21 | RACI matrix builder tool | 500 | Informational/Commercial | Medium |
-| 22 | before and after measurement improvement | 120 | Informational | Medium |
-| 23 | enterprise ticketing system with methodology | 20 | Commercial | High |
-| 24 | improvement project management template | 300 | Informational | Medium |
-| 25 | cost benefit analysis tool for projects | 450 | Informational/Commercial | Medium |
-| 26 | process improvement for manufacturing companies | 180 | Commercial | Medium |
-| 27 | alternative to KaiNexus | 50 | Commercial | High |
-| 28 | OKR and improvement tracking combined | 40 | Commercial | Medium |
-| 29 | PMO process improvement tracking | 150 | Commercial | Medium |
-| 30 | consultant platform for process improvement clients | 20 | Commercial | High |
+| #   | Keyword                                             | Monthly Search Volume (Est.) | Intent                   | Priority                 |
+| --- | --------------------------------------------------- | ---------------------------- | ------------------------ | ------------------------ |
+| 11  | process improvement software for healthcare         | 150                          | Commercial               | High                     |
+| 12  | structured problem solving software                 | 100                          | Commercial               | High                     |
+| 13  | methodology embedded project management             | 10                           | Informational            | High (category creation) |
+| 14  | Lean Six Sigma project tracking tool                | 200                          | Commercial               | Medium                   |
+| 15  | continuous improvement software for mid-market      | 50                           | Commercial               | High                     |
+| 16  | 5 whys analysis tool online                         | 800                          | Informational            | Medium                   |
+| 17  | decision matrix template software                   | 400                          | Informational/Commercial | Medium                   |
+| 18  | white label improvement platform for consultants    | 30                           | Commercial               | High                     |
+| 19  | strategy execution platform affordable              | 80                           | Commercial               | High                     |
+| 20  | how to track process improvement projects           | 250                          | Informational            | Medium                   |
+| 21  | RACI matrix builder tool                            | 500                          | Informational/Commercial | Medium                   |
+| 22  | before and after measurement improvement            | 120                          | Informational            | Medium                   |
+| 23  | enterprise ticketing system with methodology        | 20                           | Commercial               | High                     |
+| 24  | improvement project management template             | 300                          | Informational            | Medium                   |
+| 25  | cost benefit analysis tool for projects             | 450                          | Informational/Commercial | Medium                   |
+| 26  | process improvement for manufacturing companies     | 180                          | Commercial               | Medium                   |
+| 27  | alternative to KaiNexus                             | 50                           | Commercial               | High                     |
+| 28  | OKR and improvement tracking combined               | 40                           | Commercial               | Medium                   |
+| 29  | PMO process improvement tracking                    | 150                          | Commercial               | Medium                   |
+| 30  | consultant platform for process improvement clients | 20                           | Commercial               | High                     |
 
 **SEO Strategy Notes:**
+
 - Build pillar pages around primary keywords #1-#5 with comprehensive 3,000+ word guides
 - Create supporting blog posts that link back to pillar pages
 - Own the fishbone diagram / root cause analysis / 5 Whys content cluster -- these are high-volume informational queries that convert well to "try the tool" CTAs
 - Prioritize category-creation keyword #13 by publishing the definitive content on this topic before any competitor can claim it
+
+**SEO Foundation Already Built (March 3, 2026):**
+
+- 22 tool pages already target keywords #5, #6, #16, #17, #21, #25 directly (fishbone diagram, root cause analysis, 5 whys, decision matrix, RACI matrix, cost-benefit analysis)
+- 35 glossary pages capture long-tail variations of keywords #7, #8, #13, #22, #28
+- 6 methodology step pages provide pillar content for the PIPS framework cluster
+- 20 book chapter preview pages create topical authority and depth
+- All pages are server-rendered (Next.js SSR) with proper `<title>`, `<meta description>`, and structured heading hierarchy
+- Internal linking between tool pages, step pages, and glossary terms creates a cohesive content graph
+- **Key gap:** No blog yet, no backlink strategy, no Google Search Console verification, no sitemap submission
 
 ### Thought Leadership: 10 LinkedIn Article/Post Ideas for Marc Albers
 
@@ -426,6 +506,7 @@ PULL QUOTE:
 ### Webinar/Workshop Series: 6 Concepts
 
 #### Webinar 1: "Stop Managing Tasks, Start Solving Problems: An Introduction to Methodology-Embedded Project Management"
+
 - **Format:** 45-minute live webinar + 15-minute Q&A
 - **Audience:** Operations leaders, PMO directors, VP-level buyers
 - **Content:** Define the category, demonstrate the problem with current tools (live comparison of a process improvement project in Jira vs. PIPS 2.0), introduce the PIPS 6-step methodology
@@ -433,6 +514,7 @@ PULL QUOTE:
 - **Timing:** Monthly recurring (evergreen foundational content)
 
 #### Webinar 2: "Root Cause Analysis in 2026: How Software Makes Fishbone Diagrams and 5 Whys 10x More Effective"
+
 - **Format:** 30-minute hands-on workshop + 15-minute Q&A
 - **Audience:** Process improvement professionals, Lean/Six Sigma practitioners
 - **Content:** Live demonstration of building a fishbone diagram and running 5 Whys analysis inside PIPS 2.0, comparison to whiteboard/spreadsheet approach
@@ -440,6 +522,7 @@ PULL QUOTE:
 - **Timing:** Quarterly
 
 #### Webinar 3: "The Consultant's Secret Weapon: How to Build Recurring Revenue with White-Label Improvement Software"
+
 - **Format:** 45-minute webinar + 15-minute Q&A, co-hosted with a consulting partner
 - **Audience:** Management consultants, Lean/Six Sigma consultants, training firms
 - **Content:** The consulting revenue problem (transactional vs. recurring), white-label demo, revenue model walkthrough, partner testimonial
@@ -447,6 +530,7 @@ PULL QUOTE:
 - **Timing:** Monthly for first 6 months, then quarterly
 
 #### Webinar 4: "From Strategy to Execution in One Platform: Connecting Boardroom Goals to Frontline Work"
+
 - **Format:** 45-minute live webinar + case study presentation
 - **Audience:** CEOs, CSOs, VP of Strategy, enterprise PMO directors
 - **Content:** How PIPS 2.0 cascades strategic goals into improvement projects into implementation tasks, live executive dashboard demo, comparison to Rhythm Systems/Cascade workflow
@@ -454,6 +538,7 @@ PULL QUOTE:
 - **Timing:** Quarterly
 
 #### Webinar 5: "Process Improvement for Healthcare: Solving Patient Safety, Compliance, and Operational Challenges"
+
 - **Format:** 45-minute industry-specific webinar + panel discussion
 - **Audience:** Healthcare operations leaders, quality directors, patient safety officers
 - **Content:** Healthcare-specific improvement use cases (medication errors, patient throughput, billing accuracy), regulatory compliance tracking, HIPAA considerations
@@ -461,6 +546,7 @@ PULL QUOTE:
 - **Timing:** Twice annually (timed around healthcare conference season)
 
 #### Webinar 6: "Measuring What Matters: How to Prove Your Improvement Program is Working"
+
 - **Format:** 30-minute data-focused presentation + live demo
 - **Audience:** Operations leaders, CFOs, anyone who needs to justify improvement spending
 - **Content:** Before/after measurement frameworks, ROI calculation methodology, PIPS 2.0 evaluation dashboards, how to build a business case for improvement investment
@@ -473,37 +559,60 @@ PULL QUOTE:
 
 **Trigger:** New email list subscriber (downloaded a resource, signed up for newsletter, or attended a webinar)
 
-| # | Subject Line | Timing | Content Summary |
-|---|-------------|--------|-----------------|
-| 1 | "Welcome to PIPS -- here's the 6-step framework that changes how teams solve problems" | Immediately | Welcome, introduce the PIPS methodology with a visual overview of the 6 steps, link to the interactive PIPS guide, set expectations for email cadence. Personal from Marc. |
-| 2 | "The #1 mistake organizations make when tackling improvement projects" | Day 3 | Educational content: jumping to solutions without defining the problem. Explain Step 1 (Identify) and why enforced problem statements are game-changing. Subtle product mention. |
-| 3 | "Root cause analysis in 3 minutes (not 3 days)" | Day 7 | Educational content: quick intro to fishbone diagrams and 5 Whys. Link to blog post with templates. CTA: "See these tools built into PIPS 2.0" with product screenshot. |
-| 4 | "How [Company/Industry Example] used structured problem-solving to save $200K" | Day 12 | Case study or hypothetical use case showing the full PIPS cycle from problem to measurable result. CTA: "Start your free 14-day trial." |
-| 5 | "You're solving problems the hard way. Here's the easy way." | Day 18 | Direct product pitch: compare the old way (spreadsheets, separate tools, no methodology) vs. the PIPS 2.0 way. Feature highlights, pricing mention, strong trial CTA. |
+| #   | Subject Line                                                                           | Timing      | Content Summary                                                                                                                                                                  |
+| --- | -------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | "Welcome to PIPS -- here's the 6-step framework that changes how teams solve problems" | Immediately | Welcome, introduce the PIPS methodology with a visual overview of the 6 steps, link to the interactive PIPS guide, set expectations for email cadence. Personal from Marc.       |
+| 2   | "The #1 mistake organizations make when tackling improvement projects"                 | Day 3       | Educational content: jumping to solutions without defining the problem. Explain Step 1 (Identify) and why enforced problem statements are game-changing. Subtle product mention. |
+| 3   | "Root cause analysis in 3 minutes (not 3 days)"                                        | Day 7       | Educational content: quick intro to fishbone diagrams and 5 Whys. Link to blog post with templates. CTA: "See these tools built into PIPS 2.0" with product screenshot.          |
+| 4   | "How [Company/Industry Example] used structured problem-solving to save $200K"         | Day 12      | Case study or hypothetical use case showing the full PIPS cycle from problem to measurable result. CTA: "Start your free 14-day trial."                                          |
+| 5   | "You're solving problems the hard way. Here's the easy way."                           | Day 18      | Direct product pitch: compare the old way (spreadsheets, separate tools, no methodology) vs. the PIPS 2.0 way. Feature highlights, pricing mention, strong trial CTA.            |
 
 #### Sequence 2: Trial-to-Paid Conversion Sequence (7 Emails)
 
 **Trigger:** User signs up for a 14-day free trial
 
-| # | Subject Line | Timing | Content Summary |
-|---|-------------|--------|-----------------|
-| 1 | "You're in! Here's how to get value from PIPS 2.0 in your first 10 minutes" | Immediately | Onboarding guide: (1) Create your first PIPS ticket, (2) Write a problem statement using the built-in template, (3) Invite one teammate. Include a 2-minute video walkthrough. |
-| 2 | "Quick question: what problem are you trying to solve?" | Day 2 | Personal-feeling email from Marc asking what brought them to PIPS 2.0. Provides 3 common use cases with links to relevant getting-started guides. Reply encouraged. |
-| 3 | "Did you try the fishbone diagram? (Most people's favorite feature)" | Day 4 | Highlight a specific feature they may not have discovered. Screenshot + short video of the fishbone diagram builder. CTA: "Build your first fishbone diagram." |
-| 4 | "Here's what happens when teams finish their first PIPS cycle" | Day 7 | Halfway through trial. Share the outcome of a complete 6-step PIPS cycle: before/after measurement, lessons learned captured, institutional knowledge created. Urgency: "You have 7 days left to experience this." |
-| 5 | "Your team can use PIPS 2.0 without any training. Here's how." | Day 9 | Address the adoption objection. Show how the in-app methodology guidance eliminates the need for separate training. Include a "share with your team" link. |
-| 6 | "5 days left: here's what you'll lose if you don't upgrade" | Day 10 | Loss aversion: list the data, tickets, and workflow configurations they've built during the trial. Explain what happens when the trial ends. Pricing reminder with annual discount highlighted. |
-| 7 | "Your trial ends tomorrow -- special offer inside" | Day 13 | Final conversion push. Offer: 20% off the first 3 months if they upgrade today. Include one-click upgrade button. Personal note from Marc thanking them for trying the product. |
+| #   | Subject Line                                                                | Timing      | Content Summary                                                                                                                                                                                                    |
+| --- | --------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | "You're in! Here's how to get value from PIPS 2.0 in your first 10 minutes" | Immediately | Onboarding guide: (1) Create your first PIPS ticket, (2) Write a problem statement using the built-in template, (3) Invite one teammate. Include a 2-minute video walkthrough.                                     |
+| 2   | "Quick question: what problem are you trying to solve?"                     | Day 2       | Personal-feeling email from Marc asking what brought them to PIPS 2.0. Provides 3 common use cases with links to relevant getting-started guides. Reply encouraged.                                                |
+| 3   | "Did you try the fishbone diagram? (Most people's favorite feature)"        | Day 4       | Highlight a specific feature they may not have discovered. Screenshot + short video of the fishbone diagram builder. CTA: "Build your first fishbone diagram."                                                     |
+| 4   | "Here's what happens when teams finish their first PIPS cycle"              | Day 7       | Halfway through trial. Share the outcome of a complete 6-step PIPS cycle: before/after measurement, lessons learned captured, institutional knowledge created. Urgency: "You have 7 days left to experience this." |
+| 5   | "Your team can use PIPS 2.0 without any training. Here's how."              | Day 9       | Address the adoption objection. Show how the in-app methodology guidance eliminates the need for separate training. Include a "share with your team" link.                                                         |
+| 6   | "5 days left: here's what you'll lose if you don't upgrade"                 | Day 10      | Loss aversion: list the data, tickets, and workflow configurations they've built during the trial. Explain what happens when the trial ends. Pricing reminder with annual discount highlighted.                    |
+| 7   | "Your trial ends tomorrow -- special offer inside"                          | Day 13      | Final conversion push. Offer: 20% off the first 3 months if they upgrade today. Include one-click upgrade button. Personal note from Marc thanking them for trying the product.                                    |
 
 #### Sequence 3: Re-Engagement Sequence (3 Emails)
 
 **Trigger:** Paying customer inactive for 14+ days (no logins, no ticket activity)
 
-| # | Subject Line | Timing | Content Summary |
-|---|-------------|--------|-----------------|
-| 1 | "We noticed you've been away -- everything okay?" | Day 14 of inactivity | Friendly check-in. Ask if they're facing any challenges. Offer a 15-minute call with customer success. Link to "quick wins" guide for re-engaging with the platform. |
-| 2 | "3 things that changed in PIPS 2.0 since you last logged in" | Day 21 of inactivity | Highlight recent product updates, new features, or improvements. "Here's what you're missing." Include a direct link to their dashboard. |
-| 3 | "We'd hate to see you go -- can we help?" | Day 30 of inactivity | Direct conversation about their experience. Offer a complimentary strategy session with customer success. Include a cancellation survey link (to capture churn reasons even if they don't respond). |
+| #   | Subject Line                                                 | Timing               | Content Summary                                                                                                                                                                                     |
+| --- | ------------------------------------------------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | "We noticed you've been away -- everything okay?"            | Day 14 of inactivity | Friendly check-in. Ask if they're facing any challenges. Offer a 15-minute call with customer success. Link to "quick wins" guide for re-engaging with the platform.                                |
+| 2   | "3 things that changed in PIPS 2.0 since you last logged in" | Day 21 of inactivity | Highlight recent product updates, new features, or improvements. "Here's what you're missing." Include a direct link to their dashboard.                                                            |
+| 3   | "We'd hate to see you go -- can we help?"                    | Day 30 of inactivity | Direct conversation about their experience. Offer a complimentary strategy session with customer success. Include a cancellation survey link (to capture churn reasons even if they don't respond). |
+
+---
+
+### Knowledge Hub as Marketing Flywheel (NEW — March 3, 2026)
+
+The Knowledge Hub represents a strategic marketing asset that most SaaS products lack: **the methodology content IS the marketing content, and both are embedded in the product.** This creates a self-reinforcing flywheel:
+
+1. **SEO attracts visitors** → 85+ marketing pages rank for process improvement queries (fishbone diagram, root cause analysis, decision matrix, 5 whys, etc.)
+2. **Marketing pages convert to signups** → Tool pages and book chapter previews include CTAs to try the full tool or read the full book inside the product
+3. **In-product content drives activation** → 205 searchable content nodes in the Knowledge Hub teach users the methodology while they use the software
+4. **Cadence Bar drives retention** → Reading progress tracking encourages users to return daily and complete the methodology learning
+5. **Training Mode drives depth** → Guided learning paths (4 paths, 27 modules, 59 exercises) transform users from tool users into methodology practitioners
+6. **Practitioner users evangelize** → Users who learn the PIPS methodology through the product become advocates who recommend it to their organizations
+
+**Key strategic implication for campaigns:** Every campaign below should link to the existing marketing pages as landing pages, not create separate campaign-specific landing pages. The tool pages are the natural landing pages for educational content campaigns. The book chapter previews are the natural landing pages for thought leadership campaigns. This consolidates SEO authority on the main domain rather than fragmenting it.
+
+**Immediate marketing actions enabled by current content:**
+
+- Submit sitemap to Google Search Console (pages are live but may not be indexed yet)
+- Add structured data (JSON-LD) to tool pages for rich search results
+- Create internal linking between related tool pages, step pages, and glossary terms
+- Add email capture CTAs to book chapter preview pages (requires email infrastructure)
+- Share individual tool pages on LinkedIn as educational content (each tool page is a standalone article)
 
 ---
 
@@ -520,6 +629,7 @@ PULL QUOTE:
 **Key Message:** "PIPS 2.0 is live. The first project management platform where the methodology is the software. Stop managing tasks. Start solving problems."
 
 **Channels:**
+
 - Product Hunt launch
 - LinkedIn (organic + paid)
 - Twitter/X
@@ -530,19 +640,23 @@ PULL QUOTE:
 
 **Creative Concepts:**
 
-*Landing Page Headline:*
+_Landing Page Headline:_
+
 > **Stop Managing Tasks. Start Solving Problems.**
 > PIPS 2.0 is the first project management platform with a complete problem-solving methodology built into every ticket. Define problems. Analyze root causes. Generate solutions. Measure results. All in one place.
 > [Start Your Free 14-Day Trial]
 
-*Product Hunt Tagline:*
+_Product Hunt Tagline:_
+
 > "Project management with a built-in problem-solving methodology"
 
-*Launch Email Subject Lines (A/B test):*
+_Launch Email Subject Lines (A/B test):_
+
 - A: "It's here: the project management tool that actually solves problems"
 - B: "We just launched the tool we wish existed 10 years ago"
 
-*Social Post (LinkedIn):*
+_Social Post (LinkedIn):_
+
 > Today, I'm launching PIPS 2.0 -- a product I've been building for the past [X] months.
 >
 > Here's why:
@@ -554,6 +668,7 @@ PULL QUOTE:
 > So I built PIPS 2.0: project management software where the methodology IS the workflow.
 >
 > Every ticket guides your team through 6 proven steps:
+>
 > 1. Identify the problem (with enforced measurable definitions)
 > 2. Analyze root causes (with built-in fishbone diagrams and 5 Whys)
 > 3. Generate solutions (with structured brainstorming tools)
@@ -567,9 +682,10 @@ PULL QUOTE:
 >
 > #ProcessImprovement #ProjectManagement #SaaS #Launch
 
-*Twitter/X Thread (3 posts):*
+_Twitter/X Thread (3 posts):_
 
 Post 1:
+
 > Launching today: PIPS 2.0
 >
 > Project management with a complete problem-solving methodology built in.
@@ -581,7 +697,9 @@ Post 1:
 > Thread: why this matters >>
 
 Post 2:
+
 > The problem with PM tools:
+>
 > - Jira tracks WHAT you're doing
 > - Monday.com tracks WHEN it's due
 > - Asana tracks WHO is responsible
@@ -591,7 +709,9 @@ Post 2:
 > PIPS 2.0 answers all of these. In the workflow. Automatically.
 
 Post 3:
+
 > PIPS 2.0:
+>
 > - 6-step methodology in every ticket
 > - 26+ built-in improvement tools
 > - Jira & Azure DevOps integration
@@ -603,6 +723,7 @@ Post 3:
 **Call-to-Action:** "Start Your Free 14-Day Trial"
 
 **Success Metrics:**
+
 - 500+ Product Hunt upvotes
 - 1,000+ website visits on launch day
 - 200+ trial signups in first 2 weeks
@@ -610,6 +731,7 @@ Post 3:
 - 10+ press/blog mentions
 
 **Budget Estimate:** $3,000-$5,000
+
 - $0 for Product Hunt, Hacker News, organic social
 - $2,000 for LinkedIn promoted posts (launch week)
 - $500 for press outreach (HARO, journalist cold email tools)
@@ -630,6 +752,7 @@ Post 3:
 **Key Message:** "There's a proven 6-step process for solving any business problem. Now there's software that makes it automatic."
 
 **Channels:**
+
 - LinkedIn organic content (Marc's personal account + company page)
 - Blog content series (6 posts, one per PIPS step)
 - YouTube video series ("PIPS in 6 Minutes")
@@ -639,7 +762,8 @@ Post 3:
 
 **Creative Concepts:**
 
-*Blog Series Titles:*
+_Blog Series Titles:_
+
 1. "Step 1: Why Most Improvement Projects Fail Before They Start (The Problem Statement Problem)"
 2. "Step 2: Stop Guessing -- How Root Cause Analysis Changes Everything"
 3. "Step 3: Brainstorming Is Broken. Here's How to Fix It."
@@ -647,24 +771,28 @@ Post 3:
 5. "Step 5: Implementation Is Where Good Ideas Go to Die -- Unless You Do This"
 6. "Step 6: The Step Everyone Skips: Measuring Whether Your Solution Actually Worked"
 
-*LinkedIn Ad Copy (3 Variations):*
+_LinkedIn Ad Copy (3 Variations):_
 
 **Ad A -- Problem-focused:**
+
 > Headline: "Your improvement projects are failing. Here's why."
 > Body: "Organizations spend thousands on Lean Six Sigma training. Then teams go back to their desks and run improvement projects in spreadsheets. The methodology gets forgotten. Results don't get measured. Sound familiar? There's a better way."
 > CTA: "Learn the 6-Step Framework"
 
 **Ad B -- Stat-focused:**
+
 > Headline: "67% of strategies fail at execution. What if the tool fixed that?"
 > Body: "Project management tools track tasks. Strategy platforms track goals. But nothing teaches your team HOW to solve the problems between strategy and execution. Until now."
 > CTA: "See PIPS 2.0 in Action"
 
 **Ad C -- Curiosity-focused:**
+
 > Headline: "What if your project management tool could teach your team to solve problems?"
 > Body: "Not track them. SOLVE them. With root cause analysis, decision matrices, and before/after measurement built right into the workflow. PIPS 2.0 is project management with a brain."
 > CTA: "Start Free Trial"
 
-*YouTube Video Script Concept ("PIPS in 6 Minutes"):*
+_YouTube Video Script Concept ("PIPS in 6 Minutes"):_
+
 > "In the next 6 minutes, I'm going to teach you a problem-solving framework that you can apply to ANY business challenge. It has 6 steps, it's been tested in hundreds of real improvement projects, and it works. I'm Marc Albers, creator of the PIPS methodology, and here's how it works..."
 > [1 minute per step, visual graphics showing the process, real-world examples]
 > "Now -- what if this entire framework was built into your project management software? That's PIPS 2.0."
@@ -672,6 +800,7 @@ Post 3:
 **Call-to-Action:** "Download the PIPS Methodology Guide" (gated PDF) or "Start Your Free Trial"
 
 **Success Metrics:**
+
 - 5,000+ blog page views per month (across series)
 - 500+ methodology guide downloads
 - 200+ YouTube views per video within first month
@@ -679,6 +808,7 @@ Post 3:
 - 20+ LinkedIn shares per post (organic)
 
 **Budget Estimate:** $5,000-$10,000/month
+
 - $2,000-$4,000/month for LinkedIn sponsored content
 - $1,000-$2,000 for video production (can be done with screen recording + Canva)
 - $1,000-$2,000 for blog content amplification
@@ -699,6 +829,7 @@ Post 3:
 **Key Message:** "Stop losing clients when the engagement ends. Deploy your own branded improvement platform and build recurring revenue."
 
 **Channels:**
+
 - LinkedIn targeted outreach (direct messages to consultants)
 - LinkedIn paid ads (targeting "management consultant," "Lean Six Sigma," "process improvement consultant" titles)
 - Consultant community forums (iSixSigma, ASQ, consulting Slack groups)
@@ -709,29 +840,35 @@ Post 3:
 
 **Creative Concepts:**
 
-*Partner Landing Page Headline:*
+_Partner Landing Page Headline:_
+
 > **Your Methodology. Your Brand. Your Recurring Revenue.**
 > PIPS 2.0 is the first modern improvement platform built for white-labeling. Deploy it under your brand, manage multiple clients from one portal, and earn recurring revenue on every subscription.
 > [Apply for the Partner Program]
 
-*LinkedIn Ad Copy:*
+_LinkedIn Ad Copy:_
 
 **Ad A:**
+
 > Headline: "Consulting is transactional. Software is recurring."
 > Body: "You teach the methodology. You leave. The client goes back to spreadsheets. What if you could deploy a branded improvement platform that keeps your methodology alive -- and pays you monthly? PIPS 2.0 White-Label: $500/mo + $8/end-user."
 > CTA: "Learn About the Partner Program"
 
 **Ad B:**
+
 > Headline: "Your clients forget your methodology 30 days after you leave. Fix that."
 > Body: "PIPS 2.0 White-Label lets you deploy a branded process improvement platform for your clients. Your logo. Your colors. Your domain. Your recurring revenue. No development required."
 > CTA: "See the White-Label Demo"
 
-*Direct Outreach Template (LinkedIn DM):*
+_Direct Outreach Template (LinkedIn DM):_
+
 > "Hi [Name] -- I noticed you specialize in [Lean/process improvement/continuous improvement]. I built a process improvement platform (PIPS 2.0) that's designed to be white-labeled by consultants like you. You can deploy it under your own brand for clients and earn recurring revenue. Would a 15-minute demo be worth your time? No pitch, just a look at the platform."
 
-*Partner Program One-Pager Headline:*
+_Partner Program One-Pager Headline:_
+
 > **THE PIPS 2.0 PARTNER PROGRAM**
 > Turn your consulting practice into a software company. Without building software.
+>
 > - Your brand on the platform
 > - $8/user/month recurring revenue per client
 > - Multi-client management portal
@@ -741,12 +878,14 @@ Post 3:
 **Call-to-Action:** "Apply for the Partner Program" or "Schedule a Partner Demo"
 
 **Success Metrics:**
+
 - 50+ partner program applications in first 3 months
 - 20+ partner demos scheduled per month
 - 10+ signed partner agreements in first 6 months
 - 5+ white-label deployments live within 6 months
 
 **Budget Estimate:** $4,000-$8,000/month
+
 - $2,000-$4,000/month for LinkedIn ads targeting consultants
 - $1,000-$2,000/month for direct outreach tools (LinkedIn Sales Navigator, email outreach)
 - $500-$1,000/month for partner program collateral
@@ -767,6 +906,7 @@ Post 3:
 **Key Message:** "Everything your strategy platform does, plus 26 improvement tools, integrated ticketing, and white-label capability. At 80% less cost."
 
 **Channels:**
+
 - Google Ads (competitor brand keywords)
 - Comparison landing pages (PIPS 2.0 vs. Rhythm Systems, PIPS 2.0 vs. Cascade, etc.)
 - G2 / Capterra presence and reviews
@@ -776,35 +916,38 @@ Post 3:
 
 **Creative Concepts:**
 
-*Google Ad (Search - targeting "Rhythm Systems alternative"):*
+_Google Ad (Search - targeting "Rhythm Systems alternative"):_
+
 > Headline 1: "Tired of Paying $50K/Year for Strategy Software?"
 > Headline 2: "PIPS 2.0 -- Methodology + PM Starting at $12/User"
 > Description: "Get strategy execution, process improvement tools, and project management in one platform. Free 14-day trial. No sales call required."
 
-*Comparison Landing Page Structure:*
+_Comparison Landing Page Structure:_
+
 > ## PIPS 2.0 vs. Rhythm Systems
+>
 > **Honest comparison. You decide.**
 >
-> | Feature | PIPS 2.0 | Rhythm Systems |
-> |---------|----------|----------------|
-> | Strategy execution dashboards | Yes | Yes |
-> | Improvement methodology built in | Yes (PIPS 6-step) | Proprietary "Think Plan Do" |
-> | Ticketing system | Yes (PIPS + General tickets) | No |
-> | Root cause analysis tools | Yes (fishbone, 5 Whys, etc.) | No |
-> | White-label capability | Yes | No |
-> | API / Jira integration | Yes | Limited |
-> | Starting price | $12/user/month | Custom quote ($40+/user) |
-> | Free trial | 14 days, self-serve | No (demo required) |
+> | Feature                          | PIPS 2.0                     | Rhythm Systems              |
+> | -------------------------------- | ---------------------------- | --------------------------- |
+> | Strategy execution dashboards    | Yes                          | Yes                         |
+> | Improvement methodology built in | Yes (PIPS 6-step)            | Proprietary "Think Plan Do" |
+> | Ticketing system                 | Yes (PIPS + General tickets) | No                          |
+> | Root cause analysis tools        | Yes (fishbone, 5 Whys, etc.) | No                          |
+> | White-label capability           | Yes                          | No                          |
+> | API / Jira integration           | Yes                          | Limited                     |
+> | Starting price                   | $12/user/month               | Custom quote ($40+/user)    |
+> | Free trial                       | 14 days, self-serve          | No (demo required)          |
 >
 > [Start Your Free Trial and See the Difference]
 
-*LinkedIn Ad Copy:*
+_LinkedIn Ad Copy:_
 
 > Headline: "Paying $40+/user for strategy software that can't track a root cause?"
 > Body: "PIPS 2.0 gives you strategy execution dashboards, 26 improvement tools, integrated ticketing, AND project management. Starting at $12/user/month. See why teams are switching."
 > CTA: "Compare Plans"
 
-*Retargeting Ad (for comparison page visitors):*
+_Retargeting Ad (for comparison page visitors):_
 
 > Headline: "Still comparing? Here's a free trial. No credit card. No sales call."
 > Body: "You've been looking at alternatives. Try PIPS 2.0 for 14 days and see the difference for yourself."
@@ -813,12 +956,14 @@ Post 3:
 **Call-to-Action:** "See the Full Comparison" or "Start Your Free Trial"
 
 **Success Metrics:**
+
 - 1,000+ comparison page visits per month
 - 5%+ conversion rate from comparison page to trial signup
 - 50+ trial signups per month from competitive search terms
 - 10+ customers who explicitly switched from a named competitor in first 12 months
 
 **Budget Estimate:** $3,000-$6,000/month
+
 - $1,500-$3,000/month for Google Ads (competitor keywords, typically $5-$15 CPC)
 - $1,000-$2,000/month for LinkedIn ads targeting competitor audiences
 - $500-$1,000/month for G2/Capterra profile management and review campaigns
@@ -838,6 +983,7 @@ Post 3:
 **Key Message:** "Healthcare problems are too important for spreadsheets. PIPS 2.0 brings structured root cause analysis, improvement tracking, and measurable outcomes to your patient safety and operational improvement programs."
 
 **Channels:**
+
 - LinkedIn ads targeting healthcare operations titles
 - Healthcare conference sponsorships (IHI Forum, NAHQ, ASHP)
 - Healthcare-specific webinar (Campaign Webinar #5)
@@ -847,37 +993,44 @@ Post 3:
 
 **Creative Concepts:**
 
-*Healthcare Landing Page Headline:*
+_Healthcare Landing Page Headline:_
+
 > **Patient Safety Deserves More Than a Spreadsheet.**
 > PIPS 2.0 is the improvement platform that guides healthcare teams through structured root cause analysis, solution selection, and measurable outcomes tracking -- for every patient safety event, operational bottleneck, and compliance challenge.
 > [Start Your Healthcare Free Trial]
 
-*Healthcare Use Cases Section:*
+_Healthcare Use Cases Section:_
+
 > **How Healthcare Teams Use PIPS 2.0:**
+>
 > - **Patient Safety Events** -- Structured root cause analysis with fishbone diagrams and 5 Whys, action tracking, outcome measurement
 > - **Operational Throughput** -- ED wait times, OR turnover, discharge planning -- define the problem, analyze causes, implement and measure solutions
 > - **Billing and Claims Accuracy** -- Track denial root causes, implement process changes, measure before/after denial rates
 > - **Regulatory Compliance** -- CMS, Joint Commission, and state regulatory improvement projects with full audit trails
 > - **Staff Satisfaction and Retention** -- Structure improvement projects around engagement survey results with measurable action plans
 
-*LinkedIn Ad Copy:*
+_LinkedIn Ad Copy:_
 
 **Ad A:**
+
 > Headline: "When a patient safety event happens, do you have a system for solving the root cause?"
 > Body: "Most healthcare teams document events in spreadsheets and track action items in email. PIPS 2.0 provides a structured 6-step improvement process with built-in root cause analysis tools, designed for healthcare improvement."
 > CTA: "See PIPS 2.0 for Healthcare"
 
 **Ad B:**
+
 > Headline: "Your quality team runs 20+ improvement projects. How many can you track right now?"
 > Body: "PIPS 2.0 gives healthcare quality teams a single platform to define problems, analyze root causes, implement solutions, and prove results. With audit trails for regulatory compliance."
 > CTA: "Start Free Healthcare Trial"
 
-*Conference Booth Tagline:*
+_Conference Booth Tagline:_
+
 > **"From root cause to resolution. In one platform."**
 
 **Call-to-Action:** "Start Your Healthcare Free Trial" (with pre-built healthcare templates)
 
 **Success Metrics:**
+
 - 200+ healthcare-specific landing page visits per month
 - 50+ healthcare trial signups in first 6 months
 - 20+ healthcare paying customers in first year
@@ -885,6 +1038,7 @@ Post 3:
 - 2+ healthcare conference presentations or sponsorships
 
 **Budget Estimate:** $5,000-$12,000/month
+
 - $2,000-$4,000/month for LinkedIn ads targeting healthcare
 - $1,000-$3,000/month for healthcare publication advertising
 - $2,000-$5,000 per conference sponsorship (1-2 per year)
@@ -902,14 +1056,17 @@ Post 3:
 **Why LinkedIn:** The target audience (operations leaders, PMO directors, C-suite, consultants) lives on LinkedIn. B2B SaaS purchasing decisions are heavily influenced by LinkedIn content.
 
 **Account Strategy:**
+
 - **Marc Albers (personal account):** Primary content vehicle. Founder-led content performs 3-5x better than company pages on LinkedIn. Marc posts as a practitioner-turned-founder sharing insights on process improvement, building in public, and leadership.
 - **PIPS 2.0 (company page):** Product announcements, feature updates, customer success stories, job postings. Shares and amplifies Marc's content.
 
 **Posting Cadence:**
+
 - Marc's personal: 4-5 posts per week (Monday, Tuesday, Wednesday, Thursday, Friday)
 - Company page: 2-3 posts per week
 
 **Content Mix (80/20 rule -- 80% value, 20% promotion):**
+
 - 40% -- Methodology education (PIPS framework tips, root cause analysis how-tos, improvement best practices)
 - 25% -- Industry insights and trends (process improvement market, SaaS trends, strategy execution research)
 - 15% -- Founder story / building in public (behind-the-scenes, lessons learned, vulnerability)
@@ -921,14 +1078,17 @@ Post 3:
 **Why Twitter/X:** Tech-savvy buyers, SaaS community, build-in-public audience, Product Hunt community, and developer/integration discussions.
 
 **Account Strategy:**
+
 - **@PIPS2app (or similar handle):** Product account for announcements, tips, and community engagement
 - **@MarcAlbers (personal):** Build-in-public content, industry commentary, founder perspective
 
 **Posting Cadence:**
+
 - 3-5 tweets per week, including 1 thread per week
 - Active engagement (replies, quote tweets) daily
 
 **Content Mix:**
+
 - 30% -- Quick tips and methodology snippets
 - 25% -- Build-in-public updates (metrics, milestones, challenges)
 - 20% -- Industry commentary and engagement
@@ -940,12 +1100,15 @@ Post 3:
 **Why YouTube:** Long-form educational content, product demos, and methodology deep-dives. YouTube is the #2 search engine and excellent for SEO-driven discovery.
 
 **Account Strategy:**
+
 - **PIPS 2.0 channel:** Educational content, product tutorials, customer stories
 
 **Posting Cadence:**
+
 - 2 videos per month minimum
 
 **Content Formats:**
+
 - "PIPS in 6 Minutes" methodology series (6 episodes)
 - Product walkthrough videos (5-10 minutes)
 - Customer success story interviews (10-15 minutes)
@@ -957,6 +1120,7 @@ Post 3:
 #### LinkedIn Posts (10)
 
 **Post 1 (Methodology Education):**
+
 > The most common mistake in process improvement:
 >
 > Jumping straight from "we have a problem" to "here's the solution."
@@ -973,7 +1137,9 @@ Post 3:
 > What's the biggest root cause analysis mistake you've seen on a team? Let me know in the comments.
 
 **Post 2 (Founder Story / Building in Public):**
+
 > 6 months ago, I was running improvement projects at a pharmacy benefits company using:
+>
 > - Spreadsheets for tracking
 > - PowerPoint for fishbone diagrams
 > - Email for stakeholder updates
@@ -989,6 +1155,7 @@ Post 3:
 > PIPS 2.0 launches [date]. Here's what I learned building a SaaS product as a non-developer (thread below).
 
 **Post 3 (Industry Insight):**
+
 > PMI says $97 million is wasted for every $1 billion invested in projects.
 >
 > That's not a tools problem. Jira, Monday.com, and Asana are great tools.
@@ -1001,6 +1168,7 @@ Post 3:
 > That's the gap PIPS 2.0 fills.
 
 **Post 4 (Product Announcement):**
+
 > New in PIPS 2.0: Built-in Fishbone Diagram Builder
 >
 > No more drawing Ishikawa diagrams on whiteboards that get erased. No more PowerPoint versions that nobody can find.
@@ -1012,6 +1180,7 @@ Post 3:
 > Try it free: [link]
 
 **Post 5 (Engagement / Poll):**
+
 > Quick poll for operations leaders:
 >
 > Where do you currently track your process improvement projects?
@@ -1025,6 +1194,7 @@ Post 3:
 > (No judgment -- I used spreadsheets for years too.)
 
 **Post 6 (Consultant-Targeted):**
+
 > Hot take for management consultants:
 >
 > If your clients go back to spreadsheets 30 days after your engagement ends, you didn't deliver a solution. You delivered a workshop.
@@ -1036,6 +1206,7 @@ Post 3:
 > Interested? DM me "partner" and I'll share the details.
 
 **Post 7 (Case Study / Social Proof):**
+
 > Real results from a PIPS methodology pilot:
 >
 > Problem: Claims processing errors costing $180K/year
@@ -1050,6 +1221,7 @@ Post 3:
 > Process improvement isn't expensive. NOT doing it is.
 
 **Post 8 (Methodology Education -- 5 Whys):**
+
 > The "5 Whys" technique is the most powerful root cause analysis tool you'll ever use.
 >
 > And most people do it wrong.
@@ -1066,6 +1238,7 @@ Post 3:
 > This is Step 2 of the PIPS methodology. And it's built into every PIPS 2.0 ticket.
 
 **Post 9 (Competitive Positioning):**
+
 > I looked at 12 project management tools last month.
 >
 > Here's what I found:
@@ -1075,6 +1248,7 @@ Post 3:
 > - All of them let you set due dates ✓
 >
 > None of them:
+>
 > - Enforce problem definition before work begins
 > - Guide root cause analysis
 > - Embed decision-making frameworks
@@ -1087,6 +1261,7 @@ Post 3:
 > That's what we're building at PIPS 2.0.
 
 **Post 10 (Customer Quote / Testimonial):**
+
 > "For the first time, our improvement projects have a beginning, a middle, and an end that we can actually measure."
 >
 > -- [Name], Director of Operations, [Company]
@@ -1098,6 +1273,7 @@ Post 3:
 #### Twitter/X Posts (6)
 
 **Post 11:**
+
 > Unpopular opinion: Your team doesn't need another project management tool.
 >
 > They need a problem-solving system.
@@ -1105,6 +1281,7 @@ Post 3:
 > That's what we built with PIPS 2.0.
 
 **Post 12:**
+
 > Building PIPS 2.0 in public. Week 12 update:
 >
 > - 26 improvement tools integrated
@@ -1117,6 +1294,7 @@ Post 3:
 > Lessons learned so far >> [thread]
 
 **Post 13:**
+
 > Task management = WHAT needs to be done
 > Project management = WHEN and WHO
 > Problem management = WHY and HOW
@@ -1125,6 +1303,7 @@ Post 3:
 > PIPS 2.0 does all three.
 
 **Post 14:**
+
 > Every improvement methodology has the same 3 weaknesses:
 >
 > 1. It lives in binders nobody reads
@@ -1134,6 +1313,7 @@ Post 3:
 > Software that embeds the methodology fixes all three.
 
 **Post 15:**
+
 > Shipped: PIPS 2.0 white-label system.
 >
 > Consultants can now deploy their own branded improvement platform.
@@ -1145,6 +1325,7 @@ Post 3:
 > The consulting → SaaS playbook, without building software.
 
 **Post 16:**
+
 > The cost of NOT doing root cause analysis:
 >
 > First occurrence: fix the symptom ($500)
@@ -1159,26 +1340,32 @@ Post 3:
 #### YouTube Video Titles (4)
 
 **Post 17 (Video Title + Description):**
+
 > Title: "The 6-Step Problem-Solving Framework Used by High-Performing Teams | PIPS Methodology Explained"
 > Description: "Most teams jump from problem to solution without understanding the root cause. The PIPS methodology provides a structured 6-step process..."
 
 **Post 18 (Video Title):**
+
 > "PIPS 2.0 Full Product Demo: See Methodology-Embedded Project Management in Action (12 min)"
 
 **Post 19 (Video Title):**
+
 > "How to Build a Fishbone Diagram in PIPS 2.0 (3-Minute Tutorial)"
 
 **Post 20 (Video Title):**
+
 > "Why I Left My Operations Job to Build Process Improvement Software | Founder Story"
 
 ### Hashtag Strategy
 
 **Primary hashtags (use on every post):**
+
 - #ProcessImprovement
 - #ContinuousImprovement
 - #PIPS
 
 **Secondary hashtags (rotate based on content):**
+
 - #ProjectManagement
 - #LeanSixSigma
 - #OperationalExcellence
@@ -1193,6 +1380,7 @@ Post 3:
 - #ManagementConsulting (audience-specific)
 
 **Branded hashtag:**
+
 - #StopManagingStartSolving (campaign hashtag)
 - #MethodologyEmbedded (category hashtag)
 
@@ -1216,29 +1404,30 @@ Post 3:
 
 #### 15 Target Keywords with Estimated CPCs
 
-| # | Keyword | Match Type | Est. CPC | Monthly Searches | Intent |
-|---|---------|-----------|----------|-----------------|--------|
-| 1 | process improvement software | Exact | $12-$18 | 1,200 | Commercial |
-| 2 | continuous improvement tools | Exact | $8-$14 | 900 | Commercial |
-| 3 | strategy execution software | Exact | $15-$22 | 600 | Commercial |
-| 4 | Rhythm Systems alternative | Exact | $10-$16 | 200 | Commercial |
-| 5 | root cause analysis tool | Exact | $6-$10 | 1,500 | Informational/Commercial |
-| 6 | fishbone diagram software | Exact | $4-$8 | 800 | Commercial |
-| 7 | white label project management | Exact | $8-$14 | 350 | Commercial |
-| 8 | Lean Six Sigma software | Exact | $10-$16 | 500 | Commercial |
-| 9 | KaiNexus alternative | Exact | $8-$12 | 50 | Commercial |
-| 10 | process improvement for healthcare | Exact | $12-$20 | 150 | Commercial |
-| 11 | OKR software affordable | Exact | $8-$14 | 200 | Commercial |
-| 12 | project management with methodology | Phrase | $6-$10 | 100 | Commercial |
-| 13 | improvement project tracking software | Phrase | $8-$14 | 150 | Commercial |
-| 14 | decision matrix tool | Exact | $4-$8 | 600 | Informational/Commercial |
-| 15 | RACI matrix builder | Exact | $3-$6 | 500 | Informational/Commercial |
+| #   | Keyword                               | Match Type | Est. CPC | Monthly Searches | Intent                   |
+| --- | ------------------------------------- | ---------- | -------- | ---------------- | ------------------------ |
+| 1   | process improvement software          | Exact      | $12-$18  | 1,200            | Commercial               |
+| 2   | continuous improvement tools          | Exact      | $8-$14   | 900              | Commercial               |
+| 3   | strategy execution software           | Exact      | $15-$22  | 600              | Commercial               |
+| 4   | Rhythm Systems alternative            | Exact      | $10-$16  | 200              | Commercial               |
+| 5   | root cause analysis tool              | Exact      | $6-$10   | 1,500            | Informational/Commercial |
+| 6   | fishbone diagram software             | Exact      | $4-$8    | 800              | Commercial               |
+| 7   | white label project management        | Exact      | $8-$14   | 350              | Commercial               |
+| 8   | Lean Six Sigma software               | Exact      | $10-$16  | 500              | Commercial               |
+| 9   | KaiNexus alternative                  | Exact      | $8-$12   | 50               | Commercial               |
+| 10  | process improvement for healthcare    | Exact      | $12-$20  | 150              | Commercial               |
+| 11  | OKR software affordable               | Exact      | $8-$14   | 200              | Commercial               |
+| 12  | project management with methodology   | Phrase     | $6-$10   | 100              | Commercial               |
+| 13  | improvement project tracking software | Phrase     | $8-$14   | 150              | Commercial               |
+| 14  | decision matrix tool                  | Exact      | $4-$8    | 600              | Informational/Commercial |
+| 15  | RACI matrix builder                   | Exact      | $3-$6    | 500              | Informational/Commercial |
 
 **Negative Keywords:** free, open source, download, template (for commercial campaigns -- template keywords used in informational campaigns only)
 
 #### 5 Google Ad Copy Variations
 
 **Ad 1 (Primary Brand Ad):**
+
 > Headline 1: Stop Managing Tasks. Start Solving Problems.
 > Headline 2: PIPS 2.0 — Methodology-Embedded PM
 > Headline 3: Free 14-Day Trial. No Credit Card.
@@ -1246,6 +1435,7 @@ Post 3:
 > Description 2: 26+ improvement tools included. Jira integration. White-label available. Starting at $12/user/month.
 
 **Ad 2 (Competitor Targeting):**
+
 > Headline 1: Tired of $50K/yr Strategy Software?
 > Headline 2: PIPS 2.0 — Same Results, 80% Less Cost
 > Headline 3: Strategy + PM + Improvement in One Tool
@@ -1253,6 +1443,7 @@ Post 3:
 > Description 2: Switch from Rhythm Systems, Cascade, or AchieveIt. Keep your methodology. Lose the bill.
 
 **Ad 3 (Root Cause Analysis / Educational):**
+
 > Headline 1: Root Cause Analysis Made Easy
 > Headline 2: Fishbone Diagrams Built Into Your Workflow
 > Headline 3: Stop Guessing. Start Analyzing.
@@ -1260,6 +1451,7 @@ Post 3:
 > Description 2: No more whiteboard photos. No more lost PowerPoints. Root cause analysis that lives in your improvement tickets.
 
 **Ad 4 (White-Label / Consultant):**
+
 > Headline 1: Consultants: Build Recurring Revenue
 > Headline 2: White-Label Improvement Software
 > Headline 3: Your Brand. Your Clients. Your Revenue.
@@ -1267,6 +1459,7 @@ Post 3:
 > Description 2: Stop losing clients after engagements end. Give them a system that keeps your methodology alive — and pays you monthly.
 
 **Ad 5 (Healthcare Vertical):**
+
 > Headline 1: Healthcare Process Improvement Software
 > Headline 2: Root Cause Analysis for Patient Safety
 > Headline 3: Structured Improvement for Health Systems
@@ -1277,27 +1470,30 @@ Post 3:
 
 **Targeting Criteria:**
 
-| Criteria | Values |
-|----------|--------|
-| Job Titles | VP Operations, Director Operations, Director Process Improvement, COO, Chief Strategy Officer, VP Strategic Planning, Director PMO, Lean Six Sigma (any), Quality Director, Management Consultant, Process Improvement Consultant |
-| Company Size | 200-5,000 employees |
-| Industries | Healthcare, Manufacturing, Financial Services, Technology, Professional Services |
-| Seniority | Director, VP, C-Suite |
-| Geography | United States, Canada, United Kingdom, Australia |
+| Criteria     | Values                                                                                                                                                                                                                            |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Job Titles   | VP Operations, Director Operations, Director Process Improvement, COO, Chief Strategy Officer, VP Strategic Planning, Director PMO, Lean Six Sigma (any), Quality Director, Management Consultant, Process Improvement Consultant |
+| Company Size | 200-5,000 employees                                                                                                                                                                                                               |
+| Industries   | Healthcare, Manufacturing, Financial Services, Technology, Professional Services                                                                                                                                                  |
+| Seniority    | Director, VP, C-Suite                                                                                                                                                                                                             |
+| Geography    | United States, Canada, United Kingdom, Australia                                                                                                                                                                                  |
 
 **LinkedIn Ad Concepts (5 variations):**
 
 **Ad 1 (Sponsored Content - Single Image):**
+
 > Image: Side-by-side comparison -- left side shows a messy spreadsheet labeled "How you track improvement projects today" and right side shows a clean PIPS 2.0 dashboard labeled "How it should look"
 > Text: "Your improvement projects deserve better than a spreadsheet. PIPS 2.0 is project management with a complete problem-solving methodology built in. Try it free."
 > CTA Button: "Start Free Trial"
 
 **Ad 2 (Sponsored Content - Video):**
+
 > 30-second video showing the PIPS 6-step workflow inside the product
 > Text: "6 steps. Every problem. Built into your workflow. PIPS 2.0 is the first methodology-embedded project management platform."
 > CTA Button: "Watch Demo"
 
 **Ad 3 (Sponsored Content - Carousel):**
+
 > 6 cards, one per PIPS step, each showing the tool in action
 > Card 1: "Step 1: IDENTIFY -- Define measurable problems"
 > Card 2: "Step 2: ANALYZE -- Root cause analysis with built-in fishbone diagrams"
@@ -1308,11 +1504,13 @@ Post 3:
 > Text: "This is the problem-solving process that should be in every project management tool. Now it is. Try PIPS 2.0 free."
 
 **Ad 4 (Message Ad - targeting consultants):**
+
 > Subject: "A new revenue stream for your consulting practice"
 > Body: "Hi [Name], I built a process improvement platform that consultants can white-label and deploy under their own brand. Your logo, your colors, your domain. You earn recurring revenue on every client subscription. Would a 15-minute demo be worth your time?"
 > CTA Button: "Learn More"
 
 **Ad 5 (Text Ad):**
+
 > Headline: "Stop Managing Tasks. Start Solving Problems."
 > Description: "PIPS 2.0: Project management with a built-in problem-solving methodology. 26+ improvement tools. $12/user/mo. Free trial."
 
@@ -1344,13 +1542,13 @@ Post 3:
 
 **Monthly Paid Advertising Budget: $8,000-$15,000**
 
-| Channel | % of Budget | Monthly Spend | Primary Goal |
-|---------|-------------|---------------|-------------|
-| Google Ads (Search) | 35% | $2,800-$5,250 | Capture high-intent commercial searches |
-| LinkedIn Ads (Sponsored Content) | 35% | $2,800-$5,250 | Reach target audience with awareness and consideration content |
-| LinkedIn Ads (Message Ads) | 10% | $800-$1,500 | Partner program outreach to consultants |
-| Retargeting (Google Display + LinkedIn) | 15% | $1,200-$2,250 | Convert warm visitors and lapsed trial users |
-| G2/Capterra Ads | 5% | $400-$750 | Capture high-intent software buyers |
+| Channel                                 | % of Budget | Monthly Spend | Primary Goal                                                   |
+| --------------------------------------- | ----------- | ------------- | -------------------------------------------------------------- |
+| Google Ads (Search)                     | 35%         | $2,800-$5,250 | Capture high-intent commercial searches                        |
+| LinkedIn Ads (Sponsored Content)        | 35%         | $2,800-$5,250 | Reach target audience with awareness and consideration content |
+| LinkedIn Ads (Message Ads)              | 10%         | $800-$1,500   | Partner program outreach to consultants                        |
+| Retargeting (Google Display + LinkedIn) | 15%         | $1,200-$2,250 | Convert warm visitors and lapsed trial users                   |
+| G2/Capterra Ads                         | 5%          | $400-$750     | Capture high-intent software buyers                            |
 
 ---
 
@@ -1361,18 +1559,21 @@ Post 3:
 #### Tier 1: Integration Partners (Strategic)
 
 **Atlassian (Jira)**
+
 - **Value to PIPS 2.0:** Jira is the dominant ticketing system. Integration validates PIPS 2.0 and addresses the "we already use Jira" objection
 - **Partnership play:** Atlassian Marketplace listing, co-marketing blog post ("Use PIPS 2.0 for improvement, Jira for development"), Atlassian Connect certification
 - **Revenue opportunity:** Marketplace listing drives discovery; 25% of PIPS customers will come through Jira integration searches
 - **Action:** Build the integration, apply for Atlassian Marketplace listing, attend Atlassian Team conference
 
 **Microsoft (Azure DevOps)**
+
 - **Value to PIPS 2.0:** Azure DevOps is dominant in enterprise and Microsoft-centric organizations
 - **Partnership play:** Microsoft AppSource listing, Azure Marketplace listing, co-sell program eligibility
 - **Revenue opportunity:** Enterprise buyers in Microsoft ecosystems will require Azure DevOps integration as a minimum
 - **Action:** Build the integration, apply for Microsoft Partner Network, list on AppSource
 
 **Aha! (Product Management)**
+
 - **Value to PIPS 2.0:** Aha! serves product teams who need improvement methodology for product-related problems
 - **Partnership play:** Integration listing on Aha! integrations page, co-marketing content
 - **Action:** Build the API integration, contact Aha! partnership team
@@ -1380,17 +1581,20 @@ Post 3:
 #### Tier 2: Complementary Partners
 
 **Supabase**
+
 - **Value to PIPS 2.0:** PIPS 2.0 is built on Supabase. Case study opportunity as a "built with Supabase" showcase
 - **Partnership play:** Featured in Supabase customer stories, "Built with Supabase" badge, co-marketing content
 - **Revenue opportunity:** Indirect -- credibility and visibility in the developer and SaaS builder community
 - **Action:** Submit case study to Supabase, participate in Supabase community events
 
 **Slack/Microsoft Teams**
+
 - **Value to PIPS 2.0:** Notifications and ticket creation from messaging platforms reduce adoption friction
 - **Partnership play:** Slack App Directory listing, Teams app store listing
 - **Action:** Build Slack bot and Teams integration, submit to app directories
 
 **Zapier/Make**
+
 - **Value to PIPS 2.0:** No-code integration extends PIPS 2.0's reach to non-technical teams
 - **Partnership play:** Listed as a featured integration on Zapier/Make
 - **Action:** Build Zapier triggers and actions, apply for partner program
@@ -1401,13 +1605,14 @@ Post 3:
 
 **Program Tiers:**
 
-| Tier | Requirements | Benefits |
-|------|-------------|----------|
-| **Referral Partner** | Sign referral agreement | 15% commission on first-year revenue from referred customers; co-branded landing page |
-| **Solution Partner** | Complete PIPS certification; 3+ active client deployments | 20% commission; white-label discount (20% off); co-marketing support; partner directory listing |
-| **Premier Partner** | 10+ active client deployments; $50K+ annual referral revenue | 25% commission; dedicated partner success manager; joint webinars; conference speaking opportunities; early feature access |
+| Tier                 | Requirements                                                 | Benefits                                                                                                                   |
+| -------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **Referral Partner** | Sign referral agreement                                      | 15% commission on first-year revenue from referred customers; co-branded landing page                                      |
+| **Solution Partner** | Complete PIPS certification; 3+ active client deployments    | 20% commission; white-label discount (20% off); co-marketing support; partner directory listing                            |
+| **Premier Partner**  | 10+ active client deployments; $50K+ annual referral revenue | 25% commission; dedicated partner success manager; joint webinars; conference speaking opportunities; early feature access |
 
 **Partner Onboarding Process:**
+
 1. Application and qualification call (Week 1)
 2. PIPS 2.0 product training and certification (Week 2-3)
 3. White-label setup and branding configuration (Week 3-4)
@@ -1415,6 +1620,7 @@ Post 3:
 5. Quarterly partner business reviews (ongoing)
 
 **Partner Support Resources:**
+
 - Partner portal with marketing collateral, presentation templates, and sales tools
 - Co-branded case study support
 - Lead sharing from PIPS 2.0 website (geographic/industry matching)
@@ -1432,12 +1638,14 @@ Post 3:
 ### Affiliate/Referral Program
 
 **Customer Referral Program:**
+
 - Existing customers refer a new customer who signs up and stays for 3+ months
 - **Reward:** 1 month free for the referrer + 1 month free for the referred customer
 - **Process:** Unique referral link generated in-app; tracking dashboard in account settings
 - **Stretch reward:** Refer 5 customers in a year and earn 3 months free
 
 **Affiliate Program (for bloggers, influencers, content creators):**
+
 - 20% recurring commission for the first 12 months of a referred customer's subscription
 - Cookie duration: 90 days
 - Minimum payout: $100
@@ -1477,50 +1685,59 @@ Post 3:
 
 ## 8. Launch Plan
 
+> **STATUS UPDATE (March 3, 2026):** The MVP is live but the product is in post-MVP stabilization (Phase 1.5). Launch marketing has NOT begun. The formal launch should be sequenced AFTER:
+>
+> 1. Phase 1.5 stabilization completes (all 11 bugs fixed)
+> 2. Stripe integration is live (trial signup flow works)
+> 3. Knowledge Hub reading experience is complete
+> 4. At least 1 training path is functional
+>
+> The marketing pages (85+ SEO-optimized pages) are already deployed and indexing. This gives the SEO foundation time to mature before the launch push drives traffic to these pages. The launch plan below should be executed relative to the formal public launch date, not the MVP deployment date.
+
 ### Pre-Launch Phase (8 Weeks Before Launch)
 
 #### Weeks 8-7: Foundation
 
-| Week | Tactic | Owner | Details |
-|------|--------|-------|---------|
-| 8 | Set up marketing infrastructure | Marketing | Email platform (ConvertKit/Loops), analytics (PostHog/Mixpanel), social accounts, domain, landing page builder |
-| 8 | Create brand assets | Design | Final logo, brand colors, social media templates, email templates, presentation templates |
-| 8 | Write homepage and core landing pages | Marketing | Homepage, pricing page, features page, comparison pages (vs. Rhythm, vs. Jira), about page |
-| 7 | Build waitlist landing page | Marketing | "Be the first to try PIPS 2.0" with email capture, social sharing incentive ("move up the list by sharing") |
-| 7 | Launch Marc's LinkedIn content series | Marc | Begin posting 3x/week about process improvement, founder journey, building in public |
-| 7 | Create "PIPS Methodology Guide" lead magnet | Marketing | Comprehensive PDF guide to the 6-step methodology -- gated download for email capture |
+| Week | Tactic                                      | Owner     | Details                                                                                                        |
+| ---- | ------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
+| 8    | Set up marketing infrastructure             | Marketing | Email platform (ConvertKit/Loops), analytics (PostHog/Mixpanel), social accounts, domain, landing page builder |
+| 8    | Create brand assets                         | Design    | Final logo, brand colors, social media templates, email templates, presentation templates                      |
+| 8    | Write homepage and core landing pages       | Marketing | Homepage, pricing page, features page, comparison pages (vs. Rhythm, vs. Jira), about page                     |
+| 7    | Build waitlist landing page                 | Marketing | "Be the first to try PIPS 2.0" with email capture, social sharing incentive ("move up the list by sharing")    |
+| 7    | Launch Marc's LinkedIn content series       | Marc      | Begin posting 3x/week about process improvement, founder journey, building in public                           |
+| 7    | Create "PIPS Methodology Guide" lead magnet | Marketing | Comprehensive PDF guide to the 6-step methodology -- gated download for email capture                          |
 
 #### Weeks 6-5: Content & Community
 
-| Week | Tactic | Owner | Details |
-|------|--------|-------|---------|
-| 6 | Publish first 3 blog posts | Marketing | Foundational content: PIPS methodology overview, "Why project management is broken," fishbone diagram guide |
-| 6 | Create Product Hunt "Coming Soon" page | Marketing | Teaser listing to start collecting followers before launch day |
-| 6 | Begin email nurture for waitlist | Marketing | Weekly email with methodology tips, behind-the-scenes updates, launch countdown |
-| 5 | Record "PIPS in 6 Minutes" video | Marc | 6-minute video explaining the methodology (YouTube + LinkedIn + embedded on homepage) |
-| 5 | Recruit 10 beta testers / design partners | Marc | Direct outreach to personal network: operations leaders, consultants, former colleagues |
-| 5 | Set up G2 and Capterra profiles | Marketing | Create basic profiles with product description, screenshots, and pricing |
+| Week | Tactic                                    | Owner     | Details                                                                                                     |
+| ---- | ----------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- |
+| 6    | Publish first 3 blog posts                | Marketing | Foundational content: PIPS methodology overview, "Why project management is broken," fishbone diagram guide |
+| 6    | Create Product Hunt "Coming Soon" page    | Marketing | Teaser listing to start collecting followers before launch day                                              |
+| 6    | Begin email nurture for waitlist          | Marketing | Weekly email with methodology tips, behind-the-scenes updates, launch countdown                             |
+| 5    | Record "PIPS in 6 Minutes" video          | Marc      | 6-minute video explaining the methodology (YouTube + LinkedIn + embedded on homepage)                       |
+| 5    | Recruit 10 beta testers / design partners | Marc      | Direct outreach to personal network: operations leaders, consultants, former colleagues                     |
+| 5    | Set up G2 and Capterra profiles           | Marketing | Create basic profiles with product description, screenshots, and pricing                                    |
 
 #### Weeks 4-3: Beta & Feedback
 
-| Week | Tactic | Owner | Details |
-|------|--------|-------|---------|
-| 4 | Onboard beta users | Product/CS | Guided onboarding for 10 design partners, collect structured feedback |
-| 4 | Create demo video (product walkthrough) | Marketing | 5-minute product demo video showing a complete PIPS cycle |
-| 3 | Collect beta testimonials | Marketing | Ask beta users for quotes, permission to use their names/companies |
-| 3 | Write press release | Marketing | Announcement of PIPS 2.0 launch, targeting SaaS and business press |
-| 3 | Prepare Product Hunt launch assets | Marketing | Screenshots, video, tagline, maker bio, first comment draft |
-| 3 | Build retargeting audiences | Marketing | Install tracking pixels, set up retargeting campaigns (not yet running) |
+| Week | Tactic                                  | Owner      | Details                                                                 |
+| ---- | --------------------------------------- | ---------- | ----------------------------------------------------------------------- |
+| 4    | Onboard beta users                      | Product/CS | Guided onboarding for 10 design partners, collect structured feedback   |
+| 4    | Create demo video (product walkthrough) | Marketing  | 5-minute product demo video showing a complete PIPS cycle               |
+| 3    | Collect beta testimonials               | Marketing  | Ask beta users for quotes, permission to use their names/companies      |
+| 3    | Write press release                     | Marketing  | Announcement of PIPS 2.0 launch, targeting SaaS and business press      |
+| 3    | Prepare Product Hunt launch assets      | Marketing  | Screenshots, video, tagline, maker bio, first comment draft             |
+| 3    | Build retargeting audiences             | Marketing  | Install tracking pixels, set up retargeting campaigns (not yet running) |
 
 #### Weeks 2-1: Final Preparation
 
-| Week | Tactic | Owner | Details |
-|------|--------|-------|---------|
-| 2 | Send "launch is coming" email to waitlist | Marketing | Build anticipation, preview the product with screenshots, ask waitlist to support on Product Hunt |
-| 2 | Prepare social media launch content | Marketing | Write all launch day posts, schedule where possible |
-| 2 | Brief press contacts | Marketing | Personalized outreach to 10-15 journalists/bloggers with embargoed information |
-| 1 | Final product testing and QA | Product | End-to-end testing of signup flow, onboarding, trial experience |
-| 1 | Prepare launch day war room | All | Assign roles for launch day: who monitors social, who handles signups, who responds to comments |
+| Week | Tactic                                    | Owner     | Details                                                                                           |
+| ---- | ----------------------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| 2    | Send "launch is coming" email to waitlist | Marketing | Build anticipation, preview the product with screenshots, ask waitlist to support on Product Hunt |
+| 2    | Prepare social media launch content       | Marketing | Write all launch day posts, schedule where possible                                               |
+| 2    | Brief press contacts                      | Marketing | Personalized outreach to 10-15 journalists/bloggers with embargoed information                    |
+| 1    | Final product testing and QA              | Product   | End-to-end testing of signup flow, onboarding, trial experience                                   |
+| 1    | Prepare launch day war room               | All       | Assign roles for launch day: who monitors social, who handles signups, who responds to comments   |
 
 ### Launch Week (Day -1 through Day 7)
 
@@ -1533,6 +1750,7 @@ Post 3:
 #### Launch Day (Day 0)
 
 **Morning (8:00 AM ET):**
+
 - Publish Product Hunt listing (coordinate with hunters if using a hunter)
 - Publish Show HN post on Hacker News
 - Send launch email to full waitlist and subscriber list
@@ -1542,32 +1760,35 @@ Post 3:
 - Activate LinkedIn paid campaign boosting launch post
 
 **Midday (12:00 PM ET):**
+
 - Marc responds to every Product Hunt comment and LinkedIn comment personally
 - Share Product Hunt link on relevant subreddits (r/SaaS, r/startups, r/projectmanagement, r/leansixsigma)
 - Share in process improvement community forums (iSixSigma, ASQ community)
 - Send thank-you emails to beta testers asking them to upvote on Product Hunt and leave G2 reviews
 
 **Afternoon (3:00 PM ET):**
+
 - Publish launch blog post: "Why I Built PIPS 2.0"
 - Cross-post to Medium and Dev.to
 - Send personalized outreach to 20 industry contacts asking for social shares
 
 **Evening (6:00 PM ET):**
+
 - Share Product Hunt stats and early traction on Twitter/X and LinkedIn
 - Thank early supporters publicly
 - Respond to any support tickets or questions from new signups
 
 #### Days 1-7 (Post-Launch Week)
 
-| Day | Tactic |
-|-----|--------|
-| 1 | Follow up with everyone who signed up on launch day -- personal welcome email from Marc |
-| 2 | Publish second launch-related blog post ("What We Learned from Our First 24 Hours") |
-| 3 | Host launch week AMA on LinkedIn Live or Twitter Spaces |
-| 4 | Send targeted outreach to journalists who haven't responded with launch day results |
-| 5 | Publish a video: "5 Things I Didn't Expect When We Launched PIPS 2.0" |
-| 6 | Share user stories and early feedback on social media |
-| 7 | Weekly recap email to all signups: what's happened, what's coming, how to get the most out of the trial |
+| Day | Tactic                                                                                                  |
+| --- | ------------------------------------------------------------------------------------------------------- |
+| 1   | Follow up with everyone who signed up on launch day -- personal welcome email from Marc                 |
+| 2   | Publish second launch-related blog post ("What We Learned from Our First 24 Hours")                     |
+| 3   | Host launch week AMA on LinkedIn Live or Twitter Spaces                                                 |
+| 4   | Send targeted outreach to journalists who haven't responded with launch day results                     |
+| 5   | Publish a video: "5 Things I Didn't Expect When We Launched PIPS 2.0"                                   |
+| 6   | Share user stories and early feedback on social media                                                   |
+| 7   | Weekly recap email to all signups: what's happened, what's coming, how to get the most out of the trial |
 
 ### Post-Launch Phase (Weeks 1-4 After Launch)
 
@@ -1595,22 +1816,22 @@ Post 3:
 
 ### Recommended Tools
 
-| Category | Recommended Tool | Why | Monthly Cost (Est.) |
-|----------|-----------------|-----|-------------------|
-| **Email Marketing** | Loops.so or ConvertKit | Loops: built for SaaS, beautiful transactional + marketing emails. ConvertKit: creator-friendly, excellent automation. | $50-$150/mo |
-| **Analytics (Product)** | PostHog | Open-source, self-hostable, includes product analytics + session replay + feature flags + A/B testing. Free tier generous. | $0-$100/mo |
-| **Analytics (Web)** | Plausible or Fathom | Privacy-friendly, lightweight, GDPR-compliant alternatives to Google Analytics. | $10-$25/mo |
-| **Social Media Management** | Buffer or Typefully | Buffer: multi-platform scheduling. Typefully: LinkedIn + Twitter-focused with AI drafting. | $15-$50/mo |
-| **CRM** | HubSpot (free tier) or Attio | HubSpot: industry standard free CRM with email tracking. Attio: modern, flexible, built for startups. | $0-$50/mo |
-| **Landing Pages** | Built into website (Next.js) | No separate tool needed -- PIPS 2.0's marketing site is already Next.js. Use Vercel preview deployments for A/B testing. | $0 |
-| **SEO** | Ahrefs or Semrush | Keyword research, backlink analysis, rank tracking. Essential for content strategy. | $100-$200/mo |
-| **Design** | Figma + Canva | Figma for brand design and web/app design. Canva for quick social media graphics and presentations. | $15-$30/mo |
-| **Video** | Loom + Cap (open source) | Loom for product demos and async communication. Cap for screen recordings (open-source Loom alternative). | $0-$15/mo |
-| **Chat / Support** | Intercom or Crisp | Intercom: full-featured customer messaging. Crisp: affordable alternative with live chat + knowledge base. | $30-$75/mo |
-| **Ad Management** | Google Ads + LinkedIn Campaign Manager | Direct platform management initially. Consider Optmyzr or Adalysis at scale. | $0 (platform fees) |
-| **Review Management** | G2 + Capterra | Essential for B2B SaaS buyer research. Free profiles, paid placement available. | $0-$500/mo |
-| **Referral/Affiliate** | Rewardful or FirstPromoter | Stripe-integrated referral tracking. Essential for partner program. | $50-$100/mo |
-| **Heatmaps** | PostHog (included) or Hotjar | Session recordings and heatmaps for conversion optimization. PostHog includes this. | $0 |
+| Category                    | Recommended Tool                       | Why                                                                                                                                                       | Monthly Cost (Est.) |
+| --------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| **Email Marketing**         | Loops.so or ConvertKit                 | Loops: built for SaaS, beautiful transactional + marketing emails. ConvertKit: creator-friendly, excellent automation.                                    | $50-$150/mo         |
+| **Analytics (Product)**     | PostHog                                | Open-source, self-hostable, includes product analytics + session replay + feature flags + A/B testing. Free tier generous.                                | $0-$100/mo          |
+| **Analytics (Web)**         | Plausible or Fathom                    | Privacy-friendly, lightweight, GDPR-compliant alternatives to Google Analytics.                                                                           | $10-$25/mo          |
+| **Social Media Management** | Buffer or Typefully                    | Buffer: multi-platform scheduling. Typefully: LinkedIn + Twitter-focused with AI drafting.                                                                | $15-$50/mo          |
+| **CRM**                     | HubSpot (free tier) or Attio           | HubSpot: industry standard free CRM with email tracking. Attio: modern, flexible, built for startups.                                                     | $0-$50/mo           |
+| **Landing Pages**           | Built into website (Next.js)           | **ALREADY LIVE**: 85+ pages deployed. Marketing route group `(marketing)` in Next.js App Router with SSR. Use Vercel preview deployments for A/B testing. | $0                  |
+| **SEO**                     | Ahrefs or Semrush                      | Keyword research, backlink analysis, rank tracking. Essential for content strategy.                                                                       | $100-$200/mo        |
+| **Design**                  | Figma + Canva                          | Figma for brand design and web/app design. Canva for quick social media graphics and presentations.                                                       | $15-$30/mo          |
+| **Video**                   | Loom + Cap (open source)               | Loom for product demos and async communication. Cap for screen recordings (open-source Loom alternative).                                                 | $0-$15/mo           |
+| **Chat / Support**          | Intercom or Crisp                      | Intercom: full-featured customer messaging. Crisp: affordable alternative with live chat + knowledge base.                                                | $30-$75/mo          |
+| **Ad Management**           | Google Ads + LinkedIn Campaign Manager | Direct platform management initially. Consider Optmyzr or Adalysis at scale.                                                                              | $0 (platform fees)  |
+| **Review Management**       | G2 + Capterra                          | Essential for B2B SaaS buyer research. Free profiles, paid placement available.                                                                           | $0-$500/mo          |
+| **Referral/Affiliate**      | Rewardful or FirstPromoter             | Stripe-integrated referral tracking. Essential for partner program.                                                                                       | $50-$100/mo         |
+| **Heatmaps**                | PostHog (included) or Hotjar           | Session recordings and heatmaps for conversion optimization. PostHog includes this.                                                                       | $0                  |
 
 **Total Estimated Monthly Cost for Marketing Tools: $270-$1,295/mo**
 
@@ -1672,6 +1893,7 @@ Trigger: Paying customer has not logged in for 7 days
 Use a time-decay attribution model that gives more credit to touchpoints closer to the conversion event, while still acknowledging the initial awareness touchpoint.
 
 **Implementation:**
+
 - Track UTM parameters on all marketing links (utm_source, utm_medium, utm_campaign, utm_content)
 - Store first-touch and last-touch data in the CRM
 - Use PostHog for in-product event tracking (trial actions, feature usage, conversion events)
@@ -1679,6 +1901,7 @@ Use a time-decay attribution model that gives more credit to touchpoints closer 
 - Quarterly CAC calculation by channel
 
 **Key tracking points:**
+
 1. First website visit (source/medium)
 2. Lead capture (which content/CTA converted them)
 3. Trial signup (which page they signed up from)
@@ -1696,31 +1919,31 @@ Use a time-decay attribution model that gives more credit to touchpoints closer 
 
 This assumes a bootstrapped/lean approach. Budget can be adjusted up or down based on early traction and available funding.
 
-| Category | Annual Budget | % of Total | Monthly Avg |
-|----------|-------------|-----------|------------|
-| **Content Marketing** (blog, video, lead magnets, freelance writers) | $18,000-$24,000 | 14% | $1,500-$2,000 |
-| **Paid Advertising** (Google Ads + LinkedIn Ads) | $48,000-$72,000 | 38% | $4,000-$6,000 |
-| **Marketing Tools & Software** | $6,000-$12,000 | 6% | $500-$1,000 |
-| **Design & Creative** (freelance designer, video production) | $12,000-$18,000 | 10% | $1,000-$1,500 |
-| **Events & Conferences** (sponsorships, travel, booth) | $12,000-$18,000 | 10% | $1,000-$1,500 |
-| **PR & Communications** (press outreach, analyst briefings) | $6,000-$12,000 | 6% | $500-$1,000 |
-| **Partner Program** (partner onboarding, co-marketing, partner events) | $6,000-$12,000 | 6% | $500-$1,000 |
-| **Community & Social** (community platform, social tools, AMAs) | $3,600-$6,000 | 3% | $300-$500 |
-| **Contingency / Testing** (experimental channels, new campaigns) | $8,400-$6,000 | 7% | $700-$500 |
-| **Total** | **$120,000-$180,000** | **100%** | **$10,000-$15,000** |
+| Category                                                               | Annual Budget         | % of Total | Monthly Avg         |
+| ---------------------------------------------------------------------- | --------------------- | ---------- | ------------------- |
+| **Content Marketing** (blog, video, lead magnets, freelance writers)   | $18,000-$24,000       | 14%        | $1,500-$2,000       |
+| **Paid Advertising** (Google Ads + LinkedIn Ads)                       | $48,000-$72,000       | 38%        | $4,000-$6,000       |
+| **Marketing Tools & Software**                                         | $6,000-$12,000        | 6%         | $500-$1,000         |
+| **Design & Creative** (freelance designer, video production)           | $12,000-$18,000       | 10%        | $1,000-$1,500       |
+| **Events & Conferences** (sponsorships, travel, booth)                 | $12,000-$18,000       | 10%        | $1,000-$1,500       |
+| **PR & Communications** (press outreach, analyst briefings)            | $6,000-$12,000        | 6%         | $500-$1,000         |
+| **Partner Program** (partner onboarding, co-marketing, partner events) | $6,000-$12,000        | 6%         | $500-$1,000         |
+| **Community & Social** (community platform, social tools, AMAs)        | $3,600-$6,000         | 3%         | $300-$500           |
+| **Contingency / Testing** (experimental channels, new campaigns)       | $8,400-$6,000         | 7%         | $700-$500           |
+| **Total**                                                              | **$120,000-$180,000** | **100%**   | **$10,000-$15,000** |
 
 ### Expected CAC by Channel
 
-| Channel | Est. CAC | Notes |
-|---------|---------|-------|
-| **Organic Search (SEO)** | $200-$500 | Lowest CAC but takes 6-12 months to ramp. Investment is in content creation. |
-| **Content Marketing (blog, video, lead magnets)** | $300-$600 | Mid-funnel content drives trials; attribution can be difficult. |
-| **LinkedIn Ads** | $800-$1,500 | Higher CPC but excellent targeting for B2B. Expect $30-$50 per lead, 5-10% lead-to-trial, 15-25% trial-to-paid. |
-| **Google Ads (Search)** | $600-$1,200 | High-intent but competitive keywords. Expect $10-$20 per click, 3-5% click-to-trial, 15-25% trial-to-paid. |
-| **Partner Referrals** | $100-$300 | Lowest CAC at scale, but takes time to build partner network. 15-25% commission is the primary cost. |
-| **Product Hunt / Community** | $50-$200 | Burst traffic with low marginal cost. Difficult to sustain but excellent for launch momentum. |
-| **Conferences / Events** | $1,500-$3,000 | Highest CAC but critical for enterprise relationships and brand credibility. |
-| **Direct Outreach** | $500-$1,000 | Marc's personal network and direct outreach. Low volume but high conversion rate. |
+| Channel                                           | Est. CAC      | Notes                                                                                                           |
+| ------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Organic Search (SEO)**                          | $200-$500     | Lowest CAC but takes 6-12 months to ramp. Investment is in content creation.                                    |
+| **Content Marketing (blog, video, lead magnets)** | $300-$600     | Mid-funnel content drives trials; attribution can be difficult.                                                 |
+| **LinkedIn Ads**                                  | $800-$1,500   | Higher CPC but excellent targeting for B2B. Expect $30-$50 per lead, 5-10% lead-to-trial, 15-25% trial-to-paid. |
+| **Google Ads (Search)**                           | $600-$1,200   | High-intent but competitive keywords. Expect $10-$20 per click, 3-5% click-to-trial, 15-25% trial-to-paid.      |
+| **Partner Referrals**                             | $100-$300     | Lowest CAC at scale, but takes time to build partner network. 15-25% commission is the primary cost.            |
+| **Product Hunt / Community**                      | $50-$200      | Burst traffic with low marginal cost. Difficult to sustain but excellent for launch momentum.                   |
+| **Conferences / Events**                          | $1,500-$3,000 | Highest CAC but critical for enterprise relationships and brand credibility.                                    |
+| **Direct Outreach**                               | $500-$1,000   | Marc's personal network and direct outreach. Low volume but high conversion rate.                               |
 
 **Blended Target CAC: $500-$800** (Year 1, improving to $300-$500 by Year 3 as organic channels mature)
 
@@ -1728,39 +1951,39 @@ This assumes a bootstrapped/lean approach. Budget can be adjusted up or down bas
 
 **Year 1 Projections (Conservative):**
 
-| Metric | Projection | Basis |
-|--------|-----------|-------|
-| Total marketing spend | $150,000 | Midpoint of budget range |
-| Trial signups | 2,000 | ~$75 cost per trial (blended) |
-| Trial-to-paid conversion | 15% | Conservative B2B SaaS benchmark |
-| Paying customers (Year 1) | 300 | 2,000 trials x 15% conversion |
-| Average first-year revenue per customer | $2,400 | Weighted avg (mostly Starter/Professional) |
-| Year 1 revenue | $360,000 | 300 customers x $2,400 avg (assumes ramp, not full year per customer) |
-| **Marketing ROI** | **2.4x** | $360K revenue / $150K spend |
-| Blended CAC | $500 | $150K / 300 customers |
-| First-year LTV:CAC | 4.8:1 | $2,400 / $500 |
+| Metric                                  | Projection | Basis                                                                 |
+| --------------------------------------- | ---------- | --------------------------------------------------------------------- |
+| Total marketing spend                   | $150,000   | Midpoint of budget range                                              |
+| Trial signups                           | 2,000      | ~$75 cost per trial (blended)                                         |
+| Trial-to-paid conversion                | 15%        | Conservative B2B SaaS benchmark                                       |
+| Paying customers (Year 1)               | 300        | 2,000 trials x 15% conversion                                         |
+| Average first-year revenue per customer | $2,400     | Weighted avg (mostly Starter/Professional)                            |
+| Year 1 revenue                          | $360,000   | 300 customers x $2,400 avg (assumes ramp, not full year per customer) |
+| **Marketing ROI**                       | **2.4x**   | $360K revenue / $150K spend                                           |
+| Blended CAC                             | $500       | $150K / 300 customers                                                 |
+| First-year LTV:CAC                      | 4.8:1      | $2,400 / $500                                                         |
 
 **Year 2 Projections (Growth):**
 
-| Metric | Projection | Basis |
-|--------|-----------|-------|
-| Total marketing spend | $300,000 | Scaled budget with revenue reinvestment |
-| New paying customers | 500 | Improved conversion + more channels |
-| Retained Year 1 customers | 255 | 85% retention |
-| Total paying customers (end of Year 2) | 755 | New + retained |
-| Average annual revenue per customer | $3,600 | Tier mix shifts toward Professional |
-| Year 2 revenue | $1,350,000 | Based on customer accumulation over the year |
-| **Marketing ROI** | **4.5x** | |
-| Blended CAC | $600 | Higher due to paid channel scaling |
+| Metric                                 | Projection | Basis                                        |
+| -------------------------------------- | ---------- | -------------------------------------------- |
+| Total marketing spend                  | $300,000   | Scaled budget with revenue reinvestment      |
+| New paying customers                   | 500        | Improved conversion + more channels          |
+| Retained Year 1 customers              | 255        | 85% retention                                |
+| Total paying customers (end of Year 2) | 755        | New + retained                               |
+| Average annual revenue per customer    | $3,600     | Tier mix shifts toward Professional          |
+| Year 2 revenue                         | $1,350,000 | Based on customer accumulation over the year |
+| **Marketing ROI**                      | **4.5x**   |                                              |
+| Blended CAC                            | $600       | Higher due to paid channel scaling           |
 
 **Year 3 Projections (Scale):**
 
-| Metric | Projection | Basis |
-|--------|-----------|-------|
-| Total paying customers (end of Year 3) | 1,500+ | |
-| ARR | $5,000,000+ | Target from business plan |
-| Blended CAC | $400 | SEO and partner channels mature |
-| LTV:CAC | 10:1+ | Multi-year retention drives LTV up |
+| Metric                                 | Projection  | Basis                              |
+| -------------------------------------- | ----------- | ---------------------------------- |
+| Total paying customers (end of Year 3) | 1,500+      |                                    |
+| ARR                                    | $5,000,000+ | Target from business plan          |
+| Blended CAC                            | $400        | SEO and partner channels mature    |
+| LTV:CAC                                | 10:1+       | Multi-year retention drives LTV up |
 
 ### Key Marketing KPIs and Dashboards
 
@@ -1877,34 +2100,47 @@ This assumes a bootstrapped/lean approach. Budget can be adjusted up or down bas
 **For a more approachable, modern SaaS feel:** Choose Concept 1 (The Cycle).
 **For a more premium, enterprise-oriented feel:** Choose Concept 5 (The Compass).
 
+> **NOTE (March 3, 2026):** The brand identity has been finalized and deployed. The production brand uses:
+>
+> - **Primary color:** Indigo-violet #4F46E5 (not the RxLogic navy/blue/green palette referenced in the logo concepts above)
+> - **Typography:** DM Sans (body) + DM Serif Display (headlines) + JetBrains Mono (code)
+> - **Design motif:** Pip dots
+> - **Step colors:** Step 1 #3B82F6, Step 2 #F59E0B, Step 3 #10B981, Step 4 #6366F1, Step 5 #CA8A04, Step 6 #0891B2
+> - **UI tokens:** 10px border radius, 20px pills, violet-tinted shadows
+>
+> The logo concepts above were pre-production explorations. The finalized visual identity is documented in `BRAND_GUIDE_V2.md`.
+
 ### Icon System Recommendations
 
 Design a consistent icon set for the 6 PIPS steps that can be used across the product, marketing materials, documentation, and social media:
 
-| Step | Icon Concept | Description |
-|------|-------------|-------------|
-| 1. Identify | Magnifying glass with exclamation mark | Discovery + urgency |
-| 2. Analyze | Branching tree or fishbone silhouette | Root cause analysis |
-| 3. Generate | Lightbulb with radiating lines | Ideas and creativity |
-| 4. Select & Plan | Checkbox with small grid/matrix | Decision-making |
-| 5. Implement | Gear with forward arrow | Execution in motion |
-| 6. Evaluate | Bar chart with upward trend | Measurement and results |
+| Step             | Icon Concept                           | Description             |
+| ---------------- | -------------------------------------- | ----------------------- |
+| 1. Identify      | Magnifying glass with exclamation mark | Discovery + urgency     |
+| 2. Analyze       | Branching tree or fishbone silhouette  | Root cause analysis     |
+| 3. Generate      | Lightbulb with radiating lines         | Ideas and creativity    |
+| 4. Select & Plan | Checkbox with small grid/matrix        | Decision-making         |
+| 5. Implement     | Gear with forward arrow                | Execution in motion     |
+| 6. Evaluate      | Bar chart with upward trend            | Measurement and results |
 
 **Icon style:** Outlined (not filled), 2px stroke weight, rounded corners, consistent 24x24px base grid. Navy (#192D70) as default color, with each step's accent color as an option.
 
 ### Photography/Illustration Style Guide
 
 **Photography:**
+
 - **People:** Diverse, modern workplace settings. Mid-market company environments (not too corporate, not too startup). Teams collaborating around screens, whiteboards, and meeting rooms. Genuine expressions -- avoid stock-photo smiles. Healthcare environments for vertical-specific content.
 - **Composition:** Clean, well-lit, shallow depth of field to blur backgrounds. Focus on the interaction between people and screens/tools. Avoid cluttered desk shots.
 - **Color treatment:** Slightly desaturated with high contrast. Consistent editing style across all photos. Subtle warm tone (avoids the cold, clinical SaaS feel).
 
 **Illustration:**
+
 - **Style:** Flat or semi-flat geometric illustrations with subtle gradients. Think: linear.app, notion.so, or vercel.com illustration style. Clean lines, limited color palette (brand colors only), no heavy textures or skeuomorphism.
 - **Use cases:** Feature explanation graphics, blog post headers, email headers, empty states in the product, onboarding guides.
 - **Characters:** Simple, geometric human figures (not detailed portraits). Used sparingly -- illustrations should focus on concepts, processes, and workflows rather than people.
 
 **Data Visualization:**
+
 - Use the brand color palette consistently across all charts and dashboards
 - Navy (#192D70) for primary data series
 - Blue (#2DC4F3) for secondary series
@@ -1917,24 +2153,30 @@ Design a consistent icon set for the 6 PIPS steps that can be used across the pr
 ## Appendix A: Quick-Reference Cheat Sheet
 
 ### Tagline
+
 **"Stop managing tasks. Start solving problems."**
 
 ### Elevator Pitch
+
 "PIPS 2.0 is project management software with a proven problem-solving methodology built into every ticket. Six steps. Every problem. From problem definition to measurable results."
 
 ### Three Things to Remember
+
 1. The methodology IS the software (not separate training + tool)
 2. White-labelable for consultants (no competitor offers this)
 3. 5-10x cheaper than strategy execution platforms
 
 ### Key Stats
+
 - 67% of well-formulated strategies fail at execution (HBR)
 - $97M wasted per $1B invested in projects (PMI)
 - $3.75B strategy execution software market growing 10-12% CAGR
 - 26+ built-in improvement tools
 
 ### Target Customer in One Sentence
+
 "An operations leader at a 200-2,000 employee company who runs improvement projects in spreadsheets and wishes there was a better way."
 
 ### Competitive Differentiator in One Sentence
+
 "PIPS 2.0 is the only platform that embeds a complete problem-solving methodology into project management -- competitors either track tasks without methodology or track strategy without operational depth."

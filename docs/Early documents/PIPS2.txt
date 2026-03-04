@@ -1,0 +1,113 @@
+Rhythm Systems Like Product: The New Goal is to Make this "process Improvement and Problem Solving Methodology" Into a full on web based application that assists organizations in becoming more efficient, more empowered, and more capable of generating scale and building resilient organizations. In a sense, this could be seen as a complimentary or a competitor to Rhythm System (https://www.rhythmsystems.com/). This would be a good company to model this after or at least a good company to use as a business use case study to compare ourselves to or model ourselves after. I can give you access to my https://rhythm.cloud/ account so that you can review their software as well if you need. I don't want us to model our software after theirs at all as it does not seem modern to me and seems overly complicated. But just as a reference for what a competitor looks like.
+
+Mobile Friendly Web Application: Let's make this into a fully functioning mobile friendly web application. It should be Multi-tenant and allow for me to launch multiple companies that are fully segregated from one another. There should be a database and full functional storage capabilities for all features (especially the ticketing system)
+
+White Label capability: Make RxLogic a dynamic field as well as the colors, logos, and style sheets so that another company can easily be inserted in place of RxLogic. 
+
+Enterprise Grade Software: Build this with the idea that an organization may adopt this methodology and use it as a way to track project work and task work. 
+
+Built in Integrations: It may need to integrate with other ticketing system so should have a strong api layer that clients can leverage. Ability to automatically connect to top tier ticketing systems like Jira and AzureDevops and AHA! would be a plus.
+
+Ticketing System: Add a fully functioning ticketing system that is centered around the PIPS process and following it. There should also be a 'General Ticket' capability so that you can do the full PIPS process or some basic work or even just track the need for and completion of complimentary tasks (childs) to the project or even just random one of tasks that aren't related to a PIPS project but should be tracked and managed via this ticketing system.
+
+User Management And Permissions: There should be a way to Add users to the system, give them certain permissions, and allow them to enter tickets and be assinged to tickets. People can be put in teams and teams can be assigned to projects or tickets.  People should be able to recall their projects, forms, and work done to the project. 
+
+Upgrade the Codebase and Technology Stack: We should build this in a way to where there is a full codebase, repository, and leverage common tools that assist in creating a mobile friendly web application that can be used as enterprise level ticketing and project management tool.
+
+Review buy critics of our current .html tool
+
+  Complete Critical Review Summary
+
+  I've gone through every major section of the PIPS Interactive Guide. Here's the consolidated findings
+  organized by priority:
+
+  BUGS FIXED DURING THIS REVIEW
+
+  ┌─────┬─────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+  │  #  │                              Issue                              │               Fix               │
+  ├─────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │     │ IntersectionObserver threshold 0.15 too high for tall sections  │ Changed to threshold: 0,        │
+  │ 1   │ — Steps 1-6 (6000+ px) would NEVER fade in because 15% of       │ rootMargin: '0px 0px -10% 0px'  │
+  │     │ section height exceeded viewport                                │                                 │
+  ├─────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────┤
+  │ 2   │ closeToolModal scope — function inside IIFE but called via      │ Added window.closeToolModal =   │
+  │     │ inline onclick                                                  │ closeToolModal;                 │
+  └─────┴─────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+
+  HIGH PRIORITY ISSUES TO FIX
+
+  ┌─────┬────────┬─────────────────┬─────────────────────────────────────────────────────────────────────────┐
+  │  #  │ Critic │     Section     │                                  Issue                                  │
+  ├─────┼────────┼─────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ 1   │ UX     │ Hero            │ Scroll hint says "arrow keys" but arrow keys are gated to               │
+  │     │        │                 │ fullscreen-only. Should say "Scroll down to navigate" in normal mode    │
+  ├─────┼────────┼─────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ 2   │ Design │ Step Iteration  │ ~350px blank gap below the "one breath" rule before the section ends    │
+  │     │        │ bottom          │                                                                         │
+  ├─────┼────────┼─────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ 3   │ UX     │ Mobile          │ H3 headings overlap with hamburger menu — needs left padding on mobile  │
+  │     │        │                 │ content                                                                 │
+  ├─────┼────────┼─────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ 4   │ Design │ Tool modal      │ Modal slightly narrow — content wraps heavily. Could be ~100px wider    │
+  └─────┴────────┴─────────────────┴─────────────────────────────────────────────────────────────────────────┘
+
+  MEDIUM PRIORITY ENHANCEMENTS
+
+  ┌─────┬──────────────┬────────────┬────────────────────────────────────────────────────────────────────────┐
+  │  #  │    Critic    │  Section   │                                 Issue                                  │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 5   │ Content      │ Hero       │ No "what you'll learn" / "who this is for" blurb — first-time visitors │
+  │     │              │            │  need value prop                                                       │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 6   │ Storytelling │ Hero       │ No hook — lead with a pain point or ROI stat instead of just the title │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 7   │ Business     │ Hero       │ No call-to-action — add "Get Started" or "Jump to Step 1" button       │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 8   │ Design       │ Philosophy │ Text line length ~80-90 chars at 1440px. Consider max-width: 720px on  │
+  │     │              │            │ body paragraphs                                                        │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 9   │ Content      │ Step 5     │ Quote attribution ("The Key Principle of Implementation") is           │
+  │     │              │            │ inconsistent — all other steps have named authors                      │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 10  │ UX           │ Glossary   │ Terms don't link to their corresponding Tools Library entries          │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 11  │ UX           │ Tool panel │ No auto-scroll when inline panel opens below viewport                  │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 12  │ Content      │ Roles      │ Missing team-size guidance — how do roles combine for small teams?     │
+  ├─────┼──────────────┼────────────┼────────────────────────────────────────────────────────────────────────┤
+  │ 13  │ IT           │ All        │ Favicon 404 in console — needs a favicon                               │
+  └─────┴──────────────┴────────────┴────────────────────────────────────────────────────────────────────────┘
+
+  LOW PRIORITY / FUTURE ENHANCEMENTS
+
+  ┌─────┬──────────────┬─────────────────┬───────────────────────────────────────────────────────────────────┐
+  │  #  │    Critic    │     Section     │                               Issue                               │
+  ├─────┼──────────────┼─────────────────┼───────────────────────────────────────────────────────────────────┤
+  │ 14  │ Design       │ Hero            │ Circle diagram could be ~15% larger at 1440px                     │
+  ├─────┼──────────────┼─────────────────┼───────────────────────────────────────────────────────────────────┤
+  │ 15  │ Content      │ Hero/Philosophy │ Hard-coded "RxLogic" — limits portability if guide goes beyond    │
+  │     │              │                 │ the company                                                       │
+  ├─────┼──────────────┼─────────────────┼───────────────────────────────────────────────────────────────────┤
+  │ 16  │ UX           │ Tools Library   │ 21 tools in vertical list = lots of scrolling. Consider           │
+  │     │              │                 │ compact/grid view                                                 │
+  ├─────┼──────────────┼─────────────────┼───────────────────────────────────────────────────────────────────┤
+  │ 17  │ UX           │ Glossary        │ No search box (fine for 20 terms, needed if it grows)             │
+  ├─────┼──────────────┼─────────────────┼───────────────────────────────────────────────────────────────────┤
+  │ 18  │ Storytelling │ Philosophy      │ Add a real-world stat/anecdote for punch                          │
+  ├─────┼──────────────┼─────────────────┼───────────────────────────────────────────────────────────────────┤
+  │ 19  │ UX           │ Tool panel      │ No open/close animation on inline panels                          │
+  ├─────┼──────────────┼─────────────────┼───────────────────────────────────────────────────────────────────┤
+  │ 20  │ Design       │ Glossary        │ No visual separators between term entries                         │
+  └─────┴──────────────┴─────────────────┴───────────────────────────────────────────────────────────────────┘
+
+  WHAT'S WORKING WELL
+
+  - Pattern consistency across all 6 steps: Quote → Objective → Content → Subsections → Tools → Worked Example
+  - Sidebar navigation with sub-item tracking — always shows where you are
+  - Collapsible subsections and resource categories — functional, accessible
+  - Tool interaction pipeline — tag click → inline panel → modal → form link — is smooth and complete
+  - Transformation cards in Step 1 (Bad → Good problem statements) — best teaching moment in the guide
+  - Parking Lot worked example threads coherently through all 6 steps
+  - Mobile responsive layout is clean with no horizontal overflow
+  - ARIA and keyboard accessibility layer is properly wired
+  - Content quality is high — concrete, actionable, well-bolded for scanners

@@ -5,168 +5,326 @@
 ### Before Starting Work
 
 1. Read this file completely
-2. Check `docs/work-log/` for the latest session entry
-3. Understand what's been built and what's in progress
-4. Update the work log BEFORE starting your task
+2. Check `docs/AGENT_STATUS_BOARD.md` for current system state
+3. Check `docs/work-log/` for the latest session entry
+4. Understand what's been built and what's in progress
+5. Update the work log BEFORE starting your task
 
 ### After Completing Work
 
-1. Run quality gates: `pnpm typecheck && pnpm lint && pnpm test`
+1. Run quality gates:
+
+pnpm typecheck && pnpm lint && pnpm test
+
 2. Update the work log with what you completed
-3. Note any blockers or decisions needed
+3. Update `docs/AGENT_STATUS_BOARD.md` if task status changed
+4. Note any blockers or decisions needed
 
 ### Work Log Format
 
 - Location: `docs/work-log/YYYY-MM-DD.md`
 - Update the current day's log, create a new one if the date changed
-- Mark completed items with [x], in-progress with [-], pending with [ ]
+- Mark completed items with `[x]`
+- Mark in-progress items with `[-]`
+- Mark pending items with `[ ]`
 
-## Section 1: Project Overview
+---
 
-PIPS 2.0 is a multi-tenant SaaS web application that embeds a 6-step process improvement methodology into enterprise project management and ticketing software.
+# Section 0.1: Multi-Agent Environment
 
-**The 6 PIPS Steps:**
+This project operates using multiple AI agents working in parallel.
 
-1. Identify — Define measurable problem statements
-2. Analyze — Root cause analysis (fishbone, 5-why, force-field)
-3. Generate — Brainstorm solutions (brainwriting, brainstorming)
-4. Select & Plan — Decision matrices, weighted voting, RACI, implementation planning
-5. Implement — Execute with milestones, checklists, progress tracking
-6. Evaluate — Measure results, lessons learned, cycle back to Step 1
+Agents specialize in different domains.
 
-## Section 2: Tech Stack
+Current agent roles include:
 
-| Layer         | Technology               | Notes                                                  |
-| ------------- | ------------------------ | ------------------------------------------------------ |
-| Framework     | Next.js 15 (App Router)  | `apps/web/`                                            |
-| Language      | TypeScript (strict mode) | Zero `any` types                                       |
-| UI Components | shadcn/ui + Radix        | Customized with PIPS design tokens                     |
-| Styling       | Tailwind CSS             | Extended with PIPS colors                              |
-| State         | Zustand                  | For complex client-side state                          |
-| Backend       | Supabase                 | Postgres, Auth, RLS, Storage, Edge Functions, Realtime |
-| Hosting       | Vercel                   | Preview deploys per PR                                 |
-| Payments      | Stripe                   | Not in MVP (free beta)                                 |
-| Email         | Resend                   | Transactional emails                                   |
-| Monitoring    | Sentry                   | Error tracking                                         |
-| Testing       | Vitest + Playwright      | Unit/integration + E2E                                 |
-| Monorepo      | Turborepo + pnpm         | `apps/` + `packages/`                                  |
+- Product Strategy Agent
+- Product Manager Agent
+- UX Design Agent
+- Customer Insights Agent
+- Project Manager Agent (Control Tower)
+- Development Lead Agent
+- QA Agent
+- DevOps Agent
+- Chief Architect Agent
+- System Architect Agent
+- Data Analytics Agent
 
-## Section 3: Code Conventions
+Agents must respect domain ownership.
 
-- **Functional components** with arrow functions
-- **Named exports** (not default exports)
-- **2-space indentation**
-- **Path aliases**: `@/` for `apps/web/src/`
-- **Files < 200 lines** preferred
-- **Co-locate** related files (component + hook + types)
-- **Zod schemas** for all data validation
-- **Server Components** by default; `'use client'` only when needed
-- **Server Actions** for mutations; API routes for webhooks and external APIs
+If a decision belongs to another domain, escalate rather than guessing.
 
-## Section 4: Brand Identity
+Agent coordination rules are defined in:
 
-| Token         | Value                           | Usage                           |
-| ------------- | ------------------------------- | ------------------------------- |
-| Primary       | `#4F46E5` (Indigo-violet)       | Buttons, links, active states   |
-| Deep          | `#1B1340` (Dark violet)         | Dark backgrounds, sidebar       |
-| Accent        | `#F59E0B` (Amber)               | Highlights, warnings, attention |
-| Surface       | `#F0EDFA` (Cloud)               | Card backgrounds, hover states  |
-| Step 1        | `#3B82F6` (Blue)                | Identify                        |
-| Step 2        | `#F59E0B` (Amber)               | Analyze                         |
-| Step 3        | `#10B981` (Emerald)             | Generate                        |
-| Step 4        | `#6366F1` (Indigo)              | Select & Plan                   |
-| Step 5        | `#CA8A04` (Gold)                | Implement                       |
-| Step 6        | `#0891B2` (Teal)                | Evaluate                        |
-| Headline Font | DM Serif Display                | Marketing, hero, display text   |
-| Body Font     | DM Sans                         | Everything else                 |
-| Mono Font     | JetBrains Mono                  | Code, data, ticket IDs          |
-| Border Radius | 10px default, 20px pills        |                                 |
-| Shadows       | Violet-tinted (rgba of #1B1340) |                                 |
+docs/planning/AI_AGENT_COORDINATION.md
 
-## Section 5: Project Structure
+Agent seeding documents are defined in:
 
-```
+docs/AGENTS/
+
+---
+
+# Section 0.2: Control Tower Coordination
+
+The **Project Manager Agent operates as the system's Control Tower**.
+
+Responsibilities include:
+
+- task dispatch
+- milestone sequencing
+- merge queue coordination
+- cross-agent conflict resolution
+- system stability monitoring
+
+Other agents should not begin new work unless:
+
+- it appears in the task list
+- it is dispatched by the Control Tower
+- the work scope is clearly defined
+
+If uncertain about task priority, defer to the Control Tower.
+
+---
+
+# Section 1: Project Overview
+
+PIPS 2.0 is a multi-tenant SaaS web application that embeds a **6-step process improvement methodology** into enterprise project management and ticketing software.
+
+The goal is to help teams systematically identify problems, analyze causes, generate solutions, execute improvements, and measure outcomes.
+
+---
+
+## The 6 PIPS Steps
+
+1. **Identify** — Define measurable problem statements
+2. **Analyze** — Root cause analysis (fishbone, 5-why, force-field)
+3. **Generate** — Brainstorm solutions (brainwriting, brainstorming)
+4. **Select & Plan** — Decision matrices, weighted voting, RACI, implementation planning
+5. **Implement** — Execute with milestones, checklists, progress tracking
+6. **Evaluate** — Measure results, lessons learned, cycle back to Step 1
+
+---
+
+# Section 2: Tech Stack
+
+| Layer         | Technology               | Notes                                        |
+| ------------- | ------------------------ | -------------------------------------------- |
+| Framework     | Next.js 15 (App Router)  | `apps/web/`                                  |
+| Language      | TypeScript (strict mode) | Zero `any` types                             |
+| UI Components | shadcn/ui + Radix        | Customized with PIPS design tokens           |
+| Styling       | Tailwind CSS             | Extended with PIPS colors                    |
+| State         | Zustand                  | Complex client state                         |
+| Backend       | Supabase                 | Postgres, Auth, RLS, Storage, Edge Functions |
+| Hosting       | Vercel                   | Preview deploys per PR                       |
+| Payments      | Stripe                   | Not in MVP                                   |
+| Email         | Resend                   | Transactional email                          |
+| Monitoring    | Sentry                   | Error tracking                               |
+| Testing       | Vitest + Playwright      | Unit + E2E                                   |
+| Monorepo      | Turborepo + pnpm         | apps + packages                              |
+
+---
+
+# Section 3: Code Conventions
+
+- Functional components with arrow functions
+- Named exports only (no default exports)
+- 2-space indentation
+- Path aliases: `@/` → `apps/web/src`
+- Files under 200 lines when possible
+- Co-locate related files (component + hook + types)
+- Zod schemas for all data validation
+- Server Components by default
+- `'use client'` only when necessary
+- Server Actions for mutations
+- API routes for webhooks and external APIs
+
+---
+
+# Section 4: Brand Identity
+
+| Token   | Value   | Usage                |
+| ------- | ------- | -------------------- |
+| Primary | #4F46E5 | Buttons, links       |
+| Deep    | #1B1340 | Sidebar backgrounds  |
+| Accent  | #F59E0B | Attention highlights |
+| Surface | #F0EDFA | Card backgrounds     |
+
+### Step Colors
+
+| Step   | Color   |
+| ------ | ------- |
+| Step 1 | #3B82F6 |
+| Step 2 | #F59E0B |
+| Step 3 | #10B981 |
+| Step 4 | #6366F1 |
+| Step 5 | #CA8A04 |
+| Step 6 | #0891B2 |
+
+### Typography
+
+Headline: DM Serif Display  
+Body: DM Sans  
+Mono: JetBrains Mono
+
+### UI Tokens
+
+Border radius: 10px default, 20px pills  
+Shadows: violet tinted rgba(#1B1340)
+
+---
+
+# Section 5: Project Structure
+
 pips2.0/
 ├── apps/
-│   └── web/                    # Next.js 15 application
-│       ├── app/                # App Router
-│       │   ├── (auth)/         # Auth pages (login, signup, etc.)
-│       │   ├── (marketing)/    # Public pages (landing, pricing)
-│       │   └── (app)/          # Authenticated app
-│       │       ├── dashboard/
-│       │       ├── projects/
-│       │       ├── tickets/
-│       │       ├── teams/
-│       │       └── settings/
-│       ├── components/         # Shared React components
-│       │   ├── ui/             # shadcn/ui base components
-│       │   ├── pips/           # PIPS-specific components
-│       │   ├── tickets/        # Ticket components
-│       │   └── layout/         # Layout components
-│       ├── hooks/              # Custom hooks
-│       ├── lib/                # Utilities
-│       │   ├── supabase/       # Supabase clients
-│       │   ├── utils.ts        # General utilities
-│       │   └── validations.ts  # Zod schemas
-│       ├── stores/             # Zustand stores
-│       └── types/              # TypeScript types
+│ └── web/
+│ ├── app/
+│ │ ├── (auth)/
+│ │ ├── (marketing)/
+│ │ └── (app)/
+│ │ ├── dashboard/
+│ │ ├── projects/
+│ │ ├── tickets/
+│ │ ├── teams/
+│ │ └── settings/
+│ ├── components/
+│ │ ├── ui/
+│ │ ├── pips/
+│ │ ├── tickets/
+│ │ └── layout/
+│ ├── hooks/
+│ ├── lib/
+│ │ ├── supabase/
+│ │ ├── utils.ts
+│ │ └── validations.ts
+│ ├── stores/
+│ └── types/
 ├── packages/
-│   └── shared/                 # Shared types, constants
+│ └── shared/
 ├── supabase/
-│   ├── migrations/             # SQL migrations (YYYYMMDDHHMMSS_name.sql)
-│   ├── functions/              # Edge Functions
-│   └── seed.sql                # Dev seed data
+│ ├── migrations/
+│ ├── functions/
+│ └── seed.sql
 ├── tests/
-│   ├── e2e/                    # Playwright tests
-│   └── integration/            # Integration tests
+│ ├── e2e/
+│ └── integration/
 ├── docs/
-│   ├── planning/               # Planning documents (read-only reference)
-│   ├── mockups/                # HTML brand mockups
-│   └── work-log/               # Daily work logs
+│ ├── planning/
+│ ├── mockups/
+│ └── work-log/
 └── .github/
-    └── workflows/              # CI/CD
-```
+└── workflows/
 
-## Section 6: Database Conventions
+---
 
-- **Multi-tenancy**: Every user-facing table has `org_id` column with RLS policy
-- **RLS**: Every table has `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`
-- **Timestamps**: `created_at` and `updated_at` on every table (with trigger)
-- **Soft delete**: Use `archived_at` timestamp, not hard delete
-- **UUIDs**: Primary keys are `uuid DEFAULT gen_random_uuid()`
-- **Enums**: Use Postgres enums for fixed sets (roles, statuses, priorities)
-- **JSONB**: Use for flexible form data (`project_forms.data`)
-- **Migration naming**: `YYYYMMDDHHMMSS_description.sql`
-- **Migration ordering for parallel agents**: Use 10-minute timestamp gaps
+# Section 6: Database Conventions
 
-## Section 7: Testing Requirements
+- Every table has `org_id` for multi-tenancy
+- Row Level Security enabled on all tables
+- `created_at` and `updated_at` timestamps
+- Soft delete using `archived_at`
+- UUID primary keys
+- Postgres enums for statuses and roles
+- JSONB for flexible structured data
+- Migration format:
 
-- `tsc --noEmit` must pass (zero type errors)
-- `pnpm lint` must pass (zero ESLint errors)
-- `pnpm test` must pass (all Vitest tests green — currently 832/832)
-- `pnpm exec playwright test` for E2E tests (currently 160 tests across 18 specs)
-- New features need tests (components: render + interaction, API: happy path + error)
-- E2E tests use custom fixtures in `tests/e2e/helpers/`: `testUser`, `authenticatedPage`, `orgPage`
-- Test factories in `tests/e2e/helpers/test-factories.ts` for server-side data creation
-- **DB column note**: `projects` table column is `title`, not `name`. Server actions map form field `name` to `title`.
+YYYYMMDDHHMMSS_description.sql
 
-## Section 8: Planning References
+For parallel agents:
 
-All planning documents are in `docs/planning/`. Key files:
+Use **10-minute timestamp spacing** between migrations.
 
-- **Start here**: `PROJECT_INDEX.md` — Overview and navigation guide
-- **What to build**: `MVP_SPECIFICATION.md` — Definitive MVP build guide
-- **How to build**: `TECHNICAL_PLAN.md` — Architecture, schema, APIs
-- **How to set up**: `DEVOPS_RUNBOOK.md` — Day-1 setup, CI/CD, deployment
-- **How agents work**: `AI_AGENT_COORDINATION.md` — Worktree strategy, task decomposition
-- **How it looks**: `BRAND_GUIDE_V2.md` — Visual identity, design tokens
-- **UX patterns**: `UX_FLOWS.md` — User journeys, screen descriptions
-- **Existing content**: `CONTENT_MIGRATION.md` — Form template migration specs
+---
 
-## Section 9: Git Conventions
+# Section 7: Testing Requirements
 
-- **Branch naming**: `feature/description`, `fix/description`, `chore/description`
-- **Agent branches**: `agent/{phase}-{feature}`
-- **Commit messages**: Imperative mood, type prefix: `feat(scope): description`
-- **Never force push to main**
-- **PR required for main merges**
+The following must always pass:
+
+pnpm tsc --noEmit
+pnpm lint
+pnpm test
+
+E2E tests:
+
+pnpm exec playwright test
+
+Testing expectations:
+
+- Components → render + interaction tests
+- API → happy path + error cases
+- E2E → real workflows
+
+---
+
+# Section 8: Planning References
+
+Planning documents live in:
+
+docs/planning/
+
+Key files:
+
+PROJECT_INDEX.md — system navigation guide  
+MVP_SPECIFICATION.md — definitive MVP scope  
+TECHNICAL_PLAN.md — architecture + schema  
+DEVOPS_RUNBOOK.md — deployment setup  
+AI_AGENT_COORDINATION.md — multi-agent rules  
+BRAND_GUIDE_V2.md — design tokens  
+UX_FLOWS.md — user journeys  
+CONTENT_MIGRATION.md — template migration specs
+
+---
+
+# Section 8.1: Planning Document Protection
+
+Planning documents define system intent and must remain stable.
+
+Agents must **not modify planning documents unless they are the designated owner**.
+
+If a planning document appears incorrect:
+
+1. Document the issue
+2. Propose a correction
+3. Escalate to the document owner
+4. Await approval before editing
+
+Ownership rules are defined in:
+
+docs/planning/AI_AGENT_COORDINATION.md
+
+---
+
+# Section 9: Git Conventions
+
+Branch naming:
+
+feature/description  
+fix/description  
+chore/description
+
+Agent branches:
+
+agent/{phase}-{feature}
+
+Commit style:
+
+feat(scope): description
+
+Rules:
+
+- Never force push to main
+- PR required for merges
+- CI must pass before merge
+
+---
+
+# Section 10: System Goal
+
+The goal of the PIPS 2.0 system is to deliver a stable, scalable SaaS product that embeds structured process improvement into everyday work.
+
+The AI agent system exists to enable:
+
+- parallel development
+- clear ownership
+- predictable delivery
+- high quality releases
