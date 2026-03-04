@@ -28,6 +28,7 @@
     "content:compile": "npx tsx scripts/compile-content.ts",
     "content:seed": "npx tsx scripts/seed-content.ts",
     "content:build": "npx tsx scripts/compile-content.ts && npx tsx scripts/seed-content.ts",
+    "training:seed": "npx tsx scripts/seed-training.ts",
     "prepare": "husky"
   },
   "devDependencies": {
