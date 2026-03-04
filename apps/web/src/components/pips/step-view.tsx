@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { STEP_CONTENT, type StepFormDef } from '@pips/shared'
+import { STEP_CONTENT, buildProductContext, type StepFormDef } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
-import { buildProductContext } from '@pips/shared'
 
 type FormStatus = {
   form_type: string

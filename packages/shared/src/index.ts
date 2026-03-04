@@ -39,6 +39,7 @@ export {
   CONTENT_PILLARS,
   PILLAR_META,
   stepNumberToContentStep,
+  pipsStepEnumToNumber,
   formTypeToContentTool,
   buildProductContext,
   matchContentNodes,

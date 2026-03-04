@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { saveFormData } from '@/app/(app)/projects/[projectId]/steps/[stepNumber]/forms/actions'
+import type { ProductContext } from '@pips/shared'
+import { buildProductContext } from '@pips/shared'
+import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 
 type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved'
 
@@ -19,6 +22,7 @@ type DataDrivenProps = {
   title: string
   description: string
   required?: boolean
+  cadenceContext?: ProductContext
   children: React.ReactNode
   data: Record<string, unknown>
   onSaveSuccess?: () => void
@@ -34,6 +38,7 @@ type CallbackProps = {
   title: string
   description: string
   required?: boolean
+  cadenceContext?: ProductContext
   children: React.ReactNode
   data?: never
   onSaveSuccess?: never
@@ -44,7 +49,9 @@ type CallbackProps = {
 export type FormShellProps = DataDrivenProps | CallbackProps
 
 export const FormShell = (props: FormShellProps) => {
-  const { title, description, stepNumber, required = false, children } = props
+  const { title, description, stepNumber, required = false, cadenceContext, children } = props
+  const formType = 'formType' in props ? (props.formType as string | undefined) : undefined
+  const derivedCadenceContext = cadenceContext ?? buildProductContext(stepNumber, formType)
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [lastSaved, setLastSaved] = useState<string>(props.data ? JSON.stringify(props.data) : '')
@@ -162,6 +169,9 @@ export const FormShell = (props: FormShellProps) => {
         </CardHeader>
         <CardContent>{children}</CardContent>
       </Card>
+
+      {/* Knowledge Cadence Bar — contextual content links */}
+      <KnowledgeCadenceBar context={derivedCadenceContext} defaultCollapsed />
     </div>
   )
 }

@@ -9,6 +9,8 @@ import { ParentTicketLink } from '@/components/tickets/parent-ticket-link'
 import { SubTickets } from '@/components/tickets/sub-tickets'
 import { Separator } from '@/components/ui/separator'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
+import { pipsStepEnumToNumber, buildProductContext } from '@pips/shared'
+import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 
 /* ============================================================
    Page Props
@@ -171,6 +173,25 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
     updated_at: ticket.updated_at,
   }
 
+  // Build cadence context if ticket is linked to a PIPS step or project
+  let cadenceStepNumber: number | undefined
+  const ticketPipsStep = ticket.pips_step as string | null
+  if (ticketPipsStep) {
+    cadenceStepNumber = pipsStepEnumToNumber(ticketPipsStep)
+  } else if (project) {
+    // Fetch project's current step to derive context
+    const { data: projectRow } = await supabase
+      .from('projects')
+      .select('current_step')
+      .eq('id', project.id)
+      .single()
+    if (projectRow?.current_step) {
+      cadenceStepNumber = pipsStepEnumToNumber(projectRow.current_step as string)
+    }
+  }
+
+  const cadenceContext = cadenceStepNumber ? buildProductContext(cadenceStepNumber) : null
+
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
       {parentData && parentSequenceId && (
@@ -182,6 +203,12 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
       )}
 
       <TicketDetailClient ticket={ticketData} sequenceId={sequenceId} members={members} />
+
+      {cadenceContext && (
+        <div className="mt-6">
+          <KnowledgeCadenceBar context={cadenceContext} defaultCollapsed />
+        </div>
+      )}
 
       <Separator className="my-8" />
 

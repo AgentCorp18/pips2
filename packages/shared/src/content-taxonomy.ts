@@ -320,6 +320,19 @@ export const stepNumberToContentStep = (step: number): ContentStep => {
   return 'overview'
 }
 
+/** Maps the DB pips_step enum string to a step number */
+export const pipsStepEnumToNumber = (pipsStep: string): number => {
+  const mapping: Record<string, number> = {
+    identify: 1,
+    analyze: 2,
+    generate: 3,
+    select_plan: 4,
+    implement: 5,
+    evaluate: 6,
+  }
+  return mapping[pipsStep] ?? 1
+}
+
 /** Maps a form type string to its ContentTool tag */
 export const formTypeToContentTool = (formType: string): ContentTool | null => {
   const mapping: Record<string, ContentTool> = {
