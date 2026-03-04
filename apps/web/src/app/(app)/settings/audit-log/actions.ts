@@ -78,12 +78,13 @@ export const getAuditLog = async (
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, full_name')
+      .select('id, full_name, display_name')
       .in('id', userIds)
 
     for (const p of profiles ?? []) {
-      if (p.full_name) {
-        profileMap.set(p.id, p.full_name)
+      const name = p.display_name || p.full_name
+      if (name) {
+        profileMap.set(p.id, name)
       }
     }
   }

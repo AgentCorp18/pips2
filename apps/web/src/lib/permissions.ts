@@ -14,7 +14,7 @@ export const getUserOrgRole = async (orgId: string): Promise<OrgRole | null> => 
     .select('role')
     .eq('org_id', orgId)
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   return (data?.role as OrgRole) ?? null
 }
@@ -45,7 +45,7 @@ export const getUserOrg = async () => {
     .select('org_id, role, organizations(id, name, slug)')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   return data
 }

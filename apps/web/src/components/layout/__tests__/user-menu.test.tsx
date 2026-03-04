@@ -44,6 +44,7 @@ vi.mock('@/lib/supabase/client', () => ({
 const setupProfileMocks = (
   profile: {
     email: string
+    full_name?: string
     display_name: string | null
     avatar_url: string | null
   } | null = null,
@@ -123,19 +124,20 @@ describe('UserMenu', () => {
     })
   })
 
-  it('shows fallback "?" for empty display name', async () => {
+  it('falls back to email initials when display_name and full_name are empty', async () => {
     setupProfileMocks({
       email: 'alice@example.com',
+      full_name: '',
       display_name: '',
       avatar_url: null,
     })
     await act(async () => {
       render(<UserMenu />)
     })
-    // display_name is '' (not null), so ?? doesn't kick in.
-    // getInitials('') returns '?' because parts is empty.
+    // display_name and full_name are '' (falsy), so || falls through to email.
+    // getInitials('alice@example.com') returns 'A' (first letter).
     await waitFor(() => {
-      expect(screen.getByText('?')).toBeInTheDocument()
+      expect(screen.getByText('A')).toBeInTheDocument()
     })
   })
 

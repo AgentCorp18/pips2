@@ -74,7 +74,7 @@ export const getProjectMembers = async (projectId: string): Promise<ProjectMembe
       `
       user_id,
       role,
-      profiles!project_members_user_id_fkey ( display_name, avatar_url )
+      profiles!project_members_user_id_fkey ( full_name, display_name, avatar_url )
     `,
     )
     .eq('project_id', projectId)
@@ -83,13 +83,14 @@ export const getProjectMembers = async (projectId: string): Promise<ProjectMembe
 
   return members.map((m) => {
     const profile = m.profiles as unknown as {
-      display_name: string
+      full_name: string
+      display_name: string | null
       avatar_url: string | null
     } | null
 
     return {
       userId: m.user_id,
-      displayName: profile?.display_name ?? 'Unknown',
+      displayName: profile?.display_name || profile?.full_name || 'Unknown',
       avatarUrl: profile?.avatar_url ?? null,
       role: m.role,
     }
@@ -121,12 +122,12 @@ export const getProjectActivity = async (
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name')
+      .select('id, full_name, display_name')
       .in('id', userIds)
 
     if (profiles) {
       for (const p of profiles) {
-        userMap.set(p.id, p.display_name)
+        userMap.set(p.id, p.display_name || p.full_name || null)
       }
     }
   }

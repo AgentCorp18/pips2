@@ -39,7 +39,7 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     redirect('/onboarding')
@@ -110,14 +110,17 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   // Fetch org members for filter dropdown
   const { data: membersRaw } = await supabase
     .from('org_members')
-    .select('user_id, profiles!org_members_user_id_fkey ( display_name )')
+    .select('user_id, profiles!org_members_user_id_fkey ( full_name, display_name )')
     .eq('org_id', membership.org_id)
 
   const members = (membersRaw ?? []).map((m) => {
-    const profile = m.profiles as unknown as { display_name: string } | null
+    const profile = m.profiles as unknown as {
+      full_name: string
+      display_name: string | null
+    } | null
     return {
       user_id: m.user_id,
-      display_name: profile?.display_name ?? 'Unknown',
+      display_name: profile?.display_name || profile?.full_name || 'Unknown',
     }
   })
 

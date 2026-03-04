@@ -29,7 +29,7 @@ const resolveOrgId = async (): Promise<string | null> => {
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   return membership?.org_id ?? null
 }

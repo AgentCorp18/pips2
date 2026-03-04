@@ -146,12 +146,12 @@ export const getRecentActivity = async (orgId: string, limit = 10): Promise<Acti
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name')
+      .select('id, full_name, display_name')
       .in('id', userIds)
 
     if (profiles) {
       for (const p of profiles) {
-        userMap.set(p.id, p.display_name)
+        userMap.set(p.id, p.display_name || p.full_name || null)
       }
     }
   }

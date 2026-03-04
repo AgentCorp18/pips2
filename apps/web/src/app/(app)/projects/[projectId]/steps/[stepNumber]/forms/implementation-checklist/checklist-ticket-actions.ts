@@ -54,15 +54,19 @@ export const createTicketsFromChecklist = async (
   // Load org members to match assignees by display_name
   const { data: orgMembers } = await supabase
     .from('org_members')
-    .select('user_id, profiles!org_members_user_id_fkey(display_name)')
+    .select('user_id, profiles!org_members_user_id_fkey(full_name, display_name)')
     .eq('org_id', membership.org_id)
 
   const memberMap = new Map<string, string>()
   if (orgMembers) {
     for (const member of orgMembers) {
-      const profiles = member.profiles as unknown as { display_name: string } | null
-      if (profiles?.display_name) {
-        memberMap.set(profiles.display_name.toLowerCase(), member.user_id)
+      const profiles = member.profiles as unknown as {
+        full_name: string
+        display_name: string | null
+      } | null
+      const name = profiles?.display_name || profiles?.full_name
+      if (name) {
+        memberMap.set(name.toLowerCase(), member.user_id)
       }
     }
   }

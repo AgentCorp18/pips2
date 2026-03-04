@@ -49,7 +49,7 @@ export const createProject = async (
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     return { error: 'You must belong to an organization to create a project' }

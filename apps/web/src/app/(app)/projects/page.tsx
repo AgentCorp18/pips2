@@ -29,7 +29,7 @@ const ProjectsPage = async () => {
     .select('org_id, role')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     redirect('/onboarding')
@@ -47,7 +47,7 @@ const ProjectsPage = async () => {
       current_step,
       target_completion_date,
       owner_id,
-      profiles!projects_owner_id_fkey ( display_name ),
+      profiles!projects_owner_id_fkey ( full_name, display_name ),
       project_steps ( step_number, status )
     `,
     )
@@ -88,9 +88,10 @@ const ProjectsPage = async () => {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projectList.map((project) => {
             const profilesRaw = project.profiles as unknown
+            type OwnerProfile = { full_name: string; display_name: string | null }
             const ownerProfile = Array.isArray(profilesRaw)
-              ? ((profilesRaw[0] as { display_name: string } | undefined) ?? null)
-              : (profilesRaw as { display_name: string } | null)
+              ? ((profilesRaw[0] as OwnerProfile | undefined) ?? null)
+              : (profilesRaw as OwnerProfile | null)
             const steps = (project.project_steps ?? []) as Array<{
               step_number: number
               status: string
@@ -107,7 +108,7 @@ const ProjectsPage = async () => {
                 description={project.description}
                 status={project.status ?? 'active'}
                 currentStep={project.current_step ?? 1}
-                ownerName={ownerProfile?.display_name ?? 'Unknown'}
+                ownerName={ownerProfile?.display_name || ownerProfile?.full_name || 'Unknown'}
                 stepsCompleted={stepsCompleted}
                 targetDate={project.target_completion_date}
               />

@@ -24,7 +24,7 @@ const ProjectBoardPage = async ({ params }: { params: Promise<{ projectId: strin
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     redirect('/onboarding')
@@ -45,7 +45,8 @@ const ProjectBoardPage = async ({ params }: { params: Promise<{ projectId: strin
   const boardTickets: BoardTicket[] = tickets.map((ticket) => {
     const assignee = ticket.assignee as unknown as {
       id: string
-      display_name: string
+      full_name: string
+      display_name: string | null
       avatar_url: string | null
     } | null
 
@@ -56,7 +57,7 @@ const ProjectBoardPage = async ({ params }: { params: Promise<{ projectId: strin
       status: ticket.status,
       priority: ticket.priority,
       type: ticket.type,
-      assigneeName: assignee?.display_name ?? null,
+      assigneeName: assignee ? assignee.display_name || assignee.full_name || null : null,
       assigneeAvatar: assignee?.avatar_url ?? null,
       dueDate: ticket.due_date,
     }

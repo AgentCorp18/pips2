@@ -63,7 +63,7 @@ export const createTicket = async (
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     return { error: 'You must belong to an organization' }
@@ -239,8 +239,8 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
     .select(
       `
       *,
-      assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url ),
-      reporter:profiles!tickets_reporter_id_fkey ( id, display_name, avatar_url ),
+      assignee:profiles!tickets_assignee_id_fkey ( id, full_name, display_name, avatar_url ),
+      reporter:profiles!tickets_reporter_id_fkey ( id, full_name, display_name, avatar_url ),
       project:projects!tickets_project_id_fkey ( id, title )
     `,
       { count: 'exact' },
@@ -308,8 +308,8 @@ export const getTicket = async (ticketId: string) => {
     .select(
       `
       *,
-      assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url ),
-      reporter:profiles!tickets_reporter_id_fkey ( id, display_name, avatar_url ),
+      assignee:profiles!tickets_assignee_id_fkey ( id, full_name, display_name, avatar_url ),
+      reporter:profiles!tickets_reporter_id_fkey ( id, full_name, display_name, avatar_url ),
       project:projects!tickets_project_id_fkey ( id, title )
     `,
     )
@@ -346,8 +346,8 @@ export const getTicketsForBoard = async (
     .select(
       `
       *,
-      assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url ),
-      reporter:profiles!tickets_reporter_id_fkey ( id, display_name, avatar_url ),
+      assignee:profiles!tickets_assignee_id_fkey ( id, full_name, display_name, avatar_url ),
+      reporter:profiles!tickets_reporter_id_fkey ( id, full_name, display_name, avatar_url ),
       project:projects!tickets_project_id_fkey ( id, title )
     `,
     )
@@ -411,7 +411,7 @@ export const bulkUpdateTickets = async (
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     return { error: 'You must belong to an organization' }
@@ -460,7 +460,7 @@ export const getChildTickets = async (ticketId: string) => {
       title,
       status,
       priority,
-      assignee:profiles!tickets_assignee_id_fkey ( id, display_name, avatar_url )
+      assignee:profiles!tickets_assignee_id_fkey ( id, full_name, display_name, avatar_url )
     `,
     )
     .eq('parent_id', ticketId)
@@ -667,7 +667,7 @@ export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActi
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     return { error: 'You must belong to an organization' }

@@ -39,7 +39,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       target_completion_date, created_at, owner_id,
       project_steps ( id, step_number, status, started_at, completed_at ),
       project_members ( id, user_id, role ),
-      profiles!projects_owner_id_fkey ( display_name )
+      profiles!projects_owner_id_fkey ( full_name, display_name )
     `,
     )
     .eq('id', projectId)
@@ -54,7 +54,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     .select('role')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   const steps = (project.project_steps ?? []) as Array<{
     id: string
@@ -72,8 +72,8 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
 
   const profilesRaw = project.profiles as unknown
   const ownerProfile = Array.isArray(profilesRaw)
-    ? ((profilesRaw[0] as { display_name: string } | undefined) ?? null)
-    : (profilesRaw as { display_name: string } | null)
+    ? ((profilesRaw[0] as { full_name: string; display_name: string | null } | undefined) ?? null)
+    : (profilesRaw as { full_name: string; display_name: string | null } | null)
 
   const currentStepLabel = STEP_LABELS[project.current_step ?? 1] ?? 'Unknown'
 
@@ -126,7 +126,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
             <MetaRow label="Owner">
               <span className="flex items-center gap-1.5">
                 <User size={14} className="text-[var(--color-text-tertiary)]" />
-                {ownerProfile?.display_name ?? 'Unassigned'}
+                {ownerProfile?.display_name || ownerProfile?.full_name || 'Unassigned'}
               </span>
             </MetaRow>
             {project.description && (
