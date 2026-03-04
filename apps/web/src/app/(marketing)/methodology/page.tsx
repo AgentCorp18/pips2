@@ -1,6 +1,25 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { PIPS_STEPS, STEP_CONTENT } from '@pips/shared'
+
+export const metadata: Metadata = {
+  title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
+  description:
+    'A principle-driven, 6-step framework for solving problems and driving continuous improvement. Identify problems, analyze root causes, generate solutions, and deliver measurable results.',
+  openGraph: {
+    title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
+    description:
+      'A principle-driven, 6-step framework for solving problems and driving continuous improvement in any team, any industry.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
+    description:
+      'A principle-driven, 6-step framework for solving problems and driving continuous improvement in any team, any industry.',
+  },
+}
 
 /** SEO pillar page: /methodology — public, no auth required */
 const MethodologyPage = () => {
@@ -8,7 +27,7 @@ const MethodologyPage = () => {
     <div className="mx-auto max-w-5xl px-6 py-16">
       {/* Hero */}
       <section className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-5xl">
+        <h1 className="font-serif text-4xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-5xl">
           The PIPS Methodology
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-text-secondary)]">
@@ -102,6 +121,44 @@ const MethodologyPage = () => {
               </Link>
             )
           })}
+        </div>
+      </section>
+
+      {/* Resources */}
+      <section className="mt-16">
+        <h2 className="text-center text-2xl font-bold text-[var(--color-text-primary)]">
+          Learn More
+        </h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <Link
+            href="/book"
+            className="group rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 transition-all hover:border-[var(--color-primary)] hover:shadow-md"
+          >
+            <h3 className="text-base font-semibold text-[var(--color-text-primary)]">
+              The Never-Ending Quest
+            </h3>
+            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+              Read the complete PIPS book — 15 chapters covering philosophy, practice, and culture
+              of continuous improvement.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)]">
+              Browse Chapters <ArrowRight size={14} />
+            </span>
+          </Link>
+          <Link
+            href="/resources/glossary"
+            className="group rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 transition-all hover:border-[var(--color-primary)] hover:shadow-md"
+          >
+            <h3 className="text-base font-semibold text-[var(--color-text-primary)]">
+              PIPS Glossary
+            </h3>
+            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+              Definitions, context, and related tools for every term in the PIPS methodology.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)]">
+              Browse Terms <ArrowRight size={14} />
+            </span>
+          </Link>
         </div>
       </section>
 
