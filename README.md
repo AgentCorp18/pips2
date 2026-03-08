@@ -53,8 +53,8 @@ Multi-tenant SaaS that embeds a 6-step process improvement methodology into ente
 ### Install
 
 ```bash
-git clone https://github.com/AlberaMarc/PIPS2.0.git
-cd PIPS2.0
+git clone https://github.com/AgentCorp18/pips2.git
+cd pips2
 pnpm install
 ```
 

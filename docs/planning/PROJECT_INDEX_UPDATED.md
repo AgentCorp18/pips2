@@ -3,9 +3,9 @@
 **Created:** March 3, 2026  
 **Status:** MVP Complete — Deployed to Production  
 **Product Name:** PIPS (Process Improvement and Problem Solving)  
-**Owner:** Marc Albers (GitHub: AlberaMarc)  
-**Production URL:** https://pips-app.vercel.app  
-**Repository:** AlberaMarc/pips2 (private)
+**Owner:** Marc Albers (GitHub: AgentCorp18)
+**Production URL:** https://pips-app.vercel.app
+**Repository:** AgentCorp18/pips2 (private)
 
 ---
 

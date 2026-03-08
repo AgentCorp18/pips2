@@ -5,9 +5,9 @@
 > **Owner:** Project Manager Agent (Control Tower)
 > **Status:** MVP Complete — Post-MVP Phases 1.5-4 Complete, Phase 5 Next
 > **Product Name:** PIPS (Process Improvement and Problem Solving)
-> **Owner (Human):** Marc Albers (GitHub: AlberaMarc)
+> **Owner (Human):** Marc Albers (GitHub: AgentCorp18)
 > **Production URL:** https://pips-app.vercel.app
-> **Repository:** AlberaMarc/pips2 (private)
+> **Repository:** AgentCorp18/pips2 (private)
 > **Supabase Project:** `cmrribhjgfybbxhrsxqi` (us-east-2)
 
 ---

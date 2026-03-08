@@ -4,7 +4,7 @@ PIPS 2.0 — Product & Project Manager Status Report │
 │ PM Agent: Claude Opus 4.6 (Product + Project Manager) │
 │ Project: PIPS 2.0 — Multi-tenant SaaS, methodology-embedded project management │
 │ Production: https://pips-app.vercel.app │
-│ Repository: AlberaMarc/pips2 (private) │
+│ Repository: AgentCorp18/pips2 (private) │
 │ │
 │ --- │
 │ 1. Executive Assessment │

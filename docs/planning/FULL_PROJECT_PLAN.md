@@ -6,7 +6,7 @@
 > **Author:** Marc Albers + Claude Opus 4.6
 > **Status:** Active — 63% of post-MVP work packages complete
 > **Production URL:** https://pips-app.vercel.app
-> **Repository:** AlberaMarc/pips2 (private)
+> **Repository:** AgentCorp18/pips2 (private)
 > **Supabase Project:** `cmrribhjgfybbxhrsxqi` (us-east-2)
 >
 > **v1.1 changes (2026-03-04):**

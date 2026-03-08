@@ -78,8 +78,8 @@ This section walks through every step required to go from zero to a working deve
 #### Create GitHub Repository
 
 ```bash
-# Create the private repo under the AlberaMarc org
-gh repo create AlberaMarc/pips2 --private --description "PIPS 2.0 - Methodology-embedded project management SaaS" --clone
+# Create the private repo under AgentCorp18
+gh repo create AgentCorp18/pips2 --private --description "PIPS 2.0 - Methodology-embedded project management SaaS" --clone
 cd pips2
 ```
 
@@ -1266,7 +1266,7 @@ supabase gen types typescript --linked > packages/shared/src/types/database.ts
 #### Connect GitHub Repo to Vercel
 
 1. Go to https://vercel.com/new
-2. Import the `AlberaMarc/pips2` repository
+2. Import the `AgentCorp18/pips2` repository
 3. Framework preset: **Next.js**
 4. Root directory: `apps/web`
 5. Build command: `cd ../.. && pnpm turbo build --filter=@pips2/web`
@@ -3105,12 +3105,12 @@ supabase functions deploy <function-name>
 
 #### Onboard a New Developer or Agent
 
-1. Grant GitHub repo access (`AlberaMarc/pips2`)
+1. Grant GitHub repo access (`AgentCorp18/pips2`)
 2. Share the `.env.local` values (via secure channel, never email)
 3. Developer runs:
 
 ```bash
-git clone git@github.com:AlberaMarc/pips2.git
+git clone git@github.com:AgentCorp18/pips2.git
 cd pips2
 pnpm install
 cp apps/web/.env.example apps/web/.env.local
