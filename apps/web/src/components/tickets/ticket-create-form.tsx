@@ -1,12 +1,13 @@
 'use client'
 
-import { useActionState, useEffect, useRef } from 'react'
+import { useActionState, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { AiAssistButton } from '@/components/ui/ai-assist-button'
 import {
   Select,
   SelectContent,
@@ -46,7 +47,16 @@ const initialState: TicketActionState = {}
 export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFormProps) => {
   const router = useRouter()
   const hasRedirected = useRef(false)
+  const descriptionRef = useRef<HTMLTextAreaElement>(null)
+  const [descriptionValue, setDescriptionValue] = useState('')
   const [state, formAction, pending] = useActionState(createTicket, initialState)
+
+  const handleDescriptionAccept = useCallback((text: string) => {
+    setDescriptionValue(text)
+    if (descriptionRef.current) {
+      descriptionRef.current.value = text
+    }
+  }, [])
 
   useEffect(() => {
     if (state.success && state.redirectTo && !hasRedirected.current) {
@@ -96,14 +106,24 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
 
       {/* Description */}
       <div className="space-y-1.5">
-        <Label htmlFor="description">Description</Label>
+        <div className="flex items-center gap-1">
+          <Label htmlFor="description">Description</Label>
+          <AiAssistButton
+            fieldRef={descriptionRef}
+            fieldType="ticket_description"
+            onAccept={handleDescriptionAccept}
+          />
+        </div>
         <Textarea
+          ref={descriptionRef}
           id="description"
           name="description"
           data-testid="ticket-description-input"
           placeholder="Detailed description..."
           aria-describedby={state.fieldErrors?.description ? 'description-error' : undefined}
           rows={4}
+          value={descriptionValue}
+          onChange={(e) => setDescriptionValue(e.target.value)}
         />
         {state.fieldErrors?.description && (
           <p id="description-error" className="text-xs" style={{ color: 'var(--color-error)' }}>

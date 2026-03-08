@@ -16,6 +16,8 @@ import {
   deleteComment,
 } from '@/app/(app)/tickets/[ticketId]/comment-actions'
 import { MoreHorizontal, Pencil, Trash2, User } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { AiAssistButton } from '@/components/ui/ai-assist-button'
 
 /* ============================================================
    Types
@@ -153,6 +155,14 @@ export const CommentSection = ({
 
       {/* New comment form */}
       <div className="relative space-y-2">
+        <div className="flex items-center gap-1">
+          <Label>New comment</Label>
+          <AiAssistButton
+            fieldRef={textareaRef}
+            fieldType="comment"
+            onAccept={(text) => setNewBody(text)}
+          />
+        </div>
         <Textarea
           ref={textareaRef}
           value={newBody}

@@ -1,11 +1,12 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { AiAssistButton } from '@/components/ui/ai-assist-button'
 import { Plus, ThumbsUp, Eye, EyeOff, Check, X } from 'lucide-react'
 import type { BrainstormingData } from '@/lib/form-schemas'
 
@@ -29,6 +30,7 @@ export const BrainstormingForm = ({ projectId, stepNumber, initialData }: Props)
   const [newIdea, setNewIdea] = useState('')
   const [newAuthor, setNewAuthor] = useState('')
   const [showEliminated, setShowEliminated] = useState(false)
+  const ideaRef = useRef<HTMLTextAreaElement>(null)
 
   const addIdea = useCallback(() => {
     const text = newIdea.trim()
@@ -105,10 +107,21 @@ export const BrainstormingForm = ({ projectId, stepNumber, initialData }: Props)
       data={data as unknown as Record<string, unknown>}
     >
       <div className="space-y-6">
+        {/* Hidden textarea for AI assist to read/write */}
+        <textarea ref={ideaRef} value={newIdea} readOnly className="hidden" />
+
         {/* Add Idea */}
         <Card>
           <CardContent className="space-y-3 pt-6">
-            <Label>Add a new idea</Label>
+            <div className="flex items-center gap-1">
+              <Label>Add a new idea</Label>
+              <AiAssistButton
+                fieldRef={ideaRef}
+                fieldType="solution"
+                context={`Brainstorming ideas. Existing ideas: ${data.ideas.map((i) => i.text).join(', ') || 'none yet'}`}
+                onAccept={(text) => setNewIdea(text)}
+              />
+            </div>
             <div className="flex gap-2">
               <Input
                 value={newIdea}

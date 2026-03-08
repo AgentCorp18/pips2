@@ -1,11 +1,12 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Plus, Trash2, ThumbsUp, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { AiAssistButton } from '@/components/ui/ai-assist-button'
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ export const LessonsLearnedForm = ({ projectId, initialData }: Props) => {
   const [data, setData] = useState<LessonsLearnedData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
   const [saveVersion, setSaveVersion] = useState(0)
+  const takeawaysRef = useRef<HTMLTextAreaElement>(null)
 
   const update = (next: LessonsLearnedData) => {
     setData(next)
@@ -236,11 +238,20 @@ export const LessonsLearnedForm = ({ projectId, initialData }: Props) => {
 
         {/* Key takeaways */}
         <div className="space-y-2">
-          <Label>Key Takeaways</Label>
+          <div className="flex items-center gap-1">
+            <Label>Key Takeaways</Label>
+            <AiAssistButton
+              fieldRef={takeawaysRef}
+              fieldType="lessons_learned"
+              context={`Lessons learned. Went well: ${data.wentWell.filter(Boolean).join(', ') || 'none'}. Improvements: ${data.improvements.filter(Boolean).join(', ') || 'none'}`}
+              onAccept={(text) => update({ ...data, keyTakeaways: text })}
+            />
+          </div>
           <p className="text-xs text-muted-foreground">
             Summarize the most important lessons from this improvement cycle.
           </p>
           <textarea
+            ref={takeawaysRef}
             value={data.keyTakeaways}
             onChange={(e) => update({ ...data, keyTakeaways: e.target.value })}
             placeholder="What are the top 2-3 things this team should remember?"

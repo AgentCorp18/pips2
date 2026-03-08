@@ -127,6 +127,8 @@ export const FiveWhyForm = ({
                 onChange={(v) => updateWhy(i, 'question', v)}
                 placeholder={buildSuggestion(i)}
                 rows={2}
+                aiFieldType="root_cause"
+                aiContext={`5-Why analysis — question #${i + 1}. Problem: ${data.problemStatement || 'not set'}`}
               />
 
               <FormTextarea
@@ -139,6 +141,8 @@ export const FiveWhyForm = ({
                   i < data.whys.length - 1 ? 'This answer feeds the next "why" question.' : ''
                 }
                 rows={2}
+                aiFieldType="root_cause"
+                aiContext={`5-Why analysis — answer #${i + 1}. Question: ${why.question || buildSuggestion(i)}`}
               />
             </CardContent>
           </Card>
@@ -158,6 +162,8 @@ export const FiveWhyForm = ({
           placeholder="Based on the analysis above, the root cause is..."
           helperText="Summarize the fundamental root cause identified through the 5-Why process."
           rows={3}
+          aiFieldType="root_cause"
+          aiContext={`5-Why analysis — root cause conclusion. Problem: ${data.problemStatement || 'not set'}. Why chain: ${data.whys.map((w, idx) => `#${idx + 1} Q: ${w.question} A: ${w.answer}`).join('; ')}`}
         />
       </div>
     </FormShell>

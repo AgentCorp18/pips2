@@ -74,6 +74,8 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
           placeholder="Describe how things work today..."
           helperText="What is the current state of the process? Be specific with numbers and observations."
           rows={4}
+          aiFieldType="problem_statement"
+          aiContext={`Problem statement form — current state (as-is). Problem area: ${data.problemArea || 'not set'}`}
         />
 
         {/* Desired State */}
@@ -85,6 +87,8 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
           placeholder="Describe what success looks like..."
           helperText="What would the ideal outcome look like? Include measurable targets."
           rows={4}
+          aiFieldType="problem_statement"
+          aiContext={`Problem statement form — desired state. Current state: ${data.asIs || 'not yet defined'}`}
         />
 
         {/* Gap */}
@@ -96,6 +100,8 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
           placeholder="What is the difference between current and desired?"
           helperText="Clearly articulate the gap. This helps frame the problem."
           rows={3}
+          aiFieldType="problem_statement"
+          aiContext={`Problem statement form — gap analysis. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}`}
         />
 
         {/* Problem Statement */}
@@ -108,6 +114,8 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
           helperText="Combine the As-Is, Desired State, and Gap into a concise, measurable statement."
           rows={3}
           required
+          aiFieldType="problem_statement"
+          aiContext={`Problem statement form — final statement. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}. Gap: ${data.gap || 'not yet defined'}`}
         />
 
         {/* Problem Area */}
