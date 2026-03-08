@@ -71,6 +71,7 @@ const StepDetailPage = async ({
     .from('org_members')
     .select('role')
     .eq('user_id', user.id)
+    .order('joined_at', { ascending: true })
     .limit(1)
     .maybeSingle()
 

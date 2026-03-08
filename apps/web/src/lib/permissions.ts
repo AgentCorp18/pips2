@@ -44,6 +44,7 @@ export const getUserOrg = async () => {
     .from('org_members')
     .select('org_id, role, organizations(id, name, slug)')
     .eq('user_id', user.id)
+    .order('joined_at', { ascending: true })
     .limit(1)
     .maybeSingle()
 

@@ -28,6 +28,7 @@ const resolveOrgId = async (): Promise<string | null> => {
     .from('org_members')
     .select('org_id')
     .eq('user_id', user.id)
+    .order('joined_at', { ascending: true })
     .limit(1)
     .maybeSingle()
 

@@ -22,6 +22,7 @@ export const getOrgWithSettings = async () => {
     .from('org_members')
     .select('org_id, role')
     .eq('user_id', user.id)
+    .order('joined_at', { ascending: true })
     .limit(1)
     .maybeSingle()
 
@@ -96,6 +97,7 @@ export const updateOrgSettings = async (
     .from('org_members')
     .select('org_id, role')
     .eq('user_id', user.id)
+    .order('joined_at', { ascending: true })
     .limit(1)
     .maybeSingle()
 

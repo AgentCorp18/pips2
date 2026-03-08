@@ -47,7 +47,7 @@ import { changeMemberRole, removeMember } from './actions'
 export interface OrgMember {
   id: string
   role: OrgRole
-  created_at: string
+  joined_at: string
   user_id: string
   profiles: {
     full_name: string | null
@@ -148,7 +148,7 @@ export const MembersList = ({
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   <FormattedDate
-                    date={member.created_at}
+                    date={member.joined_at}
                     options={{ month: 'short', day: 'numeric', year: 'numeric' }}
                   />
                 </TableCell>

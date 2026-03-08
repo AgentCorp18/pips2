@@ -22,16 +22,16 @@ const MembersPage = async () => {
   // Fetch all org members with profile data
   const { data: members } = await supabase
     .from('org_members')
-    .select('id, role, created_at, user_id, profiles(full_name, email, avatar_url)')
+    .select('id, role, joined_at, user_id, profiles(full_name, email, avatar_url)')
     .eq('org_id', orgId)
-    .order('created_at', { ascending: true })
+    .order('joined_at', { ascending: true })
 
   // Supabase join returns profiles; cast through unknown since
   // generated DB types may not be present yet.
   const orgMembers: OrgMember[] = (members ?? []).map((m) => ({
     id: m.id as string,
     role: m.role as OrgRole,
-    created_at: m.created_at as string,
+    joined_at: m.joined_at as string,
     user_id: m.user_id as string,
     profiles: (Array.isArray(m.profiles) ? m.profiles[0] : m.profiles) as OrgMember['profiles'],
   }))

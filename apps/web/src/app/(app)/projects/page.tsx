@@ -30,6 +30,7 @@ const ProjectsPage = async () => {
     .from('org_members')
     .select('org_id, role')
     .eq('user_id', user.id)
+    .order('joined_at', { ascending: true })
     .limit(1)
     .maybeSingle()
 
