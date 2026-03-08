@@ -1,9 +1,56 @@
 'use server'
 
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getUserOrg } from '@/lib/permissions'
 import { hasPermission, type OrgRole } from '@pips/shared'
 import { revalidatePath } from 'next/cache'
+
+// ---------------------------------------------------------------------------
+// Zod Schemas
+// ---------------------------------------------------------------------------
+
+const workshopModuleSchema = z.object({
+  title: z.string().min(1, 'Module title is required'),
+  duration: z.string().min(1, 'Module duration is required'),
+  notes: z.string(),
+})
+
+export const createSessionSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be 200 characters or fewer'),
+  modules: z.array(workshopModuleSchema),
+  scenarioId: z.string().uuid('Scenario ID must be a valid UUID').optional(),
+})
+
+export const sessionIdSchema = z.object({
+  sessionId: z.string().uuid('Session ID must be a valid UUID'),
+})
+
+export const setCurrentModuleSchema = z.object({
+  sessionId: z.string().uuid('Session ID must be a valid UUID'),
+  moduleIndex: z
+    .number()
+    .int('Module index must be an integer')
+    .min(0, 'Module index must be non-negative'),
+})
+
+export const timerStateSchema = z.object({
+  mode: z.enum(['countdown', 'countup']).optional(),
+  duration: z.number().optional(),
+  remaining: z.number().optional(),
+  running: z.boolean().optional(),
+  startedAt: z.string().optional(),
+})
+
+export const updateTimerStateSchema = z.object({
+  sessionId: z.string().uuid('Session ID must be a valid UUID'),
+  timerState: timerStateSchema,
+})
+
+export const updateParticipantCountSchema = z.object({
+  sessionId: z.string().uuid('Session ID must be a valid UUID'),
+  count: z.number().int('Count must be an integer').min(0, 'Count must be non-negative'),
+})
 
 // ---------------------------------------------------------------------------
 // Types
@@ -115,6 +162,11 @@ export const createSession = async (
   scenarioId?: string,
 ): Promise<ActionResult<WorkshopSession>> => {
   try {
+    const parsed = createSessionSchema.safeParse({ title, modules, scenarioId })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     const { orgId } = await requireWorkshopPermission()
     const userId = await getCurrentUserId()
 
@@ -147,6 +199,11 @@ export const createSession = async (
 /** Start a draft session (manager+ only) */
 export const startSession = async (sessionId: string): Promise<ActionResult> => {
   try {
+    const parsed = sessionIdSchema.safeParse({ sessionId })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     await requireWorkshopPermission()
     const supabase = await createClient()
 
@@ -172,6 +229,11 @@ export const startSession = async (sessionId: string): Promise<ActionResult> => 
 /** Pause an active session */
 export const pauseSession = async (sessionId: string): Promise<ActionResult> => {
   try {
+    const parsed = sessionIdSchema.safeParse({ sessionId })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     await requireWorkshopPermission()
     const supabase = await createClient()
 
@@ -214,6 +276,11 @@ export const pauseSession = async (sessionId: string): Promise<ActionResult> => 
 /** Resume a paused session */
 export const resumeSession = async (sessionId: string): Promise<ActionResult> => {
   try {
+    const parsed = sessionIdSchema.safeParse({ sessionId })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     await requireWorkshopPermission()
     const supabase = await createClient()
 
@@ -248,6 +315,11 @@ export const resumeSession = async (sessionId: string): Promise<ActionResult> =>
 /** Complete a session (active or paused) */
 export const completeSession = async (sessionId: string): Promise<ActionResult> => {
   try {
+    const parsed = sessionIdSchema.safeParse({ sessionId })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     await requireWorkshopPermission()
     const supabase = await createClient()
 
@@ -276,6 +348,11 @@ export const setCurrentModule = async (
   moduleIndex: number,
 ): Promise<ActionResult> => {
   try {
+    const parsed = setCurrentModuleSchema.safeParse({ sessionId, moduleIndex })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     await requireWorkshopPermission()
     const supabase = await createClient()
 
@@ -297,6 +374,11 @@ export const updateTimerState = async (
   timerState: TimerState,
 ): Promise<ActionResult> => {
   try {
+    const parsed = updateTimerStateSchema.safeParse({ sessionId, timerState })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     await requireWorkshopPermission()
     const supabase = await createClient()
 
@@ -318,6 +400,11 @@ export const updateParticipantCount = async (
   count: number,
 ): Promise<ActionResult> => {
   try {
+    const parsed = updateParticipantCountSchema.safeParse({ sessionId, count })
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    }
+
     const supabase = await createClient()
     const { error } = await supabase
       .from('workshop_sessions')

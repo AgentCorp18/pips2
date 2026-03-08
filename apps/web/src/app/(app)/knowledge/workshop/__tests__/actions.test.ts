@@ -71,6 +71,12 @@ import {
 } from '../actions'
 
 /* ============================================================
+   Constants
+   ============================================================ */
+
+const VALID_UUID = '00000000-0000-4000-8000-000000000001'
+
+/* ============================================================
    getOrgSessions
    ============================================================ */
 
@@ -113,12 +119,12 @@ describe('getSession', () => {
   })
 
   it('returns session by ID', async () => {
-    const session = { id: 's1', title: 'Test', status: 'draft' }
+    const session = { id: VALID_UUID, title: 'Test', status: 'draft' }
     fromResults = [{ data: session, error: null }]
 
-    const result = await getSession('s1')
+    const result = await getSession(VALID_UUID)
     expect(result).not.toBeNull()
-    expect(result!.id).toBe('s1')
+    expect(result!.id).toBe(VALID_UUID)
   })
 
   it('returns null on error', async () => {
@@ -167,6 +173,43 @@ describe('createSession', () => {
       expect(result.error).toBe('Insert failed')
     }
   })
+
+  it('rejects empty title', async () => {
+    const result = await createSession('', [])
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('Title is required')
+    }
+  })
+
+  it('rejects title longer than 200 characters', async () => {
+    const result = await createSession('x'.repeat(201), [])
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('200')
+    }
+  })
+
+  it('rejects invalid scenarioId', async () => {
+    const result = await createSession('Valid Title', [], 'not-a-uuid')
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
+  })
+
+  it('accepts valid scenarioId', async () => {
+    const newSession = {
+      id: 'new-2',
+      title: 'Scenario Workshop',
+      status: 'draft',
+      modules: [],
+    }
+    fromResults = [{ data: newSession, error: null }]
+
+    const result = await createSession('Scenario Workshop', [], VALID_UUID)
+    expect(result.success).toBe(true)
+  })
 })
 
 /* ============================================================
@@ -183,15 +226,23 @@ describe('startSession', () => {
   it('starts a draft session', async () => {
     fromResults = [{ data: null, error: null }]
 
-    const result = await startSession('s1')
+    const result = await startSession(VALID_UUID)
     expect(result.success).toBe(true)
   })
 
   it('returns error on failure', async () => {
     fromResults = [{ data: null, error: { message: 'Not in draft' } }]
 
-    const result = await startSession('s1')
+    const result = await startSession(VALID_UUID)
     expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid sessionId', async () => {
+    const result = await startSession('not-a-uuid')
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
   })
 })
 
@@ -207,7 +258,6 @@ describe('pauseSession', () => {
   })
 
   it('pauses an active session', async () => {
-    // First call: fetch current timer_state
     fromResults = [
       {
         data: {
@@ -215,12 +265,19 @@ describe('pauseSession', () => {
         },
         error: null,
       },
-      // Second call: update
       { data: null, error: null },
     ]
 
-    const result = await pauseSession('s1')
+    const result = await pauseSession(VALID_UUID)
     expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid sessionId', async () => {
+    const result = await pauseSession('bad-id')
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
   })
 })
 
@@ -241,8 +298,16 @@ describe('resumeSession', () => {
       { data: null, error: null },
     ]
 
-    const result = await resumeSession('s1')
+    const result = await resumeSession(VALID_UUID)
     expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid sessionId', async () => {
+    const result = await resumeSession('xyz')
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
   })
 })
 
@@ -260,15 +325,23 @@ describe('completeSession', () => {
   it('completes an active session', async () => {
     fromResults = [{ data: null, error: null }]
 
-    const result = await completeSession('s1')
+    const result = await completeSession(VALID_UUID)
     expect(result.success).toBe(true)
   })
 
   it('returns error on failure', async () => {
     fromResults = [{ data: null, error: { message: 'Already completed' } }]
 
-    const result = await completeSession('s1')
+    const result = await completeSession(VALID_UUID)
     expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid sessionId', async () => {
+    const result = await completeSession('nope')
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
   })
 })
 
@@ -286,8 +359,32 @@ describe('setCurrentModule', () => {
   it('advances to a specific module', async () => {
     fromResults = [{ data: null, error: null }]
 
-    const result = await setCurrentModule('s1', 3)
+    const result = await setCurrentModule(VALID_UUID, 3)
     expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid sessionId', async () => {
+    const result = await setCurrentModule('bad', 0)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
+  })
+
+  it('rejects negative moduleIndex', async () => {
+    const result = await setCurrentModule(VALID_UUID, -1)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('non-negative')
+    }
+  })
+
+  it('rejects non-integer moduleIndex', async () => {
+    const result = await setCurrentModule(VALID_UUID, 1.5)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('integer')
+    }
   })
 })
 
@@ -305,7 +402,7 @@ describe('updateTimerState', () => {
   it('sets countdown timer', async () => {
     fromResults = [{ data: null, error: null }]
 
-    const result = await updateTimerState('s1', {
+    const result = await updateTimerState(VALID_UUID, {
       mode: 'countdown',
       duration: 300,
       remaining: 300,
@@ -318,8 +415,16 @@ describe('updateTimerState', () => {
   it('resets timer', async () => {
     fromResults = [{ data: null, error: null }]
 
-    const result = await updateTimerState('s1', {})
+    const result = await updateTimerState(VALID_UUID, {})
     expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid sessionId', async () => {
+    const result = await updateTimerState('nope', {})
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
   })
 })
 
@@ -337,7 +442,31 @@ describe('updateParticipantCount', () => {
   it('updates count', async () => {
     fromResults = [{ data: null, error: null }]
 
-    const result = await updateParticipantCount('s1', 5)
+    const result = await updateParticipantCount(VALID_UUID, 5)
     expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid sessionId', async () => {
+    const result = await updateParticipantCount('bad', 5)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('UUID')
+    }
+  })
+
+  it('rejects negative count', async () => {
+    const result = await updateParticipantCount(VALID_UUID, -1)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('non-negative')
+    }
+  })
+
+  it('rejects non-integer count', async () => {
+    const result = await updateParticipantCount(VALID_UUID, 2.7)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('integer')
+    }
   })
 })
