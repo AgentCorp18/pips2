@@ -14,7 +14,8 @@ const mockMaybeSingle = vi.fn().mockImplementation(() => ({
 }))
 
 const mockLimit = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
-const mockEq = vi.fn().mockReturnValue({ limit: mockLimit })
+const mockOrder = vi.fn().mockReturnValue({ limit: mockLimit })
+const mockEq = vi.fn().mockReturnValue({ order: mockOrder })
 const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
 const mockFrom = vi.fn().mockReturnValue({ select: mockSelect })
 
