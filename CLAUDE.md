@@ -4,7 +4,7 @@ PIPS 2.0 — Multi-tenant SaaS embedding a 6-step process improvement methodolog
 
 ## Stack
 
-- Next.js 15 (App Router), TypeScript strict, Tailwind CSS, shadcn/ui + Radix
+- Next.js 16 (App Router), TypeScript strict, Tailwind CSS, shadcn/ui + Radix
 - Supabase (Postgres, Auth, RLS, Edge Functions), Zustand
 - Turborepo + pnpm monorepo
 - Vitest + Playwright, Vercel hosting, Resend email, Sentry monitoring
@@ -52,7 +52,7 @@ IMPORTANT: After every change, run in this order:
 
 - Don't edit .env files — use Vercel env vars for production
 - Don't edit supabase/migrations/ directly — migrations require careful sequencing
-- Don't skip type checking — 1,144+ unit tests must continue passing
+- Don't skip type checking — 1,621+ unit tests must continue passing
 - Don't use default exports — named exports only
 
 ## Gotchas
