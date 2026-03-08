@@ -13,6 +13,7 @@ import {
   ArrowRight,
   SkipForward,
   MessageSquare,
+  Star,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
@@ -32,6 +33,15 @@ type StepViewProps = {
   onAdvance?: () => void
   onOverride?: () => void
   isPending?: boolean
+}
+
+const RECOMMENDED_FORMS: Record<number, Set<string>> = {
+  1: new Set(['problem_statement']),
+  2: new Set(['fishbone', 'five_why']),
+  3: new Set(['brainstorming']),
+  4: new Set(['criteria_matrix', 'implementation_plan']),
+  5: new Set(['milestone_tracker']),
+  6: new Set(['before_after', 'lessons_learned']),
 }
 
 export const StepView = ({
@@ -127,6 +137,7 @@ export const StepView = ({
                 projectId={projectId}
                 stepNumber={stepNumber}
                 started={formStatuses.some((fs) => fs.form_type === form.type && fs.started)}
+                recommended={RECOMMENDED_FORMS[stepNumber]?.has(form.type) ?? false}
               />
             ))}
           </div>
@@ -223,9 +234,10 @@ type FormRowProps = {
   projectId: string
   stepNumber: PipsStepNumber
   started: boolean
+  recommended: boolean
 }
 
-const FormRow = ({ form, projectId, stepNumber, started }: FormRowProps) => (
+const FormRow = ({ form, projectId, stepNumber, started, recommended }: FormRowProps) => (
   <Link
     href={`/projects/${projectId}/steps/${stepNumber}/forms/${form.type}`}
     data-testid={`form-link-${form.type}`}
@@ -248,6 +260,17 @@ const FormRow = ({ form, projectId, stepNumber, started }: FormRowProps) => (
       </div>
     </div>
     <div className="flex items-center gap-2">
+      {recommended && (
+        <Badge
+          variant="outline"
+          className="gap-1 text-[10px]"
+          style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
+          data-testid={`recommended-badge-${form.type}`}
+        >
+          <Star size={10} />
+          Recommended
+        </Badge>
+      )}
       {form.required && (
         <Badge variant="secondary" className="text-[10px]">
           Required

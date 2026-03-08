@@ -16,12 +16,16 @@ describe('TicketEmptyState', () => {
 
   it('renders description text', () => {
     render(<TicketEmptyState />)
-    expect(screen.getByText('Create your first ticket to start tracking work.')).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Tickets help you track tasks, bugs, and action items across your projects.',
+      ),
+    ).toBeTruthy()
   })
 
   it('renders create ticket link', () => {
     render(<TicketEmptyState />)
-    const link = screen.getByText('Create your first ticket')
+    const link = screen.getByText('Create Ticket')
     expect(link.closest('a')?.getAttribute('href')).toBe('/tickets/new')
   })
 

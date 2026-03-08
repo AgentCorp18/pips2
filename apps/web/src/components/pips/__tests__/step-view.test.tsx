@@ -25,6 +25,27 @@ vi.mock('@pips/shared', () => ({
       completionCriteria: ['Problem statement defined', 'Impact assessed'],
       methodology: { tips: [], bestPractices: [], facilitationGuide: '' },
     },
+    2: {
+      title: 'Analyze',
+      objective: 'Determine root causes of the problem.',
+      prompts: ['Why does this happen?'],
+      forms: [
+        {
+          type: 'fishbone',
+          name: 'Fishbone Diagram',
+          description: 'Identify cause categories',
+          required: false,
+        },
+        {
+          type: 'five_why',
+          name: '5 Whys',
+          description: 'Drill down to root cause',
+          required: false,
+        },
+      ],
+      completionCriteria: ['Root causes identified'],
+      methodology: { tips: [], bestPractices: [], facilitationGuide: '' },
+    },
   },
   buildProductContext: vi.fn().mockReturnValue({ stepNumber: 1 }),
 }))
@@ -127,5 +148,23 @@ describe('StepView', () => {
   it('renders knowledge cadence bar', () => {
     render(<StepView {...defaultProps} />)
     expect(screen.getByTestId('cadence-bar')).toBeTruthy()
+  })
+
+  /* ---- Recommended badges ---- */
+
+  it('renders Recommended badge for problem_statement in step 1', () => {
+    render(<StepView {...defaultProps} />)
+    expect(screen.getByTestId('recommended-badge-problem_statement')).toBeTruthy()
+  })
+
+  it('does not render Recommended badge for impact_assessment in step 1', () => {
+    render(<StepView {...defaultProps} />)
+    expect(screen.queryByTestId('recommended-badge-impact_assessment')).toBeNull()
+  })
+
+  it('renders two Recommended badges for step 2', () => {
+    render(<StepView {...defaultProps} stepNumber={2 as const} />)
+    expect(screen.getByTestId('recommended-badge-fishbone')).toBeTruthy()
+    expect(screen.getByTestId('recommended-badge-five_why')).toBeTruthy()
   })
 })

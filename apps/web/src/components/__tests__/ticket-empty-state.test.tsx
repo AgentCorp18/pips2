@@ -14,12 +14,16 @@ describe('TicketEmptyState', () => {
 
   it('renders the description', () => {
     render(<TicketEmptyState />)
-    expect(screen.getByText('Create your first ticket to start tracking work.')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Tickets help you track tasks, bugs, and action items across your projects.',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('renders the create button with link to /tickets/new', () => {
     render(<TicketEmptyState />)
-    const link = screen.getByRole('link', { name: /create your first ticket/i })
+    const link = screen.getByRole('link', { name: /create ticket/i })
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/tickets/new')
   })

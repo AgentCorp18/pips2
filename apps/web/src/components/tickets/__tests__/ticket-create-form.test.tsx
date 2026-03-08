@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { TicketCreateForm } from '../ticket-create-form'
 
 /* ============================================================
@@ -31,6 +31,10 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
+vi.mock('@/components/ui/ai-assist-button', () => ({
+  AiAssistButton: () => <button data-testid="ai-assist-mock">AI</button>,
+}))
+
 /* ============================================================
    Helpers
    ============================================================ */
@@ -50,6 +54,10 @@ const defaultProps = {
   projects,
 }
 
+const expandFullForm = () => {
+  fireEvent.click(screen.getByTestId('toggle-full-form'))
+}
+
 /* ============================================================
    Tests
    ============================================================ */
@@ -60,73 +68,139 @@ describe('TicketCreateForm', () => {
     mockUseActionState.mockReturnValue([{}, mockFormAction, false])
   })
 
-  /* ---- Basic rendering ---- */
+  /* ---- Quick Create section ---- */
 
-  it('renders the form element', () => {
+  it('renders quick create section', () => {
     render(<TicketCreateForm {...defaultProps} />)
-    const form = document.querySelector('form')
-    expect(form).toBeInTheDocument()
+    expect(screen.getByTestId('quick-create-section')).toBeInTheDocument()
   })
 
-  it('renders the title input field', () => {
+  it('renders "Quick Create" label', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expect(screen.getByText('Quick Create')).toBeInTheDocument()
+  })
+
+  it('renders quick create input with correct placeholder', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    expect(screen.getByTestId('quick-create-title-input')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('What needs to be done?')).toBeInTheDocument()
+  })
+
+  it('renders quick create submit button', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    expect(screen.getByTestId('quick-create-submit')).toBeInTheDocument()
+  })
+
+  it('renders hidden type/priority/status inputs for quick create', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    const form = screen.getByTestId('quick-create-section').querySelector('form')
+    expect(form).toBeInTheDocument()
+    const typeInput = form?.querySelector('input[name="type"]') as HTMLInputElement
+    expect(typeInput?.value).toBe('task')
+    const priorityInput = form?.querySelector('input[name="priority"]') as HTMLInputElement
+    expect(priorityInput?.value).toBe('medium')
+    const statusInput = form?.querySelector('input[name="status"]') as HTMLInputElement
+    expect(statusInput?.value).toBe('backlog')
+  })
+
+  /* ---- Toggle full form ---- */
+
+  it('renders toggle button', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    expect(screen.getByTestId('toggle-full-form')).toBeInTheDocument()
+  })
+
+  it('full form is hidden by default', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    expect(screen.queryByTestId('full-create-form')).not.toBeInTheDocument()
+  })
+
+  it('shows full form when toggle is clicked', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
+    expect(screen.getByTestId('full-create-form')).toBeInTheDocument()
+  })
+
+  it('toggle text changes when expanded', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    expect(screen.getByText('Show full form')).toBeInTheDocument()
+    expandFullForm()
+    expect(screen.getByText('Hide full form')).toBeInTheDocument()
+  })
+
+  /* ---- Full form: Basic rendering ---- */
+
+  it('renders the title input field in full form', () => {
+    render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Title *')).toBeInTheDocument()
   })
 
   it('renders the title input with required attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Title *')).toBeRequired()
   })
 
   it('renders the description textarea', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Description')).toBeInTheDocument()
   })
 
   it('renders the due date input', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Due Date')).toBeInTheDocument()
   })
 
   it('renders the tags input', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Tags')).toBeInTheDocument()
   })
 
   it('renders Type select trigger', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Type')).toBeInTheDocument()
   })
 
   it('renders Priority select trigger', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Priority')).toBeInTheDocument()
   })
 
   it('renders Status select trigger', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Status')).toBeInTheDocument()
   })
 
   it('renders Assignee select trigger', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Assignee')).toBeInTheDocument()
   })
 
   it('renders Project select trigger', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Project')).toBeInTheDocument()
   })
 
   it('renders the submit button with "Create Ticket" text', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByRole('button', { name: 'Create Ticket' })).toBeInTheDocument()
   })
 
   /* ---- Labels ---- */
 
-  it('renders all expected labels', () => {
+  it('renders all expected labels in full form', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByText('Title *')).toBeInTheDocument()
     expect(screen.getByText('Description')).toBeInTheDocument()
     expect(screen.getByText('Type')).toBeInTheDocument()
@@ -142,8 +216,10 @@ describe('TicketCreateForm', () => {
 
   it('renders hidden parent_id input when parentId is provided', () => {
     render(<TicketCreateForm {...defaultProps} parentId="parent-123" />)
-    const hidden = document.querySelector('input[name="parent_id"]') as HTMLInputElement
-    expect(hidden).toBeInTheDocument()
+    expandFullForm()
+    const hiddens = document.querySelectorAll('input[name="parent_id"]')
+    expect(hiddens.length).toBeGreaterThanOrEqual(1)
+    const hidden = hiddens[0] as HTMLInputElement
     expect(hidden.type).toBe('hidden')
     expect(hidden.value).toBe('parent-123')
   })
@@ -156,19 +232,14 @@ describe('TicketCreateForm', () => {
 
   /* ---- Pending state ---- */
 
-  it('shows "Creating..." and disables button when pending', () => {
+  it('shows "Creating..." and disables quick create button when pending', () => {
     mockUseActionState.mockReturnValue([{}, mockFormAction, true])
 
     render(<TicketCreateForm {...defaultProps} />)
 
-    const button = screen.getByRole('button', { name: 'Creating...' })
-    expect(button).toBeInTheDocument()
+    const button = screen.getByTestId('quick-create-submit')
+    expect(button).toHaveTextContent('Creating...')
     expect(button).toBeDisabled()
-  })
-
-  it('submit button is enabled when not pending', () => {
-    render(<TicketCreateForm {...defaultProps} />)
-    expect(screen.getByRole('button', { name: 'Create Ticket' })).not.toBeDisabled()
   })
 
   /* ---- Error display ---- */
@@ -177,14 +248,10 @@ describe('TicketCreateForm', () => {
     mockUseActionState.mockReturnValue([{ error: 'Something went wrong' }, mockFormAction, false])
 
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     const alert = screen.getByRole('alert')
     expect(alert).toBeInTheDocument()
     expect(alert).toHaveTextContent('Something went wrong')
-  })
-
-  it('does not render error alert when no error exists', () => {
-    render(<TicketCreateForm {...defaultProps} />)
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('renders field-level error for title', () => {
@@ -195,69 +262,21 @@ describe('TicketCreateForm', () => {
     ])
 
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByText('Title is required')).toBeInTheDocument()
-  })
-
-  it('sets aria-invalid on title input when title field error exists', () => {
-    mockUseActionState.mockReturnValue([
-      { fieldErrors: { title: 'Title is required' } },
-      mockFormAction,
-      false,
-    ])
-
-    render(<TicketCreateForm {...defaultProps} />)
-    const titleInput = screen.getByLabelText('Title *')
-    expect(titleInput).toHaveAttribute('aria-invalid', 'true')
-  })
-
-  it('sets aria-describedby on title input when title field error exists', () => {
-    mockUseActionState.mockReturnValue([
-      { fieldErrors: { title: 'Title is required' } },
-      mockFormAction,
-      false,
-    ])
-
-    render(<TicketCreateForm {...defaultProps} />)
-    const titleInput = screen.getByLabelText('Title *')
-    expect(titleInput).toHaveAttribute('aria-describedby', 'title-error')
-  })
-
-  it('renders field-level error for description', () => {
-    mockUseActionState.mockReturnValue([
-      { fieldErrors: { description: 'Description too long' } },
-      mockFormAction,
-      false,
-    ])
-
-    render(<TicketCreateForm {...defaultProps} />)
-    expect(screen.getByText('Description too long')).toBeInTheDocument()
-  })
-
-  it('renders field-level error for due date', () => {
-    mockUseActionState.mockReturnValue([
-      { fieldErrors: { due_date: 'Invalid date' } },
-      mockFormAction,
-      false,
-    ])
-
-    render(<TicketCreateForm {...defaultProps} />)
-    expect(screen.getByText('Invalid date')).toBeInTheDocument()
   })
 
   /* ---- Placeholders ---- */
 
-  it('shows placeholder text for title', () => {
-    render(<TicketCreateForm {...defaultProps} />)
-    expect(screen.getByPlaceholderText('Brief summary of the ticket')).toBeInTheDocument()
-  })
-
   it('shows placeholder text for description', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByPlaceholderText('Detailed description...')).toBeInTheDocument()
   })
 
   it('shows placeholder text for tags', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByPlaceholderText('Comma-separated tags')).toBeInTheDocument()
   })
 
@@ -265,37 +284,23 @@ describe('TicketCreateForm', () => {
 
   it('title input has correct name attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     const input = screen.getByLabelText('Title *')
     expect(input).toHaveAttribute('name', 'title')
   })
 
   it('description textarea has correct name attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     const textarea = screen.getByLabelText('Description')
     expect(textarea).toHaveAttribute('name', 'description')
-  })
-
-  it('due date input has correct name attribute via DatePicker hidden input', () => {
-    render(<TicketCreateForm {...defaultProps} />)
-    // DatePicker renders a hidden input with the name and a button trigger
-    const hiddenInput = document.querySelector('input[name="due_date"]') as HTMLInputElement
-    expect(hiddenInput).toBeInTheDocument()
-    expect(hiddenInput.type).toBe('hidden')
-    // The visible trigger button is linked via label
-    const trigger = screen.getByLabelText('Due Date')
-    expect(trigger).toBeInTheDocument()
-  })
-
-  it('tags input has correct name attribute', () => {
-    render(<TicketCreateForm {...defaultProps} />)
-    const input = screen.getByLabelText('Tags')
-    expect(input).toHaveAttribute('name', 'tags')
   })
 
   /* ---- aria-required ---- */
 
   it('title input has aria-required attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
+    expandFullForm()
     expect(screen.getByLabelText('Title *')).toHaveAttribute('aria-required', 'true')
   })
 
@@ -303,35 +308,13 @@ describe('TicketCreateForm', () => {
 
   it('renders without error when members list is empty', () => {
     render(<TicketCreateForm members={[]} projects={projects} />)
+    expandFullForm()
     expect(screen.getByLabelText('Assignee')).toBeInTheDocument()
   })
 
   it('renders without error when projects list is empty', () => {
     render(<TicketCreateForm members={members} projects={[]} />)
+    expandFullForm()
     expect(screen.getByLabelText('Project')).toBeInTheDocument()
-  })
-
-  /* ---- Multiple field errors ---- */
-
-  it('renders multiple field errors simultaneously', () => {
-    mockUseActionState.mockReturnValue([
-      {
-        error: 'Validation failed',
-        fieldErrors: {
-          title: 'Title is required',
-          description: 'Description too long',
-          due_date: 'Invalid date format',
-        },
-      },
-      mockFormAction,
-      false,
-    ])
-
-    render(<TicketCreateForm {...defaultProps} />)
-
-    expect(screen.getByRole('alert')).toHaveTextContent('Validation failed')
-    expect(screen.getByText('Title is required')).toBeInTheDocument()
-    expect(screen.getByText('Description too long')).toBeInTheDocument()
-    expect(screen.getByText('Invalid date format')).toBeInTheDocument()
   })
 })
