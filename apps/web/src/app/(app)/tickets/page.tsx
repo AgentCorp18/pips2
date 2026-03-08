@@ -11,6 +11,7 @@ import type { TicketRow } from '@/components/tickets/ticket-list-table'
 import { TicketEmptyState } from '@/components/tickets/ticket-empty-state'
 import { Plus } from 'lucide-react'
 import { ExportTicketsButton } from '@/components/tickets/export-tickets-button'
+import { QuickCreateFab } from '@/components/ui/quick-create-fab'
 import { getTickets } from './actions'
 import { TicketListFilters } from '@/components/tickets/ticket-list-filters'
 import { TicketQuickFilters } from '@/components/tickets/ticket-quick-filters'
@@ -235,6 +236,8 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       ) : (
         <TicketEmptyState />
       )}
+
+      <QuickCreateFab />
     </div>
   )
 }
