@@ -3,9 +3,11 @@ import { PIPS_STEPS } from '@pips/shared'
 
 const FOOTER_LINKS = {
   Product: [
-    { label: 'Features', href: '#features' },
-    { label: 'Methodology', href: '#methodology' },
-    { label: 'How It Works', href: '#how-it-works' },
+    { label: 'Methodology', href: '/methodology' },
+    { label: 'Resources', href: '/resources' },
+    { label: 'Book', href: '/book' },
+    { label: 'Glossary', href: '/resources/glossary' },
+    { label: 'Pricing', href: '/pricing' },
   ],
   Account: [
     { label: 'Sign Up', href: '/signup' },
@@ -40,8 +42,7 @@ export const LandingFooter = () => {
               <span className="text-xl font-bold tracking-[0.05em] text-white">PIPS</span>
             </div>
             <p className="max-w-[280px] text-sm leading-relaxed text-white/40">
-              A 6-step process improvement methodology embedded in enterprise project management
-              software.
+              A 6-step process improvement methodology embedded in project management software.
             </p>
           </div>
 

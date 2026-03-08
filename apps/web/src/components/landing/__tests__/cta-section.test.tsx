@@ -17,27 +17,27 @@ vi.mock('next/link', () => ({
 describe('CtaSection', () => {
   it('renders heading', () => {
     render(<CtaSection />)
-    expect(screen.getByText('Ready to Improve Your Processes?')).toBeTruthy()
+    expect(screen.getByText('Ready to improve how your team improves?')).toBeTruthy()
   })
 
   it('renders heading as h2', () => {
     render(<CtaSection />)
-    expect(screen.getByText('Ready to Improve Your Processes?').tagName).toBe('H2')
+    expect(screen.getByText('Ready to improve how your team improves?').tagName).toBe('H2')
   })
 
   it('renders description', () => {
     render(<CtaSection />)
-    expect(screen.getByText(/Join teams using PIPS/)).toBeTruthy()
+    expect(screen.getByText(/Start free — no credit card required/)).toBeTruthy()
   })
 
-  it('renders Get Started Free CTA', () => {
+  it('renders Start Free CTA', () => {
     render(<CtaSection />)
-    expect(screen.getByText('Get Started Free')).toBeTruthy()
+    expect(screen.getByText('Start Free')).toBeTruthy()
   })
 
   it('links CTA to /signup', () => {
     render(<CtaSection />)
-    expect(screen.getByText('Get Started Free').closest('a')?.getAttribute('href')).toBe('/signup')
+    expect(screen.getByText('Start Free').closest('a')?.getAttribute('href')).toBe('/signup')
   })
 
   it('renders section element', () => {

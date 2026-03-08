@@ -1,17 +1,17 @@
-import { BookOpen, KanbanSquare, Users, BarChart3 } from 'lucide-react'
+import { FileText, BookOpen, Users, GraduationCap, Radio, BarChart3 } from 'lucide-react'
 
 const FEATURES = [
   {
-    icon: BookOpen,
-    title: 'Guided Methodology',
+    icon: FileText,
+    title: 'Interactive Forms',
     description:
-      'Step-by-step forms, templates, and structured workflows guide your team through each phase of process improvement.',
+      'Digital forms for every step — problem statements, fishbone diagrams, 5-why analysis, criteria matrices, and more.',
   },
   {
-    icon: KanbanSquare,
-    title: 'Integrated Ticketing',
+    icon: BookOpen,
+    title: 'Knowledge Hub',
     description:
-      'Kanban boards, priority tracking, and task assignment keep implementation on track from planning to completion.',
+      'A searchable library of 205+ resources, guides, templates, and references to support every phase.',
   },
   {
     icon: Users,
@@ -20,10 +20,22 @@ const FEATURES = [
       'Role-based access, team workspaces, and real-time notifications keep everyone aligned and accountable.',
   },
   {
-    icon: BarChart3,
-    title: 'Data-Driven Decisions',
+    icon: GraduationCap,
+    title: 'Training Mode',
     description:
-      'Dashboards, analytics, and evaluation tools help you measure impact and continuously refine your processes.',
+      'Four guided training paths from beginner to advanced, with practice scenarios and self-assessment.',
+  },
+  {
+    icon: Radio,
+    title: 'Real-time Workshop',
+    description:
+      'Facilitate live improvement workshops with shared boards, voting, and collaborative brainstorming.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Reporting & Insights',
+    description:
+      'Dashboards and evaluation tools help you measure impact, track progress, and refine your approach.',
   },
 ] as const
 
@@ -45,7 +57,7 @@ export const FeaturesSection = () => {
       </div>
 
       {/* Feature cards */}
-      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((feature) => (
           <div
             key={feature.title}

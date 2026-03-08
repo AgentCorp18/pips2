@@ -30,9 +30,9 @@ describe('LandingNav', () => {
     expect(screen.getByText('Features')).toBeTruthy()
   })
 
-  it('renders How It Works nav link', () => {
+  it('renders Pricing nav link', () => {
     render(<LandingNav />)
-    expect(screen.getByText('How It Works')).toBeTruthy()
+    expect(screen.getByText('Pricing')).toBeTruthy()
   })
 
   it('renders Sign In link', () => {
@@ -41,10 +41,10 @@ describe('LandingNav', () => {
     expect(signIn.closest('a')?.getAttribute('href')).toBe('/login')
   })
 
-  it('renders Get Started button', () => {
+  it('renders Start Free button', () => {
     render(<LandingNav />)
-    const getStarted = screen.getByText('Get Started')
-    expect(getStarted.closest('a')?.getAttribute('href')).toBe('/signup')
+    const startFree = screen.getByText('Start Free')
+    expect(startFree.closest('a')?.getAttribute('href')).toBe('/signup')
   })
 
   it('renders header element', () => {

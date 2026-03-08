@@ -40,6 +40,16 @@ describe('LandingFooter', () => {
     expect(screen.getByText('Legal')).toBeTruthy()
   })
 
+  it('renders Methodology link pointing to /methodology', () => {
+    render(<LandingFooter />)
+    expect(screen.getByText('Methodology').closest('a')?.getAttribute('href')).toBe('/methodology')
+  })
+
+  it('renders Pricing link pointing to /pricing', () => {
+    render(<LandingFooter />)
+    expect(screen.getByText('Pricing').closest('a')?.getAttribute('href')).toBe('/pricing')
+  })
+
   it('renders Sign Up link pointing to /signup', () => {
     render(<LandingFooter />)
     expect(screen.getByText('Sign Up').closest('a')?.getAttribute('href')).toBe('/signup')

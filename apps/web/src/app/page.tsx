@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 import {
   LandingNav,
   HeroSection,
+  ProblemSolutionSection,
   MethodologySection,
   FeaturesSection,
-  HowItWorksSection,
+  TrustSection,
   CtaSection,
   LandingFooter,
 } from '@/components/landing'
@@ -13,20 +14,20 @@ import { JsonLd } from '@/components/seo/json-ld'
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
 
 export const metadata: Metadata = {
-  title: 'Process Improvement Made Simple',
+  title: 'Transform How Your Team Solves Problems | PIPS',
   description:
-    'PIPS is a 6-step methodology embedded in project management software that helps teams identify problems, analyze root causes, and deliver measurable results.',
+    'PIPS embeds a proven 6-step methodology into your workflow — guiding teams from problem identification through measurable results.',
   openGraph: {
-    title: 'PIPS — Process Improvement Made Simple',
+    title: 'PIPS — Transform How Your Team Solves Problems',
     description:
-      'A 6-step methodology embedded in project management software. Identify problems, analyze root causes, and deliver measurable results.',
+      'A 6-step methodology embedded in project management software. Guide your team from problem identification through measurable results.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PIPS — Process Improvement Made Simple',
+    title: 'PIPS — Transform How Your Team Solves Problems',
     description:
-      'A 6-step methodology embedded in project management software. Identify problems, analyze root causes, and deliver measurable results.',
+      'A 6-step methodology embedded in project management software. Guide your team from problem identification through measurable results.',
   },
 }
 
@@ -63,9 +64,10 @@ export const HomePage = () => {
       <JsonLd data={webApplicationJsonLd} />
       <LandingNav />
       <HeroSection />
+      <ProblemSolutionSection />
       <MethodologySection />
       <FeaturesSection />
-      <HowItWorksSection />
+      <TrustSection />
       <CtaSection />
       <LandingFooter />
     </main>

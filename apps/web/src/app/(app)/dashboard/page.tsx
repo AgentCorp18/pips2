@@ -8,6 +8,8 @@ import { RecentActivity } from '@/components/dashboard/recent-activity'
 import { CreateSampleProject } from './create-sample-project'
 import { getDashboardStats, getProjectsByStep, getRecentActivity } from './actions'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
+import { WelcomeCards } from '@/components/dashboard/welcome-cards'
+import { QuickCreateFab } from '@/components/ui/quick-create-fab'
 import type { ProductContext } from '@pips/shared'
 
 export const metadata: Metadata = {
@@ -101,25 +103,39 @@ const DashboardPage = async () => {
         <KnowledgeCadenceBar context={dashboardCadenceContext} defaultCollapsed />
       </div>
 
-      {/* Stats cards */}
-      <StatCards stats={stats} />
+      {/* Conditional rendering: welcome experience vs full dashboard */}
+      {stats.activeProjects === 0 && stats.openTickets === 0 ? (
+        <>
+          <WelcomeCards />
+          <div className="mt-6">
+            <CreateSampleProject />
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Stats cards */}
+          <StatCards stats={stats} />
 
-      {/* Sample project CTA — shown when user has no projects */}
-      {stats.activeProjects === 0 && (
-        <div className="mt-6">
-          <CreateSampleProject />
-        </div>
+          {/* Sample project CTA — shown when user has no projects */}
+          {stats.activeProjects === 0 && (
+            <div className="mt-6">
+              <CreateSampleProject />
+            </div>
+          )}
+
+          {/* Projects by Step chart */}
+          <div className="mt-8">
+            <ProjectsByStepChart data={stepData} />
+          </div>
+
+          {/* Recent Activity */}
+          <div className="mt-8">
+            <RecentActivity items={activity} />
+          </div>
+        </>
       )}
 
-      {/* Projects by Step chart */}
-      <div className="mt-8">
-        <ProjectsByStepChart data={stepData} />
-      </div>
-
-      {/* Recent Activity */}
-      <div className="mt-8">
-        <RecentActivity items={activity} />
-      </div>
+      <QuickCreateFab />
     </div>
   )
 }

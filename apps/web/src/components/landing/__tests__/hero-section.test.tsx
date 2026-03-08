@@ -17,12 +17,12 @@ vi.mock('next/link', () => ({
 describe('HeroSection', () => {
   it('renders headline', () => {
     render(<HeroSection />)
-    expect(screen.getByText('Process Improvement Made Simple')).toBeTruthy()
+    expect(screen.getByText('Transform How Your Team Solves Problems')).toBeTruthy()
   })
 
   it('renders headline as h1', () => {
     render(<HeroSection />)
-    expect(screen.getByText('Process Improvement Made Simple').tagName).toBe('H1')
+    expect(screen.getByText('Transform How Your Team Solves Problems').tagName).toBe('H1')
   })
 
   it('renders overline text', () => {
@@ -32,39 +32,30 @@ describe('HeroSection', () => {
 
   it('renders subtitle', () => {
     render(<HeroSection />)
-    expect(screen.getByText(/PIPS guides your team through six proven steps/)).toBeTruthy()
+    expect(screen.getByText(/embeds a proven methodology/)).toBeTruthy()
   })
 
-  it('renders Get Started Free CTA', () => {
+  it('renders Start Free CTA linking to /signup', () => {
     render(<HeroSection />)
-    expect(screen.getByText('Get Started Free')).toBeTruthy()
+    expect(screen.getByText('Start Free').closest('a')?.getAttribute('href')).toBe('/signup')
   })
 
-  it('links Get Started Free to /signup', () => {
+  it('renders See the Methodology link to /methodology', () => {
     render(<HeroSection />)
-    expect(screen.getByText('Get Started Free').closest('a')?.getAttribute('href')).toBe('/signup')
-  })
-
-  it('renders See How It Works link', () => {
-    render(<HeroSection />)
-    expect(screen.getByText('See How It Works')).toBeTruthy()
-  })
-
-  it('links See How It Works to #methodology', () => {
-    render(<HeroSection />)
-    expect(screen.getByText('See How It Works').closest('a')?.getAttribute('href')).toBe(
-      '#methodology',
+    expect(screen.getByText('See the Methodology').closest('a')?.getAttribute('href')).toBe(
+      '/methodology',
     )
+  })
+
+  it('renders 6 step numbers in stepper', () => {
+    render(<HeroSection />)
+    for (let i = 1; i <= 6; i++) {
+      expect(screen.getByText(String(i))).toBeTruthy()
+    }
   })
 
   it('renders section element', () => {
     const { container } = render(<HeroSection />)
     expect(container.querySelector('section')).toBeTruthy()
-  })
-
-  it('renders 6 pip dots', () => {
-    const { container } = render(<HeroSection />)
-    const dots = container.querySelectorAll('span.rounded-full')
-    expect(dots.length).toBeGreaterThanOrEqual(6)
   })
 })

@@ -18,14 +18,14 @@ describe('FeaturesSection', () => {
     expect(screen.getByText('Built for Teams')).toBeTruthy()
   })
 
-  it('renders Guided Methodology card', () => {
+  it('renders Interactive Forms card', () => {
     render(<FeaturesSection />)
-    expect(screen.getByText('Guided Methodology')).toBeTruthy()
+    expect(screen.getByText('Interactive Forms')).toBeTruthy()
   })
 
-  it('renders Integrated Ticketing card', () => {
+  it('renders Knowledge Hub card', () => {
     render(<FeaturesSection />)
-    expect(screen.getByText('Integrated Ticketing')).toBeTruthy()
+    expect(screen.getByText('Knowledge Hub')).toBeTruthy()
   })
 
   it('renders Team Collaboration card', () => {
@@ -33,18 +33,30 @@ describe('FeaturesSection', () => {
     expect(screen.getByText('Team Collaboration')).toBeTruthy()
   })
 
-  it('renders Data-Driven Decisions card', () => {
+  it('renders Training Mode card', () => {
     render(<FeaturesSection />)
-    expect(screen.getByText('Data-Driven Decisions')).toBeTruthy()
+    expect(screen.getByText('Training Mode')).toBeTruthy()
   })
 
-  it('renders 4 feature cards', () => {
+  it('renders Real-time Workshop card', () => {
+    render(<FeaturesSection />)
+    expect(screen.getByText('Real-time Workshop')).toBeTruthy()
+  })
+
+  it('renders Reporting & Insights card', () => {
+    render(<FeaturesSection />)
+    expect(screen.getByText('Reporting & Insights')).toBeTruthy()
+  })
+
+  it('renders 6 feature cards as h3', () => {
     render(<FeaturesSection />)
     const cards = [
-      'Guided Methodology',
-      'Integrated Ticketing',
+      'Interactive Forms',
+      'Knowledge Hub',
       'Team Collaboration',
-      'Data-Driven Decisions',
+      'Training Mode',
+      'Real-time Workshop',
+      'Reporting & Insights',
     ]
     cards.forEach((title) => {
       expect(screen.getByText(title).tagName).toBe('H3')

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Crosshair, Search, Lightbulb, ClipboardCheck, Wrench, Gauge } from 'lucide-react'
 import { PIPS_STEPS } from '@pips/shared'
 
@@ -26,25 +27,15 @@ export const MethodologySection = () => {
       {/* Step gradient stripe */}
       <div className="step-gradient-stripe-smooth mx-auto mb-12 max-w-4xl rounded-full" />
 
-      {/* Step dot row */}
-      <div className="mb-12 flex items-center justify-center gap-1.5">
-        {PIPS_STEPS.map((step) => (
-          <span
-            key={step.number}
-            className="inline-block h-2.5 w-2.5 rounded-full"
-            style={{ backgroundColor: step.color }}
-          />
-        ))}
-      </div>
-
-      {/* Steps grid */}
+      {/* Steps grid - 3x2 */}
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {PIPS_STEPS.map((step, i) => {
           const Icon = STEP_ICONS[i]!
           return (
-            <div
+            <Link
               key={step.number}
-              className="relative rounded-[var(--radius-lg)] border border-[var(--color-neutral-200)] bg-white p-7 transition-all duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-medium)]"
+              href={`/methodology/step/${step.number}`}
+              className="group relative rounded-[var(--radius-lg)] border border-[var(--color-neutral-200)] bg-white p-7 transition-all duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-medium)]"
               style={{ borderTopWidth: '3px', borderTopColor: step.color }}
             >
               {/* Step header */}
@@ -72,7 +63,7 @@ export const MethodologySection = () => {
               >
                 <Icon className="h-4.5 w-4.5" style={{ color: step.color }} />
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>

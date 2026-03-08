@@ -1,6 +1,18 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MethodologySection } from '../methodology-section'
+
+vi.mock('next/link', () => ({
+  default: ({
+    children,
+    href,
+    ...rest
+  }: { children: React.ReactNode; href: string } & Record<string, unknown>) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}))
 
 describe('MethodologySection', () => {
   it('renders section heading', () => {
@@ -46,6 +58,12 @@ describe('MethodologySection', () => {
     names.forEach((name) => {
       expect(screen.getByText(name).tagName).toBe('H3')
     })
+  })
+
+  it('renders step cards as links to methodology steps', () => {
+    render(<MethodologySection />)
+    const link1 = screen.getByText('Identify').closest('a')
+    expect(link1?.getAttribute('href')).toBe('/methodology/step/1')
   })
 
   it('renders section with methodology id', () => {

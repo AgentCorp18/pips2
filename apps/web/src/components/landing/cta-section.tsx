@@ -28,19 +28,19 @@ export const CtaSection = () => {
         </div>
 
         <h2 className="mb-4 font-serif text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.15] text-white">
-          Ready to Improve Your Processes?
+          Ready to improve how your team improves?
         </h2>
 
         <p className="mb-9 text-[1.0625rem] leading-relaxed text-white/60">
-          Join teams using PIPS to solve real problems with a proven, structured approach. Start for
-          free — no credit card required.
+          Start free — no credit card required. Explore the full 6-step methodology and see how PIPS
+          can transform your improvement process.
         </p>
 
         <Link
           href="/signup"
           className="inline-flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-8 py-3.5 text-base font-semibold text-white shadow-[0_4px_14px_rgba(79,70,229,0.35)] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-hover)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.45)] active:translate-y-0 active:scale-[0.97]"
         >
-          Get Started Free
+          Start Free
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

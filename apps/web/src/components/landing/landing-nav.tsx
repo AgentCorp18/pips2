@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { PIPS_STEPS } from '@pips/shared'
 
 const NAV_LINKS = [
-  { label: 'Methodology', href: '#methodology' },
+  { label: 'Methodology', href: '/methodology' },
   { label: 'Features', href: '#features' },
-  { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Pricing', href: '/pricing' },
 ] as const
 
 export const LandingNav = () => {
@@ -28,13 +28,13 @@ export const LandingNav = () => {
         {/* Nav links — hidden on small screens */}
         <nav className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               className="text-sm font-medium text-white/60 transition-colors hover:text-white"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -50,7 +50,7 @@ export const LandingNav = () => {
             href="/signup"
             className="rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)]"
           >
-            Get Started
+            Start Free
           </Link>
         </div>
       </div>
