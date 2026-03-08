@@ -21,18 +21,18 @@ test.describe('Kanban Board', () => {
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    const columnLabels = [
-      'Backlog',
-      'To Do',
-      'In Progress',
-      'In Review',
-      'Blocked',
-      'Done',
-      'Cancelled',
+    const columnIds = [
+      'backlog',
+      'todo',
+      'in_progress',
+      'in_review',
+      'blocked',
+      'done',
+      'cancelled',
     ]
 
-    for (const label of columnLabels) {
-      const columnHeader = page.getByRole('heading', { name: label })
+    for (const id of columnIds) {
+      const columnHeader = page.getByTestId(`kanban-column-heading-${id}`)
       await expect(columnHeader).toBeVisible({ timeout: 10000 })
     }
   })
@@ -46,8 +46,8 @@ test.describe('Kanban Board', () => {
     // Create a ticket via the UI with default status (backlog)
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Title').fill(uniqueTitle)
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
+    await page.getByTestId('create-ticket-button').click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
 
     // Navigate to the board
@@ -55,10 +55,7 @@ test.describe('Kanban Board', () => {
     await page.waitForLoadState('networkidle')
 
     // The ticket should appear in the Backlog column
-    // The Backlog column is identified by its aria-label
-    const backlogColumn = page.locator('[role="group"]').filter({
-      has: page.getByRole('heading', { name: 'Backlog' }),
-    })
+    const backlogColumn = page.getByTestId('kanban-column-backlog')
     const ticketInBacklog = backlogColumn.getByText(uniqueTitle)
     await expect(ticketInBacklog).toBeVisible({ timeout: 10000 })
   })
@@ -85,11 +82,11 @@ test.describe('Kanban Board', () => {
     // Check for the board filters section (priority, assignee, project dropdowns)
     // At least one filter mechanism should be visible
     // The page structure has: header, quick filters, board filters, then the board
-    const boardPage = page.getByRole('heading', { name: 'Board' })
+    const boardPage = page.getByTestId('board-page-heading')
     await expect(boardPage).toBeVisible()
 
     // The description text below the heading is always present
-    const filterDescription = page.getByText('Drag tickets between columns to update status')
+    const filterDescription = page.getByTestId('board-description')
     await expect(filterDescription).toBeVisible()
 
     // If quick filters exist, verify they render
@@ -106,7 +103,7 @@ test.describe('Kanban Board', () => {
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    const newTicketButton = page.getByRole('link', { name: /New Ticket/ })
+    const newTicketButton = page.getByTestId('board-new-ticket-link')
     await expect(newTicketButton).toBeVisible({ timeout: 10000 })
     await expect(newTicketButton).toHaveAttribute('href', '/tickets/new')
 
@@ -123,26 +120,25 @@ test.describe('Kanban Board', () => {
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    // Each column has an aria-label like "Backlog column, N ticket(s)"
-    // and a visible count span next to the heading.
-    const columnLabels = [
-      'Backlog',
-      'To Do',
-      'In Progress',
-      'In Review',
-      'Blocked',
-      'Done',
-      'Cancelled',
+    // Each column has a count badge with a data-testid
+    const columnIds = [
+      'backlog',
+      'todo',
+      'in_progress',
+      'in_review',
+      'blocked',
+      'done',
+      'cancelled',
     ]
 
-    for (const label of columnLabels) {
-      // Each column group has an aria-label containing the count
-      const column = page.locator('[role="group"]').filter({
-        has: page.getByRole('heading', { name: label }),
-      })
+    for (const id of columnIds) {
+      const column = page.getByTestId(`kanban-column-${id}`)
       await expect(column).toBeVisible({ timeout: 10000 })
 
-      // The count badge is a span after the h3, showing a number
+      // The count badge has a data-testid
+      const countBadge = page.getByTestId(`kanban-column-count-${id}`)
+      await expect(countBadge).toBeVisible()
+
       // Verify the column has an aria-label that includes "ticket"
       const ariaLabel = await column.getAttribute('aria-label')
       expect(ariaLabel).toMatch(/\d+ tickets?/)

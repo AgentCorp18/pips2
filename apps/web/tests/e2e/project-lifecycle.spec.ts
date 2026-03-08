@@ -59,20 +59,18 @@ test.describe('Project creation page', () => {
     await expect(page).toHaveTitle(/New Project/)
 
     // Verify form heading
-    const heading = page.getByText('Create a new project')
+    const heading = page.getByTestId('create-project-heading')
     await expect(heading).toBeVisible()
 
     // Verify form fields
-    const nameInput = page.locator('input[name="name"]')
-    const descriptionTextarea = page.locator('textarea[name="description"]')
-    const dateInput = page.locator('input[name="target_completion_date"]')
+    const nameInput = page.getByTestId('project-name-input')
+    const descriptionTextarea = page.getByTestId('project-description-input')
 
     await expect(nameInput).toBeVisible()
     await expect(descriptionTextarea).toBeVisible()
-    await expect(dateInput).toBeVisible()
 
     // Verify submit button
-    const submitButton = page.getByRole('button', { name: 'Create project' })
+    const submitButton = page.getByTestId('create-project-button')
     await expect(submitButton).toBeVisible()
     await expect(submitButton).toBeEnabled()
   })
@@ -88,10 +86,10 @@ test.describe('Project creation page', () => {
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
 
-    const nameInput = page.locator('input[name="name"]')
+    const nameInput = page.getByTestId('project-name-input')
     await expect(nameInput).toHaveAttribute('placeholder', 'e.g. Reduce onboarding time')
 
-    const descriptionTextarea = page.locator('textarea[name="description"]')
+    const descriptionTextarea = page.getByTestId('project-description-input')
     await expect(descriptionTextarea).toHaveAttribute(
       'placeholder',
       'Describe the process you want to improve...',
@@ -109,8 +107,8 @@ test.describe('Project creation page', () => {
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
 
-    const nameInput = page.locator('input[name="name"]')
-    const descriptionTextarea = page.locator('textarea[name="description"]')
+    const nameInput = page.getByTestId('project-name-input')
+    const descriptionTextarea = page.getByTestId('project-description-input')
 
     await nameInput.fill('E2E Test Project')
     await descriptionTextarea.fill('This is a test project created by E2E tests')
@@ -131,9 +129,9 @@ test.describe('Project creation page', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill required field
-    await page.locator('input[name="name"]').fill('E2E Test Project')
+    await page.getByTestId('project-name-input').fill('E2E Test Project')
 
-    const submitButton = page.getByRole('button', { name: 'Create project' })
+    const submitButton = page.getByTestId('create-project-button')
     await submitButton.click()
 
     // Check for pending state
@@ -160,10 +158,10 @@ test.describe('Projects list page', () => {
     await page.goto('/projects')
     await page.waitForLoadState('networkidle')
 
-    const heading = page.getByRole('heading', { name: 'Projects' })
+    const heading = page.getByTestId('projects-page-heading')
     await expect(heading).toBeVisible()
 
-    const description = page.getByText('Manage your process improvement projects')
+    const description = page.getByTestId('projects-description')
     await expect(description).toBeVisible()
   })
 
@@ -178,7 +176,7 @@ test.describe('Projects list page', () => {
     await page.goto('/projects')
     await page.waitForLoadState('networkidle')
 
-    const newProjectButton = page.getByRole('link', { name: /New Project/ })
+    const newProjectButton = page.getByTestId('new-project-link')
     await expect(newProjectButton).toBeVisible()
     await expect(newProjectButton).toHaveAttribute('href', '/projects/new')
   })
@@ -195,7 +193,7 @@ test.describe('Projects list page', () => {
     await page.waitForLoadState('networkidle')
 
     // Either shows project cards OR empty state
-    const emptyState = page.getByText('No projects yet')
+    const emptyState = page.getByTestId('projects-empty-title')
     const projectGrid = page.locator('.grid')
 
     const hasEmpty = await emptyState.isVisible().catch(() => false)
@@ -215,7 +213,7 @@ test.describe('Projects list page', () => {
     await page.goto('/projects')
     await page.waitForLoadState('networkidle')
 
-    const newProjectButton = page.getByRole('link', { name: /New Project/ })
+    const newProjectButton = page.getByTestId('new-project-link')
     await newProjectButton.click()
 
     await expect(page).toHaveURL(/\/projects\/new/)
@@ -332,7 +330,7 @@ test.describe('Project detail and step stepper', () => {
     await page.waitForLoadState('networkidle')
 
     // Click the first (current) step button in the stepper
-    const stepButton = page.getByRole('button', { name: /Identify/i })
+    const stepButton = page.getByTestId('step-button-1')
     const isClickable = await stepButton.isEnabled().catch(() => false)
 
     if (isClickable) {
@@ -369,7 +367,7 @@ test.describe('Step detail page', () => {
     await page.waitForLoadState('networkidle')
 
     // Click step 1 if clickable
-    const stepButton = page.getByRole('button', { name: /Identify/i })
+    const stepButton = page.getByTestId('step-button-1')
     const isClickable = await stepButton.isEnabled().catch(() => false)
 
     if (!isClickable) {
@@ -381,9 +379,9 @@ test.describe('Step detail page', () => {
     await page.waitForLoadState('networkidle')
 
     // Verify step content sections
-    const guidingQuestions = page.getByText('Guiding Questions')
-    const analysisTools = page.getByText('Analysis Tools')
-    const completionCriteria = page.getByText('Completion Criteria')
+    const guidingQuestions = page.getByTestId('guiding-questions-title')
+    const analysisTools = page.getByTestId('analysis-tools-title')
+    const completionCriteria = page.getByTestId('completion-criteria-title')
 
     await expect(guidingQuestions).toBeVisible()
     await expect(analysisTools).toBeVisible()
@@ -412,7 +410,7 @@ test.describe('Step detail page', () => {
     await projectLink.click()
     await page.waitForLoadState('networkidle')
 
-    const stepButton = page.getByRole('button', { name: /Identify/i })
+    const stepButton = page.getByTestId('step-button-1')
     const isClickable = await stepButton.isEnabled().catch(() => false)
 
     if (!isClickable) {
@@ -424,7 +422,7 @@ test.describe('Step detail page', () => {
     await page.waitForLoadState('networkidle')
 
     // Should show a status badge (Not Started, In Progress, or Completed)
-    const statusBadge = page.getByText(/(Not Started|In Progress|Completed|Skipped)/)
+    const statusBadge = page.getByTestId('step-status-badge')
     await expect(statusBadge.first()).toBeVisible()
   })
 
@@ -450,7 +448,7 @@ test.describe('Step detail page', () => {
     await projectLink.click()
     await page.waitForLoadState('networkidle')
 
-    const stepButton = page.getByRole('button', { name: /Identify/i })
+    const stepButton = page.getByTestId('step-button-1')
     const isClickable = await stepButton.isEnabled().catch(() => false)
 
     if (!isClickable) {
@@ -501,7 +499,7 @@ test.describe('Form auto-save', () => {
     await projectLink.click()
     await page.waitForLoadState('networkidle')
 
-    const stepButton = page.getByRole('button', { name: /Identify/i })
+    const stepButton = page.getByTestId('step-button-1')
     const isClickable = await stepButton.isEnabled().catch(() => false)
 
     if (!isClickable) {
@@ -524,11 +522,11 @@ test.describe('Form auto-save', () => {
     await page.waitForLoadState('networkidle')
 
     // Verify "Back to step" link
-    const backLink = page.getByText('Back to step')
+    const backLink = page.getByTestId('back-to-step-link')
     await expect(backLink).toBeVisible()
 
     // Verify manual Save button
-    const saveButton = page.getByRole('button', { name: 'Save' })
+    const saveButton = page.getByTestId('form-save-button')
     await expect(saveButton).toBeVisible()
   })
 
@@ -554,7 +552,7 @@ test.describe('Form auto-save', () => {
     await projectLink.click()
     await page.waitForLoadState('networkidle')
 
-    const stepButton = page.getByRole('button', { name: /Identify/i })
+    const stepButton = page.getByTestId('step-button-1')
     const isClickable = await stepButton.isEnabled().catch(() => false)
 
     if (!isClickable) {

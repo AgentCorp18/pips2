@@ -22,10 +22,10 @@ test.describe('Ticket CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill only the required title field (label is "Title *", placeholder is "Brief summary of the ticket")
-    await page.getByLabel('Title').fill(uniqueTitle)
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
 
     // Submit the form
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('create-ticket-button').click()
 
     // Should redirect to /tickets
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
@@ -47,8 +47,8 @@ test.describe('Ticket CRUD', () => {
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
     const projectName = `E2E Proj for Ticket ${Date.now()}`
-    await page.getByLabel('Project name').fill(projectName)
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('project-name-input').fill(projectName)
+    await page.getByTestId('create-project-button').click()
     await page.waitForURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
 
     // Navigate to ticket creation
@@ -56,35 +56,35 @@ test.describe('Ticket CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill title and description
-    await page.getByLabel('Title').fill(uniqueTitle)
-    await page.getByLabel('Description').fill(description)
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
+    await page.getByTestId('ticket-description-input').fill(description)
 
     // Select Type = bug (using the SelectTrigger with aria-label="Type")
-    await page.locator('[aria-label="Type"]').click()
+    await page.getByTestId('ticket-type-select').click()
     await page.getByRole('option', { name: 'Bug' }).click()
 
     // Select Priority = high
-    await page.locator('[aria-label="Priority"]').click()
+    await page.getByTestId('ticket-priority-select').click()
     await page.getByRole('option', { name: 'High' }).click()
 
     // Select Status = todo
-    await page.locator('[aria-label="Status"]').click()
+    await page.getByTestId('ticket-status-select').click()
     await page.getByRole('option', { name: 'Todo' }).click()
 
     // Select Assignee (first member in list — should be the test user)
-    await page.locator('[aria-label="Assignee"]').click()
+    await page.getByTestId('ticket-assignee-select').click()
     const assigneeOption = page.getByRole('option').first()
     await assigneeOption.click()
 
     // Select Project (the one we just created)
-    await page.locator('[aria-label="Project"]').click()
+    await page.getByTestId('ticket-project-select').click()
     await page.getByRole('option', { name: projectName }).click()
 
     // Fill tags
-    await page.getByLabel('Tags').fill('e2e,test,automated')
+    await page.getByTestId('ticket-tags-input').fill('e2e,test,automated')
 
     // Submit
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('create-ticket-button').click()
 
     // Should redirect to /tickets
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
@@ -106,8 +106,8 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Detail View ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Title').fill(uniqueTitle)
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
+    await page.getByTestId('create-ticket-button').click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
@@ -129,7 +129,7 @@ test.describe('Ticket CRUD', () => {
     await expect(statusBadge.first()).toBeVisible()
 
     // Comment section should be visible
-    const commentsHeading = page.getByText(/Comments \(\d+\)/)
+    const commentsHeading = page.getByTestId('comments-heading')
     await expect(commentsHeading).toBeVisible()
   })
 
@@ -142,8 +142,8 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Comment Test ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Title').fill(uniqueTitle)
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
+    await page.getByTestId('create-ticket-button').click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
@@ -155,12 +155,12 @@ test.describe('Ticket CRUD', () => {
 
     // Write a comment
     const commentText = `E2E test comment ${Date.now()}`
-    const commentTextarea = page.getByPlaceholder('Write a comment... Use @ to mention someone')
+    const commentTextarea = page.getByTestId('comment-textarea')
     await expect(commentTextarea).toBeVisible()
     await commentTextarea.fill(commentText)
 
     // Comment button should now be enabled
-    const commentButton = page.getByRole('button', { name: 'Comment' })
+    const commentButton = page.getByTestId('comment-submit-button')
     await expect(commentButton).toBeEnabled()
     await commentButton.click()
 
@@ -169,7 +169,7 @@ test.describe('Ticket CRUD', () => {
     await expect(postedComment).toBeVisible({ timeout: 15000 })
 
     // Comment count should update to 1
-    const commentsHeading = page.getByText('Comments (1)')
+    const commentsHeading = page.getByTestId('comments-heading')
     await expect(commentsHeading).toBeVisible({ timeout: 10000 })
   })
 
@@ -182,8 +182,8 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Edit Title ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Title').fill(uniqueTitle)
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
+    await page.getByTestId('create-ticket-button').click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
@@ -195,14 +195,14 @@ test.describe('Ticket CRUD', () => {
 
     // The title is rendered in an h1 with a pencil icon on hover.
     // Clicking the title should activate edit mode with an input.
-    const titleHeading = page.locator('h1').filter({ hasText: uniqueTitle })
+    const titleHeading = page.getByTestId('ticket-detail-title')
     await expect(titleHeading).toBeVisible()
 
     // Click title to activate inline editing
     await titleHeading.click()
 
     // An input field should now be visible for editing the title
-    const titleInput = page.locator('input').filter({ hasText: '' }).first()
+    const titleInput = page.getByTestId('ticket-title-edit-input')
     await expect(titleInput).toBeVisible({ timeout: 5000 })
 
     // Pressing Escape should cancel editing
@@ -218,13 +218,13 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Board Check ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Title').fill(uniqueTitle)
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
 
     // Set status to todo so it appears in "To Do" column
-    await page.locator('[aria-label="Status"]').click()
+    await page.getByTestId('ticket-status-select').click()
     await page.getByRole('option', { name: 'Todo' }).click()
 
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('create-ticket-button').click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
 
     // Navigate to board view
@@ -232,9 +232,7 @@ test.describe('Ticket CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // The ticket should appear in the "To Do" column
-    const todoColumn = page.locator('[role="group"]').filter({
-      has: page.getByRole('heading', { name: 'To Do' }),
-    })
+    const todoColumn = page.getByTestId('kanban-column-todo')
     const ticketInColumn = todoColumn.getByText(uniqueTitle)
     await expect(ticketInColumn).toBeVisible({ timeout: 10000 })
   })
@@ -250,10 +248,10 @@ test.describe('Ticket CRUD', () => {
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
 
-    await page.getByLabel('Title').fill(uniqueTitle)
-    await page.getByLabel('Tags').fill('urgent,frontend,v2')
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
+    await page.getByTestId('ticket-tags-input').fill('urgent,frontend,v2')
 
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('create-ticket-button').click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
@@ -278,8 +276,8 @@ test.describe('Ticket CRUD', () => {
     const uniqueTitle = `E2E Count Badge ${Date.now()}`
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Title').fill(uniqueTitle)
-    await page.getByRole('button', { name: 'Create Ticket' }).click()
+    await page.getByTestId('ticket-title-input').fill(uniqueTitle)
+    await page.getByTestId('create-ticket-button').click()
     await expect(page).toHaveURL(/\/tickets/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 

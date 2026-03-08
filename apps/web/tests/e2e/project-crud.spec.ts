@@ -21,10 +21,10 @@ test.describe('Project CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill the required name field
-    await page.getByLabel('Project name').fill(projectName)
+    await page.getByTestId('project-name-input').fill(projectName)
 
     // Submit the form
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('create-project-button').click()
 
     // Should redirect to the new project's detail page
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
@@ -46,10 +46,10 @@ test.describe('Project CRUD', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill name
-    await page.getByLabel('Project name').fill(projectName)
+    await page.getByTestId('project-name-input').fill(projectName)
 
     // Fill description
-    await page.getByLabel('Description').fill(description)
+    await page.getByTestId('project-description-input').fill(description)
 
     // Open the date picker and select a date
     // If the DatePicker renders as a button trigger, click it
@@ -68,7 +68,7 @@ test.describe('Project CRUD', () => {
     }
 
     // Submit
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('create-project-button').click()
 
     // Should redirect to project detail
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
@@ -91,8 +91,8 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Stepper Test ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Project name').fill(projectName)
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('project-name-input').fill(projectName)
+    await page.getByTestId('create-project-button').click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
@@ -113,8 +113,8 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Progress Card ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Project name').fill(projectName)
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('project-name-input').fill(projectName)
+    await page.getByTestId('create-project-button').click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
@@ -140,14 +140,14 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Step Click ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Project name').fill(projectName)
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('project-name-input').fill(projectName)
+    await page.getByTestId('create-project-button').click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
     // The stepper renders step buttons. Step 1 (Identify) is the current step
     // and should be clickable.
-    const identifyButton = page.getByRole('button', { name: /Identify/i })
+    const identifyButton = page.getByTestId('step-button-1')
     await expect(identifyButton.first()).toBeVisible({ timeout: 10000 })
     await identifyButton.first().click()
 
@@ -167,29 +167,29 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E Step Sections ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Project name').fill(projectName)
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('project-name-input').fill(projectName)
+    await page.getByTestId('create-project-button').click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
     await page.waitForLoadState('networkidle')
 
     // Click step 1
-    const identifyButton = page.getByRole('button', { name: /Identify/i })
+    const identifyButton = page.getByTestId('step-button-1')
     await identifyButton.first().click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+\/steps\/1/, { timeout: 15000 })
     await page.waitForLoadState('networkidle')
 
     // Verify all three key sections exist
-    const guidingQuestions = page.getByText('Guiding Questions')
+    const guidingQuestions = page.getByTestId('guiding-questions-title')
     await expect(guidingQuestions).toBeVisible({ timeout: 10000 })
 
-    const analysisTools = page.getByText('Analysis Tools')
+    const analysisTools = page.getByTestId('analysis-tools-title')
     await expect(analysisTools).toBeVisible()
 
-    const completionCriteria = page.getByText('Completion Criteria')
+    const completionCriteria = page.getByTestId('completion-criteria-title')
     await expect(completionCriteria).toBeVisible()
 
     // Status badge should also be visible (In Progress for step 1)
-    const statusBadge = page.getByText(/(Not Started|In Progress|Completed|Skipped)/)
+    const statusBadge = page.getByTestId('step-status-badge')
     await expect(statusBadge.first()).toBeVisible()
   })
 
@@ -202,8 +202,8 @@ test.describe('Project CRUD', () => {
     const projectName = `E2E List Card ${Date.now()}`
     await page.goto('/projects/new')
     await page.waitForLoadState('networkidle')
-    await page.getByLabel('Project name').fill(projectName)
-    await page.getByRole('button', { name: 'Create project' }).click()
+    await page.getByTestId('project-name-input').fill(projectName)
+    await page.getByTestId('create-project-button').click()
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/, { timeout: 30000 })
 
     // Navigate to projects list
@@ -215,7 +215,7 @@ test.describe('Project CRUD', () => {
     await expect(projectCard.first()).toBeVisible({ timeout: 10000 })
 
     // Projects heading should be present
-    const heading = page.getByRole('heading', { name: 'Projects' })
+    const heading = page.getByTestId('projects-page-heading')
     await expect(heading).toBeVisible()
   })
 

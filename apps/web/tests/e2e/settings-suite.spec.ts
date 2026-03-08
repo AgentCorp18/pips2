@@ -23,7 +23,7 @@ test.describe('Settings General tab', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // Verify page heading (h1 rendered by SettingsPage)
-    const heading = orgPage.locator('h1', { hasText: 'Settings' })
+    const heading = orgPage.getByTestId('settings-page-heading')
     await expect(heading).toBeVisible()
 
     // Verify General tab is active in the SettingsNav (Link components rendered as <a> tags)
@@ -32,7 +32,7 @@ test.describe('Settings General tab', () => {
 
     // Verify the org name input is present with a value
     // OrgSettingsForm renders <Input id="name" name="name" />
-    const nameInput = orgPage.locator('input#name')
+    const nameInput = orgPage.getByTestId('org-name-input')
     await expect(nameInput).toBeVisible()
     const nameValue = await nameInput.inputValue()
     expect(nameValue).toBeTruthy()
@@ -42,7 +42,7 @@ test.describe('Settings General tab', () => {
     await orgPage.goto('/settings')
     await orgPage.waitForLoadState('networkidle')
 
-    const nameInput = orgPage.locator('input#name')
+    const nameInput = orgPage.getByTestId('org-name-input')
     await expect(nameInput).toBeVisible()
 
     // Update the org name
@@ -51,7 +51,7 @@ test.describe('Settings General tab', () => {
     await nameInput.fill(newName)
 
     // Click Save — button says "Save changes" or "Saving..."
-    const saveButton = orgPage.getByRole('button', { name: /Save changes/i })
+    const saveButton = orgPage.getByTestId('settings-save-button')
     await saveButton.click()
 
     // Wait for the success message or page to settle
@@ -62,7 +62,7 @@ test.describe('Settings General tab', () => {
     await orgPage.goto('/settings')
     await orgPage.waitForLoadState('networkidle')
 
-    const updatedNameInput = orgPage.locator('input#name')
+    const updatedNameInput = orgPage.getByTestId('org-name-input')
     const updatedValue = await updatedNameInput.inputValue()
     expect(updatedValue).toBe(newName)
   })
@@ -73,8 +73,8 @@ test.describe('Settings Members tab', () => {
     await orgPage.goto('/settings/members')
     await orgPage.waitForLoadState('networkidle')
 
-    // MembersPage renders h1 "Members" (text-2xl font-bold)
-    const heading = orgPage.locator('h1', { hasText: 'Members' })
+    // MembersPage renders h1 "Members"
+    const heading = orgPage.getByTestId('members-page-heading')
     await expect(heading).toBeVisible()
 
     // Verify the members table exists
@@ -95,7 +95,7 @@ test.describe('Settings Members tab', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // InviteDialog renders a trigger button with text "Invite Member"
-    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
+    const inviteButton = orgPage.getByTestId('invite-member-trigger')
     await expect(inviteButton).toBeVisible()
   })
 })
@@ -106,7 +106,7 @@ test.describe('Settings Notifications tab', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // NotificationPreferencesPage renders h1 "Notification Preferences"
-    const heading = orgPage.locator('h1', { hasText: 'Notification Preferences' })
+    const heading = orgPage.getByTestId('notifications-page-heading')
     await expect(heading).toBeVisible()
 
     // NotificationPreferencesForm has a Card with CardTitle "In-app notifications"
@@ -138,11 +138,11 @@ test.describe('Settings Audit Log tab', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // AuditLogPage renders h1 "Audit Log"
-    const heading = orgPage.locator('h1', { hasText: 'Audit Log' })
+    const heading = orgPage.getByTestId('audit-log-heading')
     await expect(heading).toBeVisible()
 
     // Card has CardTitle "Activity History"
-    const cardTitle = orgPage.getByText('Activity History')
+    const cardTitle = orgPage.getByTestId('audit-log-card-title')
     await expect(cardTitle).toBeVisible()
 
     // Should show either the table headers or the empty state

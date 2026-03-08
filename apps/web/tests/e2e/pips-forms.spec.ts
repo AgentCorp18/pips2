@@ -114,14 +114,14 @@ test.describe('PIPS step forms', () => {
         }
 
         // FormShell renders a "Save" button (variant="outline", size="sm")
-        const saveButton = orgPage.getByRole('button', { name: /^Save$/i })
+        const saveButton = orgPage.getByTestId('form-save-button')
         await expect(saveButton).toBeVisible()
         await saveButton.click()
 
         // After save, FormShell's SaveIndicator shows "Saved"
         // or a toast "Saved" appears, or the button is ready again
-        const savedIndicator = orgPage.getByText('Saved')
-        const buttonReady = orgPage.getByRole('button', { name: /^Save$/i })
+        const savedIndicator = orgPage.getByTestId('save-indicator-saved')
+        const buttonReady = orgPage.getByTestId('form-save-button')
 
         // Either a "Saved" indicator appears or the Save button is still available
         await expect(savedIndicator.first().or(buttonReady)).toBeVisible({ timeout: 10000 })
@@ -255,7 +255,7 @@ test.describe('PIPS step forms', () => {
         await orgPage.waitForLoadState('networkidle')
 
         // FormShell renders a Link with text "Back to step" and href to the step page
-        const backLink = orgPage.getByText('Back to step')
+        const backLink = orgPage.getByTestId('back-to-step-link')
         await expect(backLink.first()).toBeVisible()
         await backLink.first().click()
         await orgPage.waitForLoadState('networkidle')

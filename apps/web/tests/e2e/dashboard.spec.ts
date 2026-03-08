@@ -69,11 +69,11 @@ test.describe('Dashboard page content', () => {
     await expect(page).toHaveTitle(/Dashboard/)
 
     // The org name is rendered as an h1
-    const heading = page.getByRole('heading', { level: 1 })
+    const heading = page.getByTestId('dashboard-heading')
     await expect(heading).toBeVisible()
 
     // Welcome text should be present
-    const welcomeText = page.getByText('Welcome to your PIPS dashboard')
+    const welcomeText = page.getByTestId('dashboard-welcome-text')
     await expect(welcomeText).toBeVisible()
   })
 
@@ -94,12 +94,12 @@ test.describe('Dashboard page content', () => {
     }
 
     // Role badge (e.g., "Owner", "Admin", "Member")
-    const roleBadge = page.getByText(/(Owner|Admin|Member|Viewer)/)
-    await expect(roleBadge.first()).toBeVisible()
+    const roleBadge = page.getByTestId('dashboard-role-badge')
+    await expect(roleBadge).toBeVisible()
 
     // Plan badge (e.g., "free plan", "pro plan")
-    const planBadge = page.getByText(/plan/)
-    await expect(planBadge.first()).toBeVisible()
+    const planBadge = page.getByTestId('dashboard-plan-badge')
+    await expect(planBadge).toBeVisible()
   })
 
   test('shows the step gradient stripe', async ({ page }) => {
@@ -329,7 +329,7 @@ test.describe('Dashboard navigation actions', () => {
     }
 
     // Sidebar nav link to Projects
-    const projectsLink = page.locator('a[href="/projects"]')
+    const projectsLink = page.getByTestId('nav-link-projects')
     await expect(projectsLink).toBeVisible()
   })
 
@@ -350,13 +350,13 @@ test.describe('Dashboard navigation actions', () => {
     }
 
     // Click Projects in sidebar
-    const projectsLink = page.locator('a[href="/projects"]')
+    const projectsLink = page.getByTestId('nav-link-projects')
     await projectsLink.click()
 
     await expect(page).toHaveURL(/\/projects/)
 
     // Verify projects page loaded
-    const heading = page.getByRole('heading', { name: 'Projects' })
+    const heading = page.getByTestId('projects-page-heading')
     await expect(heading).toBeVisible()
   })
 
@@ -377,12 +377,12 @@ test.describe('Dashboard navigation actions', () => {
     }
 
     // Click Tickets in sidebar
-    const ticketsLink = page.locator('a[href="/tickets"]')
+    const ticketsLink = page.getByTestId('nav-link-tickets')
     await ticketsLink.click()
 
     await expect(page).toHaveURL(/\/tickets/)
 
-    const heading = page.getByRole('heading', { name: 'Tickets' })
+    const heading = page.getByTestId('tickets-page-heading')
     await expect(heading).toBeVisible()
   })
 
@@ -403,18 +403,18 @@ test.describe('Dashboard navigation actions', () => {
       return
     }
 
-    const projectsLink = page.locator('a[href="/projects"]')
+    const projectsLink = page.getByTestId('nav-link-projects')
     await projectsLink.click()
     await page.waitForLoadState('networkidle')
 
     // Click "New Project" button
-    const newProjectButton = page.getByRole('link', { name: /New Project/ })
+    const newProjectButton = page.getByTestId('new-project-link')
     await newProjectButton.click()
 
     await expect(page).toHaveURL(/\/projects\/new/)
 
     // Verify the creation form loaded
-    const formHeading = page.getByText('Create a new project')
+    const formHeading = page.getByTestId('create-project-heading')
     await expect(formHeading).toBeVisible()
   })
 })
@@ -440,10 +440,9 @@ test.describe('Dashboard layout', () => {
     const brandText = page.locator('aside').getByText('PIPS')
     await expect(brandText).toBeVisible()
 
-    // Step dots in sidebar
-    const dots = page.locator('aside .pip-dot')
-    const dotCount = await dots.count()
-    expect(dotCount).toBe(6)
+    // Step gradient stripe in sidebar
+    const stripe = page.locator('aside .step-gradient-stripe')
+    await expect(stripe).toBeVisible()
   })
 
   test('header has search trigger and user menu', async ({ page }) => {
@@ -463,12 +462,8 @@ test.describe('Dashboard layout', () => {
     }
 
     // Search trigger button (opens command palette)
-    const searchTrigger = page.getByText('Search projects, tickets...')
-    const hasSearch = await searchTrigger.isVisible().catch(() => false)
-    // On mobile, the text may be hidden
-    if (hasSearch) {
-      await expect(searchTrigger).toBeVisible()
-    }
+    const searchTrigger = page.getByTestId('search-trigger')
+    await expect(searchTrigger).toBeVisible()
   })
 
   test('sidebar has all 5 navigation items', async ({ page }) => {
@@ -488,17 +483,17 @@ test.describe('Dashboard layout', () => {
     }
 
     const navItems = [
-      { label: 'Dashboard', href: '/dashboard' },
-      { label: 'Projects', href: '/projects' },
-      { label: 'Tickets', href: '/tickets' },
-      { label: 'Teams', href: '/teams' },
-      { label: 'Settings', href: '/settings' },
+      { label: 'dashboard', href: '/dashboard' },
+      { label: 'projects', href: '/projects' },
+      { label: 'tickets', href: '/tickets' },
+      { label: 'teams', href: '/teams' },
+      { label: 'settings', href: '/settings' },
     ]
 
     for (const item of navItems) {
-      const link = page.locator(`a[href="${item.href}"]`)
+      const link = page.getByTestId(`nav-link-${item.label}`)
       await expect(link).toBeVisible()
-      await expect(link).toContainText(item.label)
+      await expect(link).toHaveAttribute('href', item.href)
     }
   })
 })

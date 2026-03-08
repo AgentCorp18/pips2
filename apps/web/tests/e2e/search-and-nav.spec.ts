@@ -23,7 +23,7 @@ test.describe('Command palette and global search', () => {
 
     // CommandPalette renders inside a Dialog with a Command.Input
     // The input has placeholder="Search projects, tickets..."
-    const searchInput = orgPage.getByPlaceholder(/Search projects/i)
+    const searchInput = orgPage.locator('[placeholder*="Search projects"]')
 
     // The dialog should become visible
     const dialog = orgPage.getByRole('dialog')
@@ -39,7 +39,7 @@ test.describe('Command palette and global search', () => {
     await orgPage.keyboard.press('Control+k')
 
     // Wait for the palette to render — Command.Input has placeholder "Search projects, tickets..."
-    const searchInput = orgPage.getByPlaceholder(/Search projects/i)
+    const searchInput = orgPage.locator('[placeholder*="Search projects"]')
     await expect(searchInput.first()).toBeVisible({ timeout: 5000 })
 
     // QUICK_ACTIONS labels: "Create Project", "Create Ticket", "Go to Dashboard"
@@ -67,7 +67,7 @@ test.describe('Command palette and global search', () => {
       // Open command palette
       await orgPage.keyboard.press('Control+k')
 
-      const searchInput = orgPage.getByPlaceholder(/Search projects/i)
+      const searchInput = orgPage.locator('[placeholder*="Search projects"]')
       await expect(searchInput.first()).toBeVisible({ timeout: 5000 })
 
       // Type "E2E" which should match the factory-created project and ticket titles
@@ -104,7 +104,7 @@ test.describe('Command palette and global search', () => {
       // Open command palette
       await orgPage.keyboard.press('Control+k')
 
-      const searchInput = orgPage.getByPlaceholder(/Search projects/i)
+      const searchInput = orgPage.locator('[placeholder*="Search projects"]')
       await expect(searchInput.first()).toBeVisible({ timeout: 5000 })
 
       // Search for the test project

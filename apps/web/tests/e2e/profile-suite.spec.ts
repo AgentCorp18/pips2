@@ -23,11 +23,11 @@ test.describe('Profile page content', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // ProfilePage renders h1 "Profile"
-    const heading = orgPage.locator('h1', { hasText: 'Profile' })
+    const heading = orgPage.getByTestId('profile-page-heading')
     await expect(heading).toBeVisible()
 
     // Description below heading
-    const description = orgPage.getByText('Manage your personal information and profile photo')
+    const description = orgPage.getByTestId('profile-description')
     await expect(description).toBeVisible()
 
     // ProfileForm renders <Label htmlFor="display_name">Display name</Label>
@@ -35,7 +35,7 @@ test.describe('Profile page content', () => {
     await expect(displayNameLabel.first()).toBeVisible()
 
     // Input with id="display_name" name="display_name"
-    const displayNameInput = orgPage.locator('input#display_name')
+    const displayNameInput = orgPage.getByTestId('display-name-input')
     await expect(displayNameInput).toBeVisible()
 
     // Helper text below the display name input
@@ -47,7 +47,7 @@ test.describe('Profile page content', () => {
     await orgPage.goto('/profile')
     await orgPage.waitForLoadState('networkidle')
 
-    const displayNameInput = orgPage.locator('input#display_name')
+    const displayNameInput = orgPage.getByTestId('display-name-input')
     await expect(displayNameInput).toBeVisible()
 
     // Set a unique display name
@@ -56,7 +56,7 @@ test.describe('Profile page content', () => {
     await displayNameInput.fill(newDisplayName)
 
     // Click save — ProfileForm button says "Save changes" or "Saving..."
-    const saveButton = orgPage.getByRole('button', { name: /Save changes/i })
+    const saveButton = orgPage.getByTestId('profile-save-button')
     await saveButton.click()
 
     // Wait for the action to complete
@@ -76,12 +76,12 @@ test.describe('Profile page content', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // ProfileForm has a Card with CardTitle "Profile Photo"
-    const photoTitle = orgPage.getByText('Profile Photo')
+    const photoTitle = orgPage.getByTestId('profile-photo-title')
     await expect(photoTitle).toBeVisible()
 
     // The AvatarUpload component should render either a current avatar
     // or an upload area. Verify the profile photo section is rendered.
-    const profilePhotoCard = orgPage.locator('text=Profile Photo').locator('..')
+    const profilePhotoCard = orgPage.getByTestId('profile-photo-title').locator('..')
     await expect(profilePhotoCard).toBeVisible()
   })
 })

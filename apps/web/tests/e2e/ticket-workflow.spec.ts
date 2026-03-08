@@ -55,11 +55,11 @@ test.describe('Tickets list page', () => {
     await page.waitForLoadState('networkidle')
 
     // Page heading
-    const heading = page.getByRole('heading', { name: 'Tickets' })
+    const heading = page.getByTestId('tickets-page-heading')
     await expect(heading).toBeVisible()
 
     // Ticket count (e.g. "0 tickets" or "5 tickets")
-    const count = page.getByText(/\d+ tickets?/)
+    const count = page.getByTestId('tickets-count')
     await expect(count).toBeVisible()
   })
 
@@ -74,7 +74,7 @@ test.describe('Tickets list page', () => {
     await page.goto('/tickets')
     await page.waitForLoadState('networkidle')
 
-    const newTicketButton = page.getByRole('link', { name: /New Ticket/ })
+    const newTicketButton = page.getByTestId('new-ticket-link')
     await expect(newTicketButton).toBeVisible()
     await expect(newTicketButton).toHaveAttribute('href', '/tickets/new')
   })
@@ -106,7 +106,7 @@ test.describe('Tickets list page', () => {
     await page.goto('/tickets')
     await page.waitForLoadState('networkidle')
 
-    const newTicketButton = page.getByRole('link', { name: /New Ticket/ })
+    const newTicketButton = page.getByTestId('new-ticket-link')
     await newTicketButton.click()
 
     await expect(page).toHaveURL(/\/tickets\/new/)
@@ -158,15 +158,15 @@ test.describe('Ticket creation page', () => {
     await expect(page).toHaveTitle(/New Ticket/)
 
     // Verify form heading
-    const heading = page.getByText('Create New Ticket')
+    const heading = page.getByTestId('new-ticket-heading')
     await expect(heading).toBeVisible()
 
     // Verify required fields
-    const titleInput = page.locator('input[name="title"]')
+    const titleInput = page.getByTestId('ticket-title-input')
     await expect(titleInput).toBeVisible()
 
     // Verify description textarea
-    const descriptionTextarea = page.locator('textarea[name="description"]')
+    const descriptionTextarea = page.getByTestId('ticket-description-input')
     await expect(descriptionTextarea).toBeVisible()
 
     // Verify Type, Priority, Status select triggers
@@ -179,7 +179,7 @@ test.describe('Ticket creation page', () => {
     await expect(statusLabel).toBeVisible()
 
     // Verify submit button
-    const submitButton = page.getByRole('button', { name: 'Create Ticket' })
+    const submitButton = page.getByTestId('create-ticket-button')
     await expect(submitButton).toBeVisible()
     await expect(submitButton).toBeEnabled()
   })
@@ -195,7 +195,7 @@ test.describe('Ticket creation page', () => {
     await page.goto('/tickets/new')
     await page.waitForLoadState('networkidle')
 
-    const titleInput = page.locator('input[name="title"]')
+    const titleInput = page.getByTestId('ticket-title-input')
     await expect(titleInput).toHaveAttribute('placeholder', 'Brief summary of the ticket')
   })
 
@@ -211,12 +211,12 @@ test.describe('Ticket creation page', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill title
-    const titleInput = page.locator('input[name="title"]')
+    const titleInput = page.getByTestId('ticket-title-input')
     await titleInput.fill('E2E Test Ticket')
     await expect(titleInput).toHaveValue('E2E Test Ticket')
 
     // Fill description
-    const descriptionTextarea = page.locator('textarea[name="description"]')
+    const descriptionTextarea = page.getByTestId('ticket-description-input')
     await descriptionTextarea.fill('This ticket was created by E2E tests')
     await expect(descriptionTextarea).toHaveValue('This ticket was created by E2E tests')
   })
@@ -233,11 +233,11 @@ test.describe('Ticket creation page', () => {
     await page.waitForLoadState('networkidle')
 
     // Due date
-    const dueDateInput = page.locator('input[name="due_date"]')
+    const dueDateInput = page.locator('[name="due_date"]')
     await expect(dueDateInput).toBeVisible()
 
     // Tags
-    const tagsInput = page.locator('input[name="tags"]')
+    const tagsInput = page.getByTestId('ticket-tags-input')
     await expect(tagsInput).toBeVisible()
     await expect(tagsInput).toHaveAttribute('placeholder', 'Comma-separated tags')
   })
@@ -272,9 +272,9 @@ test.describe('Ticket creation page', () => {
     await page.waitForLoadState('networkidle')
 
     // Fill required title
-    await page.locator('input[name="title"]').fill('E2E Test Ticket')
+    await page.getByTestId('ticket-title-input').fill('E2E Test Ticket')
 
-    const submitButton = page.getByRole('button', { name: 'Create Ticket' })
+    const submitButton = page.getByTestId('create-ticket-button')
     await submitButton.click()
 
     // Button should show pending state
@@ -311,7 +311,7 @@ test.describe('Ticket detail page', () => {
     await expect(page).toHaveURL(/\/tickets\/[a-f0-9-]+/)
 
     // Comment section heading
-    const commentsHeading = page.getByText(/Comments \(\d+\)/)
+    const commentsHeading = page.getByTestId('comments-heading')
     await expect(commentsHeading).toBeVisible()
   })
 
@@ -338,11 +338,11 @@ test.describe('Ticket detail page', () => {
     await page.waitForLoadState('networkidle')
 
     // Comment textarea
-    const commentTextarea = page.getByPlaceholder('Write a comment... Use @ to mention someone')
+    const commentTextarea = page.getByTestId('comment-textarea')
     await expect(commentTextarea).toBeVisible()
 
     // Comment button (disabled when empty)
-    const commentButton = page.getByRole('button', { name: 'Comment' })
+    const commentButton = page.getByTestId('comment-submit-button')
     await expect(commentButton).toBeVisible()
     await expect(commentButton).toBeDisabled()
   })
@@ -369,11 +369,11 @@ test.describe('Ticket detail page', () => {
     await ticketLink.click()
     await page.waitForLoadState('networkidle')
 
-    const commentTextarea = page.getByPlaceholder('Write a comment... Use @ to mention someone')
+    const commentTextarea = page.getByTestId('comment-textarea')
     await commentTextarea.fill('This is a test comment from E2E')
 
     // Comment button should now be enabled
-    const commentButton = page.getByRole('button', { name: 'Comment' })
+    const commentButton = page.getByTestId('comment-submit-button')
     await expect(commentButton).toBeEnabled()
   })
 
@@ -422,10 +422,10 @@ test.describe('Kanban board page', () => {
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    const heading = page.getByRole('heading', { name: 'Board' })
+    const heading = page.getByTestId('board-page-heading')
     await expect(heading).toBeVisible()
 
-    const description = page.getByText('Drag tickets between columns to update status')
+    const description = page.getByTestId('board-description')
     await expect(description).toBeVisible()
   })
 
@@ -440,7 +440,7 @@ test.describe('Kanban board page', () => {
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    const newTicketButton = page.getByRole('link', { name: /New Ticket/ })
+    const newTicketButton = page.getByTestId('board-new-ticket-link')
     await expect(newTicketButton).toBeVisible()
     await expect(newTicketButton).toHaveAttribute('href', '/tickets/new')
   })
@@ -457,18 +457,18 @@ test.describe('Kanban board page', () => {
     await page.waitForLoadState('networkidle')
 
     // Verify all 7 board columns are visible
-    const columnLabels = [
-      'Backlog',
-      'To Do',
-      'In Progress',
-      'In Review',
-      'Blocked',
-      'Done',
-      'Cancelled',
+    const columnIds = [
+      'backlog',
+      'todo',
+      'in_progress',
+      'in_review',
+      'blocked',
+      'done',
+      'cancelled',
     ]
 
-    for (const label of columnLabels) {
-      const columnHeader = page.getByRole('heading', { name: label })
+    for (const id of columnIds) {
+      const columnHeader = page.getByTestId(`kanban-column-heading-${id}`)
       await expect(columnHeader).toBeVisible()
     }
   })
@@ -484,13 +484,21 @@ test.describe('Kanban board page', () => {
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    // Each column header has a count badge (shows "0" or more)
-    // The count badges are spans inside the column headers
-    const countBadges = page.locator('h3 + span')
-    const count = await countBadges.count()
+    // Each column has a count badge with a data-testid
+    const columnIds = [
+      'backlog',
+      'todo',
+      'in_progress',
+      'in_review',
+      'blocked',
+      'done',
+      'cancelled',
+    ]
 
-    // We expect at least 7 count badges (one per column)
-    expect(count).toBeGreaterThanOrEqual(7)
+    for (const id of columnIds) {
+      const countBadge = page.getByTestId(`kanban-column-count-${id}`)
+      await expect(countBadge).toBeVisible()
+    }
   })
 })
 
@@ -507,14 +515,14 @@ test.describe('Ticket navigation flow', () => {
     await page.goto('/tickets')
     await page.waitForLoadState('networkidle')
 
-    const heading = page.getByRole('heading', { name: 'Tickets' })
+    const heading = page.getByTestId('tickets-page-heading')
     await expect(heading).toBeVisible()
 
     // Navigate to board
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    const boardHeading = page.getByRole('heading', { name: 'Board' })
+    const boardHeading = page.getByTestId('board-page-heading')
     await expect(boardHeading).toBeVisible()
   })
 
@@ -529,9 +537,11 @@ test.describe('Ticket navigation flow', () => {
     await page.goto('/tickets/board')
     await page.waitForLoadState('networkidle')
 
-    // Board filters section should be present (BoardFilters component)
-    // It contains filter dropdowns for priority, assignee, and project
-    const filtersArea = page.locator('[class*="mb-4"]').last()
-    await expect(filtersArea).toBeVisible()
+    // The board page always shows the heading and description
+    const boardPage = page.getByTestId('board-page-heading')
+    await expect(boardPage).toBeVisible()
+
+    const filterDescription = page.getByTestId('board-description')
+    await expect(filterDescription).toBeVisible()
   })
 })

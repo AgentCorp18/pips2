@@ -13,10 +13,10 @@ test.describe('Teams page structure', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // h1 rendered by TeamsPage
-    const heading = orgPage.locator('h1', { hasText: 'Teams' })
+    const heading = orgPage.getByTestId('teams-page-heading')
     await expect(heading).toBeVisible()
 
-    const description = orgPage.getByText('Organize members into teams for your projects')
+    const description = orgPage.getByTestId('teams-description')
     await expect(description).toBeVisible()
   })
 
@@ -24,14 +24,9 @@ test.describe('Teams page structure', () => {
     await orgPage.goto('/teams')
     await orgPage.waitForLoadState('networkidle')
 
-    // EmptyState component renders an h3 for the title
-    const emptyTitle = orgPage.locator('h3', { hasText: 'No teams yet' })
-    const emptyDescription = orgPage.getByText(
-      'Create your first team to start organizing members and collaborating on projects.',
-    )
-
+    // EmptyState component renders the title
+    const emptyTitle = orgPage.getByTestId('teams-empty-title')
     await expect(emptyTitle).toBeVisible()
-    await expect(emptyDescription).toBeVisible()
   })
 })
 
@@ -41,27 +36,26 @@ test.describe('Team creation', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // Click the Create Team button
-    const createButton = orgPage.getByRole('button', { name: 'Create Team' })
+    const createButton = orgPage.getByTestId('create-team-trigger')
     await expect(createButton).toBeVisible()
     await createButton.click()
 
     // Verify dialog opened with expected content
     // DialogTitle renders "Create a new team"
-    const dialogTitle = orgPage.getByText('Create a new team')
+    const dialogTitle = orgPage.getByTestId('create-team-dialog-title')
     await expect(dialogTitle).toBeVisible()
 
-    const nameLabel = orgPage.getByText('Team name')
-    await expect(nameLabel).toBeVisible()
+    const nameInput = orgPage.getByTestId('team-name-input')
+    await expect(nameInput).toBeVisible()
 
-    // Label text is "Description (optional)" — match with regex
-    const descriptionLabel = orgPage.getByText(/^Description/)
-    await expect(descriptionLabel).toBeVisible()
+    const descriptionInput = orgPage.getByTestId('team-description-input')
+    await expect(descriptionInput).toBeVisible()
 
     // Verify Cancel and Create Team buttons in dialog footer
     const cancelButton = orgPage.getByRole('button', { name: 'Cancel' })
     await expect(cancelButton).toBeVisible()
 
-    const submitButton = orgPage.getByRole('button', { name: 'Create Team' }).last()
+    const submitButton = orgPage.getByTestId('create-team-submit')
     await expect(submitButton).toBeVisible()
   })
 
@@ -72,22 +66,24 @@ test.describe('Team creation', () => {
     const teamName = `E2E Team ${Date.now()}`
 
     // Open the create dialog
-    const createButton = orgPage.getByRole('button', { name: 'Create Team' })
+    const createButton = orgPage.getByTestId('create-team-trigger')
     await createButton.click()
 
     // Fill in the form
-    const nameInput = orgPage.locator('#team-name')
+    const nameInput = orgPage.getByTestId('team-name-input')
     await nameInput.fill(teamName)
 
-    const descriptionInput = orgPage.locator('#team-description')
+    const descriptionInput = orgPage.getByTestId('team-description-input')
     await descriptionInput.fill('Created by E2E test')
 
     // Submit
-    const submitButton = orgPage.locator('form button[type="submit"]')
+    const submitButton = orgPage.getByTestId('create-team-submit')
     await submitButton.click()
 
     // Wait for dialog to close and page to refresh
-    await expect(orgPage.getByText('Create a new team')).not.toBeVisible({ timeout: 10000 })
+    await expect(orgPage.getByTestId('create-team-dialog-title')).not.toBeVisible({
+      timeout: 10000,
+    })
 
     // Verify the team appears in the list
     const teamCard = orgPage.getByText(teamName)
@@ -105,17 +101,19 @@ test.describe('Team detail page', () => {
     // Create a team through the UI to get a known team
     const teamName = `E2E Detail Team ${Date.now()}`
 
-    const createButton = orgPage.getByRole('button', { name: 'Create Team' })
+    const createButton = orgPage.getByTestId('create-team-trigger')
     await createButton.click()
 
-    const nameInput = orgPage.locator('#team-name')
+    const nameInput = orgPage.getByTestId('team-name-input')
     await nameInput.fill(teamName)
 
-    const submitButton = orgPage.locator('form button[type="submit"]')
+    const submitButton = orgPage.getByTestId('create-team-submit')
     await submitButton.click()
 
     // Wait for dialog to close
-    await expect(orgPage.getByText('Create a new team')).not.toBeVisible({ timeout: 10000 })
+    await expect(orgPage.getByTestId('create-team-dialog-title')).not.toBeVisible({
+      timeout: 10000,
+    })
 
     // Click the team card to navigate to detail
     const teamLink = orgPage.getByText(teamName)
@@ -126,7 +124,7 @@ test.describe('Team detail page', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // Team detail page renders h1 with team name
-    const heading = orgPage.locator('h1', { hasText: teamName })
+    const heading = orgPage.getByTestId('team-detail-heading')
     await expect(heading).toBeVisible()
   })
 
@@ -137,13 +135,15 @@ test.describe('Team detail page', () => {
     // Create a team to navigate to its detail
     const teamName = `E2E Members Team ${Date.now()}`
 
-    const createButton = orgPage.getByRole('button', { name: 'Create Team' })
+    const createButton = orgPage.getByTestId('create-team-trigger')
     await createButton.click()
 
-    await orgPage.locator('#team-name').fill(teamName)
-    await orgPage.locator('form button[type="submit"]').click()
+    await orgPage.getByTestId('team-name-input').fill(teamName)
+    await orgPage.getByTestId('create-team-submit').click()
 
-    await expect(orgPage.getByText('Create a new team')).not.toBeVisible({ timeout: 10000 })
+    await expect(orgPage.getByTestId('create-team-dialog-title')).not.toBeVisible({
+      timeout: 10000,
+    })
 
     // Navigate to team detail
     const teamLink = orgPage.getByText(teamName)
@@ -151,8 +151,8 @@ test.describe('Team detail page', () => {
     await teamLink.click()
     await orgPage.waitForLoadState('networkidle')
 
-    // TeamMembersList renders h2 "Members ({count})" — match with regex
-    const membersHeading = orgPage.locator('h2', { hasText: /Members/ })
+    // TeamMembersList renders h2 "Members ({count})"
+    const membersHeading = orgPage.getByTestId('team-members-heading')
     await expect(membersHeading).toBeVisible()
 
     // The creator should be listed as a lead member

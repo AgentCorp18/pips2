@@ -19,12 +19,12 @@ test.describe('Invite dialog from Settings', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // InviteDialog trigger button has text "Invite Member" with UserPlus icon
-    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
+    const inviteButton = orgPage.getByTestId('invite-member-trigger')
     await expect(inviteButton).toBeVisible()
     await inviteButton.click()
 
     // DialogTitle renders "Invite a new member"
-    const dialogTitle = orgPage.getByText('Invite a new member')
+    const dialogTitle = orgPage.getByTestId('invite-dialog-title')
     await expect(dialogTitle).toBeVisible()
 
     // DialogDescription renders this exact text
@@ -39,7 +39,7 @@ test.describe('Invite dialog from Settings', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // Open the dialog
-    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
+    const inviteButton = orgPage.getByTestId('invite-member-trigger')
     await inviteButton.click()
 
     // InviteDialog has <Label htmlFor="invite-email">Email address</Label>
@@ -47,7 +47,7 @@ test.describe('Invite dialog from Settings', () => {
     await expect(emailLabel).toBeVisible()
 
     // <Input id="invite-email" type="email" placeholder="colleague@company.com" />
-    const emailInput = orgPage.locator('input#invite-email')
+    const emailInput = orgPage.getByTestId('invite-email-input')
     await expect(emailInput).toBeVisible()
     await expect(emailInput).toHaveAttribute('type', 'email')
     await expect(emailInput).toHaveAttribute('placeholder', 'colleague@company.com')
@@ -65,7 +65,7 @@ test.describe('Invite dialog from Settings', () => {
     await expect(cancelButton).toBeVisible()
 
     // Submit button says "Send Invite" (or "Inviting..." while loading)
-    const sendButton = orgPage.getByRole('button', { name: /Send Invite/i })
+    const sendButton = orgPage.getByTestId('send-invite-button')
     await expect(sendButton).toBeVisible()
   })
 
@@ -74,16 +74,16 @@ test.describe('Invite dialog from Settings', () => {
     await orgPage.waitForLoadState('networkidle')
 
     // Open the dialog
-    const inviteButton = orgPage.getByRole('button', { name: /Invite Member/i })
+    const inviteButton = orgPage.getByTestId('invite-member-trigger')
     await inviteButton.click()
 
     // The Send Invite button is disabled when email is empty
     // InviteDialog: disabled={loading || !email.trim()}
-    const sendButton = orgPage.getByRole('button', { name: /Send Invite/i })
+    const sendButton = orgPage.getByTestId('send-invite-button')
     await expect(sendButton).toBeDisabled()
 
     // Fill in an email to enable the button
-    const emailInput = orgPage.locator('input#invite-email')
+    const emailInput = orgPage.getByTestId('invite-email-input')
     await emailInput.fill('test@example.com')
 
     await expect(sendButton).toBeEnabled()
