@@ -121,7 +121,7 @@ Once logged in, you'll see the main dashboard with:
 
 ### Option 1: GitHub Issues (Preferred)
 
-1. Go to https://github.com/AlberaMarc/pips2/issues
+1. Go to https://github.com/AgentCorp18/pips2/issues
 2. Click "New Issue"
 3. Use this format:
 

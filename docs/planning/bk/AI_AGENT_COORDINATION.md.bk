@@ -4,7 +4,7 @@
 > **Created:** 2026-03-03
 > **Author:** Marc Albers + Claude Opus 4.6
 > **Status:** Active
-> **Repo:** AlberaMarc/pips2 (private)
+> **Repo:** AgentCorp18/pips2 (private)
 
 This document defines how multiple Claude Code agents collaborate to build PIPS 2.0
 in parallel without stepping on each other, duplicating work, or introducing merge conflicts.
