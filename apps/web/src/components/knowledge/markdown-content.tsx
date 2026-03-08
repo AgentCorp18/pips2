@@ -64,7 +64,7 @@ const components: Components = {
 
 export const MarkdownContent = ({ content }: MarkdownContentProps) => {
   return (
-    <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-[var(--color-text-primary)] prose-p:text-[var(--color-text-secondary)] prose-strong:text-[var(--color-text-primary)] prose-a:text-[var(--color-primary)]">
+    <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-[var(--color-text-primary)] prose-p:text-[var(--color-text-secondary)] prose-p:leading-relaxed prose-li:text-[var(--color-text-secondary)] prose-li:leading-relaxed prose-strong:text-[var(--color-text-primary)] prose-a:text-[var(--color-primary)] prose-blockquote:border-l-[var(--color-primary)] prose-blockquote:text-[var(--color-text-secondary)]">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, rehypeHighlight]}

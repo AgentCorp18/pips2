@@ -11,10 +11,12 @@ import {
   Clock,
   ArrowRight,
   Eye,
+  GraduationCap,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ReadingProgress } from './reading-progress'
 import type {
   ReadHistoryWithContent,
   ReadingSessionWithContent,
@@ -73,12 +75,16 @@ type KnowledgeHubLandingProps = {
   recentReadHistory: ReadHistoryWithContent[]
   bookmarkCount: number
   readingSessions?: ReadingSessionWithContent[]
+  bookChapterCount?: number
+  bookChaptersRead?: number
 }
 
 export const KnowledgeHubLanding = ({
   recentReadHistory,
   bookmarkCount,
   readingSessions = [],
+  bookChapterCount = 0,
+  bookChaptersRead = 0,
 }: KnowledgeHubLandingProps) => {
   return (
     <div className="mx-auto max-w-5xl space-y-8" data-testid="knowledge-hub">
@@ -145,64 +151,83 @@ export const KnowledgeHubLanding = ({
         })}
       </div>
 
-      {/* Continue Reading */}
-      {readingSessions.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BookOpen size={16} className="text-[var(--color-primary)]" />
-              Continue Reading
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {readingSessions.map((session) => {
-                const config = PILLAR_CONFIG[session.pillar]
-                const href = `/knowledge/${session.pillar}/${session.slug}`
-                const progressPercent = Math.round(session.scrollPosition * 100)
+      {/* Continue Learning */}
+      {(readingSessions.length > 0 || bookChapterCount > 0) && (
+        <div className="space-y-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--color-text-primary)]">
+            <GraduationCap size={20} className="text-[var(--color-primary)]" />
+            Continue Learning
+          </h2>
 
-                return (
-                  <Link key={session.pillar} href={href}>
-                    <div className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2.5 text-sm transition-colors hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)]">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <Badge
-                          variant="outline"
-                          className="shrink-0 text-[10px] capitalize"
-                          style={{
-                            borderColor: config?.color,
-                            color: config?.color,
-                          }}
-                        >
-                          {config?.label ?? session.pillar}
-                        </Badge>
-                        <div className="min-w-0">
-                          <span className="block truncate text-[var(--color-text-primary)]">
-                            {session.title}
-                          </span>
-                          <div className="mt-1 flex items-center gap-2">
-                            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-[var(--color-border)]">
-                              <div
-                                className="h-full rounded-full bg-[var(--color-primary)]"
-                                style={{ width: `${progressPercent}%` }}
-                              />
+          {/* Reading progress overview */}
+          {bookChapterCount > 0 && (
+            <ReadingProgress
+              title="Book Progress"
+              totalItems={bookChapterCount}
+              completedItems={bookChaptersRead}
+            />
+          )}
+
+          {/* Active reading sessions */}
+          {readingSessions.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <BookOpen size={14} className="text-[var(--color-primary)]" />
+                  Pick Up Where You Left Off
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {readingSessions.map((session) => {
+                    const config = PILLAR_CONFIG[session.pillar]
+                    const href = `/knowledge/${session.pillar}/${session.slug}`
+                    const progressPercent = Math.round(session.scrollPosition * 100)
+
+                    return (
+                      <Link key={session.pillar} href={href}>
+                        <div className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2.5 text-sm transition-colors hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)]">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <Badge
+                              variant="outline"
+                              className="shrink-0 text-[10px] capitalize"
+                              style={{
+                                borderColor: config?.color,
+                                color: config?.color,
+                              }}
+                            >
+                              {config?.label ?? session.pillar}
+                            </Badge>
+                            <div className="min-w-0">
+                              <span className="block truncate text-[var(--color-text-primary)]">
+                                {session.title}
+                              </span>
+                              <div className="mt-1 flex items-center gap-2">
+                                <div className="h-1.5 w-20 overflow-hidden rounded-full bg-[var(--color-border)]">
+                                  <div
+                                    className="h-full rounded-full bg-[var(--color-primary)]"
+                                    style={{ width: `${progressPercent}%` }}
+                                  />
+                                </div>
+                                <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                                  {progressPercent}%
+                                </span>
+                              </div>
                             </div>
-                            <span className="text-[10px] text-[var(--color-text-tertiary)]">
-                              {progressPercent}%
-                            </span>
                           </div>
+                          <ArrowRight
+                            size={12}
+                            className="shrink-0 text-[var(--color-text-tertiary)]"
+                          />
                         </div>
-                      </div>
-                      <ArrowRight
-                        size={12}
-                        className="shrink-0 text-[var(--color-text-tertiary)]"
-                      />
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
       {/* Recently Read */}

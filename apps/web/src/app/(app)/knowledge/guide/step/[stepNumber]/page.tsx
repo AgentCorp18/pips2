@@ -3,6 +3,10 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight, BookOpen, Wrench, Lightbulb } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ContentBreadcrumb } from '@/components/knowledge/content-breadcrumb'
+import { Callout } from '@/components/knowledge/callout'
+import { ExpandableSection } from '@/components/knowledge/expandable-section'
+import { KeyTakeaway } from '@/components/knowledge/key-takeaway'
 import { PIPS_STEPS, STEP_CONTENT, BOOK_CHAPTER_MAP } from '@pips/shared'
 import type { PipsStepNumber, ContentTool } from '@pips/shared'
 import { getGuideContentForStep } from '../../../actions'
@@ -41,19 +45,16 @@ const StepPage = async ({ params }: StepPageProps) => {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
-        <Link href="/knowledge" className="hover:text-[var(--color-primary)]">
-          Knowledge Hub
-        </Link>
-        <span>/</span>
-        <Link href="/knowledge/guide" className="hover:text-[var(--color-primary)]">
-          Guide
-        </Link>
-        <span>/</span>
-        <span className="text-[var(--color-text-secondary)]">
-          Step {step.number}: {step.name}
-        </span>
-      </nav>
+      <ContentBreadcrumb
+        items={[
+          { label: 'Knowledge Hub', href: '/knowledge' },
+          { label: 'Guide', href: '/knowledge/guide' },
+          {
+            label: `Step ${step.number}: ${step.name}`,
+            href: `/knowledge/guide/step/${step.number}`,
+          },
+        ]}
+      />
 
       {/* Step Header */}
       <div className="flex items-start gap-4">
@@ -143,48 +144,33 @@ const StepPage = async ({ params }: StepPageProps) => {
       )}
 
       {/* Methodology Tips & Best Practices */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Tips</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {stepContent.methodology.tips.map((tip) => (
-                <li key={tip} className="text-xs text-[var(--color-text-secondary)]">
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Best Practices</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {stepContent.methodology.bestPractices.map((bp) => (
-                <li key={bp} className="text-xs text-[var(--color-text-secondary)]">
-                  {bp}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+      <div className="space-y-4">
+        <Callout variant="tip" title="Tips">
+          <ul className="space-y-2">
+            {stepContent.methodology.tips.map((tip) => (
+              <li key={tip} className="text-sm">
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </Callout>
+        <Callout variant="success" title="Best Practices">
+          <ul className="space-y-2">
+            {stepContent.methodology.bestPractices.map((bp) => (
+              <li key={bp} className="text-sm">
+                {bp}
+              </li>
+            ))}
+          </ul>
+        </Callout>
       </div>
 
       {/* Facilitation Guide */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Facilitation Guide</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-            {stepContent.methodology.facilitationGuide}
-          </p>
-        </CardContent>
-      </Card>
+      <ExpandableSection title="Facilitation Guide">
+        <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+          {stepContent.methodology.facilitationGuide}
+        </p>
+      </ExpandableSection>
 
       {/* Related Book Content */}
       {contentNodes.length > 0 && (
@@ -218,6 +204,13 @@ const StepPage = async ({ params }: StepPageProps) => {
           </div>
         </div>
       )}
+
+      {/* Key Takeaway */}
+      <KeyTakeaway stepColor={step.color}>
+        Master Step {step.number} ({step.name}) by applying the key questions above, using the
+        recommended tools, and following the best practices. Each step builds on the previous one to
+        create a comprehensive improvement journey.
+      </KeyTakeaway>
 
       {/* Prev / Next Step Navigation */}
       <Card className="mt-10">
