@@ -66,6 +66,12 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
       toast.success('Ticket created')
       router.push(state.redirectTo)
     }
+    if (state.error) {
+      toast.error(state.error)
+    }
+    if (state.fieldErrors && Object.keys(state.fieldErrors).length > 0) {
+      toast.error(state.fieldErrors.title ?? 'Please fix the form errors')
+    }
   }, [state, router])
 
   return (

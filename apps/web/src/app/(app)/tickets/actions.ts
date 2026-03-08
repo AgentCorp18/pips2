@@ -27,15 +27,15 @@ export const createTicket = async (
 ): Promise<TicketActionState> => {
   const raw = {
     title: formData.get('title'),
-    description: formData.get('description'),
+    description: formData.get('description') ?? undefined,
     type: formData.get('type'),
     status: formData.get('status'),
     priority: formData.get('priority'),
-    assignee_id: formData.get('assignee_id'),
-    project_id: formData.get('project_id'),
-    parent_id: formData.get('parent_id'),
-    due_date: formData.get('due_date'),
-    tags: formData.get('tags'),
+    assignee_id: formData.get('assignee_id') ?? undefined,
+    project_id: formData.get('project_id') ?? undefined,
+    parent_id: formData.get('parent_id') ?? undefined,
+    due_date: formData.get('due_date') ?? undefined,
+    tags: formData.get('tags') ?? undefined,
   }
 
   const result = createTicketSchema.safeParse(raw)

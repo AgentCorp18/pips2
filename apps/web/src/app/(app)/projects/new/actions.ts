@@ -17,8 +17,8 @@ export const createProject = async (
 ): Promise<CreateProjectActionState> => {
   const raw = {
     name: formData.get('name'),
-    description: formData.get('description'),
-    target_completion_date: formData.get('target_completion_date'),
+    description: formData.get('description') ?? undefined,
+    target_completion_date: formData.get('target_completion_date') ?? undefined,
   }
 
   const result = createProjectSchema.safeParse(raw)
