@@ -133,6 +133,7 @@ export const FormShell = (props: FormShellProps) => {
           <Link
             href={`/projects/${projectId}/steps/${stepNumber}`}
             className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            data-testid="back-to-step-link"
           >
             <ArrowLeft size={14} />
             Back to step
@@ -147,6 +148,7 @@ export const FormShell = (props: FormShellProps) => {
             size="sm"
             onClick={handleManualSave}
             disabled={saveState === 'saving'}
+            data-testid="form-save-button"
           >
             <CloudUpload size={14} />
             Save
@@ -184,20 +186,20 @@ const SaveIndicator = ({ status }: { status: DisplayStatus }) => {
       return (
         <span className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
           <Loader2 size={12} className="animate-spin" />
-          Saving...
+          <span data-testid="save-indicator-saving">Saving...</span>
         </span>
       )
     case 'saved':
       return (
         <span className="flex items-center gap-1.5 text-xs text-[var(--color-success)]">
           <Check size={12} />
-          Saved
+          <span data-testid="save-indicator-saved">Saved</span>
         </span>
       )
     case 'unsaved':
       return (
         <span className="flex items-center gap-1.5 text-xs text-[var(--color-warning)]">
-          Unsaved changes
+          <span data-testid="save-indicator-unsaved">Unsaved changes</span>
         </span>
       )
     default:

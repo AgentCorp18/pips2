@@ -40,7 +40,9 @@ const MembersPage = async () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Members</h1>
+          <h1 className="text-2xl font-bold tracking-tight" data-testid="members-page-heading">
+            Members
+          </h1>
           <p className="text-sm text-muted-foreground">
             Manage who has access to your organization.
           </p>

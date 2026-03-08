@@ -114,6 +114,7 @@ const StepItem = ({
         clickable && 'cursor-pointer hover:bg-[var(--color-surface-secondary)]',
         !clickable && 'cursor-default',
       )}
+      data-testid={`step-button-${number}`}
     >
       {/* Step circle */}
       <div
@@ -188,6 +189,7 @@ const StepItemMobile = ({
         clickable && !isCurrent && 'hover:bg-[var(--color-surface-secondary)]',
         !clickable && 'cursor-default',
       )}
+      data-testid={`step-button-mobile-${number}`}
     >
       <div
         className={cn(

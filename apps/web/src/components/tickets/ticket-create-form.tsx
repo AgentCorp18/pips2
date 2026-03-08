@@ -80,6 +80,7 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
         <Input
           id="title"
           name="title"
+          data-testid="ticket-title-input"
           placeholder="Brief summary of the ticket"
           aria-invalid={!!state.fieldErrors?.title}
           aria-describedby={state.fieldErrors?.title ? 'title-error' : undefined}
@@ -99,6 +100,7 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
         <Textarea
           id="description"
           name="description"
+          data-testid="ticket-description-input"
           placeholder="Detailed description..."
           aria-describedby={state.fieldErrors?.description ? 'description-error' : undefined}
           rows={4}
@@ -115,7 +117,7 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
         <div className="space-y-1.5">
           <Label>Type</Label>
           <Select name="type" defaultValue="general">
-            <SelectTrigger className="w-full" aria-label="Type">
+            <SelectTrigger className="w-full" aria-label="Type" data-testid="ticket-type-select">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -131,7 +133,11 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
         <div className="space-y-1.5">
           <Label>Priority</Label>
           <Select name="priority" defaultValue="medium">
-            <SelectTrigger className="w-full" aria-label="Priority">
+            <SelectTrigger
+              className="w-full"
+              aria-label="Priority"
+              data-testid="ticket-priority-select"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -147,7 +153,11 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
         <div className="space-y-1.5">
           <Label>Status</Label>
           <Select name="status" defaultValue="backlog">
-            <SelectTrigger className="w-full" aria-label="Status">
+            <SelectTrigger
+              className="w-full"
+              aria-label="Status"
+              data-testid="ticket-status-select"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -164,7 +174,11 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
         <div className="space-y-1.5">
           <Label>Assignee</Label>
           <Select name="assignee_id">
-            <SelectTrigger className="w-full" aria-label="Assignee">
+            <SelectTrigger
+              className="w-full"
+              aria-label="Assignee"
+              data-testid="ticket-assignee-select"
+            >
               <SelectValue placeholder="Unassigned" />
             </SelectTrigger>
             <SelectContent>
@@ -180,7 +194,11 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
         <div className="space-y-1.5">
           <Label>Project</Label>
           <Select name="project_id">
-            <SelectTrigger className="w-full" aria-label="Project">
+            <SelectTrigger
+              className="w-full"
+              aria-label="Project"
+              data-testid="ticket-project-select"
+            >
               <SelectValue placeholder="None" />
             </SelectTrigger>
             <SelectContent>
@@ -212,13 +230,18 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
 
         <div className="space-y-1.5">
           <Label htmlFor="tags">Tags</Label>
-          <Input id="tags" name="tags" placeholder="Comma-separated tags" />
+          <Input
+            id="tags"
+            name="tags"
+            data-testid="ticket-tags-input"
+            placeholder="Comma-separated tags"
+          />
         </div>
       </div>
 
       {/* Submit */}
       <div className="flex justify-end gap-3 pt-2">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} data-testid="create-ticket-button">
           {pending ? 'Creating...' : 'Create Ticket'}
         </Button>
       </div>

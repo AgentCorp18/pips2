@@ -19,7 +19,11 @@ export const TeamsEmptyState = ({ role }: TeamsEmptyStateProps) => {
       >
         <Users size={24} style={{ color: 'var(--color-primary)' }} />
       </div>
-      <h3 className="mb-1 text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+      <h3
+        className="mb-1 text-lg font-semibold"
+        style={{ color: 'var(--color-text-primary)' }}
+        data-testid="teams-empty-title"
+      >
         No teams yet
       </h3>
       <p

@@ -64,7 +64,11 @@ const TeamDetailPage = async ({ params }: TeamDetailPageProps) => {
       {/* Team header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1
+            className="text-2xl font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
+            data-testid="team-detail-heading"
+          >
             {team.name}
           </h1>
           {team.description && (

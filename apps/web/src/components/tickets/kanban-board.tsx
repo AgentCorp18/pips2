@@ -135,6 +135,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
               key={col.id}
               className="flex w-[280px] flex-shrink-0 flex-col"
               role="group"
+              data-testid={`kanban-column-${col.id}`}
               aria-label={`${col.label} column, ${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`}
             >
               {/* Column header */}
@@ -146,6 +147,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
                 />
                 <h3
                   className="text-sm font-semibold"
+                  data-testid={`kanban-column-heading-${col.id}`}
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {col.label}
@@ -156,6 +158,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
                     backgroundColor: 'var(--color-surface)',
                     color: 'var(--color-text-secondary)',
                   }}
+                  data-testid={`kanban-column-count-${col.id}`}
                   aria-label={`${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`}
                 >
                   {tickets.length}

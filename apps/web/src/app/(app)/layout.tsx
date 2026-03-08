@@ -147,6 +147,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                 href={item.href}
                 onClick={mounted && isMobile ? closeSidebar : undefined}
                 aria-current={isActive ? 'page' : undefined}
+                data-testid={`nav-link-${item.label.toLowerCase()}`}
                 className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 ${
                   isActive ? 'bg-[var(--sidebar-accent)] opacity-100' : 'opacity-70'
                 }`}
@@ -186,6 +187,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               type="button"
               onClick={openCommandPalette}
               aria-label="Search projects, tickets (Ctrl+K)"
+              data-testid="search-trigger"
               className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-1.5 transition-colors hover:border-[var(--color-primary)]"
             >
               <Search size={16} className="text-[var(--color-text-tertiary)]" />

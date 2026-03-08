@@ -28,7 +28,9 @@ export const ProjectForm = () => {
   return (
     <Card className="mx-auto max-w-lg">
       <CardHeader>
-        <CardTitle className="text-xl">Create a new project</CardTitle>
+        <CardTitle className="text-xl" data-testid="create-project-heading">
+          Create a new project
+        </CardTitle>
         <CardDescription>Start a PIPS improvement cycle by defining your project</CardDescription>
       </CardHeader>
 
@@ -54,6 +56,7 @@ export const ProjectForm = () => {
               id="name"
               name="name"
               type="text"
+              data-testid="project-name-input"
               placeholder="e.g. Reduce onboarding time"
               aria-required="true"
               aria-describedby={state.fieldErrors?.name ? 'name-error' : undefined}
@@ -73,6 +76,7 @@ export const ProjectForm = () => {
             <textarea
               id="description"
               name="description"
+              data-testid="project-description-input"
               placeholder="Describe the process you want to improve..."
               disabled={isPending}
               rows={3}
@@ -105,7 +109,12 @@ export const ProjectForm = () => {
           </div>
 
           {/* Submit */}
-          <Button type="submit" className="mt-2 w-full" disabled={isPending}>
+          <Button
+            type="submit"
+            className="mt-2 w-full"
+            disabled={isPending}
+            data-testid="create-project-button"
+          >
             {isPending ? 'Creating project...' : 'Create project'}
           </Button>
         </form>

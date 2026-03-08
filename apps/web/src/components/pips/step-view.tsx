@@ -84,7 +84,10 @@ export const StepView = ({
       {/* Guided Prompts */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle
+            className="flex items-center gap-2 text-base"
+            data-testid="guiding-questions-title"
+          >
             <MessageSquare size={16} className="text-[var(--color-text-tertiary)]" />
             Guiding Questions
           </CardTitle>
@@ -107,7 +110,10 @@ export const StepView = ({
       {/* Forms */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle
+            className="flex items-center gap-2 text-base"
+            data-testid="analysis-tools-title"
+          >
             <FileText size={16} className="text-[var(--color-text-tertiary)]" />
             Analysis Tools
           </CardTitle>
@@ -130,7 +136,9 @@ export const StepView = ({
       {/* Completion Criteria */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Completion Criteria</CardTitle>
+          <CardTitle className="text-base" data-testid="completion-criteria-title">
+            Completion Criteria
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
@@ -204,7 +212,7 @@ const StatusBadge = ({
   const config = variants[status] ?? fallback
 
   return (
-    <Badge variant={config.variant} className="mt-1 text-xs">
+    <Badge variant={config.variant} className="mt-1 text-xs" data-testid="step-status-badge">
       {config.label}
     </Badge>
   )
@@ -220,6 +228,7 @@ type FormRowProps = {
 const FormRow = ({ form, projectId, stepNumber, started }: FormRowProps) => (
   <Link
     href={`/projects/${projectId}/steps/${stepNumber}/forms/${form.type}`}
+    data-testid={`form-link-${form.type}`}
     className={cn(
       'flex items-center justify-between rounded-[var(--radius-md)] border px-4 py-3 transition-all hover:bg-[var(--color-surface-secondary)]',
       started

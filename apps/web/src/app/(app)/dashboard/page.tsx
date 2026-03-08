@@ -70,15 +70,25 @@ const DashboardPage = async () => {
       {/* Welcome header */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1
+            className="text-2xl font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
+            data-testid="dashboard-heading"
+          >
             {org.name}
           </h1>
-          <Badge variant="secondary">
+          <Badge variant="secondary" data-testid="dashboard-role-badge">
             {roleLabel.charAt(0).toUpperCase() + roleLabel.slice(1)}
           </Badge>
-          <Badge variant="outline">{org.plan} plan</Badge>
+          <Badge variant="outline" data-testid="dashboard-plan-badge">
+            {org.plan} plan
+          </Badge>
         </div>
-        <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+        <p
+          className="mt-1 text-sm"
+          style={{ color: 'var(--color-text-secondary)' }}
+          data-testid="dashboard-welcome-text"
+        >
           Welcome to your PIPS dashboard. Here is an overview of your workspace.
         </p>
       </div>

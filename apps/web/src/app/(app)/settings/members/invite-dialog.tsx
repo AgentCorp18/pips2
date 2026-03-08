@@ -60,7 +60,7 @@ export const InviteDialog = ({ orgId, actorRole }: InviteDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button data-testid="invite-member-trigger">
           <UserPlus className="size-4" />
           Invite Member
         </Button>
@@ -68,7 +68,7 @@ export const InviteDialog = ({ orgId, actorRole }: InviteDialogProps) => {
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Invite a new member</DialogTitle>
+            <DialogTitle data-testid="invite-dialog-title">Invite a new member</DialogTitle>
             <DialogDescription>
               Enter the email address of the person you want to invite.
             </DialogDescription>
@@ -80,6 +80,7 @@ export const InviteDialog = ({ orgId, actorRole }: InviteDialogProps) => {
               <Input
                 id="invite-email"
                 type="email"
+                data-testid="invite-email-input"
                 placeholder="colleague@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -108,7 +109,11 @@ export const InviteDialog = ({ orgId, actorRole }: InviteDialogProps) => {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !email.trim()}>
+            <Button
+              type="submit"
+              disabled={loading || !email.trim()}
+              data-testid="send-invite-button"
+            >
               {loading ? 'Inviting...' : 'Send Invite'}
             </Button>
           </DialogFooter>

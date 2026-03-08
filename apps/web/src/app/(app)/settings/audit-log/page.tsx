@@ -145,7 +145,11 @@ const AuditLogPage = async ({ searchParams }: AuditLogPageProps) => {
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <h1
+          className="text-2xl font-semibold"
+          style={{ color: 'var(--color-text-primary)' }}
+          data-testid="audit-log-heading"
+        >
           Audit Log
         </h1>
         <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
@@ -155,7 +159,9 @@ const AuditLogPage = async ({ searchParams }: AuditLogPageProps) => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Activity History</CardTitle>
+          <CardTitle className="text-lg" data-testid="audit-log-card-title">
+            Activity History
+          </CardTitle>
           <CardDescription>
             {result.total} total {result.total === 1 ? 'entry' : 'entries'}
           </CardDescription>

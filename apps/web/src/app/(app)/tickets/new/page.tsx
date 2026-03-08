@@ -90,7 +90,9 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
     <div className="mx-auto max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle>{parentContext ? 'Create Sub-Ticket' : 'Create New Ticket'}</CardTitle>
+          <CardTitle data-testid="new-ticket-heading">
+            {parentContext ? 'Create Sub-Ticket' : 'Create New Ticket'}
+          </CardTitle>
           {parentContext && (
             <CardDescription>
               Creating sub-ticket under{' '}

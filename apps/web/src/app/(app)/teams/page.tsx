@@ -29,10 +29,18 @@ const TeamsPage = async () => {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1
+            className="text-2xl font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
+            data-testid="teams-page-heading"
+          >
             Teams
           </h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <p
+            className="mt-1 text-sm"
+            style={{ color: 'var(--color-text-secondary)' }}
+            data-testid="teams-description"
+          >
             Organize members into teams for your projects
           </p>
         </div>

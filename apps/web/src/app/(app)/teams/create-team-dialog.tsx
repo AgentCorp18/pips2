@@ -48,7 +48,7 @@ export const CreateTeamDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
+        <Button className="gap-2" data-testid="create-team-trigger">
           <Plus className="size-4" />
           Create Team
         </Button>
@@ -56,7 +56,7 @@ export const CreateTeamDialog = () => {
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create a new team</DialogTitle>
+            <DialogTitle data-testid="create-team-dialog-title">Create a new team</DialogTitle>
             <DialogDescription>
               Teams help you organize members and assign them to projects together.
             </DialogDescription>
@@ -67,6 +67,7 @@ export const CreateTeamDialog = () => {
               <Label htmlFor="team-name">Team name</Label>
               <Input
                 id="team-name"
+                data-testid="team-name-input"
                 placeholder="e.g. Engineering, Operations"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -80,6 +81,7 @@ export const CreateTeamDialog = () => {
               </Label>
               <Textarea
                 id="team-description"
+                data-testid="team-description-input"
                 placeholder="What does this team work on?"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -92,7 +94,11 @@ export const CreateTeamDialog = () => {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !name.trim()}>
+            <Button
+              type="submit"
+              disabled={loading || !name.trim()}
+              data-testid="create-team-submit"
+            >
               {loading ? 'Creating...' : 'Create Team'}
             </Button>
           </DialogFooter>

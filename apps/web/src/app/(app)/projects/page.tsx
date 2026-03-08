@@ -63,17 +63,25 @@ const ProjectsPage = async () => {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1
+            className="text-2xl font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
+            data-testid="projects-page-heading"
+          >
             Projects
           </h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <p
+            className="mt-1 text-sm"
+            style={{ color: 'var(--color-text-secondary)' }}
+            data-testid="projects-description"
+          >
             Manage your process improvement projects
           </p>
         </div>
         <div className="flex items-center gap-3">
           <ExportProjectsButton />
-          <Button asChild className="gap-2">
-            <Link href="/projects/new">
+          <Button asChild className="gap-2" data-testid="new-project-button">
+            <Link href="/projects/new" data-testid="new-project-link">
               <Plus size={16} />
               New Project
             </Link>
@@ -132,7 +140,11 @@ const EmptyState = () => (
     >
       <FolderKanban size={24} style={{ color: 'var(--color-primary)' }} />
     </div>
-    <h3 className="mb-1 text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+    <h3
+      className="mb-1 text-lg font-semibold"
+      style={{ color: 'var(--color-text-primary)' }}
+      data-testid="projects-empty-title"
+    >
       No projects yet
     </h3>
     <p

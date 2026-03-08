@@ -68,7 +68,11 @@ export const TeamMembersList = ({
   return (
     <>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <h2
+          className="text-lg font-semibold"
+          style={{ color: 'var(--color-text-primary)' }}
+          data-testid="team-members-heading"
+        >
           Members ({members.length})
         </h2>
         {canManage && availableMembers.length > 0 && (

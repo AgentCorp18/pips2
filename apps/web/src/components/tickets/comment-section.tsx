@@ -112,7 +112,11 @@ export const CommentSection = ({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+      <h2
+        className="text-lg font-semibold"
+        style={{ color: 'var(--color-text-primary)' }}
+        data-testid="comments-heading"
+      >
         Comments ({comments.length})
       </h2>
 
@@ -153,6 +157,7 @@ export const CommentSection = ({
           ref={textareaRef}
           value={newBody}
           onChange={(e) => handleBodyChange(e.target.value)}
+          data-testid="comment-textarea"
           placeholder="Write a comment... Use @ to mention someone"
           rows={3}
           onKeyDown={(e) => {
@@ -190,7 +195,12 @@ export const CommentSection = ({
           <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
             Ctrl+Enter to submit
           </p>
-          <Button size="sm" onClick={handleSubmit} disabled={isPending || !newBody.trim()}>
+          <Button
+            size="sm"
+            onClick={handleSubmit}
+            disabled={isPending || !newBody.trim()}
+            data-testid="comment-submit-button"
+          >
             {isPending ? 'Posting...' : 'Comment'}
           </Button>
         </div>

@@ -18,7 +18,11 @@ const NotificationPreferencesPage = async () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <h1
+          className="text-2xl font-semibold"
+          style={{ color: 'var(--color-text-primary)' }}
+          data-testid="notifications-page-heading"
+        >
           Notification Preferences
         </h1>
         <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>

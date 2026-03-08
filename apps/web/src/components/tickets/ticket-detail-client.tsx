@@ -140,6 +140,7 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
               <Input
                 value={titleDraft}
                 onChange={(e) => setTitleDraft(e.target.value)}
+                data-testid="ticket-title-edit-input"
                 className="text-xl font-semibold"
                 autoFocus
                 onKeyDown={(e) => {
@@ -168,6 +169,7 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
             <h1
               className="group flex cursor-pointer items-center gap-2 text-xl font-semibold"
               style={{ color: 'var(--color-text-primary)' }}
+              data-testid="ticket-detail-title"
               onClick={() => setEditingTitle(true)}
             >
               {ticket.title}
@@ -176,10 +178,18 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
           )}
 
           <div className="mt-2 flex items-center gap-2">
-            <Badge className={STATUS_COLORS[ticket.status]} variant="secondary">
+            <Badge
+              className={STATUS_COLORS[ticket.status]}
+              variant="secondary"
+              data-testid="ticket-status-badge"
+            >
               {STATUS_OPTIONS.find((o) => o.value === ticket.status)?.label}
             </Badge>
-            <Badge className={PRIORITY_COLORS[ticket.priority]} variant="secondary">
+            <Badge
+              className={PRIORITY_COLORS[ticket.priority]}
+              variant="secondary"
+              data-testid="ticket-priority-badge"
+            >
               {PRIORITY_OPTIONS.find((o) => o.value === ticket.priority)?.label}
             </Badge>
           </div>
@@ -332,9 +342,14 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
         {/* Tags */}
         {ticket.tags.length > 0 && (
           <SidebarField label="Tags" icon={<Tag size={14} />}>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1" data-testid="ticket-tags">
               {ticket.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs">
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="text-xs"
+                  data-testid={`ticket-tag-${tag}`}
+                >
                   {tag}
                 </Badge>
               ))}

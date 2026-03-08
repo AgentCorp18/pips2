@@ -96,6 +96,7 @@ export const OrgSettingsForm = ({ org, settings, canEdit }: OrgSettingsFormProps
             <Input
               id="name"
               name="name"
+              data-testid="org-name-input"
               defaultValue={org.name}
               disabled={isPending || !canEdit}
               required
@@ -247,7 +248,7 @@ export const OrgSettingsForm = ({ org, settings, canEdit }: OrgSettingsFormProps
 
       {canEdit && (
         <div className="flex justify-end">
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending} data-testid="settings-save-button">
             {isPending ? 'Saving...' : 'Save changes'}
           </Button>
         </div>

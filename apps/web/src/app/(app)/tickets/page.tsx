@@ -161,18 +161,26 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1
+            className="text-2xl font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
+            data-testid="tickets-page-heading"
+          >
             Tickets
           </h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <p
+            className="mt-1 text-sm"
+            style={{ color: 'var(--color-text-secondary)' }}
+            data-testid="tickets-count"
+          >
             {total} ticket{total !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <ExportTicketsButton />
           <ViewToggle current={view} />
-          <Button asChild className="gap-2">
-            <Link href="/tickets/new">
+          <Button asChild className="gap-2" data-testid="new-ticket-button">
+            <Link href="/tickets/new" data-testid="new-ticket-link">
               <Plus size={16} />
               New Ticket
             </Link>

@@ -95,7 +95,9 @@ export const ProfileForm = ({ profile }: ProfileFormProps) => {
       {/* Avatar section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Profile Photo</CardTitle>
+          <CardTitle className="text-lg" data-testid="profile-photo-title">
+            Profile Photo
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <AvatarUpload
@@ -131,6 +133,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps) => {
               <Input
                 id="display_name"
                 name="display_name"
+                data-testid="display-name-input"
                 defaultValue={profile.display_name ?? ''}
                 placeholder={profile.full_name || 'Enter a display name'}
                 disabled={isPending}
@@ -164,7 +167,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps) => {
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending} data-testid="profile-save-button">
             {isPending ? 'Saving...' : 'Save changes'}
           </Button>
         </div>
