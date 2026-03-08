@@ -14,14 +14,14 @@ vi.mock('@/components/pips/step-stepper', () => ({
     currentStep,
     onStepClick,
   }: {
-    steps: Array<{ number: number; name: string; status: string }>
+    steps: Array<{ step_number: number; name: string; status: string }>
     currentStep: number
     onStepClick: (n: number) => void
   }) => (
     <div data-testid="step-stepper">
       <span>Current: {currentStep}</span>
       {steps.map((s) => (
-        <button key={s.number} onClick={() => onStepClick(s.number)}>
+        <button key={s.step_number} onClick={() => onStepClick(s.step_number)}>
           {s.name}
         </button>
       ))}
@@ -31,7 +31,7 @@ vi.mock('@/components/pips/step-stepper', () => ({
 
 const mockSteps = [
   {
-    number: 1,
+    step_number: 1,
     name: 'Identify',
     status: 'completed' as const,
     completedAt: null,
@@ -39,7 +39,7 @@ const mockSteps = [
     completedForms: 2,
   },
   {
-    number: 2,
+    step_number: 2,
     name: 'Analyze',
     status: 'in_progress' as const,
     completedAt: null,
