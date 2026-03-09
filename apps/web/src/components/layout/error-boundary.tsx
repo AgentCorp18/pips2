@@ -14,7 +14,7 @@ export const ErrorBoundaryCard = ({ error, reset }: ErrorBoundaryCardProps) => {
   const isDev = process.env.NODE_ENV === 'development'
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center p-6">
+    <div className="flex min-h-[60vh] items-center justify-center p-6" data-testid="error-boundary">
       <Card className="w-full max-w-md">
         <CardContent className="flex flex-col items-center py-12 text-center">
           <div
