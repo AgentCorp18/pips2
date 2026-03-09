@@ -2,13 +2,14 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Building2, Users, Bell, ScrollText } from 'lucide-react'
+import { Building2, Users, Bell, ScrollText, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const SETTINGS_NAV_ITEMS = [
   { label: 'General', href: '/settings', icon: Building2 },
   { label: 'Members', href: '/settings/members', icon: Users },
   { label: 'Notifications', href: '/settings/notifications', icon: Bell },
+  { label: 'Security', href: '/settings/security', icon: Shield },
   { label: 'Audit Log', href: '/settings/audit-log', icon: ScrollText },
 ]
 

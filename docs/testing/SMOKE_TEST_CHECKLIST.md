@@ -2,7 +2,7 @@
 
 > **Purpose:** Quick verification that core functionality works after each deployment.
 > **Time:** ~15 minutes per run
-> **Updated:** March 4, 2026
+> **Updated:** March 8, 2026
 
 ---
 
@@ -42,14 +42,24 @@
 
 ---
 
-## Tickets & PIPS Steps
+## Tickets
 
-- [ ] Open ticket detail page
-- [ ] Step 1 form loads and can be filled
-- [ ] Step 2 form loads (Fishbone Diagram)
+- [ ] Create ticket via Quick Create (top of page)
+- [ ] Create ticket via Full Form (all fields)
+- [ ] Ticket redirects to detail page after creation
+- [ ] Ticket appears in ticket list
+- [ ] Open Kanban board — tickets visible in columns
+- [ ] Quick-create FAB visible and creates ticket
+
+---
+
+## PIPS Steps
+
+- [ ] Open project detail — 6-step stepper visible
+- [ ] Step 1 (Identify): fill Problem Statement form → save → verify persistence
+- [ ] Step 2 (Analyze): Fishbone Diagram loads
 - [ ] Form data saves without errors
 - [ ] Step navigation (next/previous) works
-- [ ] Ticket status updates when advancing steps
 
 ---
 
@@ -85,12 +95,30 @@
 
 ---
 
-## Settings
+## Reports
+
+- [ ] Reports hub loads with category cards
+- [ ] Project report renders charts with data
+- [ ] Team report renders charts
+- [ ] Methodology report renders charts
+
+---
+
+## AI Assist
+
+- [ ] AI assist button visible on ticket description field
+- [ ] Click AI assist — streaming response appears
+- [ ] Accept AI suggestion — text populates field
+
+---
+
+## Settings & Profile
 
 - [ ] Profile page loads with current user info
-- [ ] Name update saves successfully
+- [ ] Update display name → verify persistence
 - [ ] Team page loads with member list
 - [ ] Notification preferences page loads
+- [ ] Audit log shows recent entries
 
 ---
 
@@ -98,9 +126,17 @@
 
 - [ ] No JavaScript errors in browser console
 - [ ] No 500 responses in Network tab
-- [ ] Dark mode toggle works (if available)
 - [ ] Page titles are correct in browser tab
 - [ ] Back button navigates correctly
+
+---
+
+## Mobile (375px viewport)
+
+- [ ] Dashboard loads, sidebar collapses
+- [ ] Create ticket flow works
+- [ ] Knowledge Hub content readable
+- [ ] Navigation accessible via mobile menu
 
 ---
 

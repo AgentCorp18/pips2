@@ -3,10 +3,12 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getTicket, getChildTickets, getParentTicket } from '../actions'
 import { getComments } from './comment-actions'
+import { getTicketAuditLog } from './audit-log-actions'
 import { TicketDetailClient } from '@/components/tickets/ticket-detail-client'
 import { CommentSection } from '@/components/tickets/comment-section'
 import { ParentTicketLink } from '@/components/tickets/parent-ticket-link'
 import { SubTickets } from '@/components/tickets/sub-tickets'
+import { TicketChangeLog } from '@/components/tickets/ticket-change-log'
 import { Separator } from '@/components/ui/separator'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 import { pipsStepEnumToNumber, buildProductContext } from '@pips/shared'
@@ -96,8 +98,11 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
     parentSequenceId = `${parentPrefix}-${parentData.sequence_number}`
   }
 
-  // Fetch comments
-  const commentsRaw = await getComments(ticketId)
+  // Fetch comments and audit log in parallel
+  const [commentsRaw, auditEntries] = await Promise.all([
+    getComments(ticketId),
+    getTicketAuditLog(ticketId),
+  ])
   const comments = commentsRaw.map((c) => {
     const author = c.author as unknown as {
       id: string
@@ -202,7 +207,16 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         />
       )}
 
-      <TicketDetailClient ticket={ticketData} sequenceId={sequenceId} members={members} />
+      <TicketDetailClient
+        ticket={ticketData}
+        sequenceId={sequenceId}
+        members={members}
+        parentTicket={
+          parentData && parentSequenceId
+            ? { id: parentData.id, title: parentData.title, sequenceId: parentSequenceId }
+            : undefined
+        }
+      />
 
       {cadenceContext && (
         <div className="mt-6">
@@ -222,6 +236,10 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         currentUserId={user.id}
         members={members}
       />
+
+      <Separator className="my-8" />
+
+      <TicketChangeLog entries={auditEntries} />
     </div>
   )
 }

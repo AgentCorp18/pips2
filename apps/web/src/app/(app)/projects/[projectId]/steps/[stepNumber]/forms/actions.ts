@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { stepNumberToEnum } from '@pips/shared'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type FormActionResult = {
   success: boolean
@@ -44,6 +45,13 @@ export const saveFormData = async (
     console.error('Failed to save form data:', error.message)
     return { success: false, error: 'Failed to save form data. Please try again.' }
   }
+
+  trackServerEvent('form.saved', {
+    project_id: projectId,
+    step_number: stepNumber,
+    form_type: formType,
+    fields_populated: Object.keys(data).length,
+  })
 
   revalidatePath(`/projects/${projectId}/steps/${stepNumber}`)
   return { success: true }

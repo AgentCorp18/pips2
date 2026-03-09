@@ -14,7 +14,12 @@ type EmptyStateProps = {
 
 export const EmptyState = ({ icon: Icon, title, description, action }: EmptyStateProps) => {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] py-16">
+    <div
+      role="status"
+      aria-label={title}
+      data-testid="empty-state"
+      className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] py-16"
+    >
       <div
         className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
         style={{ backgroundColor: 'var(--color-primary-subtle)' }}

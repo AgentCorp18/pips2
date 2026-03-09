@@ -37,6 +37,7 @@ type TicketCreateFormProps = {
   members: OrgMember[]
   projects: Project[]
   parentId?: string
+  initialExpanded?: boolean
 }
 
 /* ============================================================
@@ -45,13 +46,18 @@ type TicketCreateFormProps = {
 
 const initialState: TicketActionState = {}
 
-export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFormProps) => {
+export const TicketCreateForm = ({
+  members,
+  projects,
+  parentId,
+  initialExpanded = false,
+}: TicketCreateFormProps) => {
   const router = useRouter()
   const hasRedirected = useRef(false)
   const descriptionRef = useRef<HTMLTextAreaElement>(null)
   const [descriptionValue, setDescriptionValue] = useState('')
   const [state, formAction, pending] = useActionState(createTicket, initialState)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(initialExpanded)
 
   const handleDescriptionAccept = useCallback((text: string) => {
     setDescriptionValue(text)
@@ -152,7 +158,7 @@ export const TicketCreateForm = ({ members, projects, parentId }: TicketCreateFo
               id="title"
               name="title"
               data-testid="ticket-title-input"
-              placeholder="What needs to be done?"
+              placeholder="Brief summary of the ticket"
               aria-invalid={!!state.fieldErrors?.title}
               aria-describedby={state.fieldErrors?.title ? 'title-error' : undefined}
               aria-required="true"

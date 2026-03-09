@@ -44,34 +44,50 @@ const TicketRow = ({ ticket }: { ticket: MyWorkTicket }) => {
   const priorityColor = PRIORITY_COLORS[ticket.priority] ?? 'var(--color-text-tertiary)'
 
   return (
-    <a href={`/tickets/${ticket.id}`} className="block">
+    <a href={`/tickets/${ticket.id}`} className="block" data-testid={`ticket-row-${ticket.id}`}>
       <Card className="transition-shadow hover:shadow-md">
         <CardContent className="flex items-center gap-3 py-3">
           <div
             className="h-2 w-2 shrink-0 rounded-full"
             style={{ backgroundColor: priorityColor }}
+            aria-label={`Priority: ${ticket.priority}`}
+            data-testid="ticket-priority-dot"
           />
           <div className="min-w-0 flex-1">
             <p
               className="truncate text-sm font-medium"
               style={{ color: 'var(--color-text-primary)' }}
+              data-testid="ticket-title"
             >
               {ticket.title}
             </p>
             <div className="mt-0.5 flex items-center gap-2">
               {ticket.project && (
-                <span className="truncate text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                <span
+                  className="truncate text-xs"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                  data-testid="ticket-project"
+                >
                   {ticket.project.title}
                 </span>
               )}
               {ticket.due_date && (
-                <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                <span
+                  className="text-xs"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                  data-testid="ticket-due-date"
+                >
                   Due {ticket.due_date}
                 </span>
               )}
             </div>
           </div>
-          <Badge variant="outline" className="shrink-0 text-xs">
+          <Badge
+            variant="outline"
+            className="shrink-0 text-xs"
+            data-testid="ticket-status-badge"
+            aria-label={`Status: ${STATUS_LABELS[ticket.status] ?? ticket.status}`}
+          >
             {STATUS_LABELS[ticket.status] ?? ticket.status}
           </Badge>
         </CardContent>
@@ -94,23 +110,33 @@ type SectionProps = {
 const TicketSection = ({ title, icon: Icon, color, tickets }: SectionProps) => {
   if (tickets.length === 0) return null
 
+  const sectionId = title.toLowerCase().replace(/\s+/g, '-')
+
   return (
-    <div className="mb-6">
+    <section
+      className="mb-6"
+      data-testid={`my-work-section-${sectionId}`}
+      aria-labelledby={`section-heading-${sectionId}`}
+    >
       <div className="mb-3 flex items-center gap-2">
-        <Icon size={16} style={{ color }} />
-        <h2 className="text-sm font-semibold" style={{ color }}>
+        <Icon size={16} style={{ color }} aria-hidden="true" />
+        <h2 id={`section-heading-${sectionId}`} className="text-sm font-semibold" style={{ color }}>
           {title}
         </h2>
-        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+        <span
+          className="text-xs"
+          style={{ color: 'var(--color-text-tertiary)' }}
+          data-testid={`section-count-${sectionId}`}
+        >
           ({tickets.length})
         </span>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2" data-testid={`ticket-list-${sectionId}`}>
         {tickets.map((ticket) => (
           <TicketRow key={ticket.id} ticket={ticket} />
         ))}
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -149,20 +175,33 @@ const MyWorkPage = async () => {
     grouped.later.length
 
   return (
-    <div className="mx-auto max-w-[var(--content-max-width)]">
+    <div className="mx-auto max-w-[var(--content-max-width)]" data-testid="my-work-page">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <h1
+          className="text-2xl font-semibold"
+          style={{ color: 'var(--color-text-primary)' }}
+          data-testid="my-work-heading"
+        >
           My Work
         </h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+        <p
+          className="mt-1 text-sm"
+          style={{ color: 'var(--color-text-secondary)' }}
+          data-testid="my-work-description"
+        >
           Tickets assigned to you, grouped by urgency.
         </p>
       </div>
 
       {totalCount === 0 ? (
-        <Card>
+        <Card data-testid="my-work-empty-state" role="status" aria-label="No assigned tickets">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <Inbox size={48} style={{ color: 'var(--color-text-tertiary)' }} className="mb-4" />
+            <Inbox
+              size={48}
+              style={{ color: 'var(--color-text-tertiary)' }}
+              className="mb-4"
+              aria-hidden="true"
+            />
             <p className="text-lg font-medium" style={{ color: 'var(--color-text-secondary)' }}>
               No assigned tickets
             </p>

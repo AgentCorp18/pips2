@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { toast } from 'sonner'
 import { Trash2, UserPlus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -103,9 +104,11 @@ export const TeamMembersList = ({
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       {member.profiles?.avatar_url ? (
-                        <img
+                        <Image
                           src={member.profiles.avatar_url}
                           alt={displayName}
+                          width={32}
+                          height={32}
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (

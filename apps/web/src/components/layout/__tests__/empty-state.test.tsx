@@ -76,4 +76,37 @@ describe('EmptyState', () => {
     rerender(<EmptyState icon={Search} title="Empty" description="Nothing here" />)
     expect(document.querySelector('svg')).toBeInTheDocument()
   })
+
+  it('has role="status" for accessibility', () => {
+    render(
+      <EmptyState
+        icon={FolderKanban}
+        title="No projects"
+        description="Create your first project"
+      />,
+    )
+    expect(screen.getByRole('status')).toBeInTheDocument()
+  })
+
+  it('has aria-label matching the title', () => {
+    render(
+      <EmptyState
+        icon={FolderKanban}
+        title="No projects"
+        description="Create your first project"
+      />,
+    )
+    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'No projects')
+  })
+
+  it('has data-testid="empty-state"', () => {
+    render(
+      <EmptyState
+        icon={FolderKanban}
+        title="No projects"
+        description="Create your first project"
+      />,
+    )
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument()
+  })
 })

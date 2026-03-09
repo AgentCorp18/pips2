@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { StatCards } from '../dashboard/stat-cards'
+import { StatCards } from '../stat-cards'
 import type { DashboardStats } from '@/app/(app)/dashboard/actions'
 
 /* ============================================================
@@ -12,15 +12,17 @@ const defaultStats: DashboardStats = {
   openTickets: 23,
   overdueTickets: 3,
   completedThisMonth: 12,
+  teamMembers: 4,
 }
 
 describe('StatCards', () => {
-  it('renders 4 stat cards', () => {
+  it('renders 5 stat cards', () => {
     render(<StatCards stats={defaultStats} />)
     expect(screen.getByText('Active Projects')).toBeInTheDocument()
     expect(screen.getByText('Open Tickets')).toBeInTheDocument()
     expect(screen.getByText('Overdue')).toBeInTheDocument()
     expect(screen.getByText('Completed This Month')).toBeInTheDocument()
+    expect(screen.getByText('Team Members')).toBeInTheDocument()
   })
 
   it('renders correct values', () => {
@@ -29,6 +31,7 @@ describe('StatCards', () => {
     expect(screen.getByText('23')).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(screen.getByText('12')).toBeInTheDocument()
+    expect(screen.getByText('4')).toBeInTheDocument()
   })
 
   it('shows overdue count in red when greater than 0', () => {
@@ -43,7 +46,9 @@ describe('StatCards', () => {
       overdueTickets: 0,
     }
     render(<StatCards stats={zeroOverdueStats} />)
-    const overdueValue = screen.getByText('0')
+    // Find the overdue card's value (the 0 inside stat-overdue)
+    const overdueCard = screen.getByTestId('stat-overdue')
+    const overdueValue = overdueCard.querySelector('.text-2xl')
     expect(overdueValue).not.toHaveStyle({ color: '#EF4444' })
   })
 
@@ -53,9 +58,33 @@ describe('StatCards', () => {
       openTickets: 0,
       overdueTickets: 0,
       completedThisMonth: 0,
+      teamMembers: 0,
     }
     render(<StatCards stats={zeroStats} />)
     const zeros = screen.getAllByText('0')
-    expect(zeros).toHaveLength(4)
+    expect(zeros).toHaveLength(5)
+  })
+
+  it('renders data-testid on each card', () => {
+    render(<StatCards stats={defaultStats} />)
+    expect(screen.getByTestId('stat-active-projects')).toBeInTheDocument()
+    expect(screen.getByTestId('stat-open-tickets')).toBeInTheDocument()
+    expect(screen.getByTestId('stat-overdue')).toBeInTheDocument()
+    expect(screen.getByTestId('stat-completed')).toBeInTheDocument()
+    expect(screen.getByTestId('stat-team-members')).toBeInTheDocument()
+  })
+
+  it('renders overdue card as a link', () => {
+    render(<StatCards stats={defaultStats} />)
+    const overdueCard = screen.getByTestId('stat-overdue')
+    const link = overdueCard.closest('a')
+    expect(link).toHaveAttribute('href', '/tickets?status=overdue')
+  })
+
+  it('renders team members card as a link', () => {
+    render(<StatCards stats={defaultStats} />)
+    const teamCard = screen.getByTestId('stat-team-members')
+    const link = teamCard.closest('a')
+    expect(link).toHaveAttribute('href', '/settings/members')
   })
 })

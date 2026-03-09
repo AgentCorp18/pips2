@@ -71,7 +71,7 @@ export const ScenarioRunner = ({ scenario }: { scenario: ScenarioData }) => {
       </Card>
 
       {/* Step progress */}
-      <nav aria-label="Scenario steps" className="flex items-center gap-2">
+      <nav aria-label="Scenario steps" className="flex overflow-x-auto items-center gap-2">
         {scenario.steps.map((step, index) => {
           const isDone = completedSteps.has(index)
           const isCurrent = index === currentStep

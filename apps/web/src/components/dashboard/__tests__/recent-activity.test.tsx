@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { RecentActivity } from '../dashboard/recent-activity'
+import { RecentActivity } from '../recent-activity'
 import type { ActivityItem } from '@/app/(app)/dashboard/actions'
 
 /* ============================================================

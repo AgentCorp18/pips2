@@ -1237,6 +1237,216 @@ ON CONFLICT DO NOTHING;
 
 
 -- ============================================================
+-- 15. CONTENT NODES — Knowledge Hub sample content
+-- ============================================================
+-- Content nodes are a global catalog (no org_id, no RLS).
+-- IDs use a human-readable slug format: pillar-slug
+
+-- ----- BOOK chapters (one per PIPS pillar area) -----
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'book-understanding-the-problem',
+  'book',
+  'Understanding the Problem: Why Most Improvement Efforts Fail',
+  'understanding-the-problem',
+  'Explores why 70% of process improvement initiatives fail and how the PIPS methodology addresses the root causes of failure through structured problem identification.',
+  E'# Understanding the Problem\n\nMost process improvement efforts fail not because teams lack motivation, but because they skip the most critical step: truly understanding the problem they are trying to solve.\n\n## The 70% Failure Rate\n\nResearch consistently shows that roughly 70% of organizational change initiatives fail to achieve their stated goals. The primary reason? Teams jump to solutions before they have properly identified and scoped the problem.\n\n## The PIPS Approach\n\nThe PIPS methodology begins with **Step 1: Identify** — a structured approach to problem identification that ensures teams:\n\n- Define the problem in measurable terms\n- Identify all affected stakeholders\n- Establish a clear baseline before attempting any changes\n- Articulate the desired outcome with specific success criteria\n\n## The Problem Statement Framework\n\nA well-crafted problem statement answers six essential questions: Who is affected? What is happening? When does it occur? Where does it happen? What is the magnitude of impact? What does the desired outcome look like?\n\nWithout this foundation, even the most creative solutions will miss their mark.',
+  8,
+  1,
+  'public',
+  '{"steps": ["step-1"], "tools": ["problem-statement"]}'::jsonb,
+  ARRAY['book-root-cause-analysis', 'guide-problem-statement']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'book-root-cause-analysis',
+  'book',
+  'Root Cause Analysis: Digging Beneath the Surface',
+  'root-cause-analysis',
+  'Covers the art and science of root cause analysis using fishbone diagrams, Five-Why analysis, and data-driven investigation techniques within the PIPS framework.',
+  E'# Root Cause Analysis\n\nOnce a problem is clearly identified, the temptation is to brainstorm solutions immediately. The PIPS methodology resists this urge, instead dedicating **Step 2: Analyze** to understanding *why* the problem exists.\n\n## Symptoms vs. Root Causes\n\nConsider a hospital emergency department with long wait times. The symptom is obvious — patients wait too long. But the root causes could include:\n\n- Staffing patterns that do not match patient arrival patterns\n- Inefficient triage procedures\n- Downstream bottlenecks in lab results or bed availability\n- Poor communication between departments\n\n## The Fishbone Diagram\n\nThe fishbone (Ishikawa) diagram organizes potential causes into categories: People, Process, Place, Technology, Management, and Materials. This visual tool prevents tunnel vision and ensures the team considers all possible contributing factors.\n\n## Five-Why Analysis\n\nFor each major cause identified in the fishbone, the Five-Why technique drills deeper. By asking "why?" five times in succession, teams move from surface-level symptoms to actionable root causes.\n\n## Data-Driven Validation\n\nHypothesized root causes must be validated with data. The PIPS framework requires teams to gather evidence before proceeding to solution generation, preventing the common trap of solving the wrong problem brilliantly.',
+  10,
+  2,
+  'free-registered',
+  '{"steps": ["step-2"], "tools": ["fishbone", "five-why"]}'::jsonb,
+  ARRAY['book-understanding-the-problem', 'guide-fishbone-diagram']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'book-from-ideas-to-action',
+  'book',
+  'From Ideas to Action: Selecting and Planning Solutions',
+  'from-ideas-to-action',
+  'Guides teams through structured brainstorming, criteria-based evaluation, and implementation planning using the PIPS Steps 3 and 4 methodology.',
+  E'# From Ideas to Action\n\nWith root causes validated, teams are finally ready to generate solutions. The PIPS methodology dedicates two full steps to this transition: **Step 3: Generate** and **Step 4: Select & Plan**.\n\n## Structured Brainstorming\n\nEffective brainstorming is not a free-for-all. The PIPS approach uses structured techniques to maximize creative output:\n\n- **Round-robin ideation** ensures every voice is heard\n- **How-Might-We framing** converts root causes into opportunity statements\n- **Analogous thinking** borrows solutions from other industries\n\n## The Criteria Matrix\n\nWith a rich set of potential solutions, teams need a systematic way to evaluate them. The criteria matrix scores each option against weighted factors such as:\n\n- Impact on the root cause\n- Cost and resource requirements\n- Implementation timeline\n- Risk and reversibility\n- Stakeholder acceptance\n\n## Implementation Planning\n\nThe selected solution becomes an actionable plan through the PIPS implementation planning tools: Gantt timelines, RACI charts, risk registers, and communication plans. Each tool ensures that the brilliant solution on paper becomes a successful change in practice.',
+  12,
+  3,
+  'paid',
+  '{"steps": ["step-3", "step-4"], "tools": ["criteria-matrix", "implementation-plan", "raci"]}'::jsonb,
+  ARRAY['guide-criteria-matrix', 'workbook-criteria-matrix-exercise']
+) ON CONFLICT (id) DO NOTHING;
+
+-- ----- GUIDE tool descriptions -----
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'guide-problem-statement',
+  'guide',
+  'How to Write an Effective Problem Statement',
+  'problem-statement',
+  'Step-by-step guide to crafting a PIPS problem statement that clearly defines the who, what, when, where, impact, and desired outcome of the issue.',
+  E'# How to Write an Effective Problem Statement\n\nThe problem statement is the foundation of every PIPS project. A well-written problem statement aligns stakeholders, focuses effort, and provides the baseline against which success is measured.\n\n## The Six Elements\n\n### 1. Who is affected?\nIdentify the specific people, teams, or customers impacted by the problem. Be precise — "employees" is too vague; "the 240 employees who park in the main lot daily" is actionable.\n\n### 2. What is happening?\nDescribe the observable symptoms without jumping to causes or solutions. Use data wherever possible.\n\n### 3. When does it occur?\nIs the problem constant, periodic, or triggered by specific events? Understanding timing helps identify root causes.\n\n### 4. Where does it happen?\nLocate the problem geographically, organizationally, or within a process flow.\n\n### 5. What is the impact?\nQuantify the cost in dollars, time, customer satisfaction, safety, or other measurable terms.\n\n### 6. What is the desired outcome?\nState the target with specific, measurable success criteria.\n\n## Common Mistakes\n\n- **Embedding the solution**: "We need a new parking system" is a solution, not a problem statement\n- **Being too broad**: "Customer service needs improvement" cannot be acted upon\n- **Lacking measurement**: Without a baseline, you cannot prove the solution worked',
+  6,
+  1,
+  'public',
+  '{"steps": ["step-1"], "tools": ["problem-statement"]}'::jsonb,
+  ARRAY['book-understanding-the-problem', 'workbook-problem-statement-exercise']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'guide-fishbone-diagram',
+  'guide',
+  'Facilitating a Fishbone Diagram Workshop',
+  'fishbone-diagram',
+  'Practical guide for facilitators running a fishbone (Ishikawa) root cause analysis session, including preparation, facilitation tips, and follow-up actions.',
+  E'# Facilitating a Fishbone Diagram Workshop\n\nThe fishbone diagram is a visual tool that helps teams systematically identify and categorize potential causes of a problem. When facilitated well, a fishbone workshop surfaces causes that no individual would discover alone.\n\n## Before the Workshop\n\n- **Select participants**: Include people closest to the problem (front-line workers) plus those with broader perspective (managers, cross-functional partners)\n- **Share the problem statement**: All participants should receive the validated problem statement at least 2 days before the session\n- **Prepare materials**: Whiteboard or large paper, sticky notes, markers, timer\n\n## The Six Categories\n\nPIPS uses six standard categories for organizing causes:\n\n1. **People** — Skills, training, staffing, workload\n2. **Process** — Procedures, workflows, handoffs, documentation\n3. **Place** — Physical environment, layout, equipment location\n4. **Technology** — Systems, software, hardware, data quality\n5. **Management** — Policies, priorities, communication, culture\n6. **Materials** — Supplies, raw materials, information inputs\n\n## Facilitation Flow\n\n1. Draw the fish skeleton with the problem at the head (5 min)\n2. Label the six category bones (2 min)\n3. Silent brainstorming — each person writes causes on sticky notes (10 min)\n4. Round-robin placement — each person places and explains one note per round (20 min)\n5. Group discussion and clustering (15 min)\n6. Dot voting on most likely root causes — each person gets 3 votes (5 min)\n7. Select top 3 causes for Five-Why deep dive (3 min)',
+  7,
+  2,
+  'free-registered',
+  '{"steps": ["step-2"], "tools": ["fishbone"]}'::jsonb,
+  ARRAY['book-root-cause-analysis', 'guide-five-why']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'guide-five-why',
+  'guide',
+  'The Five-Why Technique: From Symptoms to Root Causes',
+  'five-why',
+  'Learn to apply the Five-Why analysis method to drill past surface symptoms and uncover the true root causes driving process problems.',
+  E'# The Five-Why Technique\n\nThe Five-Why method is deceptively simple: keep asking "Why?" until you reach a root cause that, if addressed, would prevent the problem from recurring.\n\n## How It Works\n\nStart with a cause identified in your fishbone diagram and ask "Why does this happen?" For each answer, ask "Why?" again. Typically, five iterations are sufficient to reach an actionable root cause.\n\n## Example: Employee Parking Problem\n\n- **Problem**: Employees spend 12+ minutes searching for parking\n- **Why?** The main lot is full when most employees arrive\n- **Why?** 85% of employees arrive between 8:00 and 8:30 AM\n- **Why?** The company has a rigid 8:30 AM start time for all departments\n- **Why?** The policy was set when the company had 120 employees; it has never been revisited\n- **Why?** There is no regular process to review operational policies as the company grows\n\nThe root cause is not a parking shortage — it is a failure to update policies as the organization scales. The solution shifts from "build more parking" to "implement flexible scheduling and regular policy reviews."\n\n## Tips for Effective Five-Why Sessions\n\n- Stay focused on process and system causes, not people\n- Verify each "because" with data when possible\n- If you reach a dead end, try a different branch\n- Document the chain — it tells a compelling story for stakeholders',
+  5,
+  3,
+  'public',
+  '{"steps": ["step-2"], "tools": ["five-why"]}'::jsonb,
+  ARRAY['guide-fishbone-diagram', 'book-root-cause-analysis']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'guide-criteria-matrix',
+  'guide',
+  'Using the Criteria Matrix to Evaluate Solutions',
+  'criteria-matrix',
+  'A detailed guide to building and scoring a weighted criteria matrix for objective solution evaluation in PIPS Step 4.',
+  E'# Using the Criteria Matrix\n\nAfter brainstorming multiple potential solutions in Step 3, teams need an objective method to compare them. The criteria matrix provides this structure.\n\n## Building the Matrix\n\n### 1. Define Evaluation Criteria\nCommon criteria for PIPS projects include:\n- **Impact**: How directly does this address the root cause?\n- **Cost**: What is the total cost of implementation?\n- **Timeline**: How quickly can this be implemented?\n- **Risk**: What could go wrong, and how reversible is the solution?\n- **Acceptance**: How likely are stakeholders to support this change?\n\n### 2. Weight the Criteria\nNot all criteria are equally important. Assign percentage weights that sum to 100%. Typically, impact carries the highest weight (30-40%).\n\n### 3. Score Each Solution\nRate each solution 1-5 against each criterion. Multiply by the weight to get weighted scores.\n\n### 4. Compare and Discuss\nThe matrix provides a starting point for discussion, not a final verdict. If the numbers surprise the team, explore why — it often reveals unstated assumptions.\n\n## Common Pitfalls\n\n- **Anchoring**: Presenting a favorite solution first biases scoring. Randomize order.\n- **Groupthink**: Have individuals score independently before group discussion.\n- **Ignoring qualitative factors**: The matrix is one input. Leadership judgment, organizational readiness, and strategic alignment also matter.',
+  7,
+  4,
+  'paid',
+  '{"steps": ["step-4"], "tools": ["criteria-matrix"]}'::jsonb,
+  ARRAY['book-from-ideas-to-action', 'workbook-criteria-matrix-exercise']
+) ON CONFLICT (id) DO NOTHING;
+
+-- ----- WORKBOOK exercises -----
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'workbook-problem-statement-exercise',
+  'workbook',
+  'Exercise: Draft Your Problem Statement',
+  'problem-statement-exercise',
+  'A guided workbook exercise that walks you through drafting a problem statement for a real issue in your organization, with reflection prompts and self-assessment.',
+  E'# Exercise: Draft Your Problem Statement\n\nThis exercise guides you through creating a problem statement for a real process issue in your organization.\n\n## Instructions\n\nThink of a process that frustrates you or your team. It could be as large as customer onboarding or as small as how meeting rooms are booked. Answer each question below.\n\n### Part 1: The Six Elements\n\n1. **Who is affected?**\n   Write down every person or group impacted. Be specific about numbers.\n\n2. **What is happening?**\n   Describe the observable symptoms using facts and data. Avoid opinions or causes.\n\n3. **When does it occur?**\n   Note frequency, timing, and any patterns.\n\n4. **Where does it happen?**\n   Identify the location — physical, organizational, or within a process.\n\n5. **What is the impact?**\n   Quantify in at least two dimensions (time, money, satisfaction, safety).\n\n6. **What is the desired outcome?**\n   State your SMART goal.\n\n### Part 2: Self-Assessment\n\nReview your draft against these criteria:\n- [ ] Does it describe a problem, not a solution?\n- [ ] Is it specific enough to act on?\n- [ ] Does it include measurable baseline data?\n- [ ] Would a stranger understand the scope and urgency?\n\n### Part 3: Peer Review\n\nShare your problem statement with a colleague who is unfamiliar with the issue. If they can explain the problem back to you accurately, your statement is effective.',
+  15,
+  1,
+  'free-registered',
+  '{"steps": ["step-1"], "tools": ["problem-statement"]}'::jsonb,
+  ARRAY['guide-problem-statement', 'book-understanding-the-problem']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'workbook-criteria-matrix-exercise',
+  'workbook',
+  'Exercise: Build a Criteria Matrix for Your Project',
+  'criteria-matrix-exercise',
+  'Hands-on exercise to create a weighted criteria matrix, score at least three candidate solutions, and interpret the results for decision-making.',
+  E'# Exercise: Build a Criteria Matrix\n\nIn this exercise, you will create a criteria matrix to evaluate solutions for a process improvement challenge.\n\n## Prerequisites\n\nBefore starting, you should have:\n- A validated problem statement (Step 1)\n- Completed root cause analysis (Step 2)\n- At least 3 candidate solutions from brainstorming (Step 3)\n\n## Step-by-Step Instructions\n\n### 1. List Your Solutions (5 min)\nWrite down 3-5 candidate solutions generated during brainstorming.\n\n### 2. Define Criteria (10 min)\nSelect 4-6 evaluation criteria. Suggested starting set:\n- Impact on root cause (how directly does it solve the problem?)\n- Implementation cost (total budget required)\n- Time to implement (weeks or months to full deployment)\n- Risk level (what could go wrong?)\n- Stakeholder acceptance (will people embrace this change?)\n\n### 3. Assign Weights (10 min)\nDistribute 100 percentage points across your criteria. The most important criterion gets the highest weight.\n\n### 4. Score Each Solution (15 min)\nRate each solution 1 (poor) to 5 (excellent) on each criterion. Score independently before discussing with your team.\n\n### 5. Calculate Weighted Scores (5 min)\nMultiply each score by the criterion weight. Sum the weighted scores for each solution.\n\n### 6. Interpret Results (10 min)\n- Which solution scored highest overall?\n- Were there any surprises?\n- Does the top-scoring solution feel right intuitively? If not, what criteria might be missing?\n\n## Reflection\n\nThe matrix is a decision-support tool, not a decision-making machine. Use it to structure discussion and surface disagreements productively.',
+  20,
+  2,
+  'paid',
+  '{"steps": ["step-3", "step-4"], "tools": ["criteria-matrix"]}'::jsonb,
+  ARRAY['guide-criteria-matrix', 'book-from-ideas-to-action']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'workbook-five-why-practice',
+  'workbook',
+  'Exercise: Five-Why Deep Dive on a Real Problem',
+  'five-why-practice',
+  'Practice the Five-Why technique on three common workplace scenarios, then apply it to a real issue from your own experience.',
+  E'# Exercise: Five-Why Deep Dive\n\nPractice the Five-Why technique with guided scenarios before applying it to your own organizational challenges.\n\n## Warm-Up Scenario\n\n**Problem**: The monthly financial report is consistently delivered 3 days late.\n\nTry completing the Five-Why chain:\n1. Why is the report late? → (Your answer)\n2. Why? → (Your answer)\n3. Why? → (Your answer)\n4. Why? → (Your answer)\n5. Why? → (Your answer)\n\n**Sample chain** (reveal after attempting):\n1. The data is not ready when the analyst starts → 2. Three departments submit their figures late → 3. Department heads wait for month-end reconciliation → 4. Reconciliation requires manual data entry from two legacy systems → 5. The legacy systems have never been integrated because no one owns the data pipeline.\n\n## Your Turn\n\nSelect a real problem from your organization and complete a Five-Why analysis:\n\n1. State the problem clearly: ___\n2. Why does this happen? ___\n3. Why? ___\n4. Why? ___\n5. Why? ___\n6. Root cause identified: ___\n\n## Validation Checklist\n\n- [ ] Does your root cause point to a system or process issue (not a person)?\n- [ ] If you fixed this root cause, would the original problem be prevented?\n- [ ] Can you gather data to confirm this root cause is real?\n- [ ] Is the root cause within your influence to change?',
+  12,
+  3,
+  'free-registered',
+  '{"steps": ["step-2"], "tools": ["five-why"]}'::jsonb,
+  ARRAY['guide-five-why', 'book-root-cause-analysis']
+) ON CONFLICT (id) DO NOTHING;
+
+-- ----- WORKSHOP module descriptions -----
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'workshop-intro-to-pips',
+  'workshop',
+  'Workshop Module: Introduction to the PIPS Methodology',
+  'intro-to-pips',
+  'A 90-minute facilitator-led workshop module introducing the PIPS 6-step methodology with an interactive team exercise using a realistic scenario.',
+  E'# Workshop: Introduction to the PIPS Methodology\n\n**Duration**: 90 minutes | **Group size**: 6-20 participants | **Level**: Beginner\n\n## Learning Objectives\n\nBy the end of this module, participants will be able to:\n- Explain the six steps of the PIPS methodology and their purpose\n- Identify which step applies to common process improvement situations\n- Recognize the difference between symptoms and root causes\n- Articulate why structured methodology outperforms ad-hoc problem solving\n\n## Agenda\n\n| Time | Activity | Format |\n|------|----------|--------|\n| 0-10 min | Welcome and icebreaker: "Name a process that frustrates you" | Group discussion |\n| 10-30 min | Overview of the 6 PIPS steps with real-world examples | Presentation |\n| 30-50 min | Team exercise: Sort 12 activity cards into the correct PIPS step | Small groups |\n| 50-65 min | Debrief: Common misconceptions and "aha" moments | Group discussion |\n| 65-85 min | Mini-scenario: Apply Step 1 (Identify) to a sample problem | Pairs |\n| 85-90 min | Wrap-up and preview of next module | Facilitator |\n\n## Materials Needed\n\n- Activity card deck (12 cards, printable from the PIPS resource library)\n- Problem scenario handout\n- Flip chart paper and markers for each table\n- Timer for exercises',
+  5,
+  1,
+  'public',
+  '{"steps": ["step-1", "step-2", "step-3", "step-4", "step-5", "step-6"], "tools": ["problem-statement"]}'::jsonb,
+  ARRAY['book-understanding-the-problem', 'workshop-fishbone-in-action']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'workshop-fishbone-in-action',
+  'workshop',
+  'Workshop Module: Fishbone Analysis in Action',
+  'fishbone-in-action',
+  'A hands-on 2-hour workshop module where teams conduct a complete fishbone analysis on a realistic business scenario, practicing facilitation and root cause identification.',
+  E'# Workshop: Fishbone Analysis in Action\n\n**Duration**: 120 minutes | **Group size**: 8-24 participants | **Level**: Intermediate\n\n## Learning Objectives\n\nBy the end of this module, participants will be able to:\n- Facilitate a fishbone diagram session for their own team\n- Categorize causes across the six PIPS categories (People, Process, Place, Technology, Management, Materials)\n- Use dot-voting to prioritize root causes for further investigation\n- Transition from fishbone findings to Five-Why deep dives\n\n## Scenario: Regional Hospital Emergency Department\n\nParticipants work with a pre-built scenario where a regional hospital''s ED has seen average wait times increase from 45 minutes to 2.5 hours over 18 months. Patient satisfaction scores have dropped from 78% to 52%.\n\n## Agenda\n\n| Time | Activity | Format |\n|------|----------|--------|\n| 0-15 min | Review scenario data pack and problem statement | Individual reading |\n| 15-25 min | Demonstrate fishbone technique with a simple example | Facilitator demo |\n| 25-35 min | Silent brainstorming: Write potential causes on sticky notes | Individual |\n| 35-60 min | Build the fishbone: Round-robin placement and discussion | Table groups |\n| 60-70 min | Dot voting: Each person places 3 votes on most likely root causes | Individual |\n| 70-90 min | Five-Why drill-down on the top-voted cause per table | Table groups |\n| 90-110 min | Gallery walk: Tables visit each other''s fishbones | Cross-group |\n| 110-120 min | Debrief: Compare findings, discuss facilitation challenges | Full group |\n\n## Facilitator Notes\n\n- Resist the urge to correct "wrong" causes during brainstorming. Let the group self-correct during discussion.\n- If a group gets stuck in one category, prompt them: "What about the Technology angle?" or "Have you considered how Management policies contribute?"\n- The gallery walk is essential for cross-pollination of ideas between tables.',
+  6,
+  2,
+  'free-registered',
+  '{"steps": ["step-2"], "tools": ["fishbone", "five-why"]}'::jsonb,
+  ARRAY['guide-fishbone-diagram', 'guide-five-why', 'workshop-intro-to-pips']
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_nodes (id, pillar, title, slug, summary, body_md, estimated_read_minutes, sort_order, access_level, tags, related_nodes)
+VALUES (
+  'workshop-solution-selection',
+  'workshop',
+  'Workshop Module: Solution Selection and Planning',
+  'solution-selection',
+  'A 2-hour workshop module guiding teams through structured brainstorming, criteria matrix evaluation, and RACI chart development for their top solution.',
+  E'# Workshop: Solution Selection and Planning\n\n**Duration**: 120 minutes | **Group size**: 6-20 participants | **Level**: Intermediate\n\n## Prerequisites\n\nParticipants should have completed root cause analysis (fishbone + Five-Why) on a real or scenario-based problem.\n\n## Learning Objectives\n\nBy the end of this module, participants will be able to:\n- Generate diverse solutions using structured brainstorming techniques\n- Build and score a weighted criteria matrix\n- Develop a RACI chart for their selected solution\n- Create a high-level implementation timeline\n\n## Agenda\n\n| Time | Activity | Format |\n|------|----------|--------|\n| 0-10 min | Review root causes from previous module | Group recap |\n| 10-30 min | Structured brainstorming: How-Might-We statements | Pairs, then groups |\n| 30-45 min | Solution clustering and initial shortlist (top 3-4) | Group discussion |\n| 45-65 min | Build criteria matrix: define criteria, assign weights | Group exercise |\n| 65-80 min | Independent scoring, then group calibration | Individual, then group |\n| 80-95 min | Develop RACI chart for the winning solution | Group exercise |\n| 95-110 min | Draft 30-day implementation sprint plan | Group exercise |\n| 110-120 min | Present plans to the room and peer feedback | Presentations |\n\n## Key Facilitation Tips\n\n- During brainstorming, enforce "yes, and" thinking. No evaluation until the brainstorming phase closes.\n- When scoring the criteria matrix, have individuals score silently first. Discuss only where scores diverge by 2+ points.\n- For the RACI chart, remind teams: only one person can be Accountable per activity. Multiple Responsibles are fine.',
+  6,
+  3,
+  'paid',
+  '{"steps": ["step-3", "step-4"], "tools": ["criteria-matrix", "raci", "implementation-plan"]}'::jsonb,
+  ARRAY['guide-criteria-matrix', 'book-from-ideas-to-action', 'workshop-fishbone-in-action']
+) ON CONFLICT (id) DO NOTHING;
+
+
+-- ============================================================
 -- SEED COMPLETE
 -- ============================================================
 -- Login credentials for demo:

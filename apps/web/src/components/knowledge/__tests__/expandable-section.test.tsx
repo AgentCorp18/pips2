@@ -63,4 +63,45 @@ describe('ExpandableSection', () => {
     )
     expect(screen.getByTestId('expandable-section')).toHaveClass('custom-class')
   })
+
+  it('renders subtitle when provided', () => {
+    render(
+      <ExpandableSection title="Title" subtitle="A helpful teaser line">
+        Content
+      </ExpandableSection>,
+    )
+    expect(screen.getByText('A helpful teaser line')).toBeInTheDocument()
+  })
+
+  it('renders icon when provided', () => {
+    render(
+      <ExpandableSection title="Title" icon="target">
+        Content
+      </ExpandableSection>,
+    )
+    // The icon container div should be present
+    const button = screen.getByRole('button')
+    const iconContainer = button.querySelector('div')
+    expect(iconContainer).toBeInTheDocument()
+  })
+
+  it('does not render icon container when icon is not provided', () => {
+    render(<ExpandableSection title="Title">Content</ExpandableSection>)
+    const button = screen.getByRole('button')
+    // No icon container div inside button - only the text spans and chevron
+    const divs = button.querySelectorAll(':scope > div')
+    // Should have the text container div but no icon container
+    expect(divs.length).toBe(1)
+  })
+
+  it('applies accent color to icon container', () => {
+    render(
+      <ExpandableSection title="Title" icon="target" accentColor="#3B82F6">
+        Content
+      </ExpandableSection>,
+    )
+    const button = screen.getByRole('button')
+    const iconContainer = button.querySelector('div')
+    expect(iconContainer).toHaveStyle({ color: '#3B82F6' })
+  })
 })

@@ -5,8 +5,12 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getTicketsForBoard } from '../actions'
-import { KanbanBoard } from '@/components/tickets/kanban-board'
+import dynamic from 'next/dynamic'
 import type { BoardTicket } from '@/components/tickets/kanban-board'
+
+const KanbanBoard = dynamic(() =>
+  import('@/components/tickets/kanban-board').then((mod) => ({ default: mod.KanbanBoard })),
+)
 import { BoardFilters } from '@/components/tickets/board-filters'
 import { TicketQuickFilters } from '@/components/tickets/ticket-quick-filters'
 import { resolveQuickFilters } from '@/components/tickets/quick-filter-resolver'
@@ -137,7 +141,7 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   return (
     <div className="mx-auto max-w-full px-4">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
             className="text-2xl font-semibold"

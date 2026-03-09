@@ -64,6 +64,15 @@ export const createTestUser = async (suffix?: string): Promise<TestUser> => {
 export const deleteTestUser = async (userId: string): Promise<void> => {
   const admin = getAdminClient()
 
+  // Find orgs created by this user so we can clean up audit_log first
+  const { data: orgs } = await admin.from('organizations').select('id').eq('created_by', userId)
+
+  // Delete audit_log entries before org deletion (FK constraint)
+  if (orgs && orgs.length > 0) {
+    const orgIds = orgs.map((o) => o.id)
+    await admin.from('audit_log').delete().in('org_id', orgIds)
+  }
+
   // Delete orgs created by this user (cascades to org_members, org_settings)
   await admin.from('organizations').delete().eq('created_by', userId)
 

@@ -1,10 +1,10 @@
 # PIPS 2.0 Product Roadmap
 
-> Version: 1.1
+> Version: 1.2
 > Author: Marc Albers
 > Created: 2026-03-02
-> Status: Active — MVP Complete, Post-MVP Execution In Progress
-> Last Updated: March 3, 2026 (Product Manager Agent — phase statuses updated, post-MVP phases added, aligned with BUSINESS_PLAN.md v1.1)
+> Status: Active — All feature phases COMPLETE, Polish ~90%
+> Last Updated: March 9, 2026 (Docs Agent — phase statuses updated to reflect overnight session completions)
 
 ---
 
@@ -12,8 +12,10 @@
 
 > **Phase 0 (Foundation):** COMPLETE
 > **Phase 1 (MVP):** COMPLETE — Live at pips-app.vercel.app
-> **Phase 1.5 (Post-MVP Stabilization):** IN PROGRESS — Bug fixes, Knowledge Hub completion, Training Mode wiring, Workshop scaffolding, SEO pages
-> **Phase 2-6 (Original Roadmap):** Updated timelines below — several Phase 2 features were pulled forward into MVP
+> **Phase 1.5 (Post-MVP Stabilization):** COMPLETE — All bugs fixed, all features wired
+> **Post-MVP Phases (Dev Task List 1.5-5):** ALL COMPLETE — Knowledge Hub, Training, Workshop, Marketing all shipped
+> **Phase 6 (Polish & Quality):** ~90% COMPLETE — mobile, accessibility, performance, data-testid done; E2E specs + analytics remaining
+> **Original Roadmap Phase 2-6:** Updated timelines below — several phases were completed far ahead of schedule
 >
 > **What shipped ahead of schedule (in MVP instead of Phase 2+):**
 >
@@ -26,8 +28,11 @@
 > - CSV/PDF export (was Phase 3, shipped in MVP)
 > - 83+ SEO marketing pages (not in original roadmap)
 > - Knowledge Hub foundation with 205 content nodes (not in original roadmap)
-> - Training Mode DB + seed data (not in original roadmap)
-> - Workshop DB tables (not in original roadmap)
+> - Training Mode (4 paths, 27 modules, 59 exercises) (not in original roadmap)
+> - Workshop facilitation (session CRUD, timer, Realtime, templates) (not in original roadmap)
+> - Interactive guide overhaul (9 components, 4 new pages) (not in original roadmap)
+> - Sprint 0 production hardening (security headers, rate limiting) (not in original roadmap)
+> - 2,199+ unit tests across 196 files (far exceeding any target)
 
 ---
 
@@ -341,9 +346,10 @@ Deliver the minimum viable product: users can create a PIPS improvement project,
 
 ---
 
-## 4. Phase 1.5: Post-MVP Stabilization (Weeks 13-14) — IN PROGRESS
+## 4. Phase 1.5: Post-MVP Stabilization (Weeks 13-14) — COMPLETE
 
-> **Status: IN PROGRESS** — Bug fixes, adoption friction mitigation, Knowledge Hub/Training/Workshop wiring, SEO optimization.
+> **Status: COMPLETE** — All bugs fixed, Knowledge Hub wired, Training wired, Workshop FULLY built, SEO deployed.
+> All exit criteria met. Phase completed across sessions on 2026-03-04 through 2026-03-08.
 
 ### Goal
 
@@ -387,13 +393,13 @@ Stabilize the MVP, fix production bugs, address the top friction risks from the 
 
 ### Exit Criteria
 
-- [ ] All 5 production bugs fixed and verified
-- [ ] Sample project auto-created for new orgs
-- [ ] Post-onboarding flow operational
-- [ ] Email notifications verified for all critical paths
-- [ ] Training pages wired to DB data and rendering content
-- [ ] Knowledge Hub workbook exercises linked to PIPS forms
-- [ ] Ready for first beta user invitations
+- [x] All 5 production bugs fixed and verified — committed `85506c3`
+- [x] Sample project auto-created for new orgs
+- [x] Post-onboarding flow operational
+- [x] Email notifications verified for all critical paths
+- [x] Training pages wired to DB data and rendering content — 4 paths, 27 modules, 59 exercises
+- [x] Knowledge Hub workbook exercises linked to PIPS forms
+- [x] Ready for first beta user invitations — pending Marc identifying testers
 
 ---
 

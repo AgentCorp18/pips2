@@ -103,7 +103,12 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
           )}
         </CardHeader>
         <CardContent>
-          <TicketCreateForm members={members} projects={projects} parentId={parentContext?.id} />
+          <TicketCreateForm
+            members={members}
+            projects={projects}
+            parentId={parentContext?.id}
+            initialExpanded
+          />
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type TrainingPathRow = {
   id: string
@@ -155,6 +156,16 @@ export const updateTrainingProgress = async (
   }
 
   await supabase.from('training_progress').upsert(update, { onConflict: 'user_id,module_id' })
+
+  if (status === 'in_progress') {
+    trackServerEvent('training.module_started', { path_id: pathId, module_id: moduleId })
+  } else if (status === 'completed') {
+    trackServerEvent('training.exercise_completed', {
+      path_id: pathId,
+      module_id: moduleId,
+      score: assessmentScore ?? null,
+    })
+  }
 }
 
 /** Get a single training module by ID */

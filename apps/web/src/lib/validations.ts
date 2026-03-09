@@ -34,6 +34,20 @@ export const resetPasswordSchema = z
     path: ['confirmPassword'],
   })
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .max(72, 'Password must be less than 72 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
+
 /* ============================================================
    Organization Schemas
    ============================================================ */
@@ -218,6 +232,7 @@ export type LoginInput = z.infer<typeof loginSchema>
 export type SignupInput = z.infer<typeof signupSchema>
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
 export type CreateOrgInput = z.infer<typeof createOrgSchema>
 export type UpdateOrgSettingsInput = z.infer<typeof updateOrgSettingsSchema>
 export type CreateProjectInput = z.infer<typeof createProjectSchema>

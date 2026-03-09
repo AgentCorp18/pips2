@@ -35,9 +35,9 @@ export const BookmarkButton = ({
       data-testid="bookmark-btn"
     >
       {bookmarked ? (
-        <BookmarkCheck size={14} className="text-[var(--color-primary)]" />
+        <BookmarkCheck size={14} aria-hidden="true" className="text-[var(--color-primary)]" />
       ) : (
-        <Bookmark size={14} />
+        <Bookmark size={14} aria-hidden="true" />
       )}
       {bookmarked ? 'Bookmarked' : 'Bookmark'}
     </Button>

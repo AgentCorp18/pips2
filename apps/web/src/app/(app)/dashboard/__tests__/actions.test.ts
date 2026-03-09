@@ -63,6 +63,8 @@ describe('getDashboardStats', () => {
       { count: 3, error: null },
       // completed this month count
       { count: 8, error: null },
+      // team members count
+      { count: 4, error: null },
     ]
 
     const result = await getDashboardStats('org-1')
@@ -71,6 +73,7 @@ describe('getDashboardStats', () => {
       openTickets: 12,
       overdueTickets: 3,
       completedThisMonth: 8,
+      teamMembers: 4,
     })
   })
 
@@ -80,6 +83,7 @@ describe('getDashboardStats', () => {
       { count: null, error: null },
       { count: null, error: null },
       { count: null, error: null },
+      { count: null, error: null },
     ]
 
     const result = await getDashboardStats('org-1')
@@ -88,6 +92,7 @@ describe('getDashboardStats', () => {
       openTickets: 0,
       overdueTickets: 0,
       completedThisMonth: 0,
+      teamMembers: 0,
     })
   })
 
@@ -97,6 +102,7 @@ describe('getDashboardStats', () => {
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
+      { count: null, error: { message: 'error' } },
     ]
 
     const result = await getDashboardStats('org-1')
@@ -105,6 +111,7 @@ describe('getDashboardStats', () => {
       openTickets: 0,
       overdueTickets: 0,
       completedThisMonth: 0,
+      teamMembers: 0,
     })
   })
 })

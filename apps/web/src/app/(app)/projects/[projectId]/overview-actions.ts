@@ -1,6 +1,19 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { stepEnumToNumber, type PipsStepEnum } from '@pips/shared'
+import type {
+  ProblemStatementData,
+  FishboneData,
+  FiveWhyData,
+  BrainstormingData,
+  CriteriaMatrixData,
+  ImplementationPlanData,
+  MilestoneTrackerData,
+  BeforeAfterData,
+  LessonsLearnedData,
+  EvaluationData,
+} from '@/lib/form-schemas'
 
 /* ============================================================
    Types
@@ -26,6 +39,16 @@ export type ProjectActivity = {
   description: string
   createdAt: string
   userName: string | null
+}
+
+export type StepHighlight = {
+  label: string
+  value: string
+}
+
+export type StepSummary = {
+  stepNumber: number
+  highlights: StepHighlight[]
 }
 
 /* ============================================================
@@ -161,4 +184,198 @@ export const getProjectActivity = async (
       userName,
     }
   })
+}
+
+/* ============================================================
+   getStepSummaries
+   ============================================================ */
+
+/** Truncate a string to maxLen, appending ellipsis if needed */
+const truncate = (text: string, maxLen = 120): string => {
+  if (!text || text.length <= maxLen) return text
+  return text.slice(0, maxLen).trimEnd() + '...'
+}
+
+/** Extract highlights from Step 1 (Identify) form data */
+const extractStep1 = (forms: FormRow[]): StepHighlight[] => {
+  const highlights: StepHighlight[] = []
+  const ps = forms.find((f) => f.form_type === 'problem_statement')
+  if (ps) {
+    const d = ps.data as unknown as ProblemStatementData
+    if (d.problemStatement)
+      highlights.push({ label: 'Problem Statement', value: truncate(d.problemStatement) })
+    if (d.problemArea) highlights.push({ label: 'Problem Area', value: d.problemArea })
+  }
+  return highlights
+}
+
+/** Extract highlights from Step 2 (Analyze) form data */
+const extractStep2 = (forms: FormRow[]): StepHighlight[] => {
+  const highlights: StepHighlight[] = []
+  const fb = forms.find((f) => f.form_type === 'fishbone')
+  if (fb) {
+    const d = fb.data as unknown as FishboneData
+    const cats = Array.isArray(d.categories) ? d.categories : []
+    const totalCauses = cats.reduce(
+      (sum, cat) => sum + (Array.isArray(cat.causes) ? cat.causes.length : 0),
+      0,
+    )
+    if (totalCauses > 0)
+      highlights.push({
+        label: 'Root Causes Identified',
+        value: `${totalCauses} causes across ${cats.length} categories`,
+      })
+  }
+  const fw = forms.find((f) => f.form_type === 'five_why')
+  if (fw) {
+    const d = fw.data as unknown as FiveWhyData
+    if (d.rootCause) highlights.push({ label: 'Root Cause', value: truncate(d.rootCause) })
+  }
+  return highlights
+}
+
+/** Extract highlights from Step 3 (Generate) form data */
+const extractStep3 = (forms: FormRow[]): StepHighlight[] => {
+  const highlights: StepHighlight[] = []
+  const bs = forms.find((f) => f.form_type === 'brainstorming')
+  if (bs) {
+    const d = bs.data as unknown as BrainstormingData
+    const ideas = Array.isArray(d.ideas) ? d.ideas : []
+    const selectedIds = Array.isArray(d.selectedIdeas) ? d.selectedIdeas : []
+    const total = ideas.length
+    const selected = selectedIds.length
+    if (total > 0) highlights.push({ label: 'Ideas Generated', value: `${total} ideas` })
+    if (selected > 0) {
+      const topIdeas = ideas
+        .filter((i) => selectedIds.includes(i.id))
+        .slice(0, 3)
+        .map((i) => i.text)
+        .join(', ')
+      highlights.push({ label: 'Top Ideas', value: truncate(topIdeas ?? '', 150) })
+    }
+  }
+  return highlights
+}
+
+/** Extract highlights from Step 4 (Select & Plan) form data */
+const extractStep4 = (forms: FormRow[]): StepHighlight[] => {
+  const highlights: StepHighlight[] = []
+  const cm = forms.find((f) => f.form_type === 'criteria_matrix')
+  if (cm) {
+    const d = cm.data as unknown as CriteriaMatrixData
+    const solutions = Array.isArray(d.solutions) ? d.solutions : []
+    const criteria = Array.isArray(d.criteria) ? d.criteria : []
+    if (solutions.length > 0 && criteria.length > 0) {
+      const totals = solutions.map((sol) =>
+        criteria.reduce((sum, c) => sum + (sol.scores?.[c.name] ?? 0) * (c.weight ?? 0), 0),
+      )
+      const maxTotal = Math.max(...totals, 0)
+      const winnerIdx = totals.indexOf(maxTotal)
+      const winner = solutions[winnerIdx]
+      if (winner?.name) highlights.push({ label: 'Top-Ranked Solution', value: winner.name })
+    }
+  }
+  const ip = forms.find((f) => f.form_type === 'implementation_plan')
+  if (ip) {
+    const d = ip.data as unknown as ImplementationPlanData
+    if (d.selectedSolution)
+      highlights.push({ label: 'Selected Solution', value: truncate(d.selectedSolution) })
+    const tasks = Array.isArray(d.tasks) ? d.tasks : []
+    if (tasks.length > 0)
+      highlights.push({ label: 'Tasks Planned', value: `${tasks.length} tasks` })
+  }
+  return highlights
+}
+
+/** Extract highlights from Step 5 (Implement) form data */
+const extractStep5 = (forms: FormRow[]): StepHighlight[] => {
+  const highlights: StepHighlight[] = []
+  const mt = forms.find((f) => f.form_type === 'milestone_tracker')
+  if (mt) {
+    const d = mt.data as unknown as MilestoneTrackerData
+    const milestones = Array.isArray(d.milestones) ? d.milestones : []
+    if (milestones.length > 0) {
+      const completed = milestones.filter((m) => m.status === 'completed').length
+      highlights.push({
+        label: 'Milestones',
+        value: `${completed} of ${milestones.length} completed`,
+      })
+    }
+    if (typeof d.overallProgress === 'number') {
+      highlights.push({ label: 'Progress', value: `${d.overallProgress}%` })
+    }
+  }
+  return highlights
+}
+
+/** Extract highlights from Step 6 (Evaluate) form data */
+const extractStep6 = (forms: FormRow[]): StepHighlight[] => {
+  const highlights: StepHighlight[] = []
+  const ba = forms.find((f) => f.form_type === 'before_after')
+  if (ba) {
+    const d = ba.data as unknown as BeforeAfterData
+    const metricCount = Array.isArray(d.metrics) ? d.metrics.filter((m) => m.name).length : 0
+    if (metricCount > 0)
+      highlights.push({ label: 'Metrics Tracked', value: `${metricCount} metrics` })
+    if (d.summary) highlights.push({ label: 'Results Summary', value: truncate(d.summary) })
+  }
+  const ll = forms.find((f) => f.form_type === 'lessons_learned')
+  if (ll) {
+    const d = ll.data as unknown as LessonsLearnedData
+    if (d.keyTakeaways) highlights.push({ label: 'Key Takeaways', value: truncate(d.keyTakeaways) })
+  }
+  const ev = forms.find((f) => f.form_type === 'evaluation')
+  if (ev) {
+    const d = ev.data as unknown as EvaluationData
+    highlights.push({ label: 'Goals Achieved', value: d.goalsAchieved ? 'Yes' : 'No' })
+    if (d.effectivenessRating)
+      highlights.push({ label: 'Effectiveness', value: `${d.effectivenessRating}/5` })
+  }
+  return highlights
+}
+
+type FormRow = {
+  step: string
+  form_type: string
+  data: Record<string, unknown>
+}
+
+const STEP_EXTRACTORS: Record<number, (forms: FormRow[]) => StepHighlight[]> = {
+  1: extractStep1,
+  2: extractStep2,
+  3: extractStep3,
+  4: extractStep4,
+  5: extractStep5,
+  6: extractStep6,
+}
+
+export const getStepSummaries = async (projectId: string): Promise<Record<number, StepSummary>> => {
+  const supabase = await createClient()
+
+  const { data: forms } = await supabase
+    .from('project_forms')
+    .select('step, form_type, data')
+    .eq('project_id', projectId)
+
+  if (!forms || forms.length === 0) return {}
+
+  const grouped = new Map<number, FormRow[]>()
+  for (const form of forms) {
+    const stepNum = stepEnumToNumber(form.step as PipsStepEnum)
+    const existing = grouped.get(stepNum) ?? []
+    existing.push(form as FormRow)
+    grouped.set(stepNum, existing)
+  }
+
+  const result: Record<number, StepSummary> = {}
+  for (const [stepNum, stepForms] of grouped) {
+    const extractor = STEP_EXTRACTORS[stepNum]
+    if (!extractor) continue
+    const highlights = extractor(stepForms)
+    if (highlights.length > 0) {
+      result[stepNum] = { stepNumber: stepNum, highlights }
+    }
+  }
+
+  return result
 }

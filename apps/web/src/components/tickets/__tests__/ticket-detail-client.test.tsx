@@ -106,9 +106,9 @@ describe('TicketDetailClient', () => {
     expect(screen.queryByText('Auth Redesign')).toBeNull()
   })
 
-  it('shows No due date when due_date is null', () => {
+  it('shows date picker placeholder when due_date is null', () => {
     const ticket = { ...mockTicket, due_date: null }
     render(<TicketDetailClient ticket={ticket} sequenceId="TKT-001" members={mockMembers} />)
-    expect(screen.getByText('No due date')).toBeTruthy()
+    expect(screen.getByText('Pick a date')).toBeTruthy()
   })
 })

@@ -12,7 +12,13 @@ import { TicketEmptyState } from '@/components/tickets/ticket-empty-state'
 import { Plus } from 'lucide-react'
 import { ExportTicketsButton } from '@/components/tickets/export-tickets-button'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
-import { getTickets } from './actions'
+import dynamic from 'next/dynamic'
+import type { BoardTicket } from '@/components/tickets/kanban-board'
+import { getTickets, getTicketsForBoard } from './actions'
+
+const KanbanBoard = dynamic(() =>
+  import('@/components/tickets/kanban-board').then((mod) => ({ default: mod.KanbanBoard })),
+)
 import { TicketListFilters } from '@/components/tickets/ticket-list-filters'
 import { TicketQuickFilters } from '@/components/tickets/ticket-quick-filters'
 import { TicketFilterPanel } from '@/components/tickets/ticket-filter-panel'
@@ -65,7 +71,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
 
   // View mode
   const viewParam = typeof params.view === 'string' ? params.view : 'table'
-  const view: ViewMode = viewParam === 'cards' ? 'cards' : 'table'
+  const view: ViewMode = viewParam === 'cards' ? 'cards' : viewParam === 'board' ? 'board' : 'table'
 
   // Pagination / sort from params
   const page = typeof params.page === 'string' ? Math.max(1, Number(params.page) || 1) : 1
@@ -107,7 +113,58 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
   if (resolved.unassigned) filters.unassigned = true
   if (resolved.due_date_before) filters.due_date_before = resolved.due_date_before
 
-  const { tickets, total } = await getTickets(membership.org_id, filters)
+  // Board view: fetch all tickets without pagination
+  // Table/Cards view: fetch paginated tickets
+  let tickets: Awaited<ReturnType<typeof getTickets>>['tickets'] = []
+  let total = 0
+  let boardTickets: BoardTicket[] = []
+
+  if (view === 'board') {
+    const boardFilters: {
+      priority?: string[]
+      assignee_id?: string
+      reporter_id?: string
+      project_id?: string
+      unassigned?: boolean
+      due_date_before?: string
+      type?: string[]
+    } = {}
+    if (filters.priority) boardFilters.priority = filters.priority as string[]
+    if (filters.type) boardFilters.type = filters.type as string[]
+    if (typeof filters.assignee_id === 'string') boardFilters.assignee_id = filters.assignee_id
+    if (typeof filters.project_id === 'string') boardFilters.project_id = filters.project_id
+    if (typeof filters.reporter_id === 'string') boardFilters.reporter_id = filters.reporter_id
+    if (filters.unassigned) boardFilters.unassigned = true
+    if (typeof filters.due_date_before === 'string')
+      boardFilters.due_date_before = filters.due_date_before
+
+    const rawBoardTickets = await getTicketsForBoard(membership.org_id, boardFilters)
+    total = rawBoardTickets.length
+
+    boardTickets = rawBoardTickets.map((ticket) => {
+      const assignee = ticket.assignee as unknown as {
+        id: string
+        display_name: string
+        avatar_url: string | null
+      } | null
+
+      return {
+        id: ticket.id,
+        sequenceId: `${prefix}-${ticket.sequence_number}`,
+        title: ticket.title,
+        status: ticket.status,
+        priority: ticket.priority,
+        type: ticket.type,
+        assigneeName: assignee?.display_name ?? null,
+        assigneeAvatar: assignee?.avatar_url ?? null,
+        dueDate: ticket.due_date,
+      }
+    })
+  } else {
+    const result = await getTickets(membership.org_id, filters)
+    tickets = result.tickets
+    total = result.total
+  }
 
   // Fetch org members for filter dropdown
   const { data: membersRaw } = await supabase
@@ -159,9 +216,11 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
   })
 
   return (
-    <div className="mx-auto max-w-[var(--content-max-width)]">
+    <div
+      className={`mx-auto ${view === 'board' ? 'max-w-full px-4' : 'max-w-[var(--content-max-width)]'}`}
+    >
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
             className="text-2xl font-semibold"
@@ -204,7 +263,11 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       </div>
 
       {/* Content */}
-      {tickets.length > 0 ? (
+      {view === 'board' ? (
+        <div className="mt-4 max-w-full">
+          <KanbanBoard initialTickets={boardTickets} />
+        </div>
+      ) : tickets.length > 0 ? (
         view === 'table' ? (
           <div className="mt-4">
             <TicketListTable

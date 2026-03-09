@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { createTicketSchema, updateTicketSchema, ticketFiltersSchema } from '@/lib/validations'
+import { trackServerEvent } from '@/lib/analytics'
 import type { TicketStatus, TicketPriority } from '@/types/tickets'
 
 /* ============================================================
@@ -103,6 +104,12 @@ export const createTicket = async (
     console.error('Failed to create ticket:', insertError.message)
     return { error: 'Failed to create ticket. Please try again.' }
   }
+
+  trackServerEvent('ticket.created', {
+    ticket_type: result.data.type,
+    has_assignee: !!result.data.assignee_id,
+    has_project: !!result.data.project_id,
+  })
 
   revalidatePath('/tickets')
   return { success: true, redirectTo: '/tickets' }

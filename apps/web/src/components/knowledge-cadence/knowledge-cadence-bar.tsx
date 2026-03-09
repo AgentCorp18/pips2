@@ -86,7 +86,7 @@ export const KnowledgeCadenceBar = ({
         aria-expanded={!collapsed}
         aria-controls="cadence-bar-content"
         data-testid="cadence-bar-toggle"
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        className="flex w-full items-center justify-between rounded px-4 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
       >
         <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
           PIPS Knowledge
@@ -158,6 +158,7 @@ const PillarCard = ({ pillar, node }: PillarCardProps) => {
     <Link
       href={href}
       aria-label={node ? `${meta.label}: ${node.title}` : `${meta.label} — no match`}
+      className="rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
     >
       <div
         className="group flex h-full flex-col justify-between rounded-lg border border-[var(--color-border)] p-3 transition-all hover:shadow-sm"

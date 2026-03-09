@@ -46,4 +46,37 @@ describe('ViewToggle', () => {
     fireEvent.click(screen.getByText('Cards'))
     expect(mockPush).toHaveBeenCalledWith('/tickets?view=cards')
   })
+
+  it('renders Board button', () => {
+    render(<ViewToggle current="table" />)
+    expect(screen.getByText('Board')).toBeTruthy()
+  })
+
+  it('has aria-label on Board button', () => {
+    render(<ViewToggle current="table" />)
+    expect(screen.getByLabelText('Board view')).toBeTruthy()
+  })
+
+  it('navigates to board view on Board click', () => {
+    render(<ViewToggle current="table" />)
+    fireEvent.click(screen.getByText('Board'))
+    expect(mockPush).toHaveBeenCalledWith('/tickets?view=board')
+  })
+
+  it('highlights Board button when current is board', () => {
+    render(<ViewToggle current="board" />)
+    expect(screen.getByTestId('view-toggle-board')).toBeTruthy()
+  })
+
+  it('uses custom basePath for navigation', () => {
+    render(<ViewToggle current="cards" basePath="/projects" />)
+    fireEvent.click(screen.getByText('Table'))
+    expect(mockPush).toHaveBeenCalledWith('/projects?view=table')
+  })
+
+  it('uses custom basePath for board navigation', () => {
+    render(<ViewToggle current="table" basePath="/projects" />)
+    fireEvent.click(screen.getByText('Board'))
+    expect(mockPush).toHaveBeenCalledWith('/projects?view=board')
+  })
 })

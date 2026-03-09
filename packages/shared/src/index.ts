@@ -62,3 +62,21 @@ export type {
   TrainingStatus,
   WorkshopStatus,
 } from './content-taxonomy'
+
+export {
+  GUIDE_STEP_CONTENT,
+  PIPS_PHILOSOPHY,
+  PIPS_ITERATION_INFO,
+  GUIDE_ROLES,
+  GLOSSARY_TERMS,
+  GETTING_STARTED_STEPS,
+} from './guide-content'
+export type {
+  GuideStepContent,
+  DiagramType,
+  PhilosophyPrinciple,
+  IterationBracket,
+  GuideRole,
+  GlossaryTerm,
+  GettingStartedStep,
+} from './guide-content'

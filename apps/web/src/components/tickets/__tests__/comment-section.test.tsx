@@ -180,7 +180,7 @@ describe('CommentSection', () => {
     )
     const img = screen.getByAltText('Bob')
     expect(img).toBeInTheDocument()
-    expect(img).toHaveAttribute('src', 'https://example.com/bob.jpg')
+    expect(img.getAttribute('src')).toContain('bob.jpg')
   })
 
   it('renders initial letter when author has no avatar', () => {

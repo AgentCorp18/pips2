@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
 import {
   DropdownMenu,
@@ -83,7 +84,13 @@ export const UserMenu = () => {
           aria-label="User menu"
         >
           {avatarUrl ? (
-            <img src={avatarUrl} alt={displayName} className="h-8 w-8 rounded-full object-cover" />
+            <Image
+              src={avatarUrl}
+              alt={displayName}
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full object-cover"
+            />
           ) : (
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-white">
               {initials}

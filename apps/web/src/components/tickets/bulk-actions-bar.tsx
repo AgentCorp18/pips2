@@ -94,7 +94,11 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
 
       {/* Status change */}
       <Select onValueChange={handleStatusChange} disabled={isPending}>
-        <SelectTrigger className="w-[140px]" size="sm" aria-label="Set status for selected tickets">
+        <SelectTrigger
+          className="w-full sm:w-[140px]"
+          size="sm"
+          aria-label="Set status for selected tickets"
+        >
           <SelectValue placeholder="Set status" />
         </SelectTrigger>
         <SelectContent>
@@ -109,7 +113,7 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
       {/* Priority change */}
       <Select onValueChange={handlePriorityChange} disabled={isPending}>
         <SelectTrigger
-          className="w-[140px]"
+          className="w-full sm:w-[140px]"
           size="sm"
           aria-label="Set priority for selected tickets"
         >

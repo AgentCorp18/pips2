@@ -120,7 +120,7 @@ describe('UserMenu', () => {
     await waitFor(() => {
       const img = screen.getByAltText('Alice Johnson')
       expect(img).toBeInTheDocument()
-      expect(img).toHaveAttribute('src', 'https://example.com/alice.jpg')
+      expect(img.getAttribute('src')).toContain('alice.jpg')
     })
   })
 

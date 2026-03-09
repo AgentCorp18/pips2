@@ -3,8 +3,8 @@
 ## Quality Gates (must pass before merge)
 1. `pnpm tsc --noEmit` — zero type errors
 2. `pnpm lint` — zero lint errors
-3. `pnpm test` — all unit tests pass (1,761+ tests)
-4. `pnpm exec playwright test` — E2E tests (47 currently failing due to selector drift)
+3. `pnpm test` — all unit tests pass (1,945+ tests across apps/web + packages/shared)
+4. `pnpm exec playwright test` — E2E tests
 
 ## Test Coverage Expectations
 - Components: render + interaction tests
