@@ -71,4 +71,17 @@ describe('SettingsNav', () => {
     const membersLink = screen.getByText('Members').closest('a')
     expect(membersLink?.className).toContain('border-[var(--color-primary)]')
   })
+
+  it('renders Admin link', () => {
+    render(<SettingsNav />)
+    expect(screen.getByText('Admin')).toBeTruthy()
+    expect(screen.getByText('Admin').closest('a')?.getAttribute('href')).toBe('/settings/admin')
+  })
+
+  it('highlights active Admin tab', () => {
+    mockPathname = '/settings/admin'
+    render(<SettingsNav />)
+    const adminLink = screen.getByText('Admin').closest('a')
+    expect(adminLink?.className).toContain('border-[var(--color-primary)]')
+  })
 })
