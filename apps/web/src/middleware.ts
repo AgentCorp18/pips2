@@ -16,6 +16,10 @@ const PROTECTED_PATHS = [
   '/my-work',
   '/search',
   '/profile',
+  '/knowledge',
+  '/training',
+  '/reports',
+  '/export',
 ]
 
 /**

@@ -24,11 +24,16 @@ vi.mock('@ai-sdk/anthropic', () => ({
   anthropic: vi.fn((model: string) => ({ modelId: model })),
 }))
 
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(() => ({ allowed: true, remaining: 9, resetAt: Date.now() + 60_000 })),
+}))
+
 /* ============================================================
    Import after mocks
    ============================================================ */
 
 import { POST } from './route'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /* ============================================================
    Helpers
@@ -141,5 +146,18 @@ describe('POST /api/ai/assist', () => {
     await POST(makeRequest({ prompt: 'help', fieldType: 'lessons_learned', context: '' }))
     const args = mockStreamText.mock.calls[0]![0]
     expect(args.system).toContain('lessons learned')
+  })
+
+  it('returns 429 when rate limit is exceeded', async () => {
+    vi.mocked(checkRateLimit).mockReturnValueOnce({
+      allowed: false,
+      remaining: 0,
+      resetAt: Date.now() + 30_000,
+    })
+    const response = await POST(makeRequest({ prompt: 'test', fieldType: 'general', context: '' }))
+    const body = await response.json()
+    expect(response.status).toBe(429)
+    expect(body.error).toContain('Too many requests')
+    expect(response.headers.get('Retry-After')).toBeTruthy()
   })
 })

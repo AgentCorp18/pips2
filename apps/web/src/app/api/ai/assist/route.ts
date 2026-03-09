@@ -2,6 +2,7 @@ import { streamText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /* ============================================================
    System prompts by field type
@@ -61,6 +62,23 @@ export const POST = async (request: Request) => {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     })
+  }
+
+  // Rate limit: 10 requests per minute per user
+  const { allowed, resetAt } = checkRateLimit(`ai-assist:${user.id}`, 10, 60_000)
+
+  if (!allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Too many requests. Please wait a moment before trying again.' }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.ceil((resetAt - Date.now()) / 1000)),
+          'X-RateLimit-Remaining': '0',
+        },
+      },
+    )
   }
 
   // Parse and validate body
