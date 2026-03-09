@@ -136,7 +136,7 @@ export const ContentReader = ({
                 <div>
                   <h1
                     data-testid="content-title"
-                    className="text-2xl font-bold text-[var(--color-text-primary)]"
+                    className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)]"
                   >
                     {node.title}
                   </h1>

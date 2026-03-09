@@ -47,7 +47,7 @@ const ProgressPage = async () => {
       <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">My Progress</h1>
 
       {/* Overall Stats */}
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
         <Card>
           <CardContent className="py-4 text-center">
             <TrainingProgressRing

@@ -123,7 +123,7 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+    <div className="grid gap-4 sm:gap-8 lg:grid-cols-[1fr_300px]">
       {/* Main content */}
       <div className="space-y-6">
         {/* Header */}

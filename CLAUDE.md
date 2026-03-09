@@ -52,7 +52,7 @@ IMPORTANT: After every change, run in this order:
 
 - Don't edit .env files — use Vercel env vars for production
 - Don't edit supabase/migrations/ directly — migrations require careful sequencing
-- Don't skip type checking — 1,761+ unit tests must continue passing
+- Don't skip type checking — 1,945+ unit tests must continue passing
 - Don't use default exports — named exports only
 
 ## Gotchas
@@ -60,4 +60,5 @@ IMPORTANT: After every change, run in this order:
 - Supabase client uses .trim() on env vars to prevent \n corruption
 - RLS functions user_org_ids() and user_has_org_role() are SECURITY DEFINER
 - Onboarding uses admin client (service role) to bypass RLS for first org creation
-- 47 E2E tests currently failing (selector drift from recent UI updates)
+- E2E test cleanup requires deleting audit_log before organizations (FK constraint)
+- FormData.get() returns null but Zod .optional() expects undefined — use ?? undefined

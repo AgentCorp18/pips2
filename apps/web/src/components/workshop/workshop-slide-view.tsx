@@ -41,7 +41,7 @@ export const WorkshopSlideView = ({ initialSession }: SlideViewProps) => {
   const isCompleted = session.status === 'completed'
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--color-deep,#1B1340)] p-8 text-white">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--color-deep,#1B1340)] p-4 sm:p-8 text-white">
       {/* Progress indicator */}
       <div className="absolute left-0 top-0 h-1 w-full bg-white/10">
         <div
@@ -54,7 +54,7 @@ export const WorkshopSlideView = ({ initialSession }: SlideViewProps) => {
 
       {isCompleted ? (
         <div className="text-center">
-          <h1 className="text-5xl font-bold">Session Complete</h1>
+          <h1 className="text-3xl sm:text-5xl font-bold">Session Complete</h1>
           <p className="mt-4 text-xl text-white/60">Thank you for participating!</p>
         </div>
       ) : currentModule ? (
@@ -65,7 +65,7 @@ export const WorkshopSlideView = ({ initialSession }: SlideViewProps) => {
           </p>
 
           {/* Module title */}
-          <h1 className="max-w-3xl text-center text-5xl font-bold leading-tight">
+          <h1 className="max-w-3xl text-center text-3xl sm:text-5xl font-bold leading-tight">
             {currentModule.title}
           </h1>
 
@@ -74,7 +74,7 @@ export const WorkshopSlideView = ({ initialSession }: SlideViewProps) => {
 
           {/* Notes/Instructions */}
           {currentModule.notes && (
-            <p className="mt-6 max-w-2xl text-center text-2xl leading-relaxed text-white/80">
+            <p className="mt-6 max-w-2xl text-center text-lg sm:text-2xl leading-relaxed text-white/80">
               {currentModule.notes}
             </p>
           )}
@@ -87,7 +87,7 @@ export const WorkshopSlideView = ({ initialSession }: SlideViewProps) => {
           </div>
         </>
       ) : (
-        <h1 className="text-3xl font-bold">No modules in this session</h1>
+        <h1 className="text-xl sm:text-3xl font-bold">No modules in this session</h1>
       )}
 
       {/* Keyboard hint */}

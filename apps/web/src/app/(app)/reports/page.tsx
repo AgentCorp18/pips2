@@ -152,7 +152,7 @@ const ReportsPage = async () => {
       </div>
 
       {/* Report cards */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {REPORT_CARDS.map((card) => {
           const Icon = card.icon
           const metricValue = stats[card.metricKey]

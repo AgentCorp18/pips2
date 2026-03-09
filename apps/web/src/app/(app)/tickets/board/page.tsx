@@ -137,7 +137,7 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   return (
     <div className="mx-auto max-w-full px-4">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
             className="text-2xl font-semibold"

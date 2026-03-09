@@ -55,12 +55,12 @@ const PathPage = async ({ params }: PathPageProps) => {
       </nav>
 
       {/* Header */}
-      <div className="flex items-start gap-4">
+      <div className="flex flex-wrap items-start gap-4">
         <TrainingProgressRing progress={overallProgress} size={56} strokeWidth={4} />
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{path.title}</h1>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{path.description}</p>
-          <div className="mt-2 flex items-center gap-4 text-xs text-[var(--color-text-tertiary)]">
+          <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-[var(--color-text-tertiary)]">
             <span className="flex items-center gap-1">
               <Clock size={12} />
               {path.estimated_hours} hours

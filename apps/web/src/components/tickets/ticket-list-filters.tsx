@@ -63,7 +63,7 @@ export const TicketListFilters = ({ members }: TicketListFiltersProps) => {
       {/* Search */}
       <Input
         placeholder="Search tickets..."
-        className="max-w-[220px]"
+        className="w-full sm:max-w-[220px]"
         defaultValue={searchParams.get('search') ?? ''}
         onChange={() => {
           // Debounce-like: update on blur or enter
@@ -81,7 +81,7 @@ export const TicketListFilters = ({ members }: TicketListFiltersProps) => {
         value={searchParams.get('status') ?? ''}
         onValueChange={(v) => setFilter('status', v)}
       >
-        <SelectTrigger className="w-[130px]" size="sm">
+        <SelectTrigger className="w-full sm:w-[130px]" size="sm">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
@@ -100,7 +100,7 @@ export const TicketListFilters = ({ members }: TicketListFiltersProps) => {
         value={searchParams.get('priority') ?? ''}
         onValueChange={(v) => setFilter('priority', v)}
       >
-        <SelectTrigger className="w-[130px]" size="sm">
+        <SelectTrigger className="w-full sm:w-[130px]" size="sm">
           <SelectValue placeholder="Priority" />
         </SelectTrigger>
         <SelectContent>
@@ -114,7 +114,7 @@ export const TicketListFilters = ({ members }: TicketListFiltersProps) => {
 
       {/* Type */}
       <Select value={searchParams.get('type') ?? ''} onValueChange={(v) => setFilter('type', v)}>
-        <SelectTrigger className="w-[130px]" size="sm">
+        <SelectTrigger className="w-full sm:w-[130px]" size="sm">
           <SelectValue placeholder="Type" />
         </SelectTrigger>
         <SelectContent>
@@ -131,7 +131,7 @@ export const TicketListFilters = ({ members }: TicketListFiltersProps) => {
         value={searchParams.get('assignee_id') ?? ''}
         onValueChange={(v) => setFilter('assignee_id', v)}
       >
-        <SelectTrigger className="w-[150px]" size="sm">
+        <SelectTrigger className="w-full sm:w-[150px]" size="sm">
           <SelectValue placeholder="Assignee" />
         </SelectTrigger>
         <SelectContent>

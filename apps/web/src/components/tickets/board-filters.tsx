@@ -68,7 +68,7 @@ export const BoardFilters = ({ members, projects }: BoardFiltersProps) => {
         value={searchParams.get('project_id') ?? ''}
         onValueChange={(v) => setFilter('project_id', v)}
       >
-        <SelectTrigger className="w-[150px]" size="sm">
+        <SelectTrigger className="w-full sm:w-[150px]" size="sm">
           <SelectValue placeholder="Project" />
         </SelectTrigger>
         <SelectContent>
@@ -85,7 +85,7 @@ export const BoardFilters = ({ members, projects }: BoardFiltersProps) => {
         value={searchParams.get('priority') ?? ''}
         onValueChange={(v) => setFilter('priority', v)}
       >
-        <SelectTrigger className="w-[130px]" size="sm">
+        <SelectTrigger className="w-full sm:w-[130px]" size="sm">
           <SelectValue placeholder="Priority" />
         </SelectTrigger>
         <SelectContent>
@@ -102,7 +102,7 @@ export const BoardFilters = ({ members, projects }: BoardFiltersProps) => {
         value={searchParams.get('assignee_id') ?? ''}
         onValueChange={(v) => setFilter('assignee_id', v)}
       >
-        <SelectTrigger className="w-[150px]" size="sm">
+        <SelectTrigger className="w-full sm:w-[150px]" size="sm">
           <SelectValue placeholder="Assignee" />
         </SelectTrigger>
         <SelectContent>
