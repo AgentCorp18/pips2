@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -31,21 +31,21 @@ export const InteractiveChecklist = ({
 }: InteractiveChecklistProps) => {
   const [checkedItems, setCheckedItems] = useState<Set<number>>(() => loadChecked(stepNumber))
 
-  const toggle = useCallback(
-    (index: number) => {
-      setCheckedItems((prev) => {
-        const next = new Set(prev)
-        if (next.has(index)) {
-          next.delete(index)
-        } else {
-          next.add(index)
-        }
-        localStorage.setItem(storageKey(stepNumber), JSON.stringify([...next]))
-        return next
-      })
-    },
-    [stepNumber],
-  )
+  useEffect(() => {
+    localStorage.setItem(storageKey(stepNumber), JSON.stringify([...checkedItems]))
+  }, [stepNumber, checkedItems])
+
+  const toggle = useCallback((index: number) => {
+    setCheckedItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(index)) {
+        next.delete(index)
+      } else {
+        next.add(index)
+      }
+      return next
+    })
+  }, [])
 
   const completed = checkedItems.size
   const total = items.length

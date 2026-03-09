@@ -8,6 +8,7 @@ import { StepSummaryCard } from '../step-summary-card'
 
 describe('StepSummaryCard', () => {
   const baseProps = {
+    projectId: 'test-project-id',
     stepNumber: 1,
     stepName: 'Identify',
     stepColor: '#2563EB',
@@ -114,6 +115,7 @@ describe('StepSummaryCard', () => {
   it('renders with different step colors', () => {
     const { container } = render(
       <StepSummaryCard
+        projectId="test-project-id"
         stepNumber={3}
         stepName="Generate"
         stepColor="#059669"

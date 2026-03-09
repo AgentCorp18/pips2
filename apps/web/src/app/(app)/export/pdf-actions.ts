@@ -232,12 +232,14 @@ const extractFormSummary = (formType: string, payload: Record<string, unknown>):
       break
     }
     case 'fishbone': {
-      const cats = payload.categories as
-        | Array<{ name: string; causes: Array<{ text: string }> }>
-        | undefined
+      const cats = Array.isArray(payload.categories)
+        ? (payload.categories as Array<{ name: string; causes: Array<{ text: string }> }>)
+        : undefined
       if (cats) {
         const topCauses = cats
-          .flatMap((c) => c.causes.filter((cause) => cause.text.trim()))
+          .flatMap((c) =>
+            (Array.isArray(c.causes) ? c.causes : []).filter((cause) => cause.text.trim()),
+          )
           .slice(0, 3)
         if (topCauses.length > 0) {
           lines.push(`Key Causes: ${topCauses.map((c) => c.text).join('; ')}`)
@@ -278,22 +280,22 @@ const extractFormSummary = (formType: string, payload: Record<string, unknown>):
       break
     }
     case 'criteria_matrix': {
-      const solutions = payload.solutions as
-        | Array<{
+      const solutions = Array.isArray(payload.solutions)
+        ? (payload.solutions as Array<{
             name: string
             scores: Record<string, number>
-          }>
-        | undefined
-      const criteria = payload.criteria as
-        | Array<{
+          }>)
+        : undefined
+      const criteria = Array.isArray(payload.criteria)
+        ? (payload.criteria as Array<{
             name: string
             weight: number
-          }>
-        | undefined
+          }>)
+        : undefined
       if (solutions && criteria && solutions.length > 0) {
         const totals = solutions.map((s) => ({
           name: s.name,
-          total: criteria.reduce((sum, c) => sum + (s.scores[c.name] ?? 0) * c.weight, 0),
+          total: criteria.reduce((sum, c) => sum + (s.scores?.[c.name] ?? 0) * (c.weight ?? 0), 0),
         }))
         const winner = totals.reduce((a, b) => (b.total > a.total ? b : a), totals[0]!)
         if (winner && winner.total > 0) {

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { updateTicket } from '@/app/(app)/tickets/actions'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Pencil, Check, X, Calendar, User, Tag, FolderKanban } from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
@@ -330,13 +331,12 @@ export const TicketDetailClient = ({ ticket, sequenceId, members }: TicketDetail
 
         {/* Due Date */}
         <SidebarField label="Due Date" icon={<Calendar size={14} />}>
-          <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-            {ticket.due_date ? (
-              <FormattedDate date={ticket.due_date} fallback="..." />
-            ) : (
-              'No due date'
-            )}
-          </p>
+          <DatePicker
+            name="due_date"
+            value={ticket.due_date ?? ''}
+            onChange={(v) => saveField('due_date', v || null)}
+            disabled={isPending}
+          />
         </SidebarField>
 
         {/* Tags */}

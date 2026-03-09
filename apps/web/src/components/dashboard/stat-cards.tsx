@@ -60,7 +60,7 @@ const CARDS: CardDef[] = [
 
 export const StatCards = ({ stats }: StatCardsProps) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
       {CARDS.map((card) => {
         const Icon = card.icon
         const value = stats[card.key]

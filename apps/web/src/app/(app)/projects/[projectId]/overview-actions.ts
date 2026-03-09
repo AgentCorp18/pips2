@@ -215,11 +215,15 @@ const extractStep2 = (forms: FormRow[]): StepHighlight[] => {
   const fb = forms.find((f) => f.form_type === 'fishbone')
   if (fb) {
     const d = fb.data as unknown as FishboneData
-    const totalCauses = d.categories?.reduce((sum, cat) => sum + (cat.causes?.length ?? 0), 0) ?? 0
+    const cats = Array.isArray(d.categories) ? d.categories : []
+    const totalCauses = cats.reduce(
+      (sum, cat) => sum + (Array.isArray(cat.causes) ? cat.causes.length : 0),
+      0,
+    )
     if (totalCauses > 0)
       highlights.push({
         label: 'Root Causes Identified',
-        value: `${totalCauses} causes across ${d.categories?.length ?? 0} categories`,
+        value: `${totalCauses} causes across ${cats.length} categories`,
       })
   }
   const fw = forms.find((f) => f.form_type === 'five_why')
@@ -236,12 +240,14 @@ const extractStep3 = (forms: FormRow[]): StepHighlight[] => {
   const bs = forms.find((f) => f.form_type === 'brainstorming')
   if (bs) {
     const d = bs.data as unknown as BrainstormingData
-    const total = d.ideas?.length ?? 0
-    const selected = d.selectedIdeas?.length ?? 0
+    const ideas = Array.isArray(d.ideas) ? d.ideas : []
+    const selectedIds = Array.isArray(d.selectedIdeas) ? d.selectedIdeas : []
+    const total = ideas.length
+    const selected = selectedIds.length
     if (total > 0) highlights.push({ label: 'Ideas Generated', value: `${total} ideas` })
     if (selected > 0) {
-      const topIdeas = d.ideas
-        ?.filter((i) => d.selectedIdeas?.includes(i.id))
+      const topIdeas = ideas
+        .filter((i) => selectedIds.includes(i.id))
         .slice(0, 3)
         .map((i) => i.text)
         .join(', ')
@@ -257,13 +263,15 @@ const extractStep4 = (forms: FormRow[]): StepHighlight[] => {
   const cm = forms.find((f) => f.form_type === 'criteria_matrix')
   if (cm) {
     const d = cm.data as unknown as CriteriaMatrixData
-    if (d.solutions?.length > 0) {
-      const totals = d.solutions.map((sol) =>
-        d.criteria.reduce((sum, c) => sum + (sol.scores[c.name] ?? 0) * c.weight, 0),
+    const solutions = Array.isArray(d.solutions) ? d.solutions : []
+    const criteria = Array.isArray(d.criteria) ? d.criteria : []
+    if (solutions.length > 0 && criteria.length > 0) {
+      const totals = solutions.map((sol) =>
+        criteria.reduce((sum, c) => sum + (sol.scores?.[c.name] ?? 0) * (c.weight ?? 0), 0),
       )
       const maxTotal = Math.max(...totals, 0)
       const winnerIdx = totals.indexOf(maxTotal)
-      const winner = d.solutions[winnerIdx]
+      const winner = solutions[winnerIdx]
       if (winner?.name) highlights.push({ label: 'Top-Ranked Solution', value: winner.name })
     }
   }
@@ -272,8 +280,9 @@ const extractStep4 = (forms: FormRow[]): StepHighlight[] => {
     const d = ip.data as unknown as ImplementationPlanData
     if (d.selectedSolution)
       highlights.push({ label: 'Selected Solution', value: truncate(d.selectedSolution) })
-    if (d.tasks?.length > 0)
-      highlights.push({ label: 'Tasks Planned', value: `${d.tasks.length} tasks` })
+    const tasks = Array.isArray(d.tasks) ? d.tasks : []
+    if (tasks.length > 0)
+      highlights.push({ label: 'Tasks Planned', value: `${tasks.length} tasks` })
   }
   return highlights
 }
@@ -284,11 +293,12 @@ const extractStep5 = (forms: FormRow[]): StepHighlight[] => {
   const mt = forms.find((f) => f.form_type === 'milestone_tracker')
   if (mt) {
     const d = mt.data as unknown as MilestoneTrackerData
-    if (d.milestones?.length > 0) {
-      const completed = d.milestones.filter((m) => m.status === 'completed').length
+    const milestones = Array.isArray(d.milestones) ? d.milestones : []
+    if (milestones.length > 0) {
+      const completed = milestones.filter((m) => m.status === 'completed').length
       highlights.push({
         label: 'Milestones',
-        value: `${completed} of ${d.milestones.length} completed`,
+        value: `${completed} of ${milestones.length} completed`,
       })
     }
     if (typeof d.overallProgress === 'number') {
@@ -304,7 +314,7 @@ const extractStep6 = (forms: FormRow[]): StepHighlight[] => {
   const ba = forms.find((f) => f.form_type === 'before_after')
   if (ba) {
     const d = ba.data as unknown as BeforeAfterData
-    const metricCount = d.metrics?.filter((m) => m.name).length ?? 0
+    const metricCount = Array.isArray(d.metrics) ? d.metrics.filter((m) => m.name).length : 0
     if (metricCount > 0)
       highlights.push({ label: 'Metrics Tracked', value: `${metricCount} metrics` })
     if (d.summary) highlights.push({ label: 'Results Summary', value: truncate(d.summary) })

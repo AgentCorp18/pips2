@@ -15,6 +15,7 @@ type DatePickerProps = {
   value?: string // YYYY-MM-DD
   defaultValue?: string // YYYY-MM-DD
   disabled?: boolean
+  onChange?: (value: string) => void
   'aria-describedby'?: string
 }
 
@@ -24,6 +25,7 @@ export const DatePicker = ({
   value: controlledValue,
   defaultValue,
   disabled,
+  onChange,
   'aria-describedby': ariaDescribedBy,
 }: DatePickerProps) => {
   const [open, setOpen] = React.useState(false)
@@ -37,6 +39,7 @@ export const DatePicker = ({
     if (controlledValue === undefined) {
       setInternalValue(formatted)
     }
+    onChange?.(formatted)
     setOpen(false)
   }
 

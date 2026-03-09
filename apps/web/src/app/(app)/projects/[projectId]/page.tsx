@@ -134,6 +134,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
               return (
                 <StepSummaryCard
                   key={pipStep.number}
+                  projectId={projectId}
                   stepNumber={pipStep.number}
                   stepName={pipStep.name}
                   stepColor={pipStep.color}
