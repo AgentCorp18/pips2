@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
-import { PIPS_STEPS, stepEnumToNumber } from '@pips/shared'
+import { PIPS_STEPS, stepEnumToNumber, stepNumberToEnum } from '@pips/shared'
 import type { ProjectPDFData, StepPDFData, TicketSummaryPDFData, MemberPDFData } from '@/lib/pdf'
 import type { OnePagerData, OnePagerStepData } from '@/lib/pdf-one-pager'
 
@@ -46,9 +46,9 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
     .select(
       `
       id, title, description, status, current_step,
-      target_completion_date, created_at, org_id,
+      target_end, created_at, org_id,
       profiles!projects_owner_id_fkey ( display_name ),
-      project_steps ( step_number, status ),
+      project_steps ( step, status ),
       project_members (
         role,
         profiles!project_members_user_id_fkey ( display_name )
@@ -107,9 +107,9 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
     .from('project_forms')
     .select('data')
     .eq('project_id', projectId)
-    .eq('step_number', 1)
+    .eq('step', stepNumberToEnum(1))
     .eq('form_type', 'problem_statement')
-    .single()
+    .maybeSingle()
 
   // Extract problem statement text from form JSONB
   const formPayload = formData?.data as Record<string, unknown> | null
@@ -136,12 +136,12 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
 
   // Build step progress
   const rawSteps = (project.project_steps ?? []) as Array<{
-    step_number: number
+    step: string
     status: string
   }>
 
   const steps: StepPDFData[] = PIPS_STEPS.map((pipsStep) => {
-    const match = rawSteps.find((s) => s.step_number === pipsStep.number)
+    const match = rawSteps.find((s) => stepEnumToNumber(s.step) === pipsStep.number)
     return {
       number: pipsStep.number,
       name: pipsStep.name,
@@ -176,16 +176,17 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
     }
   })
 
-  const currentStepDef = PIPS_STEPS.find((s) => s.number === (project.current_step ?? 1))
+  const currentStepNum = stepEnumToNumber((project.current_step as string) ?? 'identify')
+  const currentStepDef = PIPS_STEPS.find((s) => s.number === currentStepNum)
 
   const data: ProjectPDFData = {
     name: project.title as string,
     description: project.description ?? null,
     status: project.status ?? 'active',
-    currentStep: project.current_step ?? 1,
+    currentStep: currentStepNum,
     currentStepName: currentStepDef?.name ?? 'Unknown',
     createdAt: project.created_at,
-    targetDate: project.target_completion_date ?? null,
+    targetDate: (project.target_end as string) ?? null,
     ownerName: ownerProfile?.display_name ?? 'Unassigned',
     problemStatement,
     steps,

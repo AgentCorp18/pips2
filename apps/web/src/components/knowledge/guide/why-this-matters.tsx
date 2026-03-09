@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { parseRichText } from '@/components/knowledge/guide/rich-text'
 
 type WhyThisMattersProps = {
   heading: string
@@ -28,7 +29,7 @@ export const WhyThisMatters = ({
       <p className="mt-2 text-base font-semibold text-[var(--color-text-primary)]">{heading}</p>
       {paragraphs.map((text, i) => (
         <p key={i} className="mt-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-          {text}
+          {parseRichText(text)}
         </p>
       ))}
     </div>

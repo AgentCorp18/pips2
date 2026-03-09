@@ -29,11 +29,12 @@ describe('StepDiagram', () => {
     expect(screen.getByTestId('step-diagram')).toHaveClass('my-diagram')
   })
 
-  it('problem-framework contains funnel labels', () => {
+  it('problem-framework contains step labels', () => {
     render(<StepDiagram diagramType="problem-framework" stepColor="#3B82F6" />)
-    expect(screen.getByText('Symptoms')).toBeInTheDocument()
-    expect(screen.getByText('Root Problem')).toBeInTheDocument()
-    expect(screen.getByText('Clear Statement')).toBeInTheDocument()
+    expect(screen.getByText('As-Is State')).toBeInTheDocument()
+    expect(screen.getByText('Desired State')).toBeInTheDocument()
+    expect(screen.getByText('Gap')).toBeInTheDocument()
+    expect(screen.getByText('Impact')).toBeInTheDocument()
   })
 
   it('fishbone contains cause categories', () => {

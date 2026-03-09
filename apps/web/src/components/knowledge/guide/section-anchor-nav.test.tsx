@@ -52,7 +52,7 @@ describe('SectionAnchorNav', () => {
     expect(screen.getAllByText('Examples').length).toBeGreaterThan(0)
   })
 
-  it('calls scrollIntoView on click', async () => {
+  it('falls back to scrollIntoView when no main container exists', async () => {
     const user = userEvent.setup()
     const mockElement = document.createElement('div')
     mockElement.id = 'tools'
@@ -68,6 +68,36 @@ describe('SectionAnchorNav', () => {
     })
 
     document.body.removeChild(mockElement)
+  })
+
+  it('scrolls within main container when present', async () => {
+    const user = userEvent.setup()
+
+    // Create a <main> scroll container matching the app layout
+    const mainEl = document.createElement('main')
+    mainEl.id = 'main-content'
+    mainEl.scrollTo = vi.fn()
+    mainEl.getBoundingClientRect = vi.fn().mockReturnValue({ top: 0 })
+    document.body.appendChild(mainEl)
+
+    const mockElement = document.createElement('div')
+    mockElement.id = 'tools'
+    mockElement.scrollIntoView = vi.fn()
+    mockElement.getBoundingClientRect = vi.fn().mockReturnValue({ top: 200 })
+    mainEl.appendChild(mockElement)
+
+    render(<SectionAnchorNav sections={mockSections} />)
+    const buttons = screen.getAllByTestId('anchor-link-tools')
+    await user.click(buttons[0]!)
+
+    // Should use scrollTo on the container, NOT scrollIntoView
+    expect(mainEl.scrollTo).toHaveBeenCalledWith({
+      top: expect.any(Number),
+      behavior: 'smooth',
+    })
+    expect(mockElement.scrollIntoView).not.toHaveBeenCalled()
+
+    document.body.removeChild(mainEl)
   })
 
   it('sets up IntersectionObserver', () => {

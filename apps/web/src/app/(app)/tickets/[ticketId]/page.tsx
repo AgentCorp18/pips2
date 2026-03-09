@@ -207,7 +207,16 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         />
       )}
 
-      <TicketDetailClient ticket={ticketData} sequenceId={sequenceId} members={members} />
+      <TicketDetailClient
+        ticket={ticketData}
+        sequenceId={sequenceId}
+        members={members}
+        parentTicket={
+          parentData && parentSequenceId
+            ? { id: parentData.id, title: parentData.title, sequenceId: parentSequenceId }
+            : undefined
+        }
+      />
 
       {cadenceContext && (
         <div className="mt-6">

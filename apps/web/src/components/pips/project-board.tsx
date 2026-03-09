@@ -67,7 +67,7 @@ export const ProjectBoard = ({ projects }: ProjectBoardProps) => {
         return (
           <div
             key={col.id}
-            className="flex w-[300px] flex-shrink-0 flex-col"
+            className="flex min-w-[250px] flex-1 flex-col"
             role="group"
             data-testid={`project-board-column-${col.id}`}
             aria-label={`${col.label} column, ${columnProjects.length} project${columnProjects.length !== 1 ? 's' : ''}`}

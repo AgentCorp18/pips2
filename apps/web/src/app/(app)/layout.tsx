@@ -168,9 +168,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Main content area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-[var(--topbar-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:px-6">
+        <header className="shrink-0 flex h-[var(--topbar-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:px-6">
           <div className="flex items-center gap-3">
             {/* Mobile hamburger menu */}
             {mounted && isMobile && (
@@ -210,8 +210,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {/* Page content */}
-        <main id="main-content" className="flex-1 overflow-auto p-4 md:p-6">
+        {/* Page content — sole scroll container for app pages */}
+        <main id="main-content" className="min-h-0 flex-1 overflow-auto p-4 md:p-6">
           {children}
         </main>
       </div>

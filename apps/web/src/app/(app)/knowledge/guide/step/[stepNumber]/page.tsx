@@ -15,6 +15,7 @@ import { WhyThisMatters } from '@/components/knowledge/guide/why-this-matters'
 import { ToolTag } from '@/components/knowledge/guide/tool-tag'
 import { GuideNavigation } from '@/components/knowledge/guide/guide-navigation'
 import { SectionAnchorNav } from '@/components/knowledge/guide/section-anchor-nav'
+import { parseRichText } from '@/components/knowledge/guide/rich-text'
 import { TOOL_DISPLAY_NAMES } from '../../_tool-names'
 
 type StepPageProps = {
@@ -202,7 +203,7 @@ const StepPage = async ({ params }: StepPageProps) => {
                     accentColor={step.color}
                   >
                     <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                      {sub.content}
+                      {parseRichText(sub.content)}
                     </p>
                   </ExpandableSection>
                 ) : (
@@ -212,7 +213,7 @@ const StepPage = async ({ params }: StepPageProps) => {
                         {sub.title}
                       </h3>
                       <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                        {sub.content}
+                        {parseRichText(sub.content)}
                       </p>
                     </CardContent>
                   </Card>
@@ -277,7 +278,7 @@ const StepPage = async ({ params }: StepPageProps) => {
                         >
                           {i + 1}
                         </span>
-                        <span className="leading-relaxed">{tip}</span>
+                        <span className="leading-relaxed">{parseRichText(tip)}</span>
                       </li>
                     ))}
                   </ol>
@@ -300,7 +301,7 @@ const StepPage = async ({ params }: StepPageProps) => {
                         >
                           {i + 1}
                         </span>
-                        <span className="leading-relaxed">{bp}</span>
+                        <span className="leading-relaxed">{parseRichText(bp)}</span>
                       </li>
                     ))}
                   </ol>
@@ -324,7 +325,7 @@ const StepPage = async ({ params }: StepPageProps) => {
                     <Clock size={16} style={{ color: step.color }} />
                   </div>
                   <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                    {facilitationText}
+                    {parseRichText(facilitationText)}
                   </p>
                 </div>
               </CardContent>
@@ -391,7 +392,7 @@ const StepPage = async ({ params }: StepPageProps) => {
 
         {/* Desktop sidebar with anchor nav */}
         <div className="hidden w-48 shrink-0 lg:block">
-          <div className="sticky top-20">
+          <div className="sticky top-4">
             <SectionAnchorNav sections={sections} />
           </div>
         </div>

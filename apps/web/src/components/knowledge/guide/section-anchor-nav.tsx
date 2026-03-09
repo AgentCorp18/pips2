@@ -18,6 +18,10 @@ export const SectionAnchorNav = ({ sections, className }: SectionAnchorNavProps)
   const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
+    // Use the <main> scroll container as the IntersectionObserver root so
+    // section tracking works correctly when <main> is the sole scroll area.
+    const scrollRoot = document.getElementById('main-content') ?? null
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -26,7 +30,7 @@ export const SectionAnchorNav = ({ sections, className }: SectionAnchorNavProps)
           }
         }
       },
-      { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 },
+      { root: scrollRoot, rootMargin: '-80px 0px -60% 0px', threshold: 0.1 },
     )
 
     const elements = sections
@@ -44,7 +48,18 @@ export const SectionAnchorNav = ({ sections, className }: SectionAnchorNavProps)
 
   const handleClick = (id: string) => {
     const el = document.getElementById(id)
-    if (el) {
+    if (!el) return
+
+    // Find the <main> scroll container to avoid triggering document-level scroll.
+    // Using scrollIntoView without a container reference can cause dual-scroll
+    // when the app layout uses overflow-hidden on the outer shell.
+    const scrollContainer = el.closest('main') ?? document.getElementById('main-content')
+    if (scrollContainer) {
+      const containerRect = scrollContainer.getBoundingClientRect()
+      const elRect = el.getBoundingClientRect()
+      const offset = elRect.top - containerRect.top + scrollContainer.scrollTop - 16
+      scrollContainer.scrollTo({ top: offset, behavior: 'smooth' })
+    } else {
       el.scrollIntoView({ behavior: 'smooth' })
     }
   }

@@ -7,62 +7,131 @@ type StepDiagramProps = {
   className?: string
 }
 
-const ProblemFramework = ({ color }: { color: string }) => (
-  <svg
-    data-testid="step-diagram-problem-framework"
-    viewBox="0 0 400 200"
-    className="w-full"
-    role="img"
-    aria-label="Problem framework funnel diagram"
-  >
-    {/* Funnel shape */}
-    <polygon points="40,30 360,30 280,100 120,100" fill={color} opacity={0.15} />
-    <polygon points="120,100 280,100 240,170 160,170" fill={color} opacity={0.3} />
-    <rect x="160" y="170" width="80" height="25" rx="4" fill={color} opacity={0.5} />
-    {/* Labels */}
-    <text x="200" y="60" textAnchor="middle" fontSize="13" fontWeight="600" fill={color}>
-      Symptoms
-    </text>
-    <text x="200" y="135" textAnchor="middle" fontSize="12" fontWeight="600" fill={color}>
-      Root Problem
-    </text>
-    <text x="200" y="187" textAnchor="middle" fontSize="10" fontWeight="700" fill="white">
-      Clear Statement
-    </text>
-    {/* Arrows */}
-    <line
-      x1="200"
-      y1="68"
-      x2="200"
-      y2="95"
-      stroke={color}
-      strokeWidth="1.5"
-      markerEnd="url(#arrow)"
-    />
-    <line
-      x1="200"
-      y1="143"
-      x2="200"
-      y2="165"
-      stroke={color}
-      strokeWidth="1.5"
-      markerEnd="url(#arrow)"
-    />
-    <defs>
-      <marker
-        id="arrow"
-        viewBox="0 0 10 10"
-        refX="9"
-        refY="5"
-        markerWidth="6"
-        markerHeight="6"
-        orient="auto"
+const ProblemFramework = ({ color }: { color: string }) => {
+  const steps = [
+    { label: 'As-Is State', desc: 'Current situation', x: 55 },
+    { label: 'Desired State', desc: 'Target outcome', x: 165 },
+    { label: 'Gap', desc: 'What must change', x: 275 },
+    { label: 'Impact', desc: 'Why it matters', x: 385 },
+  ]
+
+  return (
+    <svg
+      data-testid="step-diagram-problem-framework"
+      viewBox="0 0 440 200"
+      className="w-full"
+      role="img"
+      aria-label="Problem statement structure: As-Is State, Desired State, Gap, and Impact"
+    >
+      <defs>
+        <marker
+          id="pf-arrow"
+          viewBox="0 0 10 10"
+          refX="9"
+          refY="5"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
+        </marker>
+        <linearGradient id="pf-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.35" />
+        </linearGradient>
+      </defs>
+
+      {/* Title */}
+      <text
+        x="220"
+        y="22"
+        textAnchor="middle"
+        fontSize="12"
+        fontWeight="700"
+        fill={color}
+        opacity={0.7}
+        fontFamily="sans-serif"
       >
-        <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
-      </marker>
-    </defs>
-  </svg>
-)
+        PROBLEM STATEMENT STRUCTURE
+      </text>
+
+      {/* Background bar connecting all steps */}
+      <rect x="20" y="50" width="400" height="90" rx="12" fill={color} opacity={0.06} />
+
+      {/* Steps */}
+      {steps.map((step, i) => (
+        <g key={step.label}>
+          {/* Step number circle */}
+          <circle cx={step.x} cy={72} r="14" fill={color} opacity={0.85 - i * 0.1} />
+          <text
+            x={step.x}
+            y={77}
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="700"
+            fill="white"
+            fontFamily="sans-serif"
+          >
+            {i + 1}
+          </text>
+
+          {/* Label */}
+          <text
+            x={step.x}
+            y={108}
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="700"
+            fill={color}
+            fontFamily="sans-serif"
+          >
+            {step.label}
+          </text>
+
+          {/* Description */}
+          <text
+            x={step.x}
+            y={124}
+            textAnchor="middle"
+            fontSize="10"
+            fill={color}
+            opacity={0.6}
+            fontFamily="sans-serif"
+          >
+            {step.desc}
+          </text>
+
+          {/* Arrow to next step */}
+          {i < steps.length - 1 && (
+            <line
+              x1={step.x + 20}
+              y1={72}
+              x2={steps[i + 1]!.x - 20}
+              y2={72}
+              stroke={color}
+              strokeWidth="1.5"
+              markerEnd="url(#pf-arrow)"
+            />
+          )}
+        </g>
+      ))}
+
+      {/* Bottom summary bar */}
+      <rect x="55" y="150" width="330" height="30" rx="8" fill={color} opacity={0.2} />
+      <text
+        x="220"
+        y="170"
+        textAnchor="middle"
+        fontSize="11"
+        fontWeight="600"
+        fill={color}
+        fontFamily="sans-serif"
+      >
+        {'As-Is → Desired → Gap → Impact = Clear Problem Statement'}
+      </text>
+    </svg>
+  )
+}
 
 /**
  * Fishbone (Ishikawa) diagram — upgraded visual with gradient spine,
@@ -297,19 +366,19 @@ const Fishbone = ({ color }: { color: string }) => {
             {/* Category badge — rounded rect with icon + label */}
             <g filter="url(#fb-badge-shadow)">
               <rect
-                x={cat.x - 50}
+                x={cat.x - 58}
                 y={cat.top ? yStart - 36 : yStart + 6}
-                width="100"
+                width="116"
                 height="32"
                 rx="8"
                 fill={branchColor}
               />
             </g>
             {/* Icon inside badge */}
-            <CategoryIcon type={cat.icon} x={cat.x - 30} y={cat.top ? yStart - 20 : yStart + 22} />
+            <CategoryIcon type={cat.icon} x={cat.x - 38} y={cat.top ? yStart - 20 : yStart + 22} />
             {/* Label text */}
             <text
-              x={cat.x + 6}
+              x={cat.x + 10}
               y={cat.top ? yStart - 16 : yStart + 26}
               textAnchor="middle"
               fontSize="12"

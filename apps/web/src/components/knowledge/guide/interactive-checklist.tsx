@@ -22,12 +22,14 @@ export const InteractiveChecklist = ({
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set())
   const isMounted = useRef(false)
 
-  // Load persisted state from localStorage after mount (client-only)
+  // Load persisted state from localStorage after mount (client-only).
+  // Setting state here is intentional — we need to hydrate from storage once.
   useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey(stepNumber))
       if (raw) {
         const arr: number[] = JSON.parse(raw)
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrating from localStorage on mount
         setCheckedItems(new Set(arr))
       }
     } catch {
