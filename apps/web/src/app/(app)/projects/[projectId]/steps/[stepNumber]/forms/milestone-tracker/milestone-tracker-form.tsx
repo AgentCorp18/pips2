@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { saveFormData } from '../actions'
 import type { MilestoneTrackerData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
@@ -211,12 +212,22 @@ export const MilestoneTrackerForm = ({ projectId, initialData }: Props) => {
           />
         ))}
 
-        <Button variant="outline" size="sm" onClick={addMilestone}>
-          <Plus className="size-4" />
-          Add Milestone
-        </Button>
+        <MilestoneAddButton onAdd={addMilestone} />
       </div>
     </FormShell>
+  )
+}
+
+/* ---- Add button (view-mode-aware) ---- */
+
+const MilestoneAddButton = ({ onAdd }: { onAdd: () => void }) => {
+  const mode = useFormViewMode()
+  if (mode === 'view') return null
+  return (
+    <Button variant="outline" size="sm" onClick={onAdd}>
+      <Plus className="size-4" />
+      Add Milestone
+    </Button>
   )
 }
 
@@ -239,7 +250,46 @@ const MilestoneCard = ({
   onUpdateDeliverable,
   onRemoveDeliverable,
 }: MilestoneCardProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
   const config = statusConfig[milestone.status]
+
+  if (isView) {
+    return (
+      <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-[var(--color-text-primary)]">
+            {milestone.title || 'Untitled milestone'}
+          </span>
+          <Badge className={cn('gap-1 text-xs', config.color)}>
+            {config.icon}
+            {config.label}
+          </Badge>
+        </div>
+        <div className="flex flex-wrap gap-3 text-xs text-[var(--color-text-tertiary)]">
+          {milestone.targetDate && <span>Target: {milestone.targetDate}</span>}
+          {milestone.completedDate && <span>Completed: {milestone.completedDate}</span>}
+        </div>
+        {milestone.description && (
+          <p className="text-sm text-[var(--color-text-secondary)]">{milestone.description}</p>
+        )}
+        {milestone.deliverables.length > 0 && (
+          <div className="space-y-0.5">
+            <span className="text-xs font-medium text-[var(--color-text-primary)]">
+              Deliverables:
+            </span>
+            <ul className="ml-4 space-y-0.5">
+              {milestone.deliverables.map((d, dIdx) => (
+                <li key={dIdx} className="text-xs text-[var(--color-text-secondary)]">
+                  {dIdx + 1}. {d || 'Empty'}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4 space-y-3">

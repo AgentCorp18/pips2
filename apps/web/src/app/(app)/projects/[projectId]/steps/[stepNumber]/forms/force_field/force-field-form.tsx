@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
 import { FormTextarea } from '@/components/pips/form-textarea'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -168,50 +169,79 @@ const ForceColumn = ({
   onAdd,
   onUpdate,
   onRemove,
-}: ForceColumnProps) => (
-  <div className="space-y-3">
-    <div>
-      <h3 className="text-sm font-semibold" style={{ color }}>
-        {title}
-      </h3>
-      <p className="text-xs text-[var(--color-text-tertiary)]">{subtitle}</p>
-    </div>
+}: ForceColumnProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
 
-    {forces.map((force, i) => (
-      <div
-        key={i}
-        className="space-y-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3"
-      >
-        <div className="flex items-center gap-2">
-          <Input
-            value={force.text}
-            onChange={(e) => onUpdate(i, 'text', e.target.value)}
-            placeholder="Describe this force..."
-            className="text-sm"
-          />
-          <Button type="button" variant="ghost" size="icon-xs" onClick={() => onRemove(i)}>
-            <Trash2 size={12} />
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Label className="text-xs text-[var(--color-text-tertiary)]">Strength:</Label>
-          <input
-            type="range"
-            min={1}
-            max={5}
-            step={1}
-            value={force.strength}
-            onChange={(e) => onUpdate(i, 'strength', parseInt(e.target.value, 10))}
-            className="flex-1 accent-[var(--color-primary)]"
-          />
-          <span className="w-4 text-center text-xs font-semibold">{force.strength}</span>
-        </div>
+  return (
+    <div className="space-y-3">
+      <div>
+        <h3 className="text-sm font-semibold" style={{ color }}>
+          {title}
+        </h3>
+        <p className="text-xs text-[var(--color-text-tertiary)]">{subtitle}</p>
       </div>
-    ))}
 
-    <Button type="button" variant="outline" size="sm" onClick={onAdd} className="w-full">
-      <Plus size={12} />
-      Add Force
-    </Button>
-  </div>
-)
+      {isView ? (
+        forces.length === 0 ? (
+          <p className="text-sm italic text-[var(--color-text-tertiary)]">No forces identified</p>
+        ) : (
+          forces.map((force, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] p-3"
+            >
+              <span className="text-sm text-[var(--color-text-secondary)]">
+                {force.text || (
+                  <span className="italic text-[var(--color-text-tertiary)]">Unnamed force</span>
+                )}
+              </span>
+              <span className="text-xs font-semibold text-[var(--color-text-tertiary)]">
+                Strength: {force.strength}/5
+              </span>
+            </div>
+          ))
+        )
+      ) : (
+        <>
+          {forces.map((force, i) => (
+            <div
+              key={i}
+              className="space-y-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3"
+            >
+              <div className="flex items-center gap-2">
+                <Input
+                  value={force.text}
+                  onChange={(e) => onUpdate(i, 'text', e.target.value)}
+                  placeholder="Describe this force..."
+                  className="text-sm"
+                />
+                <Button type="button" variant="ghost" size="icon-xs" onClick={() => onRemove(i)}>
+                  <Trash2 size={12} />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-[var(--color-text-tertiary)]">Strength:</Label>
+                <input
+                  type="range"
+                  min={1}
+                  max={5}
+                  step={1}
+                  value={force.strength}
+                  onChange={(e) => onUpdate(i, 'strength', parseInt(e.target.value, 10))}
+                  className="flex-1 accent-[var(--color-primary)]"
+                />
+                <span className="w-4 text-center text-xs font-semibold">{force.strength}</span>
+              </div>
+            </div>
+          ))}
+
+          <Button type="button" variant="outline" size="sm" onClick={onAdd} className="w-full">
+            <Plus size={12} />
+            Add Force
+          </Button>
+        </>
+      )}
+    </div>
+  )
+}

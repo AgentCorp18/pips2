@@ -3,6 +3,7 @@
 import { useRef, useCallback } from 'react'
 import { Label } from '@/components/ui/label'
 import { AiAssistButton } from '@/components/ui/ai-assist-button'
+import { useFormViewMode } from './form-view-context'
 
 type FormTextareaProps = {
   id: string
@@ -31,6 +32,7 @@ export const FormTextarea = ({
   aiFieldType,
   aiContext,
 }: FormTextareaProps) => {
+  const mode = useFormViewMode()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleAccept = useCallback(
@@ -39,6 +41,25 @@ export const FormTextarea = ({
     },
     [onChange],
   )
+
+  if (mode === 'view') {
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-[var(--color-text-primary)]">
+          {label}
+          {required && <span className="text-[var(--color-error)]"> *</span>}
+        </span>
+        {helperText && <p className="text-xs text-[var(--color-text-tertiary)]">{helperText}</p>}
+        {value ? (
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-text-secondary)]">
+            {value}
+          </p>
+        ) : (
+          <p className="text-sm italic text-[var(--color-text-tertiary)]">Not provided</p>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-1.5">

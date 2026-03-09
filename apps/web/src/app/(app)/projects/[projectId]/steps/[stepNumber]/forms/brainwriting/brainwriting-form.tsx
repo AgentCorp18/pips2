@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -133,23 +134,62 @@ export const BrainwritingForm = ({ projectId, stepNumber, initialData }: Props) 
       description="Silent written idea generation. Each participant writes 3 ideas per round, then passes to the next person to build upon."
       data={data as unknown as Record<string, unknown>}
     >
-      <div className="space-y-6">
-        <p className="text-xs text-[var(--color-text-tertiary)]">
-          In classic 6-3-5 brainwriting, 6 participants each write 3 ideas in 5 minutes per round.
-          Adapt as needed for your team size.
-        </p>
+      <BrainwritingFields
+        data={data}
+        addRound={addRound}
+        removeRound={removeRound}
+        addParticipant={addParticipant}
+        removeParticipant={removeParticipant}
+        updateParticipantName={updateParticipantName}
+        updateIdea={updateIdea}
+      />
+    </FormShell>
+  )
+}
 
-        {/* Rounds */}
-        {data.rounds.map((round, ri) => (
-          <Card key={ri}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  Round {round.roundNumber}
-                  <Badge variant="secondary" className="text-[10px]">
-                    {round.entries.length} participant{round.entries.length !== 1 ? 's' : ''}
-                  </Badge>
-                </CardTitle>
+/* ---- Inner fields component (reads view mode from context) ---- */
+
+type BrainwritingFieldsProps = {
+  data: BrainwritingData
+  addRound: () => void
+  removeRound: (roundIndex: number) => void
+  addParticipant: (roundIndex: number) => void
+  removeParticipant: (roundIndex: number, entryIndex: number) => void
+  updateParticipantName: (roundIndex: number, entryIndex: number, name: string) => void
+  updateIdea: (roundIndex: number, entryIndex: number, ideaIndex: number, value: string) => void
+}
+
+const BrainwritingFields = ({
+  data,
+  addRound,
+  removeRound,
+  addParticipant,
+  removeParticipant,
+  updateParticipantName,
+  updateIdea,
+}: BrainwritingFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  return (
+    <div className="space-y-6">
+      <p className="text-xs text-[var(--color-text-tertiary)]">
+        In classic 6-3-5 brainwriting, 6 participants each write 3 ideas in 5 minutes per round.
+        Adapt as needed for your team size.
+      </p>
+
+      {/* Rounds */}
+      {data.rounds.map((round, ri) => (
+        <Card key={ri}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                Round {round.roundNumber}
+                <Badge variant="secondary" className="text-[10px]">
+                  {round.entries.length} participant{round.entries.length !== 1 ? 's' : ''}
+                </Badge>
+              </CardTitle>
+              {!isView && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -158,48 +198,77 @@ export const BrainwritingForm = ({ projectId, stepNumber, initialData }: Props) 
                 >
                   <Trash2 size={12} />
                 </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {round.entries.map((entry, ei) => (
+              <div
+                key={ei}
+                className="space-y-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3"
+              >
+                {isView ? (
+                  <>
+                    <span className="text-xs font-medium text-[var(--color-text-primary)]">
+                      {entry.participant || 'Unnamed participant'}
+                    </span>
+                    <ul className="space-y-0.5">
+                      {entry.ideas.map((idea, ii) => (
+                        <li
+                          key={ii}
+                          className="flex items-start gap-1.5 text-xs text-[var(--color-text-secondary)]"
+                        >
+                          <span className="text-[var(--color-text-tertiary)]">{ii + 1}.</span>
+                          <span>
+                            {idea || (
+                              <span className="italic text-[var(--color-text-tertiary)]">
+                                Empty
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs">Participant:</Label>
+                      <Input
+                        value={entry.participant}
+                        onChange={(e) => updateParticipantName(ri, ei, e.target.value)}
+                        placeholder="Name"
+                        className="h-7 text-xs"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => removeParticipant(ri, ei)}
+                      >
+                        <Trash2 size={10} />
+                      </Button>
+                    </div>
+                    <div className="space-y-1.5">
+                      {entry.ideas.map((idea, ii) => (
+                        <div key={ii} className="flex items-center gap-2">
+                          <span className="text-[10px] text-[var(--color-text-tertiary)] w-4">
+                            {ii + 1}.
+                          </span>
+                          <Input
+                            value={idea}
+                            onChange={(e) => updateIdea(ri, ei, ii, e.target.value)}
+                            placeholder={`Idea ${ii + 1}`}
+                            className="h-7 text-xs"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {round.entries.map((entry, ei) => (
-                <div
-                  key={ei}
-                  className="space-y-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs">Participant:</Label>
-                    <Input
-                      value={entry.participant}
-                      onChange={(e) => updateParticipantName(ri, ei, e.target.value)}
-                      placeholder="Name"
-                      className="h-7 text-xs"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => removeParticipant(ri, ei)}
-                    >
-                      <Trash2 size={10} />
-                    </Button>
-                  </div>
-                  <div className="space-y-1.5">
-                    {entry.ideas.map((idea, ii) => (
-                      <div key={ii} className="flex items-center gap-2">
-                        <span className="text-[10px] text-[var(--color-text-tertiary)] w-4">
-                          {ii + 1}.
-                        </span>
-                        <Input
-                          value={idea}
-                          onChange={(e) => updateIdea(ri, ei, ii, e.target.value)}
-                          placeholder={`Idea ${ii + 1}`}
-                          className="h-7 text-xs"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            ))}
+            {!isView && (
               <Button
                 type="button"
                 variant="outline"
@@ -210,33 +279,35 @@ export const BrainwritingForm = ({ projectId, stepNumber, initialData }: Props) 
                 <Plus size={12} />
                 Add Participant
               </Button>
-            </CardContent>
-          </Card>
-        ))}
+            )}
+          </CardContent>
+        </Card>
+      ))}
 
+      {!isView && (
         <Button type="button" variant="outline" onClick={addRound}>
           <Plus size={14} />
           Add Round
         </Button>
+      )}
 
-        {/* All Ideas summary */}
-        {data.allIdeas.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">All Ideas ({data.allIdeas.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-1">
-                {data.allIdeas.map((idea, i) => (
-                  <li key={i} className="text-sm text-[var(--color-text-secondary)]">
-                    {i + 1}. {idea}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </FormShell>
+      {/* All Ideas summary */}
+      {data.allIdeas.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">All Ideas ({data.allIdeas.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1">
+              {data.allIdeas.map((idea, i) => (
+                <li key={i} className="text-sm text-[var(--color-text-secondary)]">
+                  {i + 1}. {idea}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }

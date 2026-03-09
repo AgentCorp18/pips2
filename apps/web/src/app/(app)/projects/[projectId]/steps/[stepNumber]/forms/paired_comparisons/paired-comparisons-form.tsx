@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { saveFormData } from '../actions'
 import type { PairedComparisonsData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
@@ -162,43 +163,74 @@ export const PairedComparisonsForm = ({ projectId, initialData }: Props) => {
       isDirty={dirty}
       key={saveVersion}
     >
-      <div className="space-y-6">
-        {/* Coaching prompt */}
-        <p className="text-sm text-muted-foreground">
-          Add the options you want to compare, then evaluate each pair. Select the better option in
-          each matchup. The results table will automatically rank them by win count.
-        </p>
+      <PairedComparisonsFields
+        data={data}
+        labelForId={labelForId}
+        completedCount={completedCount}
+        totalCount={totalCount}
+        allDone={allDone}
+        addOption={addOption}
+        removeOption={removeOption}
+        updateOptionLabel={updateOptionLabel}
+        pickWinner={pickWinner}
+        updateNotes={updateNotes}
+      />
+    </FormShell>
+  )
+}
 
-        {/* Options list */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-            Options to Compare
-          </h3>
-          {data.options.map((opt) => (
-            <div key={opt.id} className="flex items-center gap-2">
-              <Input
-                value={opt.label}
-                onChange={(e) => updateOptionLabel(opt.id, e.target.value)}
-                placeholder="Option name"
-                className="h-9 text-sm"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeOption(opt.id)}
-                className="shrink-0"
-              >
-                <Trash2 className="size-4 text-muted-foreground" />
-              </Button>
+/* ---- Inner fields component (reads view mode from context) ---- */
+
+type PairedComparisonsFieldsProps = {
+  data: PairedComparisonsData
+  labelForId: (id: string) => string
+  completedCount: number
+  totalCount: number
+  allDone: boolean
+  addOption: () => void
+  removeOption: (id: string) => void
+  updateOptionLabel: (id: string, label: string) => void
+  pickWinner: (compIdx: number, winnerId: string) => void
+  updateNotes: (compIdx: number, notes: string) => void
+}
+
+const PairedComparisonsFields = ({
+  data,
+  labelForId,
+  completedCount,
+  totalCount,
+  allDone,
+  addOption,
+  removeOption,
+  updateOptionLabel,
+  pickWinner,
+  updateNotes,
+}: PairedComparisonsFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  if (isView) {
+    return (
+      <div className="space-y-6">
+        <p className="text-sm text-muted-foreground">Paired comparison results.</p>
+
+        {/* Options */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Options</h3>
+          {data.options.length === 0 ? (
+            <p className="text-sm italic text-[var(--color-text-tertiary)]">No options defined.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {data.options.map((opt) => (
+                <Badge key={opt.id} variant="secondary" className="text-xs">
+                  {opt.label || 'Unnamed'}
+                </Badge>
+              ))}
             </div>
-          ))}
-          <Button variant="outline" size="sm" onClick={addOption}>
-            <Plus className="size-4" />
-            Add Option
-          </Button>
+          )}
         </div>
 
-        {/* Comparisons */}
+        {/* Matchups */}
         {data.comparisons.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -209,26 +241,58 @@ export const PairedComparisonsForm = ({ projectId, initialData }: Props) => {
                 {completedCount}/{totalCount} decided
               </Badge>
             </div>
-            <div className="space-y-3">
-              {data.comparisons.map((comp, idx) => (
-                <ComparisonCard
-                  key={`${comp.optionA}-${comp.optionB}`}
-                  labelA={labelForId(comp.optionA)}
-                  labelB={labelForId(comp.optionB)}
-                  idA={comp.optionA}
-                  idB={comp.optionB}
-                  winner={comp.winner}
-                  notes={comp.notes}
-                  onPick={(id) => pickWinner(idx, id)}
-                  onNotesChange={(notes) => updateNotes(idx, notes)}
-                />
-              ))}
+            <div className="space-y-2">
+              {data.comparisons.map((comp) => {
+                const winnerLabel = comp.winner ? labelForId(comp.winner) : null
+                return (
+                  <div
+                    key={`${comp.optionA}-${comp.optionB}`}
+                    className={cn(
+                      'rounded-[var(--radius-md)] border p-3',
+                      comp.winner
+                        ? 'border-[var(--color-success)]'
+                        : 'border-[var(--color-border)]',
+                    )}
+                  >
+                    <div className="flex items-center gap-2 text-sm">
+                      <span
+                        className={cn(
+                          comp.winner === comp.optionA
+                            ? 'font-semibold text-[var(--color-step-4)]'
+                            : 'text-[var(--color-text-secondary)]',
+                        )}
+                      >
+                        {labelForId(comp.optionA) || 'Option A'}
+                      </span>
+                      <span className="text-xs text-[var(--color-text-tertiary)]">vs</span>
+                      <span
+                        className={cn(
+                          comp.winner === comp.optionB
+                            ? 'font-semibold text-[var(--color-step-4)]'
+                            : 'text-[var(--color-text-secondary)]',
+                        )}
+                      >
+                        {labelForId(comp.optionB) || 'Option B'}
+                      </span>
+                      {winnerLabel && (
+                        <span className="ml-auto flex items-center gap-1 text-xs text-[var(--color-success)]">
+                          <ArrowRight className="size-3" />
+                          {winnerLabel}
+                        </span>
+                      )}
+                    </div>
+                    {comp.notes && (
+                      <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">{comp.notes}</p>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
 
         {/* Results */}
-        {allDone && data.results.length > 0 && (
+        {data.results.length > 0 && (
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Rankings</h3>
             <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)]">
@@ -294,7 +358,141 @@ export const PairedComparisonsForm = ({ projectId, initialData }: Props) => {
           </div>
         )}
       </div>
-    </FormShell>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        Add the options you want to compare, then evaluate each pair. Select the better option in
+        each matchup. The results table will automatically rank them by win count.
+      </p>
+
+      {/* Options list */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+          Options to Compare
+        </h3>
+        {data.options.map((opt) => (
+          <div key={opt.id} className="flex items-center gap-2">
+            <Input
+              value={opt.label}
+              onChange={(e) => updateOptionLabel(opt.id, e.target.value)}
+              placeholder="Option name"
+              className="h-9 text-sm"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => removeOption(opt.id)}
+              className="shrink-0"
+            >
+              <Trash2 className="size-4 text-muted-foreground" />
+            </Button>
+          </div>
+        ))}
+        <Button variant="outline" size="sm" onClick={addOption}>
+          <Plus className="size-4" />
+          Add Option
+        </Button>
+      </div>
+
+      {/* Comparisons */}
+      {data.comparisons.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+              Pairwise Matchups
+            </h3>
+            <Badge variant="secondary" className="text-xs">
+              {completedCount}/{totalCount} decided
+            </Badge>
+          </div>
+          <div className="space-y-3">
+            {data.comparisons.map((comp, idx) => (
+              <ComparisonCard
+                key={`${comp.optionA}-${comp.optionB}`}
+                labelA={labelForId(comp.optionA)}
+                labelB={labelForId(comp.optionB)}
+                idA={comp.optionA}
+                idB={comp.optionB}
+                winner={comp.winner}
+                notes={comp.notes}
+                onPick={(id) => pickWinner(idx, id)}
+                onNotesChange={(notes) => updateNotes(idx, notes)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      {allDone && data.results.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Rankings</h3>
+          <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-[var(--color-surface-secondary)]">
+                  <th className="px-4 py-2 text-left font-medium text-[var(--color-text-secondary)]">
+                    Rank
+                  </th>
+                  <th className="px-4 py-2 text-left font-medium text-[var(--color-text-secondary)]">
+                    Option
+                  </th>
+                  <th className="px-4 py-2 text-right font-medium text-[var(--color-text-secondary)]">
+                    Wins
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.results.map((r) => {
+                  const isTop = r.rank === 1
+                  return (
+                    <tr
+                      key={r.optionId}
+                      className={cn(
+                        'border-b last:border-b-0',
+                        isTop && 'bg-[var(--color-success-subtle)]',
+                      )}
+                    >
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-1.5">
+                          {isTop && <Trophy className="size-4 text-[var(--color-success)]" />}
+                          <span
+                            className={cn(
+                              'font-medium',
+                              isTop
+                                ? 'text-[var(--color-success)]'
+                                : 'text-[var(--color-text-primary)]',
+                            )}
+                          >
+                            #{r.rank}
+                          </span>
+                        </div>
+                      </td>
+                      <td
+                        className={cn(
+                          'px-4 py-2',
+                          isTop
+                            ? 'font-semibold text-[var(--color-text-primary)]'
+                            : 'text-[var(--color-text-secondary)]',
+                        )}
+                      >
+                        {labelForId(r.optionId)}
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono text-[var(--color-text-secondary)]">
+                        {r.wins}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

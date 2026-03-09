@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
 import { FormTextarea } from '@/components/pips/form-textarea'
+import { useFormViewMode } from '@/components/pips/form-view-context'
+import { FormSelectView, FormTagListView } from '@/components/pips/form-field-view'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -64,61 +66,87 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
       required
       data={data as unknown as Record<string, unknown>}
     >
-      <div className="space-y-6">
-        {/* As-Is State */}
-        <FormTextarea
-          id="asIs"
-          label="Current State (As-Is)"
-          value={data.asIs}
-          onChange={(v) => update('asIs', v)}
-          placeholder="Describe how things work today..."
-          helperText="What is the current state of the process? Be specific with numbers and observations."
-          rows={4}
-          aiFieldType="problem_statement"
-          aiContext={`Problem statement form — current state (as-is). Problem area: ${data.problemArea || 'not set'}`}
-        />
+      <ProblemStatementFields data={data} update={update} />
+    </FormShell>
+  )
+}
 
-        {/* Desired State */}
-        <FormTextarea
-          id="desired"
-          label="Desired State"
-          value={data.desired}
-          onChange={(v) => update('desired', v)}
-          placeholder="Describe what success looks like..."
-          helperText="What would the ideal outcome look like? Include measurable targets."
-          rows={4}
-          aiFieldType="problem_statement"
-          aiContext={`Problem statement form — desired state. Current state: ${data.asIs || 'not yet defined'}`}
-        />
+/* ---- Inner fields component (reads view mode from context) ---- */
 
-        {/* Gap */}
-        <FormTextarea
-          id="gap"
-          label="Gap Analysis"
-          value={data.gap}
-          onChange={(v) => update('gap', v)}
-          placeholder="What is the difference between current and desired?"
-          helperText="Clearly articulate the gap. This helps frame the problem."
-          rows={3}
-          aiFieldType="problem_statement"
-          aiContext={`Problem statement form — gap analysis. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}`}
-        />
+const ProblemStatementFields = ({
+  data,
+  update,
+}: {
+  data: ProblemStatementData
+  update: <K extends keyof ProblemStatementData>(key: K, value: ProblemStatementData[K]) => void
+}) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
 
-        {/* Problem Statement */}
-        <FormTextarea
-          id="problemStatement"
-          label="Problem Statement"
-          value={data.problemStatement}
-          onChange={(v) => update('problemStatement', v)}
-          placeholder="Summarize the problem in one or two clear sentences..."
-          helperText="Combine the As-Is, Desired State, and Gap into a concise, measurable statement."
-          rows={3}
-          required
-          aiFieldType="problem_statement"
-          aiContext={`Problem statement form — final statement. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}. Gap: ${data.gap || 'not yet defined'}`}
-        />
+  return (
+    <div className="space-y-6">
+      {/* As-Is State */}
+      <FormTextarea
+        id="asIs"
+        label="Current State (As-Is)"
+        value={data.asIs}
+        onChange={(v) => update('asIs', v)}
+        placeholder="Describe how things work today..."
+        helperText="What is the current state of the process? Be specific with numbers and observations."
+        rows={4}
+        aiFieldType="problem_statement"
+        aiContext={`Problem statement form — current state (as-is). Problem area: ${data.problemArea || 'not set'}`}
+      />
 
-        {/* Problem Area */}
+      {/* Desired State */}
+      <FormTextarea
+        id="desired"
+        label="Desired State"
+        value={data.desired}
+        onChange={(v) => update('desired', v)}
+        placeholder="Describe what success looks like..."
+        helperText="What would the ideal outcome look like? Include measurable targets."
+        rows={4}
+        aiFieldType="problem_statement"
+        aiContext={`Problem statement form — desired state. Current state: ${data.asIs || 'not yet defined'}`}
+      />
+
+      {/* Gap */}
+      <FormTextarea
+        id="gap"
+        label="Gap Analysis"
+        value={data.gap}
+        onChange={(v) => update('gap', v)}
+        placeholder="What is the difference between current and desired?"
+        helperText="Clearly articulate the gap. This helps frame the problem."
+        rows={3}
+        aiFieldType="problem_statement"
+        aiContext={`Problem statement form — gap analysis. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}`}
+      />
+
+      {/* Problem Statement */}
+      <FormTextarea
+        id="problemStatement"
+        label="Problem Statement"
+        value={data.problemStatement}
+        onChange={(v) => update('problemStatement', v)}
+        placeholder="Summarize the problem in one or two clear sentences..."
+        helperText="Combine the As-Is, Desired State, and Gap into a concise, measurable statement."
+        rows={3}
+        required
+        aiFieldType="problem_statement"
+        aiContext={`Problem statement form — final statement. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}. Gap: ${data.gap || 'not yet defined'}`}
+      />
+
+      {/* Problem Area */}
+      {isView ? (
+        <FormSelectView
+          label="Problem Area"
+          value={data.problemArea}
+          options={PROBLEM_AREAS}
+          helperText="Which category does this problem fall into?"
+        />
+      ) : (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="problemArea">Problem Area</Label>
           <p className="text-xs text-[var(--color-text-tertiary)]">
@@ -137,8 +165,16 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
             </SelectContent>
           </Select>
         </div>
+      )}
 
-        {/* Team Members */}
+      {/* Team Members */}
+      {isView ? (
+        <FormTagListView
+          label="Team Members"
+          values={data.teamMembers}
+          helperText="Who is involved in investigating this problem?"
+        />
+      ) : (
         <TagListField
           label="Team Members"
           helperText="Who is involved in investigating this problem?"
@@ -146,8 +182,16 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
           values={data.teamMembers}
           onChange={(v) => update('teamMembers', v)}
         />
+      )}
 
-        {/* Data Sources */}
+      {/* Data Sources */}
+      {isView ? (
+        <FormTagListView
+          label="Data Sources"
+          values={data.dataSources}
+          helperText="What data confirms this problem exists?"
+        />
+      ) : (
         <TagListField
           label="Data Sources"
           helperText="What data confirms this problem exists?"
@@ -155,8 +199,8 @@ export const ProblemStatementForm = ({ projectId, stepNumber, initialData }: Pro
           values={data.dataSources}
           onChange={(v) => update('dataSources', v)}
         />
-      </div>
-    </FormShell>
+      )}
+    </div>
   )
 }
 

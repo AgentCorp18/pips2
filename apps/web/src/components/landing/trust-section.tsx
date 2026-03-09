@@ -39,7 +39,7 @@ export const TrustSection = () => {
           <h2 className="mb-4 font-serif text-[clamp(1.75rem,4vw,2.25rem)] leading-[1.2] tracking-[-0.02em] text-[var(--color-neutral-800)]">
             Grounded in Real-World Practice
           </h2>
-          <p className="text-[1.0625rem] leading-relaxed text-[var(--color-neutral-500)]">
+          <p className="text-[1.0625rem] leading-relaxed text-[var(--color-text-secondary)]">
             PIPS is built on a methodology refined through years of real process improvement work,
             documented in a comprehensive guidebook.
           </p>
@@ -61,7 +61,7 @@ export const TrustSection = () => {
               <div className="mb-1 text-sm font-semibold text-[var(--color-neutral-800)]">
                 {stat.label}
               </div>
-              <div className="text-xs text-[var(--color-neutral-500)]">{stat.description}</div>
+              <div className="text-xs text-[var(--color-text-secondary)]">{stat.description}</div>
             </div>
           ))}
         </div>

@@ -41,7 +41,7 @@ export const LandingFooter = () => {
               </div>
               <span className="text-xl font-bold tracking-[0.05em] text-white">PIPS</span>
             </div>
-            <p className="max-w-[280px] text-sm leading-relaxed text-white/40">
+            <p className="max-w-[280px] text-sm leading-relaxed text-white/60">
               A 6-step process improvement methodology embedded in project management software.
             </p>
           </div>
@@ -49,15 +49,15 @@ export const LandingFooter = () => {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
             <div key={heading}>
-              <h4 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.08em] text-white/50">
+              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.08em] text-white/60">
                 {heading}
-              </h4>
+              </p>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-white/40 transition-colors hover:text-white/70"
+                      className="text-sm text-white/60 transition-colors hover:text-white/80"
                     >
                       {link.label}
                     </Link>
@@ -73,10 +73,10 @@ export const LandingFooter = () => {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/50">
             &copy; {new Date().getFullYear()} PIPS. All rights reserved.
           </p>
-          <p className="text-xs text-white/30">Built with the PIPS methodology</p>
+          <p className="text-xs text-white/50">Built with the PIPS methodology</p>
         </div>
       </div>
     </footer>

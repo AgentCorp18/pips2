@@ -121,10 +121,10 @@ export const PricingPage = () => {
                   {tier.price}
                 </span>
                 {tier.period && (
-                  <span className="text-sm text-[var(--color-neutral-500)]">{tier.period}</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">{tier.period}</span>
                 )}
               </div>
-              <p className="mb-6 text-sm leading-relaxed text-[var(--color-neutral-500)]">
+              <p className="mb-6 text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 {tier.description}
               </p>
               <ul className="mb-8 flex flex-1 flex-col gap-3">
@@ -170,7 +170,7 @@ export const PricingPage = () => {
           <h2 className="mb-3 font-serif text-2xl text-[var(--color-neutral-800)]">
             Not sure which plan is right?
           </h2>
-          <p className="mb-6 text-sm leading-relaxed text-[var(--color-neutral-500)]">
+          <p className="mb-6 text-sm leading-relaxed text-[var(--color-text-secondary)]">
             Start with the free plan and explore the full PIPS workflow. Upgrade anytime as your
             team grows.
           </p>

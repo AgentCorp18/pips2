@@ -49,7 +49,7 @@ export const HowItWorksSection = () => {
           <h2 className="mb-4 font-serif text-[clamp(1.75rem,4vw,2.25rem)] leading-[1.2] tracking-[-0.02em] text-[var(--color-neutral-800)]">
             How It Works
           </h2>
-          <p className="text-[1.0625rem] leading-relaxed text-[var(--color-neutral-500)]">
+          <p className="text-[1.0625rem] leading-relaxed text-[var(--color-text-secondary)]">
             Get up and running in minutes. PIPS turns methodology into action.
           </p>
         </div>
@@ -77,7 +77,7 @@ export const HowItWorksSection = () => {
               </h3>
 
               {/* Description */}
-              <p className="text-sm leading-relaxed text-[var(--color-neutral-500)]">
+              <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 {step.description}
               </p>
             </div>

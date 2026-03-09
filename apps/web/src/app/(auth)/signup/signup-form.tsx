@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,6 +20,8 @@ const initialState: AuthActionState = {}
 
 export const SignupForm = () => {
   const [state, formAction, isPending] = useActionState(signup, initialState)
+  const searchParams = useSearchParams()
+  const redirectParam = searchParams.get('redirect')
 
   return (
     <Card>
@@ -31,6 +34,7 @@ export const SignupForm = () => {
 
       <CardContent>
         <form action={formAction} className="flex flex-col gap-4">
+          {redirectParam && <input type="hidden" name="redirect" value={redirectParam} />}
           {state.error && (
             <div
               className="rounded-[var(--radius-md)] px-4 py-3 text-sm"

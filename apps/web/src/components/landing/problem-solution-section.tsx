@@ -24,7 +24,7 @@ export const ProblemSolutionSection = () => {
           <h2 className="mb-4 font-serif text-[clamp(1.75rem,4vw,2.25rem)] leading-[1.2] tracking-[-0.02em] text-[var(--color-neutral-800)]">
             The Gap Between Intent and Impact
           </h2>
-          <p className="text-[1.0625rem] leading-relaxed text-[var(--color-neutral-500)]">
+          <p className="text-[1.0625rem] leading-relaxed text-[var(--color-text-secondary)]">
             Most teams want to improve their processes. Few have the tools and structure to do it
             consistently.
           </p>

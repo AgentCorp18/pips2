@@ -6,6 +6,7 @@ import { Plus, Trash2, CheckSquare, Square, TicketPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { saveFormData } from '../actions'
 import { createTicketsFromChecklist } from './checklist-ticket-actions'
 import type { ImplementationChecklistData } from '@/lib/form-schemas'
@@ -127,58 +128,110 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
       isDirty={dirty}
       key={saveVersion}
     >
-      <div className="space-y-6">
-        {/* Progress count */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Track each task as you execute the implementation plan.
-          </p>
-          {totalCount > 0 && (
-            <span className="text-sm font-medium text-muted-foreground">
-              {completedCount} of {totalCount} completed
-            </span>
-          )}
-        </div>
+      <ChecklistFields
+        grouped={grouped}
+        completedCount={completedCount}
+        totalCount={totalCount}
+        incompleteWithText={incompleteWithText}
+        isCreatingTickets={isCreatingTickets}
+        toggleItem={toggleItem}
+        updateItem={updateItem}
+        removeItem={removeItem}
+        addItem={addItem}
+        handleCreateTickets={handleCreateTickets}
+      />
+    </FormShell>
+  )
+}
 
-        {/* Progress bar */}
+/* ---- Inner fields component (reads view mode from context) ---- */
+
+type ChecklistFieldsProps = {
+  grouped: Record<string, ImplementationChecklistData['items']>
+  completedCount: number
+  totalCount: number
+  incompleteWithText: number
+  isCreatingTickets: boolean
+  toggleItem: (id: string) => void
+  updateItem: (id: string, field: string, value: unknown) => void
+  removeItem: (id: string) => void
+  addItem: (category?: string) => void
+  handleCreateTickets: () => void
+}
+
+const ChecklistFields = ({
+  grouped,
+  completedCount,
+  totalCount,
+  incompleteWithText,
+  isCreatingTickets,
+  toggleItem,
+  updateItem,
+  removeItem,
+  addItem,
+  handleCreateTickets,
+}: ChecklistFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  return (
+    <div className="space-y-6">
+      {/* Progress count */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {isView
+            ? 'Implementation checklist status.'
+            : 'Track each task as you execute the implementation plan.'}
+        </p>
         {totalCount > 0 && (
-          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%`,
-                backgroundColor: 'var(--color-step-5)',
-              }}
-            />
+          <span className="text-sm font-medium text-muted-foreground">
+            {completedCount} of {totalCount} completed
+          </span>
+        )}
+      </div>
+
+      {/* Progress bar */}
+      {totalCount > 0 && (
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%`,
+              backgroundColor: 'var(--color-step-5)',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Grouped items */}
+      {totalCount === 0 && (
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          {isView
+            ? 'No checklist items.'
+            : 'No items yet. Click \u201CAdd Item\u201D to start building your checklist.'}
+        </p>
+      )}
+
+      {Object.entries(grouped).map(([category, items]) => (
+        <div key={category} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{category}</h3>
+            <span className="text-xs text-muted-foreground">
+              {items.filter((i) => i.completed).length}/{items.length}
+            </span>
           </div>
-        )}
 
-        {/* Grouped items */}
-        {totalCount === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No items yet. Click &ldquo;Add Item&rdquo; to start building your checklist.
-          </p>
-        )}
+          {items.map((item) => (
+            <ChecklistItem
+              key={item.id}
+              item={item}
+              onToggle={() => toggleItem(item.id)}
+              onUpdate={(field, value) => updateItem(item.id, field, value)}
+              onRemove={() => removeItem(item.id)}
+            />
+          ))}
 
-        {Object.entries(grouped).map(([category, items]) => (
-          <div key={category} className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{category}</h3>
-              <span className="text-xs text-muted-foreground">
-                {items.filter((i) => i.completed).length}/{items.length}
-              </span>
-            </div>
-
-            {items.map((item) => (
-              <ChecklistItem
-                key={item.id}
-                item={item}
-                onToggle={() => toggleItem(item.id)}
-                onUpdate={(field, value) => updateItem(item.id, field, value)}
-                onRemove={() => removeItem(item.id)}
-              />
-            ))}
-
+          {!isView && (
             <Button
               variant="ghost"
               size="xs"
@@ -188,10 +241,12 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
               <Plus className="size-3" />
               Add to {category}
             </Button>
-          </div>
-        ))}
+          )}
+        </div>
+      ))}
 
-        {/* Add item + Create tickets */}
+      {/* Add item + Create tickets */}
+      {!isView && (
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => addItem()}>
             <Plus className="size-4" />
@@ -212,8 +267,8 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
             </Button>
           )}
         </div>
-      </div>
-    </FormShell>
+      )}
+    </div>
   )
 }
 
@@ -226,59 +281,97 @@ type ChecklistItemProps = {
   onRemove: () => void
 }
 
-const ChecklistItem = ({ item, onToggle, onUpdate, onRemove }: ChecklistItemProps) => (
-  <div
-    className={cn(
-      'flex items-start gap-2 rounded-[var(--radius-md)] border p-3 transition-colors',
-      item.completed
-        ? 'border-[var(--color-success)] bg-[var(--color-success-subtle)]'
-        : 'border-[var(--color-border)]',
-    )}
-  >
-    <button type="button" onClick={onToggle} className="mt-1 flex-shrink-0">
-      {item.completed ? (
-        <CheckSquare className="size-4 text-[var(--color-success)]" />
-      ) : (
-        <Square className="size-4 text-muted-foreground" />
+const ChecklistItem = ({ item, onToggle, onUpdate, onRemove }: ChecklistItemProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  if (isView) {
+    return (
+      <div
+        className={cn(
+          'flex items-start gap-2 rounded-[var(--radius-md)] border p-3',
+          item.completed
+            ? 'border-[var(--color-success)] bg-[var(--color-success-subtle)]'
+            : 'border-[var(--color-border)]',
+        )}
+      >
+        {item.completed ? (
+          <CheckSquare className="mt-0.5 size-4 flex-shrink-0 text-[var(--color-success)]" />
+        ) : (
+          <Square className="mt-0.5 size-4 flex-shrink-0 text-muted-foreground" />
+        )}
+        <div className="flex-1 space-y-0.5">
+          <span
+            className={cn(
+              'text-sm text-[var(--color-text-primary)]',
+              item.completed && 'line-through text-muted-foreground',
+            )}
+          >
+            {item.text || 'Untitled task'}
+          </span>
+          <div className="flex flex-wrap gap-3 text-xs text-[var(--color-text-tertiary)]">
+            {item.assignee && <span>Assignee: {item.assignee}</span>}
+            {item.notes && <span>Notes: {item.notes}</span>}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex items-start gap-2 rounded-[var(--radius-md)] border p-3 transition-colors',
+        item.completed
+          ? 'border-[var(--color-success)] bg-[var(--color-success-subtle)]'
+          : 'border-[var(--color-border)]',
       )}
-    </button>
+    >
+      <button type="button" onClick={onToggle} className="mt-1 flex-shrink-0">
+        {item.completed ? (
+          <CheckSquare className="size-4 text-[var(--color-success)]" />
+        ) : (
+          <Square className="size-4 text-muted-foreground" />
+        )}
+      </button>
 
-    <div className="flex-1 space-y-2">
-      <div className="grid gap-2 sm:grid-cols-3">
-        <Input
-          value={item.text}
-          onChange={(e) => onUpdate('text', e.target.value)}
-          placeholder="Task description"
-          className={cn(
-            'h-7 text-xs sm:col-span-2',
-            item.completed && 'line-through text-muted-foreground',
-          )}
-        />
-        <Input
-          value={item.assignee}
-          onChange={(e) => onUpdate('assignee', e.target.value)}
-          placeholder="Assignee"
-          className="h-7 text-xs"
-        />
+      <div className="flex-1 space-y-2">
+        <div className="grid gap-2 sm:grid-cols-3">
+          <Input
+            value={item.text}
+            onChange={(e) => onUpdate('text', e.target.value)}
+            placeholder="Task description"
+            className={cn(
+              'h-7 text-xs sm:col-span-2',
+              item.completed && 'line-through text-muted-foreground',
+            )}
+          />
+          <Input
+            value={item.assignee}
+            onChange={(e) => onUpdate('assignee', e.target.value)}
+            placeholder="Assignee"
+            className="h-7 text-xs"
+          />
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Input
+            value={item.category}
+            onChange={(e) => onUpdate('category', e.target.value)}
+            placeholder="Category"
+            className="h-7 text-xs"
+          />
+          <Input
+            value={item.notes}
+            onChange={(e) => onUpdate('notes', e.target.value)}
+            placeholder="Notes (optional)"
+            className="h-7 text-xs"
+          />
+        </div>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Input
-          value={item.category}
-          onChange={(e) => onUpdate('category', e.target.value)}
-          placeholder="Category"
-          className="h-7 text-xs"
-        />
-        <Input
-          value={item.notes}
-          onChange={(e) => onUpdate('notes', e.target.value)}
-          placeholder="Notes (optional)"
-          className="h-7 text-xs"
-        />
-      </div>
+
+      <Button variant="ghost" size="icon-xs" onClick={onRemove}>
+        <Trash2 className="size-3 text-muted-foreground" />
+      </Button>
     </div>
-
-    <Button variant="ghost" size="icon-xs" onClick={onRemove}>
-      <Trash2 className="size-3 text-muted-foreground" />
-    </Button>
-  </div>
-)
+  )
+}

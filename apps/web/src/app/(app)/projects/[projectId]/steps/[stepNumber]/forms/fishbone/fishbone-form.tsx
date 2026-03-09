@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -190,6 +191,8 @@ const CategoryBranch = ({
   onUpdateSubCause,
   onRemoveSubCause,
 }: CategoryBranchProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
   const [isOpen, setIsOpen] = useState(true)
 
   return (
@@ -207,57 +210,102 @@ const CategoryBranch = ({
       </CardHeader>
       {isOpen && (
         <CardContent className="space-y-3">
-          {category.causes.map((cause, ci) => (
-            <div key={ci} className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={cause.text}
-                  onChange={(e) => onUpdateCauseText(ci, e.target.value)}
-                  placeholder="Describe a potential cause..."
-                  className="text-sm"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => onRemoveCause(ci)}
-                >
-                  <Trash2 size={12} />
-                </Button>
-              </div>
-              {/* Sub-causes */}
-              {cause.subCauses.map((sub, si) => (
-                <div key={si} className="ml-6 flex items-center gap-2">
-                  <span className="text-[var(--color-text-tertiary)]">-</span>
-                  <Input
-                    value={sub}
-                    onChange={(e) => onUpdateSubCause(ci, si, e.target.value)}
-                    placeholder="Sub-cause..."
-                    className="text-xs"
-                  />
-                  <Button
+          {isView ? (
+            <>
+              {category.causes.length === 0 ? (
+                <p className="text-sm italic text-[var(--color-text-tertiary)]">
+                  No causes identified
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {category.causes.map((cause, ci) => (
+                    <li key={ci}>
+                      <p className="text-sm text-[var(--color-text-secondary)]">
+                        {cause.text || (
+                          <span className="italic text-[var(--color-text-tertiary)]">
+                            Empty cause
+                          </span>
+                        )}
+                      </p>
+                      {cause.subCauses.length > 0 && (
+                        <ul className="ml-4 mt-1 space-y-0.5">
+                          {cause.subCauses.map((sub, si) => (
+                            <li
+                              key={si}
+                              className="flex items-start gap-1.5 text-xs text-[var(--color-text-tertiary)]"
+                            >
+                              <span className="mt-0.5">-</span>
+                              <span>{sub || 'Empty sub-cause'}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          ) : (
+            <>
+              {category.causes.map((cause, ci) => (
+                <div key={ci} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={cause.text}
+                      onChange={(e) => onUpdateCauseText(ci, e.target.value)}
+                      placeholder="Describe a potential cause..."
+                      className="text-sm"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => onRemoveCause(ci)}
+                    >
+                      <Trash2 size={12} />
+                    </Button>
+                  </div>
+                  {/* Sub-causes */}
+                  {cause.subCauses.map((sub, si) => (
+                    <div key={si} className="ml-6 flex items-center gap-2">
+                      <span className="text-[var(--color-text-tertiary)]">-</span>
+                      <Input
+                        value={sub}
+                        onChange={(e) => onUpdateSubCause(ci, si, e.target.value)}
+                        placeholder="Sub-cause..."
+                        className="text-xs"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => onRemoveSubCause(ci, si)}
+                      >
+                        <Trash2 size={10} />
+                      </Button>
+                    </div>
+                  ))}
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => onRemoveSubCause(ci, si)}
+                    onClick={() => onAddSubCause(ci)}
+                    className="ml-6 text-xs text-[var(--color-text-link)] hover:underline"
                   >
-                    <Trash2 size={10} />
-                  </Button>
+                    + Add sub-cause
+                  </button>
                 </div>
               ))}
-              <button
+              <Button
                 type="button"
-                onClick={() => onAddSubCause(ci)}
-                className="ml-6 text-xs text-[var(--color-text-link)] hover:underline"
+                variant="outline"
+                size="sm"
+                onClick={onAddCause}
+                className="w-full"
               >
-                + Add sub-cause
-              </button>
-            </div>
-          ))}
-          <Button type="button" variant="outline" size="sm" onClick={onAddCause} className="w-full">
-            <Plus size={12} />
-            Add Cause
-          </Button>
+                <Plus size={12} />
+                Add Cause
+              </Button>
+            </>
+          )}
         </CardContent>
       )}
     </Card>

@@ -50,7 +50,7 @@ export const FeaturesSection = () => {
         <h2 className="mb-4 font-serif text-[clamp(1.75rem,4vw,2.25rem)] leading-[1.2] tracking-[-0.02em] text-[var(--color-neutral-800)]">
           Everything You Need to Improve
         </h2>
-        <p className="text-[1.0625rem] leading-relaxed text-[var(--color-neutral-500)]">
+        <p className="text-[1.0625rem] leading-relaxed text-[var(--color-text-secondary)]">
           PIPS combines methodology guidance with project management tools so your team can focus on
           solving real problems.
         </p>
@@ -74,7 +74,7 @@ export const FeaturesSection = () => {
             </h3>
 
             {/* Description */}
-            <p className="text-sm leading-relaxed text-[var(--color-neutral-500)]">
+            <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
               {feature.description}
             </p>
           </div>
