@@ -218,6 +218,9 @@ export const createTestTeam = async (orgId: string, userId: string): Promise<Tes
 export const cleanupTestOrg = async (orgId: string): Promise<void> => {
   const admin = getAdminClient()
 
+  // Delete audit_log entries first (FK constraint blocks org deletion)
+  await admin.from('audit_log').delete().eq('org_id', orgId)
+
   const { error } = await admin.from('organizations').delete().eq('id', orgId)
 
   if (error) {
