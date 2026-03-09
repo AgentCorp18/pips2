@@ -60,7 +60,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
     ],
     methodology: {
       tips: [
-        'Use SMART criteria: Specific, Measurable, Achievable, Relevant, Time-bound',
+        'Use the As-Is / Desired State / Gap framework to ensure your problem statement is specific and measurable',
         'Avoid jumping to solutions — focus only on describing the problem',
         'Quantify the gap with data whenever possible (%, $, time)',
         'Interview stakeholders at multiple levels for a well-rounded view',

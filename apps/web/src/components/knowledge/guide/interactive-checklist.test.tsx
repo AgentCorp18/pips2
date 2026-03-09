@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { InteractiveChecklist } from './interactive-checklist'
 
 const items = ['Define the problem', 'Gather data', 'Identify root cause']
@@ -70,10 +70,11 @@ describe('InteractiveChecklist', () => {
     expect(parsed).toContain(1)
   })
 
-  it('loads checked items from localStorage', () => {
+  it('loads checked items from localStorage', async () => {
     store['pips-guide-checklist-1'] = JSON.stringify([0, 2])
     render(<InteractiveChecklist stepNumber={1} items={items} />)
-    expect(screen.getByText(/2 of 3 completed/)).toBeInTheDocument()
+    // State is loaded via useEffect after mount, so we need to wait for the update
+    await waitFor(() => expect(screen.getByText(/2 of 3 completed/)).toBeInTheDocument())
   })
 
   it('applies custom className', () => {
@@ -81,10 +82,11 @@ describe('InteractiveChecklist', () => {
     expect(screen.getByTestId('interactive-checklist')).toHaveClass('my-class')
   })
 
-  it('unchecks a checked item', () => {
+  it('unchecks a checked item', async () => {
     store['pips-guide-checklist-1'] = JSON.stringify([0])
     render(<InteractiveChecklist stepNumber={1} items={items} />)
-    expect(screen.getByText(/1 of 3 completed/)).toBeInTheDocument()
+    // Wait for localStorage to be loaded via useEffect
+    await waitFor(() => expect(screen.getByText(/1 of 3 completed/)).toBeInTheDocument())
     const checkbox = screen.getByLabelText('Define the problem')
     fireEvent.click(checkbox)
     expect(screen.getByText(/0 of 3 completed/)).toBeInTheDocument()

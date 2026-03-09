@@ -35,6 +35,16 @@ const sections = [
   { id: 'related', label: 'Related' },
 ]
 
+// Maps each PIPS step number to its book chapter slug (generated from chapter title)
+const BOOK_CHAPTER_SLUGS: Record<number, string> = {
+  1: 'step-1-identify',
+  2: 'step-2-analyze',
+  3: 'step-3-generate',
+  4: 'step-4-select-plan',
+  5: 'step-5-implement',
+  6: 'step-6-evaluate',
+}
+
 const DIAGRAM_TITLES: Record<number, string> = {
   1: 'Problem Framework',
   2: 'Fishbone Diagram',
@@ -321,7 +331,7 @@ const StepPage = async ({ params }: StepPageProps) => {
               Related Content
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <Link href={`/knowledge/book/ch0${step.number + 3}`}>
+              <Link href={`/knowledge/book/${BOOK_CHAPTER_SLUGS[step.number]}`}>
                 <Card className="h-full cursor-pointer transition-all hover:shadow-md">
                   <CardContent className="flex flex-col items-center gap-3 p-5 text-center">
                     <BookOpen size={24} className="text-[var(--color-text-tertiary)]" />

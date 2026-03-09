@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -12,26 +12,35 @@ type InteractiveChecklistProps = {
 
 const storageKey = (step: number) => `pips-guide-checklist-${step}`
 
-const loadChecked = (step: number): Set<number> => {
-  if (typeof window === 'undefined') return new Set()
-  try {
-    const raw = localStorage.getItem(storageKey(step))
-    if (!raw) return new Set()
-    const arr: number[] = JSON.parse(raw)
-    return new Set(arr)
-  } catch {
-    return new Set()
-  }
-}
-
 export const InteractiveChecklist = ({
   stepNumber,
   items,
   className,
 }: InteractiveChecklistProps) => {
-  const [checkedItems, setCheckedItems] = useState<Set<number>>(() => loadChecked(stepNumber))
+  // Always start empty to match the server render and avoid hydration mismatch.
+  // localStorage is read in a useEffect after the component mounts on the client.
+  const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set())
+  const isMounted = useRef(false)
 
+  // Load persisted state from localStorage after mount (client-only)
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey(stepNumber))
+      if (raw) {
+        const arr: number[] = JSON.parse(raw)
+        setCheckedItems(new Set(arr))
+      }
+    } catch {
+      // Ignore parse errors — start fresh
+    }
+    isMounted.current = true
+  }, [stepNumber])
+
+  // Persist to localStorage whenever checkedItems changes, but only after the
+  // initial load effect has run (isMounted guards against overwriting stored
+  // data with the initial empty set on first render).
+  useEffect(() => {
+    if (!isMounted.current) return
     localStorage.setItem(storageKey(stepNumber), JSON.stringify([...checkedItems]))
   }, [stepNumber, checkedItems])
 

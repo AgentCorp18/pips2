@@ -305,6 +305,13 @@ const compileBookContent = (): ContentNode[] => {
     const rawMd = fs.readFileSync(filePath, 'utf-8')
     const cleanMd = stripRxLogicBranding(rawMd)
 
+    // Split full content into preamble (before first ##) and sections (## headings onward).
+    // The chapter node stores only the preamble so it is not duplicated when section
+    // child nodes are rendered separately by ContentReader.
+    const firstSectionMatch = cleanMd.search(/^## /m)
+    const chapterPreamble =
+      firstSectionMatch === -1 ? cleanMd : cleanMd.slice(0, firstSectionMatch).trim()
+
     // Create chapter-level node
     const chapterId = `book/${mapping.chapter}`
     const chapterSlug = slugify(mapping.title)
@@ -325,7 +332,11 @@ const compileBookContent = (): ContentNode[] => {
         contentType: 'conceptual',
       },
       summary: extractSummary(cleanMd),
-      bodyMd: cleanMd,
+      // Store only the preamble (content before the first ## section heading).
+      // Sections are stored as child nodes and rendered separately — storing the
+      // full content here would cause each chapter to render its content twice.
+      bodyMd: chapterPreamble || null,
+      // Use the full content length for read-time so the header estimate is accurate.
       estimatedReadMinutes: estimateReadMinutes(cleanMd),
       sourceFile: matchedFile,
       sortOrder: globalSortOrder++,
