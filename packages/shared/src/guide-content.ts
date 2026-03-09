@@ -78,7 +78,7 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
         'Most improvement efforts fail not because of poor solutions, but because teams never properly defined the problem. When a problem statement is vague or biased, the team spends weeks solving the wrong thing — burning budget, eroding trust, and demoralizing participants. Step 1 exists to prevent that costly mistake.',
         'A rigorous problem definition forces the team to separate observation from assumption. By describing the current state (As-Is), the desired state, and the measurable gap between them, you create a shared mental model that aligns every stakeholder. Without this alignment, each person optimizes for their own interpretation of the problem, pulling the project in different directions.',
         'Data anchors the conversation. When you quantify the gap — "cycle time is 14 days versus the 5-day target" or "customer complaints increased 40% quarter-over-quarter" — the problem becomes objective and undeniable. This data-first approach also establishes the baseline you will measure against in Step 6, closing the loop on the entire PIPS cycle.',
-        'Finally, scoping matters. A problem that is too broad ("improve quality") cannot be solved in a single cycle; a problem that is too narrow ("fix the Tuesday afternoon label printer jam") may not justify the team effort. Step 1 guides you to a scope that is meaningful, measurable, and within the team\'s sphere of influence.',
+        'Finally, scoping matters. A problem that is too broad ("improve quality") cannot be solved in a single cycle; a problem that is too narrow ("fix the Tuesday afternoon label printer jam") may not justify the team effort. Step 1 guides you to a scope that is meaningful, measurable, and within the team\'s sphere of influence. As a rule of thumb, Steps 1 and 2 together should consume the first 40% of the total PIPS effort — this investment in defining and analyzing the problem pays dividends in every subsequent step.',
       ],
     },
     examples: {
@@ -94,23 +94,34 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
     },
     checklist: [
-      'Draft the As-Is state with specific, observable facts',
-      'Define the Desired State with a measurable target',
-      'Quantify the gap between As-Is and Desired State',
-      'Assess the business impact in dollars, time, or quality metrics',
-      "Confirm the problem scope is within the team's sphere of influence",
-      'Validate the problem with data from at least two independent sources',
-      'Get written agreement from all team members on the problem statement',
-      'Identify and document key stakeholders affected by this problem',
+      'I have drafted the As-Is state with specific, observable facts',
+      'I have defined the Desired State with a measurable target',
+      'I have quantified the gap between As-Is and Desired State',
+      'I have assessed the business impact in dollars, time, or quality metrics',
+      "I have confirmed the problem scope is within the team's sphere of influence",
+      'I have validated the problem with data from at least two independent sources',
+      'I have obtained written agreement from all team members on the problem statement',
+      'I have identified and documented key stakeholders affected by this problem',
     ],
     diagramType: 'problem-framework',
     keyInsight:
-      'The team that invests an extra hour defining the problem saves ten hours of rework later. Resist the urge to jump to solutions — diagnosis before prescription.',
+      'A problem well stated is a problem half solved. The team that invests an extra hour defining the problem saves ten hours of rework later. Resist the urge to jump to solutions — diagnosis before prescription.',
     subsections: [
       {
-        title: 'Writing a SMART Problem Statement',
+        title: 'The Three-Part Problem Statement',
         content:
-          'Apply the SMART framework to your problem statement: Specific (what exactly is happening?), Measurable (what numbers describe it?), Achievable (can this team solve it?), Relevant (does it matter to the organization?), and Time-bound (when do we need results?). A statement that passes all five criteria is ready for Step 2.',
+          'Every effective PIPS problem statement has three components: (1) As-Is State — a factual description of the current condition with data ("Average onboarding takes 14 business days"). (2) Desired State — a specific, measurable target ("Reduce onboarding to 5 business days or fewer"). (3) Gap — the quantified difference between As-Is and Desired State, including business impact ("9 days of excess cycle time costing ~$180,000/quarter"). This three-part structure ensures the problem is objective, measurable, and compelling enough to justify team effort.',
+      },
+      {
+        title: 'The Cardinal Rule: No Causes, No Solutions',
+        content:
+          'Problem statements must be FREE of causes and FREE of solutions. "We need a new CRM" is a solution, not a problem. "Employees don\'t know how to process order forms" embeds a cause (lack of knowledge) as fact. Compare: "68% of order forms contain errors" — this is a clean, cause-free, solution-free statement that leaves room for analysis. Test every draft: does it assume WHY the problem exists? Does it prescribe WHAT to do about it? If yes, rewrite it.',
+      },
+      {
+        title: 'Two Approaches to Problem Selection',
+        content:
+          'Approach A (Full Selection Process): When the team faces many potential problems, use a structured 7-stage process — brainstorm problems, clarify each one, reduce the list, weighted voting, criteria rating against six selection factors (Control, Importance, Difficulty, Time, ROI, Resources), reach consensus, then write the desired state. Approach B (Focused Selection): When leadership has already identified the problem area, skip the selection process and proceed directly to writing the three-part problem statement. Most teams use Approach B, but Approach A is valuable when the team has autonomy to choose its focus.',
+        collapsible: true,
       },
       {
         title: 'Stakeholder Alignment Techniques',
@@ -157,13 +168,13 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
     },
     checklist: [
-      'Review the problem statement from Step 1 with the full team',
-      'Complete a fishbone diagram with causes in at least 4 of the 6M categories',
-      'Run a 5-Why drill on the top 2-3 suspected root causes',
-      'Rate each cause on a 1-5 impact scale with team consensus',
-      'Validate the top root causes with quantitative or observational data',
-      'Complete a force field analysis identifying driving and restraining forces',
-      "Document which causes are within the team's control versus outside it",
+      'I have reviewed the problem statement from Step 1 with the full team',
+      'I have completed a fishbone diagram with causes in at least 4 of the 6M categories',
+      'I have run a 5-Why drill on the top 2-3 suspected root causes',
+      'I have rated each cause on a 1-5 impact scale with team consensus',
+      'I have validated the top root causes with quantitative or observational data',
+      'I have completed a force field analysis identifying driving and restraining forces',
+      "I have documented which causes are within the team's control versus outside it",
     ],
     diagramType: 'fishbone',
     keyInsight:
@@ -175,9 +186,14 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
           'Use these six categories to ensure comprehensive coverage: Man (people, skills, training), Machine (equipment, technology, tools), Method (processes, procedures, policies), Material (inputs, data, supplies), Measurement (metrics, inspection, feedback), and Mother Nature (environment, external factors, market conditions). Not every category will have causes — that is expected.',
       },
       {
+        title: 'Cause-and-Effect Verification',
+        content:
+          'A suspected cause is a hypothesis until data confirms it. Use a verification table: list each suspected cause in column 1, the data you will collect in column 2, the result in column 3, and the verdict (confirmed/not confirmed) in column 4. Only confirmed causes move forward to solution generation in Step 3. Common verification methods include check sheets (tally occurrences over time), Pareto analysis (rank causes by frequency or impact — often 20% of causes drive 80% of the problem), and histograms (visualize the distribution of a variable to spot patterns).',
+      },
+      {
         title: 'When to Use Each Analysis Tool',
         content:
-          'Start with the fishbone to map the landscape broadly. Use the 5-Why technique to drill into the most impactful causes identified by the fishbone. Apply force field analysis when the problem involves organizational change — it reveals resistance factors that technical analysis misses. Use a check sheet when you need data to validate a suspected cause over time.',
+          'Start with the fishbone to map the landscape broadly. Use the 5-Why technique to drill into the most impactful causes identified by the fishbone. Apply force field analysis when the problem involves organizational change — it reveals resistance factors that technical analysis misses. Use a check sheet when you need data to validate a suspected cause over time. Use Pareto analysis to identify which few causes account for the majority of the problem.',
         collapsible: true,
       },
       {
@@ -213,28 +229,39 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
     },
     checklist: [
-      'Set explicit ground rules: no criticism, quantity over quality, build on ideas',
-      'Run at least one structured idea generation technique (brainstorming or brainwriting)',
-      'Set and meet a minimum idea target (e.g., 30+ ideas)',
-      'Include all team members, not just vocal participants',
-      'Group similar ideas into themes without eliminating any',
-      'Record every idea — even wild ones — in a shared document',
-      'Resist the urge to evaluate or rank ideas during this step',
-      'Consider ideas from outside the industry or adjacent disciplines',
+      'I have set explicit ground rules: no criticism, quantity over quality, build on ideas',
+      'I have run at least one structured idea generation technique (brainstorming or brainwriting)',
+      'I have set and met a minimum idea target (e.g., 30+ ideas)',
+      'I have included all team members, not just vocal participants',
+      'I have grouped similar ideas into themes without eliminating any',
+      'I have recorded every idea — even wild ones — in a shared document',
+      'I have resisted the urge to evaluate or rank ideas during this step',
+      'I have considered ideas from outside the industry or adjacent disciplines',
     ],
     diagramType: 'diverge-converge',
     keyInsight:
       'The first ten ideas are obvious. The next ten are interesting. The best ideas often come after the team thinks they have run out — push past the wall.',
     subsections: [
       {
-        title: 'Brainwriting 6-3-5 Method',
+        title: "Osborn's Four Brainstorming Rules",
         content:
-          'Six participants each write three ideas on a sheet in five minutes. Sheets rotate to the next person, who reads the existing ideas and adds three more — building on, combining, or sparking new directions. After five rotations, you have up to 108 ideas in 30 minutes. This technique eliminates groupthink, gives introverts equal voice, and generates far more ideas than verbal brainstorming.',
+          "Alex Osborn, the father of brainstorming, established four non-negotiable rules: (1) No criticism — defer judgment on all ideas until Step 4. (2) Freewheel — wild ideas are welcome; it's easier to tame a wild idea than to invent a new one. (3) Quantity over quality — aim for volume; the best ideas emerge after the obvious ones are exhausted. (4) Hitchhike — build on, combine, and extend other people's ideas. These rules apply to every idea generation method, not just verbal brainstorming.",
+      },
+      {
+        title: 'Three Brainstorming Methods',
+        content:
+          'Choose the method that fits your team: (1) Free-form brainstorming — open verbal sharing, fast-paced, best for energetic groups comfortable speaking up. (2) Round-robin — each person contributes one idea in turn, ensuring equal participation and preventing dominant voices from taking over. (3) Brainwriting (6-3-5) — silent writing on cards or sheets that rotate, giving introverts equal voice and eliminating groupthink. For most teams, start with brainwriting, then switch to round-robin to build on the written ideas.',
+      },
+      {
+        title: 'Interviewing and Surveying for Ideas',
+        content:
+          'Do not limit idea generation to the immediate team. Interview subject matter experts, customers, and frontline staff who experience the problem daily — they often have solutions they have never been asked about. Use short surveys to crowdsource ideas from a larger group. Structure interview questions around "If you could change one thing about this process, what would it be?" and "What workarounds have you already invented?" External perspectives surface ideas the team would never generate internally.',
+        collapsible: true,
       },
       {
         title: 'Facilitation Tips for Idea Generation',
         content:
-          'Create psychological safety by emphasizing that wild ideas are valued. Use round-robin sharing so no one dominates. Set a timer to maintain energy. Play background music to reduce self-consciousness during silent writing. Post all ideas visually on a wall or board so the team can see the growing collection — it builds momentum and sparks connections.',
+          'Create psychological safety by emphasizing that wild ideas are valued. Use round-robin sharing so no one dominates. Set a timer to maintain energy. Play background music to reduce self-consciousness during silent writing. Post all ideas visually on a wall or board so the team can see the growing collection — it builds momentum and sparks connections. When the team stalls, use prompts: "How would a hospital solve this?" or "What if we had unlimited budget?"',
         collapsible: true,
       },
       {
@@ -276,23 +303,34 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
     },
     checklist: [
-      'Define 4-6 evaluation criteria before reviewing solutions',
-      'Assign weights to each criterion by team consensus',
-      'Score each shortlisted solution independently (avoid groupthink)',
-      'Calculate weighted totals and select the top solution',
-      'Document the selection rationale for stakeholder communication',
-      'Build a RACI chart with exactly one Accountable person per task',
-      'Create an implementation plan with milestones, owners, and dates',
-      'Identify the top 3-5 risks and document mitigation strategies',
+      'I have defined 4-6 evaluation criteria before reviewing solutions',
+      'I have assigned weights to each criterion by team consensus',
+      'I have scored each shortlisted solution independently (avoiding groupthink)',
+      'I have calculated weighted totals and selected the top solution',
+      'I have documented the selection rationale for stakeholder communication',
+      'I have built a RACI chart with exactly one Accountable person per task',
+      'I have created an implementation plan with milestones, owners, and dates',
+      'I have identified the top 3-5 risks and documented mitigation strategies',
     ],
     diagramType: 'flowchart-phases',
     keyInsight:
       'Weight the criteria before scoring the solutions. If you score first, you unconsciously adjust weights to justify your favorite — this is confirmation bias in action.',
     subsections: [
       {
+        title: 'The Five-Round Selection Pipeline',
+        content:
+          'Narrow the field systematically: (1) Broad Filter — eliminate ideas that are clearly infeasible, unaffordable, or outside team control. (2) Pros and Cons — for each surviving idea, state pros and cons using the "one-breath rule" (each point must fit in one or two sentences to prevent advocacy speeches). (3) Combine Like Ideas — merge similar solutions into stronger composite options. (4) Weighted Voting — each member gets a fixed number of votes to distribute across remaining options. (5) Criteria Rating — score the top 3-5 options against weighted criteria. This pipeline prevents premature commitment to the first reasonable idea.',
+      },
+      {
         title: 'Building a Weighted Criteria Matrix',
         content:
-          'List evaluation criteria in rows and solutions in columns. Assign each criterion a weight from 1 (low importance) to 5 (critical). Have each team member independently score every solution 1-5 against each criterion. Average the individual scores, multiply by the weight, and sum the column. The solution with the highest total is the objectively best fit. Display the math transparently so the team trusts the outcome.',
+          'List evaluation criteria in rows and solutions in columns. Assign each criterion a weight from 1 (low importance) to 5 (critical). Have each team member independently score every solution 1-5 against each criterion. Average the individual scores, multiply by the weight, and sum the column. The solution with the highest total is the objectively best fit. Display the math transparently so the team trusts the outcome. Alternative methods include paired comparisons (compare options head-to-head), balance sheets (structured pros/cons lists), and cost-benefit analysis (quantify financial returns).',
+      },
+      {
+        title: 'Reaching Consensus (Not Unanimity)',
+        content:
+          'Consensus does not mean everyone\'s first choice won — it means everyone can support the decision. Verify consensus with three questions: "Does everyone accept this decision?" "Is there any opposition to this decision?" "Can everyone support the decision going forward?" If anyone says no, discuss their concern before proceeding. Overriding dissent creates passive resistance during implementation. Remember: any of your top three solutions will probably work. The difference between implementing something and implementing nothing is usually larger than the difference between the best and third-best solution.',
+        collapsible: true,
       },
       {
         title: 'RACI Roles Explained',
@@ -301,9 +339,9 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
         collapsible: true,
       },
       {
-        title: 'Backward Planning From Target Date',
+        title: 'The Six-Item Implementation Plan',
         content:
-          'Start with the desired completion date and work backward. Identify the final deliverable, then ask "What must be complete before this?" for each milestone. This reveals dependencies, highlights unrealistic timelines early, and ensures the critical path is visible. Add buffer time (10-20%) for unforeseen issues. Break the plan into phases: pilot, adjust, scale.',
+          'A complete implementation plan addresses six items: (1) Sequential Steps — what must happen and in what order. (2) Clear Roles — who owns each task (use the RACI chart). (3) Commitment Strategy — how you will gain and maintain active support from stakeholders (not just passive acceptance). (4) Control System — how you will monitor progress and detect deviations. (5) Data Collection — what data you will gather during implementation for Step 6 evaluation. (6) Contingency Plans — what you will do if things go better or worse than expected.',
         collapsible: true,
       },
       {
@@ -339,23 +377,34 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
     },
     checklist: [
-      'Kick off implementation with a launch meeting confirming roles and timeline',
-      'Set up a regular check-in cadence (weekly stand-ups recommended)',
-      'Track each milestone with status, owner, and completion date',
-      'Establish an escalation path for blockers before they occur',
-      'Communicate progress to stakeholders at least weekly',
-      'Run a pilot with a small group before full rollout when possible',
-      'Document all deviations from the plan and their reasons',
-      'Update the risk register at each check-in',
+      'I have kicked off implementation with a launch meeting confirming roles and timeline',
+      'I have set up a regular check-in cadence (weekly stand-ups recommended)',
+      'I have tracked each milestone with status, owner, and completion date',
+      'I have established an escalation path for blockers before they occur',
+      'I have communicated progress to stakeholders at least weekly',
+      'I have run a pilot with a small group before full rollout when possible',
+      'I have documented all deviations from the plan and their reasons',
+      'I have updated the risk register at each check-in',
     ],
     diagramType: 'milestone-timeline',
     keyInsight:
       'A blocker that is escalated within 24 hours is a minor inconvenience. A blocker that festers for three weeks becomes a project-killing crisis. Speed of escalation is everything.',
     subsections: [
       {
+        title: 'The Four-Step Implementation Loop',
+        content:
+          'Execution follows a continuous loop: (1) Follow the Plan — work the tasks in sequence as designed in Step 4. (2) Use the Control System — check progress against milestones at each scheduled checkpoint. (3) Collect Data — gather in-process measurements that will feed Step 6 evaluation. (4) Adjust as Needed — if the plan is off track, implement contingency plans or escalate. This loop runs continuously throughout implementation, not just at the end.',
+      },
+      {
+        title: 'Five Common Implementation Failures',
+        content:
+          'Watch for these failure modes: (1) Planning confused with forecasting — a plan commits to actions and assigns owners; a forecast just predicts what might happen. (2) Weak assumptions — optimistic time estimates, inadequate resource allocation, and underestimating dependencies. (3) No contingency planning — plan for both adverse events (delays, resistance) AND favorable changes (faster-than-expected adoption requiring accelerated scaling). (4) Plan not updated or communicated — a plan is a living document; if it sits in a drawer, it is useless. (5) Necessary commitment not obtained — the difference between passive acceptance ("I guess so") and active commitment ("I will do X by Friday") determines whether tasks actually get done.',
+      },
+      {
         title: 'Running Effective Stand-Ups',
         content:
           'Keep stand-ups to 15 minutes maximum. Each owner answers three questions: What did I complete since last check-in? What am I working on next? What is blocking me? The facilitator logs blockers in real time and assigns follow-up owners. Stand-ups are status syncs, not problem-solving sessions — take detailed discussions offline.',
+        collapsible: true,
       },
       {
         title: 'Change Management Essentials',
@@ -380,7 +429,7 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
         'Step 6 is where the PIPS cycle comes full circle. The problem defined in Step 1, the causes identified in Step 2, the solutions generated in Step 3, the plan built in Step 4, and the execution managed in Step 5 — all of it culminates in a single question: did it work? The answer must come from data, not opinion. This is the "Close The Loop" principle in its purest form.',
         'The before-and-after comparison is the centerpiece of evaluation. Using the same metrics established in Step 1, the team compares baseline values to post-implementation results. Did onboarding time drop from 14 days to 5? Did customer complaints decrease by 40%? If the targets were met, the improvement is validated. If not, the gap between actual and target becomes the input for the next PIPS cycle.',
         'Lessons learned are the compound interest of continuous improvement. Each cycle teaches the team something about their organization, their processes, and their approach to problem-solving. Teams that capture and share these insights get better with every cycle. Teams that skip this step repeat the same mistakes. A structured retrospective — what went well, what to improve, what to do differently — ensures that insights are captured while they are fresh.',
-        'The final decision is a fork in the road: standardize (the improvement worked, make it permanent), iterate (partial success, run another cycle to close the remaining gap), or pivot (the approach was wrong, start a new PIPS cycle with a revised problem statement). This decision should be made deliberately by the team, not by default.',
+        'The final decision follows one of four outcome paths: (1) Desired State Reached — standardize the improvement and make it permanent. (2) Partially Achieved — iterate with another PIPS cycle to close the remaining gap. (3) Not Achieved — pivot with a revised problem statement or entirely new approach. (4) New Problems Created — the solution itself introduced unintended consequences that require a separate PIPS cycle to address. As Eric Sevareid noted, "The chief cause of problems is solutions." Always check for this fourth path before declaring success.',
       ],
     },
     examples: {
@@ -396,13 +445,13 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
     },
     checklist: [
-      'Collect post-implementation data on the same metrics defined in Step 1',
-      'Create a before-and-after comparison table with baseline, target, and actual values',
-      'Calculate percentage improvement for each metric',
-      'Run a structured retrospective: what went well, what to improve, what to do differently',
-      'Document lessons learned and share with the broader organization',
-      'Assess sustainability: will the improvement hold without active management?',
-      'Make an explicit decision: standardize, iterate, or start a new PIPS cycle',
+      'I have collected post-implementation data on the same metrics defined in Step 1',
+      'I have created a before-and-after comparison table with baseline, target, and actual values',
+      'I have calculated percentage improvement for each metric',
+      'I have run a structured retrospective: what went well, what to improve, what to do differently',
+      'I have documented lessons learned and shared them with the broader organization',
+      'I have assessed sustainability: will the improvement hold without active management?',
+      'I have made an explicit decision: standardize, iterate, or start a new PIPS cycle',
     ],
     diagramType: 'cycle-return',
     keyInsight:
@@ -420,9 +469,15 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
         collapsible: true,
       },
       {
-        title: 'Standardize, Iterate, or Pivot',
+        title: 'Four Outcome Paths',
         content:
-          'Standardize when targets are fully met and the improvement is sustainable without active management — document the new process, update training materials, and close the project. Iterate when partial improvement was achieved but the gap remains — refine the solution and run another cycle. Pivot when the approach fundamentally missed the mark — return to Step 1 with revised understanding and start fresh.',
+          'Standardize when targets are fully met and the improvement is sustainable without active management — document the new process, update training materials, and close the project. Iterate when partial improvement was achieved but the gap remains — refine the solution and run another cycle. Pivot when the approach fundamentally missed the mark — return to Step 1 with revised understanding and start fresh. Watch for new problems — sometimes the solution itself creates unintended consequences (increased workload elsewhere, new bottlenecks, quality trade-offs) that require their own PIPS cycle.',
+        collapsible: true,
+      },
+      {
+        title: 'Meta-Evaluation and Confounding Factors',
+        content:
+          "Beyond measuring results, evaluate the process itself: Did we use the right tools? Did we identify all the root causes? Was our data sufficient? Sometimes the initial problem statement is not the actual problem — meta-evaluation catches this. Also account for confounding factors: external changes (market shifts, staffing changes, seasonal patterns) that may have influenced results independently of your solution. Acknowledge these honestly in your evaluation — claiming credit for external improvements erodes trust, while understanding true impact strengthens the team's analytical credibility.",
         collapsible: true,
       },
       {

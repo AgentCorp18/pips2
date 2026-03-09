@@ -40,8 +40,10 @@ describe('StepDiagram', () => {
     render(<StepDiagram diagramType="fishbone" stepColor="#F59E0B" />)
     expect(screen.getByText('People')).toBeInTheDocument()
     expect(screen.getByText('Process')).toBeInTheDocument()
-    expect(screen.getByText('Tools')).toBeInTheDocument()
+    expect(screen.getByText('Equipment')).toBeInTheDocument()
     expect(screen.getByText('Materials')).toBeInTheDocument()
+    expect(screen.getByText('Measurement')).toBeInTheDocument()
+    expect(screen.getByText('Environment')).toBeInTheDocument()
   })
 
   it('diverge-converge contains phase labels', () => {

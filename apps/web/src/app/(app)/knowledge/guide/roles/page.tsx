@@ -4,12 +4,21 @@ import { ContentBreadcrumb } from '@/components/knowledge/content-breadcrumb'
 import { GUIDE_ROLES } from '@pips/shared'
 
 const ROLE_ICONS: Record<string, React.ReactNode> = {
-  shield: <Shield size={20} />,
-  compass: <Compass size={20} />,
-  'edit-3': <Edit3 size={20} />,
-  clock: <Clock size={20} />,
-  mic: <Mic size={20} />,
-  users: <Users size={20} />,
+  shield: <Shield size={24} />,
+  compass: <Compass size={24} />,
+  'edit-3': <Edit3 size={24} />,
+  clock: <Clock size={24} />,
+  mic: <Mic size={24} />,
+  users: <Users size={24} />,
+}
+
+const ROLE_COLORS: Record<string, string> = {
+  Leader: '#3B82F6',
+  'Process Guide': '#F59E0B',
+  Scribe: '#10B981',
+  Timekeeper: '#6366F1',
+  Presenter: '#CA8A04',
+  Facilitator: '#0891B2',
 }
 
 const RolesPage = () => {
@@ -52,35 +61,39 @@ const RolesPage = () => {
 
       {/* Role Cards Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {GUIDE_ROLES.map((role, index) => (
-          <Card key={role.title} data-testid={`role-card-${index}`}>
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-primary)]"
-                  style={{ backgroundColor: 'rgba(79, 70, 229, 0.08)' }}
-                >
-                  {ROLE_ICONS[role.icon] ?? <Users size={20} />}
-                </div>
-                <CardTitle className="text-base">{role.title}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-[var(--color-text-secondary)]">{role.description}</p>
-              <ul className="space-y-1.5">
-                {role.responsibilities.map((r) => (
-                  <li
-                    key={r}
-                    className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
+        {GUIDE_ROLES.map((role, index) => {
+          const roleColor = ROLE_COLORS[role.title] ?? '#4F46E5'
+          return (
+            <Card key={role.title} data-testid={`role-card-${index}`} className="overflow-hidden">
+              <div className="h-1.5" style={{ backgroundColor: roleColor }} />
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: `${roleColor}14`, color: roleColor }}
                   >
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
-                    {r}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
+                    {ROLE_ICONS[role.icon] ?? <Users size={24} />}
+                  </div>
+                  <CardTitle className="text-base">{role.title}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-[var(--color-text-secondary)]">{role.description}</p>
+                <ul className="space-y-1.5">
+                  {role.responsibilities.map((r) => (
+                    <li
+                      key={r}
+                      className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
+                    >
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
       {/* Adaptation Section */}

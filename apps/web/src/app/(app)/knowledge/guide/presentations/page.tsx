@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
   Presentation,
   TrendingUp,
@@ -6,6 +7,8 @@ import {
   Users,
   ArrowRight,
   Lightbulb,
+  CalendarCheck,
+  FileText,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ContentBreadcrumb } from '@/components/knowledge/content-breadcrumb'
@@ -112,6 +115,73 @@ const PresentationsPage = () => {
           </Card>
         ))}
       </div>
+
+      {/* When to Present to Leadership */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[#4338CA]"
+              style={{ backgroundColor: 'rgba(67, 56, 202, 0.08)' }}
+            >
+              <CalendarCheck size={20} />
+            </div>
+            <CardTitle className="text-base">When to Present to Leadership</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+            Schedule leadership updates at these key moments in your PIPS cycle:
+          </p>
+          <ol className="space-y-2">
+            {[
+              'After Step 1 — Share the problem statement and get buy-in on scope and resources',
+              'After Step 2 — Present root cause findings to validate the analysis direction',
+              'After Step 4 — Get approval on the selected solution and implementation plan',
+              'During Step 5 — Provide brief weekly progress updates (email or 5-minute stand-up)',
+              'After Step 6 — Present the full before-and-after results and lessons learned',
+              'At project completion — Celebrate results and propose the next improvement cycle',
+            ].map((item, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-3 text-sm text-[var(--color-text-secondary)]"
+              >
+                <span
+                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold text-white"
+                  style={{ backgroundColor: '#4338CA' }}
+                >
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{item}</span>
+              </li>
+            ))}
+          </ol>
+        </CardContent>
+      </Card>
+
+      {/* One-Pager Reference */}
+      <Link href="/export">
+        <Card className="cursor-pointer transition-all hover:shadow-md hover:border-[var(--color-primary)]">
+          <CardContent className="flex items-center gap-4 py-5">
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+              style={{ backgroundColor: 'rgba(79, 70, 229, 0.08)' }}
+            >
+              <FileText size={20} className="text-[var(--color-primary)]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                Generate a One-Pager PDF
+              </h3>
+              <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">
+                Export a project summary as a polished one-page PDF — perfect for leadership
+                briefings, stakeholder updates, and project archives.
+              </p>
+            </div>
+            <ArrowRight size={16} className="shrink-0 text-[var(--color-text-tertiary)]" />
+          </CardContent>
+        </Card>
+      </Link>
 
       {/* Tips Section */}
       <Card className="border-amber-200/50">

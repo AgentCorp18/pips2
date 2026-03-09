@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Wrench, ArrowRight } from 'lucide-react'
+import { Wrench, ArrowRight, BookOpen, Compass } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -159,23 +159,39 @@ const ToolsPage = () => {
                 {tool.description && (
                   <p className="text-xs text-[var(--color-text-secondary)]">{tool.description}</p>
                 )}
-                <div className="flex flex-wrap gap-1">
-                  {tool.steps.map((stepNum) => {
-                    const step = PIPS_STEPS[stepNum - 1]
-                    return (
-                      <Badge
-                        key={stepNum}
-                        variant="outline"
-                        className="text-[10px] px-1.5 py-0"
-                        style={{
-                          borderColor: step?.color,
-                          color: step?.color,
-                        }}
-                      >
-                        Step {stepNum}
-                      </Badge>
-                    )
-                  })}
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap gap-1">
+                    {tool.steps.map((stepNum) => {
+                      const step = PIPS_STEPS[stepNum - 1]
+                      return (
+                        <Badge
+                          key={stepNum}
+                          variant="outline"
+                          className="text-[10px] px-1.5 py-0"
+                          style={{
+                            borderColor: step?.color,
+                            color: step?.color,
+                          }}
+                        >
+                          Step {stepNum}
+                        </Badge>
+                      )
+                    })}
+                  </div>
+                  <div className="ml-auto flex gap-1.5">
+                    <span
+                      title="View in Guide"
+                      className="text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)]"
+                    >
+                      <Compass size={12} />
+                    </span>
+                    <span
+                      title="View in Book"
+                      className="text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)]"
+                    >
+                      <BookOpen size={12} />
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

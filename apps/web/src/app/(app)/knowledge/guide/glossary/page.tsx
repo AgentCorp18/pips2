@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { BookOpen, Search } from 'lucide-react'
+import { useState, useMemo, useCallback } from 'react'
+import { BookOpen, Search, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ContentBreadcrumb } from '@/components/knowledge/content-breadcrumb'
@@ -14,6 +15,19 @@ for (const step of PIPS_STEPS) {
 
 const GlossaryPage = () => {
   const [search, setSearch] = useState('')
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  const toggleTerm = useCallback((term: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      if (next.has(term)) {
+        next.delete(term)
+      } else {
+        next.add(term)
+      }
+      return next
+    })
+  }, [])
 
   const filteredTerms = useMemo(() => {
     if (!search.trim()) return GLOSSARY_TERMS
@@ -100,38 +114,73 @@ const GlossaryPage = () => {
               <h2 className="mb-3 border-b pb-1 text-lg font-bold text-[var(--color-text-primary)]">
                 {letter}
               </h2>
-              <div className="space-y-4">
-                {terms.map((t) => (
-                  <div
-                    key={t.term}
-                    data-testid={`glossary-term-${termIndexMap.get(t.term)}`}
-                    className="space-y-1"
-                  >
-                    <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                      {t.term}
-                    </h3>
-                    <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                      {t.definition}
-                    </p>
-                    {t.relatedSteps && t.relatedSteps.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {t.relatedSteps.map((s) => (
-                          <Badge
-                            key={s}
-                            variant="outline"
-                            className="text-xs"
-                            style={{
-                              borderColor: stepColors[s],
-                              color: stepColors[s],
-                            }}
-                          >
-                            Step {s}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="space-y-2">
+                {terms.map((t) => {
+                  const isExpanded = expanded.has(t.term)
+                  return (
+                    <div
+                      key={t.term}
+                      data-testid={`glossary-term-${termIndexMap.get(t.term)}`}
+                      className="rounded-lg border transition-colors"
+                      style={{ borderColor: 'var(--color-border)' }}
+                    >
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-4 py-3 text-left"
+                        onClick={() => toggleTerm(t.term)}
+                      >
+                        <ChevronRight
+                          size={14}
+                          className={`shrink-0 text-[var(--color-text-tertiary)] transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                        />
+                        <h3 className="flex-1 text-sm font-semibold text-[var(--color-text-primary)]">
+                          {t.term}
+                        </h3>
+                        {t.relatedSteps && t.relatedSteps.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {t.relatedSteps.map((s) => (
+                              <Badge
+                                key={s}
+                                variant="outline"
+                                className="text-[10px]"
+                                style={{
+                                  borderColor: stepColors[s],
+                                  color: stepColors[s],
+                                }}
+                              >
+                                {s}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </button>
+                      {isExpanded && (
+                        <div
+                          className="space-y-3 border-t px-4 py-3"
+                          style={{ borderColor: 'var(--color-border)' }}
+                        >
+                          <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                            {t.definition}
+                          </p>
+                          {t.relatedSteps && t.relatedSteps.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {t.relatedSteps.map((s) => (
+                                <Link
+                                  key={s}
+                                  href={`/knowledge/guide/step/${s}`}
+                                  className="text-xs font-medium transition-opacity hover:opacity-80"
+                                  style={{ color: stepColors[s] }}
+                                >
+                                  View Step {s} Guide →
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           ))}

@@ -64,44 +64,93 @@ const ProblemFramework = ({ color }: { color: string }) => (
   </svg>
 )
 
+const FISHBONE_CATEGORIES = [
+  { label: 'People', x: 100, top: true, boneEnd: 150 },
+  { label: 'Process', x: 190, top: true, boneEnd: 220 },
+  { label: 'Equipment', x: 275, top: true, boneEnd: 290 },
+  { label: 'Materials', x: 110, top: false, boneEnd: 160 },
+  { label: 'Measurement', x: 200, top: false, boneEnd: 230 },
+  { label: 'Environment', x: 280, top: false, boneEnd: 295 },
+]
+
+const BRANCH_COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#6366F1', '#CA8A04', '#0891B2']
+
 const Fishbone = ({ color }: { color: string }) => (
   <svg
     data-testid="step-diagram-fishbone"
-    viewBox="0 0 400 200"
+    viewBox="0 0 420 220"
     className="w-full"
     role="img"
     aria-label="Fishbone cause and effect diagram"
   >
-    {/* Spine */}
-    <line x1="60" y1="100" x2="340" y2="100" stroke={color} strokeWidth="2.5" />
+    {/* Spine — thick central line */}
+    <line x1="40" y1="110" x2="340" y2="110" stroke={color} strokeWidth="3.5" />
     {/* Effect box */}
-    <rect x="310" y="80" width="80" height="40" rx="6" fill={color} />
-    <text x="350" y="105" textAnchor="middle" fontSize="11" fontWeight="600" fill="white">
+    <rect x="330" y="88" width="80" height="44" rx="8" fill={color} />
+    <text x="370" y="115" textAnchor="middle" fontSize="12" fontWeight="700" fill="white">
       Effect
     </text>
-    {/* Upper bones */}
-    <line x1="120" y1="40" x2="160" y2="100" stroke={color} strokeWidth="1.5" opacity={0.7} />
-    <line x1="220" y1="40" x2="240" y2="100" stroke={color} strokeWidth="1.5" opacity={0.7} />
-    {/* Lower bones */}
-    <line x1="140" y1="160" x2="180" y2="100" stroke={color} strokeWidth="1.5" opacity={0.7} />
-    <line x1="240" y1="160" x2="260" y2="100" stroke={color} strokeWidth="1.5" opacity={0.7} />
-    {/* Cause labels */}
-    <rect x="90" y="22" width="60" height="22" rx="4" fill={color} opacity={0.15} />
-    <text x="120" y="37" textAnchor="middle" fontSize="10" fill={color} fontWeight="500">
-      People
-    </text>
-    <rect x="190" y="22" width="60" height="22" rx="4" fill={color} opacity={0.15} />
-    <text x="220" y="37" textAnchor="middle" fontSize="10" fill={color} fontWeight="500">
-      Process
-    </text>
-    <rect x="110" y="158" width="60" height="22" rx="4" fill={color} opacity={0.15} />
-    <text x="140" y="173" textAnchor="middle" fontSize="10" fill={color} fontWeight="500">
-      Tools
-    </text>
-    <rect x="210" y="158" width="70" height="22" rx="4" fill={color} opacity={0.15} />
-    <text x="245" y="173" textAnchor="middle" fontSize="10" fill={color} fontWeight="500">
-      Materials
-    </text>
+    {/* Category bones */}
+    {FISHBONE_CATEGORIES.map((cat, i) => {
+      const branchColor = BRANCH_COLORS[i] ?? color
+      const yStart = cat.top ? 30 : 190
+      const yEnd = 110
+      return (
+        <g key={cat.label}>
+          {/* Main bone */}
+          <line
+            x1={cat.x}
+            y1={yStart}
+            x2={cat.boneEnd}
+            y2={yEnd}
+            stroke={branchColor}
+            strokeWidth="2.5"
+            opacity={0.8}
+          />
+          {/* Sub-bones (decorative) */}
+          <line
+            x1={cat.x - 15}
+            y1={cat.top ? yStart + 18 : yStart - 18}
+            x2={cat.x + 8}
+            y2={cat.top ? yStart + 35 : yStart - 35}
+            stroke={branchColor}
+            strokeWidth="1.5"
+            opacity={0.4}
+          />
+          <line
+            x1={cat.x + 15}
+            y1={cat.top ? yStart + 25 : yStart - 25}
+            x2={cat.x + 30}
+            y2={cat.top ? yStart + 45 : yStart - 45}
+            stroke={branchColor}
+            strokeWidth="1.5"
+            opacity={0.4}
+          />
+          {/* Category label */}
+          <rect
+            x={cat.x - 38}
+            y={cat.top ? yStart - 22 : yStart}
+            width="76"
+            height="24"
+            rx="6"
+            fill={branchColor}
+            opacity={0.15}
+          />
+          <text
+            x={cat.x}
+            y={cat.top ? yStart - 5 : yStart + 16}
+            textAnchor="middle"
+            fontSize="10"
+            fill={branchColor}
+            fontWeight="600"
+          >
+            {cat.label}
+          </text>
+        </g>
+      )
+    })}
+    {/* Head arrow */}
+    <polygon points="336,110 328,104 328,116" fill={color} />
   </svg>
 )
 

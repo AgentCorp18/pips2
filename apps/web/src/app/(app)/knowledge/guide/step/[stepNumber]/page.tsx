@@ -23,6 +23,7 @@ type StepPageProps = {
 
 const sections = [
   { id: 'objective', label: 'Objective' },
+  { id: 'why-matters', label: 'Why It Matters' },
   { id: 'diagram', label: 'Visual Guide' },
   { id: 'questions', label: 'Key Questions' },
   { id: 'subsections', label: 'Deep Dive' },
@@ -30,10 +31,18 @@ const sections = [
   { id: 'tools', label: 'Tools' },
   { id: 'checklist', label: 'Checklist' },
   { id: 'tips', label: 'Tips' },
-  { id: 'why-matters', label: 'Why It Matters' },
   { id: 'facilitation', label: 'Facilitation' },
   { id: 'related', label: 'Related' },
 ]
+
+const DIAGRAM_TITLES: Record<number, string> = {
+  1: 'Problem Framework',
+  2: 'Fishbone Diagram',
+  3: 'Diverge & Converge',
+  4: 'Selection & Planning Flow',
+  5: 'Milestone Timeline',
+  6: 'Continuous Improvement Cycle',
+}
 
 const StepPage = async ({ params }: StepPageProps) => {
   const { stepNumber: stepNumberStr } = await params
@@ -89,6 +98,19 @@ const StepPage = async ({ params }: StepPageProps) => {
       <div className="flex gap-8">
         {/* Content column */}
         <div className="min-w-0 flex-1 space-y-10">
+          {/* Key Insight — prominent blockquote */}
+          <blockquote
+            className="rounded-lg border-l-4 px-6 py-4"
+            style={{
+              borderLeftColor: step.color,
+              backgroundColor: `${step.color}0A`,
+            }}
+          >
+            <p className="text-base italic leading-relaxed text-[var(--color-text-primary)]">
+              &ldquo;{guideContent.keyInsight}&rdquo;
+            </p>
+          </blockquote>
+
           {/* Objective */}
           <section id="objective" data-testid="section-objective">
             <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
@@ -97,24 +119,33 @@ const StepPage = async ({ params }: StepPageProps) => {
             <div className="flex flex-col gap-6 md:flex-row md:items-start">
               <Card className="flex-1">
                 <CardContent className="p-5">
-                  <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                  <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
                     {stepContent.objective}
-                  </p>
-                  <p className="mt-3 rounded-md bg-[var(--color-surface-secondary,#f9fafb)] p-3 text-xs italic text-[var(--color-text-tertiary)]">
-                    {guideContent.keyInsight}
                   </p>
                 </CardContent>
               </Card>
               <div className="hidden shrink-0 md:block">
-                <PipsCycleDiagram size="sm" activeStep={step.number} />
+                <PipsCycleDiagram size="sm" activeStep={step.number} interactive />
               </div>
             </div>
+          </section>
+
+          {/* Why This Matters — moved to 2nd position */}
+          <section id="why-matters" data-testid="section-why-matters">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
+              Why It Matters
+            </h2>
+            <WhyThisMatters
+              heading={guideContent.whyThisStepMatters.heading}
+              paragraphs={guideContent.whyThisStepMatters.paragraphs}
+              stepColor={step.color}
+            />
           </section>
 
           {/* Diagram */}
           <section id="diagram" data-testid="section-diagram">
             <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
-              Visual Guide
+              {DIAGRAM_TITLES[step.number] ?? 'Visual Guide'}
             </h2>
             <Card>
               <CardContent className="p-5">
@@ -260,18 +291,6 @@ const StepPage = async ({ params }: StepPageProps) => {
                 </CardContent>
               </Card>
             </div>
-          </section>
-
-          {/* Why This Matters */}
-          <section id="why-matters" data-testid="section-why-matters">
-            <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
-              Why It Matters
-            </h2>
-            <WhyThisMatters
-              heading={guideContent.whyThisStepMatters.heading}
-              paragraphs={guideContent.whyThisStepMatters.paragraphs}
-              stepColor={step.color}
-            />
           </section>
 
           {/* Facilitation Guide */}

@@ -167,13 +167,16 @@ const GuidePage = () => {
                 <Card
                   key={step.number}
                   data-testid={`step-preview-${step.number}`}
-                  className="border-l-4 transition-all hover:shadow-md"
+                  className="overflow-hidden border-l-4 transition-all hover:shadow-md"
                   style={{ borderLeftColor: step.color }}
                 >
-                  <CardContent className="p-5 md:p-6">
+                  <CardContent
+                    className="p-5 md:p-6"
+                    style={{ backgroundColor: `${step.color}06` }}
+                  >
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-5">
                       <div
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-sm"
                         style={{ backgroundColor: step.color }}
                       >
                         {step.number}
