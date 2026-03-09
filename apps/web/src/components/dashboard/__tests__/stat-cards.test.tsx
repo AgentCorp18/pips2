@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { StatCards } from '../dashboard/stat-cards'
+import { StatCards } from '../stat-cards'
 import type { DashboardStats } from '@/app/(app)/dashboard/actions'
 
 /* ============================================================
