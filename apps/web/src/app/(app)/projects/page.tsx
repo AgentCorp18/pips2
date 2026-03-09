@@ -11,7 +11,7 @@ import { ProjectBoard } from '@/components/pips/project-board'
 import type { BoardProject } from '@/components/pips/project-board'
 import { ViewToggle } from '@/components/tickets/view-toggle'
 import type { ViewMode } from '@/components/tickets/view-toggle'
-import { Plus, FolderKanban, Sparkles } from 'lucide-react'
+import { Plus, FolderKanban, Sparkles, Columns3, Rows3 } from 'lucide-react'
 import { ExportProjectsButton } from '@/components/pips/export-projects-button'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
 
@@ -73,7 +73,15 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
 
   // View mode
   const viewParam = typeof params.view === 'string' ? params.view : 'cards'
-  const view: ViewMode = viewParam === 'table' ? 'table' : viewParam === 'board' ? 'board' : 'cards'
+  const view: ViewMode =
+    viewParam === 'table'
+      ? 'table'
+      : viewParam === 'board'
+        ? 'board'
+        : viewParam === 'swimlanes'
+          ? 'board'
+          : 'cards'
+  const boardLayout = viewParam === 'swimlanes' ? ('swimlanes' as const) : ('columns' as const)
 
   // Transform projects for reuse across views
   const transformedProjects = projectList.map((project) => {
@@ -148,7 +156,8 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       {projectList.length > 0 ? (
         view === 'board' ? (
           <div className="mt-4 max-w-full">
-            <ProjectBoard projects={boardProjects} />
+            <BoardLayoutToggle currentLayout={boardLayout} />
+            <ProjectBoard projects={boardProjects} layout={boardLayout} />
           </div>
         ) : view === 'table' ? (
           <div className="mt-4">
@@ -222,6 +231,36 @@ const EmptyState = () => (
         </Link>
       </Button>
     </div>
+  </div>
+)
+
+const BoardLayoutToggle = ({ currentLayout }: { currentLayout: 'columns' | 'swimlanes' }) => (
+  <div className="mb-3 flex items-center justify-end gap-1">
+    <span className="mr-2 text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+      Layout:
+    </span>
+    <Link
+      href="/projects?view=board"
+      className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+        currentLayout === 'columns'
+          ? 'bg-[var(--color-primary-subtle)] text-[var(--color-primary)]'
+          : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
+      }`}
+    >
+      <Columns3 size={13} />
+      Status
+    </Link>
+    <Link
+      href="/projects?view=swimlanes"
+      className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+        currentLayout === 'swimlanes'
+          ? 'bg-[var(--color-primary-subtle)] text-[var(--color-primary)]'
+          : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
+      }`}
+    >
+      <Rows3 size={13} />
+      By Step
+    </Link>
   </div>
 )
 
