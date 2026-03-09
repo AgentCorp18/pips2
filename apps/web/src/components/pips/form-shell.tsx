@@ -50,6 +50,9 @@ type CallbackProps = {
 
 export type FormShellProps = DataDrivenProps | CallbackProps
 
+/** Magic projectId that triggers sandbox mode (localStorage save) */
+export const SANDBOX_PROJECT_ID = '__sandbox__'
+
 export const FormShell = (props: FormShellProps) => {
   const { title, description, stepNumber, required = false, cadenceContext, children } = props
   const formType = 'formType' in props ? (props.formType as string | undefined) : undefined
@@ -79,6 +82,8 @@ export const FormShell = (props: FormShellProps) => {
           ? 'saved'
           : 'idle'
 
+  const isSandbox = 'projectId' in props && props.projectId === SANDBOX_PROJECT_ID
+
   /* Unified save function */
   const doSave = useCallback(async () => {
     setSaveState('saving')
@@ -91,7 +96,19 @@ export const FormShell = (props: FormShellProps) => {
       } else {
         setSaveState('saved')
       }
-    } else if (props.data && props.projectId && props.formType) {
+    } else if (isSandbox && props.data && props.formType) {
+      // Sandbox mode: save to localStorage
+      try {
+        const key = `pips-sandbox-${props.formType}`
+        localStorage.setItem(key, JSON.stringify(props.data))
+        setSaveState('saved')
+        setLastSaved(JSON.stringify(props.data))
+        props.onSaveSuccess?.()
+      } catch {
+        setSaveState('idle')
+        toast.error('Failed to save to local storage')
+      }
+    } else if (props.data && 'projectId' in props && props.projectId && props.formType) {
       const result = await saveFormData(
         props.projectId,
         props.stepNumber,
@@ -107,7 +124,7 @@ export const FormShell = (props: FormShellProps) => {
         toast.error(result.error ?? 'Failed to save')
       }
     }
-  }, [props])
+  }, [props, isSandbox])
 
   /* Auto-save with 2-second debounce — no synchronous setState */
   useEffect(() => {
@@ -135,7 +152,16 @@ export const FormShell = (props: FormShellProps) => {
       <div className="space-y-4">
         {/* Back link + save status bar */}
         <div className="flex items-center justify-between">
-          {projectId ? (
+          {isSandbox ? (
+            <Link
+              href="/tools"
+              className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              data-testid="back-to-tools-link"
+            >
+              <ArrowLeft size={14} />
+              Back to tools
+            </Link>
+          ) : projectId ? (
             <Link
               href={`/projects/${projectId}/steps/${stepNumber}`}
               className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
@@ -175,7 +201,12 @@ export const FormShell = (props: FormShellProps) => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <CardTitle className="text-lg">{title}</CardTitle>
-              {required && (
+              {isSandbox && (
+                <Badge variant="outline" className="text-[10px]">
+                  Sandbox
+                </Badge>
+              )}
+              {required && !isSandbox && (
                 <Badge variant="secondary" className="text-[10px]">
                   Required
                 </Badge>
