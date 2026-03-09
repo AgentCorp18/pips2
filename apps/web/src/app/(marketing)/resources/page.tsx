@@ -63,7 +63,7 @@ const RESOURCES = [
       'Detailed instructions for every PIPS tool — Fishbone Diagrams, 5-Why Analysis, Criteria Matrices, RACI Charts, and more. Each guide includes when to use it, step-by-step instructions, and examples.',
     href: '/methodology',
     icon: GraduationCap,
-    badge: '22 Tools',
+    badge: '18 Tools',
     badgeColor: 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400',
   },
 ] as const
