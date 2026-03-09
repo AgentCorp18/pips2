@@ -2,6 +2,7 @@
 
 import { useState, useRef, useTransition } from 'react'
 import { formatDistanceToNow } from 'date-fns'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -258,9 +259,11 @@ const CommentItem = ({
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {comment.author.avatar_url ? (
-            <img
+            <Image
               src={comment.author.avatar_url}
               alt={comment.author.display_name}
+              width={24}
+              height={24}
               className="h-6 w-6 rounded-full"
             />
           ) : (

@@ -4,8 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getTicketsForBoard } from '@/app/(app)/tickets/actions'
-import { KanbanBoard } from '@/components/tickets/kanban-board'
+import dynamic from 'next/dynamic'
 import type { BoardTicket } from '@/components/tickets/kanban-board'
+
+const KanbanBoard = dynamic(() =>
+  import('@/components/tickets/kanban-board').then((mod) => ({ default: mod.KanbanBoard })),
+)
 
 const ProjectBoardPage = async ({ params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params

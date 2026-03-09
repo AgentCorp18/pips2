@@ -12,9 +12,13 @@ import { TicketEmptyState } from '@/components/tickets/ticket-empty-state'
 import { Plus } from 'lucide-react'
 import { ExportTicketsButton } from '@/components/tickets/export-tickets-button'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
-import { KanbanBoard } from '@/components/tickets/kanban-board'
+import dynamic from 'next/dynamic'
 import type { BoardTicket } from '@/components/tickets/kanban-board'
 import { getTickets, getTicketsForBoard } from './actions'
+
+const KanbanBoard = dynamic(() =>
+  import('@/components/tickets/kanban-board').then((mod) => ({ default: mod.KanbanBoard })),
+)
 import { TicketListFilters } from '@/components/tickets/ticket-list-filters'
 import { TicketQuickFilters } from '@/components/tickets/ticket-quick-filters'
 import { TicketFilterPanel } from '@/components/tickets/ticket-filter-panel'

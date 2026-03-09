@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { TableRow, TableCell } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Bug, CheckSquare, CircleDot, Lightbulb, FolderKanban, User } from 'lucide-react'
@@ -84,9 +85,11 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
         {ticket.assigneeName ? (
           <span className="flex items-center gap-1.5 text-sm">
             {ticket.assigneeAvatar ? (
-              <img
+              <Image
                 src={ticket.assigneeAvatar}
                 alt={ticket.assigneeName}
+                width={20}
+                height={20}
                 className="h-5 w-5 rounded-full"
               />
             ) : (
