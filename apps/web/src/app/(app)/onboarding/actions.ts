@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createOrgSchema } from '@/lib/validations'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type OnboardingActionState = {
   error?: string
@@ -106,6 +107,8 @@ export const createOrganization = async (
     console.error('Unexpected error during org creation:', err)
     return { error: 'An unexpected error occurred. Please try again.' }
   }
+
+  trackServerEvent('org.created')
 
   redirect('/dashboard')
 }

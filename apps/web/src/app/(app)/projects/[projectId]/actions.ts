@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type StepActionResult = {
   success: boolean
@@ -86,6 +87,16 @@ export const advanceStep = async (
       .from('projects')
       .update({ status: 'completed', updated_at: now })
       .eq('id', projectId)
+  }
+
+  trackServerEvent('step.advanced', {
+    project_id: projectId,
+    step_number: stepNumber,
+    step_name: currentStepEnum,
+  })
+
+  if (stepNumber >= 6) {
+    trackServerEvent('project.completed', { project_id: projectId })
   }
 
   revalidatePath(`/projects/${projectId}`)

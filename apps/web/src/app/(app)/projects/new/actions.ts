@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createProjectSchema } from '@/lib/validations'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type CreateProjectActionState = {
   error?: string
@@ -112,6 +113,8 @@ export const createProject = async (
     await supabase.from('projects').delete().eq('id', project.id)
     return { error: 'Failed to add you as project lead. Please try again.' }
   }
+
+  trackServerEvent('project.created', { project_id: project.id })
 
   return { success: true, projectId: project.id }
 }

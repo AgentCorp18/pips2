@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { trackServerEvent } from '@/lib/analytics'
 import type { SearchResult, SearchResultGroup, GlobalSearchResponse } from '@/types/search'
 
 const LIMIT_PER_TYPE = 5
@@ -145,6 +146,11 @@ export const globalSearch = async (
   }
 
   const total = projectResults.length + ticketResults.length
+
+  trackServerEvent('search.executed', {
+    query_text: trimmed.slice(0, 100),
+    result_count: total,
+  })
 
   return { groups, total }
 }

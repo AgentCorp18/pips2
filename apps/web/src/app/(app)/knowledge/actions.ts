@@ -1,6 +1,8 @@
 'use server'
 
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type ContentNodeRow = {
   id: string
@@ -44,7 +46,7 @@ export type ReadHistoryWithContent = ReadHistoryRow & {
 }
 
 /** Fetch all top-level content nodes (chapters/sections without parents) by pillar */
-export const getContentByPillar = async (pillar: string): Promise<ContentNodeRow[]> => {
+export const getContentByPillar = cache(async (pillar: string): Promise<ContentNodeRow[]> => {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('content_nodes')
@@ -58,31 +60,30 @@ export const getContentByPillar = async (pillar: string): Promise<ContentNodeRow
     return []
   }
   return data ?? []
-}
+})
 
 /** Fetch a single content node by slug (within a pillar) */
-export const getContentBySlug = async (
-  pillar: string,
-  slug: string,
-): Promise<ContentNodeRow | null> => {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('content_nodes')
-    .select('*')
-    .eq('pillar', pillar)
-    .eq('slug', slug)
-    .is('parent_id', null)
-    .single()
+export const getContentBySlug = cache(
+  async (pillar: string, slug: string): Promise<ContentNodeRow | null> => {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('content_nodes')
+      .select('*')
+      .eq('pillar', pillar)
+      .eq('slug', slug)
+      .is('parent_id', null)
+      .single()
 
-  if (error) {
-    console.error('getContentBySlug error:', error)
-    return null
-  }
-  return data
-}
+    if (error) {
+      console.error('getContentBySlug error:', error)
+      return null
+    }
+    return data
+  },
+)
 
 /** Fetch child sections of a chapter */
-export const getContentChildren = async (parentId: string): Promise<ContentNodeRow[]> => {
+export const getContentChildren = cache(async (parentId: string): Promise<ContentNodeRow[]> => {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('content_nodes')
@@ -95,7 +96,7 @@ export const getContentChildren = async (parentId: string): Promise<ContentNodeR
     return []
   }
   return data ?? []
-}
+})
 
 /** Full-text search across content nodes */
 export const searchContent = async (query: string, pillar?: string): Promise<ContentNodeRow[]> => {
@@ -122,7 +123,15 @@ export const searchContent = async (query: string, pillar?: string): Promise<Con
     console.error('searchContent error:', error)
     return []
   }
-  return data ?? []
+
+  const results = data ?? []
+  trackServerEvent('knowledge.searched', {
+    query_text: query.slice(0, 100),
+    result_count: results.length,
+    pillar: pillar ?? null,
+  })
+
+  return results
 }
 
 /** Fetch content nodes matching a ProductContext (step + tool tags) */
@@ -251,6 +260,9 @@ export const toggleBookmark = async (
     content_node_id: contentNodeId,
     note: note ?? null,
   })
+
+  trackServerEvent('knowledge.bookmarked', { content_node_id: contentNodeId })
+
   return { bookmarked: true }
 }
 
@@ -261,6 +273,8 @@ export const recordReadHistory = async (contentNodeId: string): Promise<void> =>
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return
+
+  trackServerEvent('knowledge.viewed', { content_node_id: contentNodeId })
 
   const { data: existing } = await supabase
     .from('content_read_history')
@@ -384,7 +398,7 @@ export const getAllReadingSessions = async (): Promise<ReadingSessionWithContent
 }
 
 /** Fetch content nodes tagged with a specific tool slug */
-export const getContentByTool = async (toolSlug: string): Promise<ContentNodeRow[]> => {
+export const getContentByTool = cache(async (toolSlug: string): Promise<ContentNodeRow[]> => {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('content_nodes')
@@ -402,30 +416,32 @@ export const getContentByTool = async (toolSlug: string): Promise<ContentNodeRow
     const nodeTools = nodeTags.tools ?? []
     return nodeTools.includes(toolSlug)
   })
-}
+})
 
 /** Fetch guide/book content nodes for a given PIPS step number */
-export const getGuideContentForStep = async (stepNumber: number): Promise<ContentNodeRow[]> => {
-  const stepTag = `step-${stepNumber}`
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('content_nodes')
-    .select('*')
-    .is('parent_id', null)
-    .order('sort_order')
-    .limit(50)
+export const getGuideContentForStep = cache(
+  async (stepNumber: number): Promise<ContentNodeRow[]> => {
+    const stepTag = `step-${stepNumber}`
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('content_nodes')
+      .select('*')
+      .is('parent_id', null)
+      .order('sort_order')
+      .limit(50)
 
-  if (error) {
-    console.error('getGuideContentForStep error:', error)
-    return []
-  }
+    if (error) {
+      console.error('getGuideContentForStep error:', error)
+      return []
+    }
 
-  return (data ?? []).filter((node) => {
-    const nodeTags = node.tags as { steps?: string[] }
-    const nodeSteps = nodeTags.steps ?? []
-    return nodeSteps.includes(stepTag)
-  })
-}
+    return (data ?? []).filter((node) => {
+      const nodeTags = node.tags as { steps?: string[] }
+      const nodeSteps = nodeTags.steps ?? []
+      return nodeSteps.includes(stepTag)
+    })
+  },
+)
 
 /** Get user's recent read history (basic — no content join) */
 export const getRecentReadHistory = async (limit = 10): Promise<ReadHistoryRow[]> => {
