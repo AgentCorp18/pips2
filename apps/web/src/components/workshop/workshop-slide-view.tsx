@@ -81,7 +81,7 @@ export const WorkshopSlideView = ({ initialSession }: SlideViewProps) => {
 
           {/* Timer */}
           <div className="mt-10 w-full max-w-sm">
-            <div className="[&_*]:!text-white [&_*]:!border-white/20 [&_.bg-\\[var\\(--color-surface-secondary\\)\\]]:!bg-white/10">
+            <div className="[&_*]:!text-white [&_*]:!border-white/20 [&_*]:!bg-transparent">
               <WorkshopTimer timerState={session.timer_state} showControls={false} large />
             </div>
           </div>
