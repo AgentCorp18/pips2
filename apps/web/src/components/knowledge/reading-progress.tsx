@@ -36,8 +36,15 @@ export const ReadingProgress = ({
       <CardContent>
         <div className="flex items-center gap-4">
           {/* Progress Ring */}
-          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
-            <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64">
+          <div
+            className="relative flex h-16 w-16 shrink-0 items-center justify-center"
+            role="progressbar"
+            aria-valuenow={percentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${completedItems} of ${totalItems} items completed`}
+          >
+            <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64" aria-hidden="true">
               <circle
                 cx="32"
                 cy="32"

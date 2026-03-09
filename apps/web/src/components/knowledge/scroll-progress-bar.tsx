@@ -29,6 +29,11 @@ export const ScrollProgressBar = () => {
     <div
       data-testid="scroll-progress-bar"
       className="sticky top-0 z-30 h-1 w-full bg-[var(--color-border)]"
+      role="progressbar"
+      aria-label="Page scroll progress"
+      aria-valuenow={Math.round(progress)}
+      aria-valuemin={0}
+      aria-valuemax={100}
     >
       <div
         className="h-full bg-[var(--color-primary)] transition-[width] duration-100 ease-out"

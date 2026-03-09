@@ -32,11 +32,13 @@ export const ExpandableSection = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-secondary)]"
+        aria-controls="expandable-content"
+        className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-medium text-[var(--color-text-primary)] outline-none transition-colors hover:bg-[var(--color-surface-secondary)] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-inset"
       >
         {title}
         <ChevronDown
           size={16}
+          aria-hidden="true"
           className={cn(
             'shrink-0 text-[var(--color-text-tertiary)] transition-transform duration-200',
             isOpen && 'rotate-180',
@@ -45,6 +47,7 @@ export const ExpandableSection = ({
       </button>
       {isOpen && (
         <div
+          id="expandable-content"
           data-testid="expandable-content"
           className="border-t border-[var(--color-border)] px-4 py-3"
         >

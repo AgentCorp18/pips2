@@ -88,6 +88,7 @@ export const ContentReader = ({
         {/* Breadcrumbs */}
         <nav
           data-testid="breadcrumbs"
+          aria-label="Breadcrumb"
           className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]"
         >
           {breadcrumbs.map((crumb, i) => (
@@ -113,7 +114,7 @@ export const ContentReader = ({
                   <List size={12} />
                   On This Page
                 </h3>
-                <nav className="space-y-1">
+                <nav aria-label="On this page" className="space-y-1">
                   {sections.map((section) => (
                     <a
                       key={section.id}
