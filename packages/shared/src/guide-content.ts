@@ -29,7 +29,13 @@ export type GuideStepContent = {
   checklist: string[]
   diagramType: DiagramType
   keyInsight: string
-  subsections: { title: string; content: string; collapsible?: boolean }[]
+  subsections: {
+    title: string
+    content: string
+    collapsible?: boolean
+    subtitle?: string
+    icon?: string
+  }[]
 }
 
 export type PhilosophyPrinciple = {
@@ -119,24 +125,33 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
       {
         title: 'Two Approaches to Problem Selection',
+        subtitle:
+          'Full selection process vs. focused selection — choose the right path for your team',
+        icon: 'target',
         content:
           'Approach A (Full Selection Process): When the team faces many potential problems, use a structured 7-stage process — brainstorm problems, clarify each one, reduce the list, weighted voting, criteria rating against six selection factors (Control, Importance, Difficulty, Time, ROI, Resources), reach consensus, then write the desired state. Approach B (Focused Selection): When leadership has already identified the problem area, skip the selection process and proceed directly to writing the three-part problem statement. Most teams use Approach B, but Approach A is valuable when the team has autonomy to choose its focus.',
         collapsible: true,
       },
       {
         title: 'Stakeholder Alignment Techniques',
+        subtitle: 'Interview templates and consensus strategies to get everyone on the same page',
+        icon: 'users',
         content:
           'Before finalizing the problem statement, interview stakeholders at multiple levels. Use a simple template: "In your words, what is the problem? What data supports that? What would success look like?" Synthesize responses to find common ground. If stakeholders disagree on the problem itself, that disagreement IS the first problem to resolve.',
         collapsible: true,
       },
       {
         title: 'Common Pitfalls in Problem Definition',
+        subtitle: 'Five traps that derail problem statements — and how to avoid each one',
+        icon: 'alert-triangle',
         content:
           'Watch for these traps: (1) Solution-in-disguise — "We need a new CRM" is a solution, not a problem. (2) Scope creep — trying to solve everything in one cycle. (3) Blame framing — naming individuals or teams as the cause. (4) Assumption-as-fact — treating theories as confirmed root causes before analysis. (5) Metric-free statements — if you cannot measure it, you cannot improve it.',
         collapsible: true,
       },
       {
         title: 'Data Collection Quick-Start',
+        subtitle: 'Leverage existing data sources and build a quick summary table in minutes',
+        icon: 'zap',
         content:
           'Start with data you already have: system logs, survey results, financial reports, help desk tickets. Create a simple data summary table with columns for Metric, Current Value, Target Value, and Source. If no data exists, design a quick check sheet (Step 2 tool) to collect observations over 1-2 weeks before finalizing the problem statement.',
         collapsible: true,
@@ -192,12 +207,16 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
       {
         title: 'When to Use Each Analysis Tool',
+        subtitle: 'Match the right tool to your situation — fishbone, 5-Why, Pareto, and more',
+        icon: 'wrench',
         content:
           'Start with the fishbone to map the landscape broadly. Use the 5-Why technique to drill into the most impactful causes identified by the fishbone. Apply force field analysis when the problem involves organizational change — it reveals resistance factors that technical analysis misses. Use a check sheet when you need data to validate a suspected cause over time. Use Pareto analysis to identify which few causes account for the majority of the problem.',
         collapsible: true,
       },
       {
         title: 'Involving the Right People',
+        subtitle: 'Build a diverse analysis team that sees what managers miss',
+        icon: 'users',
         content:
           'Root cause analysis requires diverse perspectives. Include frontline staff who live the process daily — they see causes that managers miss. Include cross-functional representatives from upstream and downstream processes. Avoid having only leadership in the room, as they tend to see the problem from a strategic altitude that misses operational detail.',
         collapsible: true,
@@ -254,24 +273,32 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
       {
         title: 'Interviewing and Surveying for Ideas',
+        subtitle: 'Tap into frontline wisdom and external perspectives your team might miss',
+        icon: 'message-circle',
         content:
           'Do not limit idea generation to the immediate team. Interview subject matter experts, customers, and frontline staff who experience the problem daily — they often have solutions they have never been asked about. Use short surveys to crowdsource ideas from a larger group. Structure interview questions around "If you could change one thing about this process, what would it be?" and "What workarounds have you already invented?" External perspectives surface ideas the team would never generate internally.',
         collapsible: true,
       },
       {
         title: 'Facilitation Tips for Idea Generation',
+        subtitle: 'Practical techniques to maintain energy and draw out creative thinking',
+        icon: 'sparkles',
         content:
           'Create psychological safety by emphasizing that wild ideas are valued. Use round-robin sharing so no one dominates. Set a timer to maintain energy. Play background music to reduce self-consciousness during silent writing. Post all ideas visually on a wall or board so the team can see the growing collection — it builds momentum and sparks connections. When the team stalls, use prompts: "How would a hospital solve this?" or "What if we had unlimited budget?"',
         collapsible: true,
       },
       {
         title: 'Clustering Ideas Into Themes',
+        subtitle: 'Organize raw ideas into actionable groups without losing outliers',
+        icon: 'layers',
         content:
           'After generation, read each idea aloud and place it on a wall. Group similar ideas into clusters and label each cluster with a theme name. Typical themes might include "technology solutions," "process redesigns," "training and skills," and "organizational changes." Do not discard outlier ideas — they may represent innovative thinking that does not fit neatly into existing categories.',
         collapsible: true,
       },
       {
         title: 'Cross-Pollination From Other Fields',
+        subtitle: 'Borrow proven strategies from industries you would never think to study',
+        icon: 'lightbulb',
         content:
           'Ask the team: "How would a hospital solve this? A restaurant? A software startup?" Analogies from unrelated industries often reveal approaches that your industry has never considered. A logistics company improved warehouse picking by studying how Amazon routes packages. A clinic reduced wait times by applying Disney theme park queue management principles.',
         collapsible: true,
@@ -328,24 +355,33 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
       {
         title: 'Reaching Consensus (Not Unanimity)',
+        subtitle: 'Three questions that distinguish genuine agreement from silent disagreement',
+        icon: 'handshake',
         content:
           'Consensus does not mean everyone\'s first choice won — it means everyone can support the decision. Verify consensus with three questions: "Does everyone accept this decision?" "Is there any opposition to this decision?" "Can everyone support the decision going forward?" If anyone says no, discuss their concern before proceeding. Overriding dissent creates passive resistance during implementation. Remember: any of your top three solutions will probably work. The difference between implementing something and implementing nothing is usually larger than the difference between the best and third-best solution.',
         collapsible: true,
       },
       {
         title: 'RACI Roles Explained',
+        subtitle: 'Clarify who does, owns, advises, and observes each task',
+        icon: 'shield',
         content:
           'Responsible: the person who does the work. Accountable: the person who owns the outcome (exactly one per task). Consulted: people whose input is needed before a decision. Informed: people who need to know the outcome but are not involved in the work. Common mistakes: multiple Accountable people (leads to diffusion of responsibility) and no Consulted people (leads to rework when stakeholders are surprised).',
         collapsible: true,
       },
       {
         title: 'The Six-Item Implementation Plan',
+        subtitle: 'Every successful plan covers these six elements — skip one and risk failure',
+        icon: 'clipboard-list',
         content:
           'A complete implementation plan addresses six items: (1) Sequential Steps — what must happen and in what order. (2) Clear Roles — who owns each task (use the RACI chart). (3) Commitment Strategy — how you will gain and maintain active support from stakeholders (not just passive acceptance). (4) Control System — how you will monitor progress and detect deviations. (5) Data Collection — what data you will gather during implementation for Step 6 evaluation. (6) Contingency Plans — what you will do if things go better or worse than expected.',
         collapsible: true,
       },
       {
         title: 'Quick Wins to Build Momentum',
+        subtitle:
+          'Start with low-effort, high-impact tasks that prove value in the first two weeks',
+        icon: 'rocket',
         content:
           'Identify 2-3 low-effort, high-impact tasks that can be completed in the first week or two. Quick wins serve three purposes: they demonstrate tangible progress to stakeholders, they build team confidence, and they often remove small blockers that make subsequent work easier. Schedule quick wins at the front of the implementation plan.',
         collapsible: true,
@@ -402,18 +438,24 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
       {
         title: 'Running Effective Stand-Ups',
+        subtitle: 'Three questions, 15 minutes, zero wasted time — the daily sync formula',
+        icon: 'timer',
         content:
           'Keep stand-ups to 15 minutes maximum. Each owner answers three questions: What did I complete since last check-in? What am I working on next? What is blocking me? The facilitator logs blockers in real time and assigns follow-up owners. Stand-ups are status syncs, not problem-solving sessions — take detailed discussions offline.',
         collapsible: true,
       },
       {
         title: 'Change Management Essentials',
+        subtitle: 'Five steps to reduce resistance and get real buy-in before rollout',
+        icon: 'refresh-cw',
         content:
           'People resist change they do not understand. Before rollout, complete these change management steps: identify who is affected, communicate why the change is happening (link back to the problem from Step 1), provide training on new processes or tools, assign a point of contact for questions, and schedule a feedback session two weeks after rollout.',
         collapsible: true,
       },
       {
         title: 'Pilot Before You Scale',
+        subtitle: 'Test with a small group first — fix critical issues before full deployment',
+        icon: 'flask-conical',
         content:
           'A pilot tests your solution with a small, controlled group before full deployment. Choose a representative group (not the most enthusiastic early adopters — they will tolerate rough edges that others will not). Define pilot success criteria in advance. Collect structured feedback through a brief survey and debrief session. Fix critical issues before scaling to the full population.',
         collapsible: true,
@@ -464,24 +506,34 @@ export const GUIDE_STEP_CONTENT: Record<PipsStepNumber, GuideStepContent> = {
       },
       {
         title: 'Running a Structured Retrospective',
+        subtitle:
+          'A color-coded sticky note exercise that captures actionable lessons in 30 minutes',
+        icon: 'message-square',
         content:
           'Give each participant sticky notes in three colors: green (what went well), yellow (what could improve), red (what to do differently). Allow five minutes of silent writing. Share one note at a time in round-robin fashion and cluster similar themes. Vote on the top insights to carry forward. The output is a concise list of lessons that future teams can reference.',
         collapsible: true,
       },
       {
         title: 'Four Outcome Paths',
+        subtitle: 'Standardize, iterate, pivot, or address new problems — decide your next move',
+        icon: 'git-branch',
         content:
           'Standardize when targets are fully met and the improvement is sustainable without active management — document the new process, update training materials, and close the project. Iterate when partial improvement was achieved but the gap remains — refine the solution and run another cycle. Pivot when the approach fundamentally missed the mark — return to Step 1 with revised understanding and start fresh. Watch for new problems — sometimes the solution itself creates unintended consequences (increased workload elsewhere, new bottlenecks, quality trade-offs) that require their own PIPS cycle.',
         collapsible: true,
       },
       {
         title: 'Meta-Evaluation and Confounding Factors',
+        subtitle: 'Separate real impact from external noise to build analytical credibility',
+        icon: 'search',
         content:
           "Beyond measuring results, evaluate the process itself: Did we use the right tools? Did we identify all the root causes? Was our data sufficient? Sometimes the initial problem statement is not the actual problem — meta-evaluation catches this. Also account for confounding factors: external changes (market shifts, staffing changes, seasonal patterns) that may have influenced results independently of your solution. Acknowledge these honestly in your evaluation — claiming credit for external improvements erodes trust, while understanding true impact strengthens the team's analytical credibility.",
         collapsible: true,
       },
       {
         title: 'Sharing Results Across the Organization',
+        subtitle:
+          'A one-page summary template that inspires others and builds institutional memory',
+        icon: 'share-2',
         content:
           "Publish a one-page summary: problem statement, solution implemented, results achieved, and key lessons. Present at a team meeting or all-hands. Share in the organization's knowledge repository. This transparency builds a culture of continuous improvement, inspires other teams to run their own PIPS cycles, and creates institutional memory that compounds over time.",
         collapsible: true,

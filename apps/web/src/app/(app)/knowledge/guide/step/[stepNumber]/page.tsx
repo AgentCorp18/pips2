@@ -194,7 +194,13 @@ const StepPage = async ({ params }: StepPageProps) => {
             <div className="space-y-4">
               {guideContent.subsections.map((sub, i) =>
                 sub.collapsible ? (
-                  <ExpandableSection key={i} title={sub.title}>
+                  <ExpandableSection
+                    key={i}
+                    title={sub.title}
+                    subtitle={sub.subtitle}
+                    icon={sub.icon}
+                    accentColor={step.color}
+                  >
                     <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
                       {sub.content}
                     </p>

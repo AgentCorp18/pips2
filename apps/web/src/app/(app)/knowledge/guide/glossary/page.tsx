@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { BookOpen, Search, ChevronRight } from 'lucide-react'
+import { BookOpen, Search, ChevronRight, FileText, BookMarked } from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,81 @@ import { GLOSSARY_TERMS, PIPS_STEPS } from '@pips/shared'
 const stepColors: Record<number, string> = {}
 for (const step of PIPS_STEPS) {
   stepColors[step.number] = step.color
+}
+
+/** Map step number to book chapter slug */
+const stepBookSlugs: Record<number, string> = {
+  1: 'step-1-identify',
+  2: 'step-2-analyze',
+  3: 'step-3-generate',
+  4: 'step-4-select-plan',
+  5: 'step-5-implement',
+  6: 'step-6-evaluate',
+}
+
+/** Map step number to short label for the book link */
+const stepBookLabels: Record<number, string> = {
+  1: 'Step 1: Identify',
+  2: 'Step 2: Analyze',
+  3: 'Step 3: Generate',
+  4: 'Step 4: Select & Plan',
+  5: 'Step 5: Implement',
+  6: 'Step 6: Evaluate',
+}
+
+/**
+ * Map glossary term names to their associated form paths.
+ * Form routes require a projectId, so we use a placeholder that users
+ * will replace from their current project context. We link to the
+ * knowledge/guide/tools page instead for a project-agnostic experience.
+ */
+const termFormLinks: Record<string, { label: string; href: string }> = {
+  'Problem Statement': {
+    label: 'Problem Statement Tool',
+    href: '/knowledge/guide/tools/problem-statement',
+  },
+  'Fishbone Diagram': { label: 'Fishbone Diagram Tool', href: '/knowledge/guide/tools/fishbone' },
+  '5-Why Analysis': { label: '5-Why Analysis Tool', href: '/knowledge/guide/tools/five-why' },
+  'Force Field Analysis': {
+    label: 'Force Field Analysis Tool',
+    href: '/knowledge/guide/tools/force-field',
+  },
+  'Check Sheet': { label: 'Check Sheet Tool', href: '/knowledge/guide/tools/checksheet' },
+  Brainstorming: { label: 'Brainstorming Tool', href: '/knowledge/guide/tools/brainstorming' },
+  'Brainwriting (6-3-5)': {
+    label: 'Brainwriting Tool',
+    href: '/knowledge/guide/tools/brainwriting',
+  },
+  'Criteria Matrix': {
+    label: 'Criteria Matrix Tool',
+    href: '/knowledge/guide/tools/criteria-matrix',
+  },
+  'Paired Comparisons': {
+    label: 'Paired Comparisons Tool',
+    href: '/knowledge/guide/tools/paired-comparisons',
+  },
+  'RACI Chart': { label: 'RACI Chart Tool', href: '/knowledge/guide/tools/raci' },
+  'Implementation Plan': {
+    label: 'Implementation Plan Tool',
+    href: '/knowledge/guide/tools/implementation-plan',
+  },
+  'Milestone Tracker': {
+    label: 'Milestone Tracker Tool',
+    href: '/knowledge/guide/tools/milestone-tracker',
+  },
+  'Before & After Comparison': {
+    label: 'Before & After Tool',
+    href: '/knowledge/guide/tools/before-after',
+  },
+  'Lessons Learned': {
+    label: 'Lessons Learned Tool',
+    href: '/knowledge/guide/tools/lessons-learned',
+  },
+  'Balance Sheet': { label: 'Balance Sheet Tool', href: '/knowledge/guide/tools/balance-sheet' },
+  'Weighted Voting': {
+    label: 'Weighted Voting Tool',
+    href: '/knowledge/guide/tools/weighted-voting',
+  },
 }
 
 const GlossaryPage = () => {
@@ -137,19 +212,23 @@ const GlossaryPage = () => {
                           {t.term}
                         </h3>
                         {t.relatedSteps && t.relatedSteps.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
+                          <div
+                            className="flex flex-wrap gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {t.relatedSteps.map((s) => (
-                              <Badge
-                                key={s}
-                                variant="outline"
-                                className="text-[10px]"
-                                style={{
-                                  borderColor: stepColors[s],
-                                  color: stepColors[s],
-                                }}
-                              >
-                                {s}
-                              </Badge>
+                              <Link key={s} href={`/knowledge/guide/step/${s}`} tabIndex={0}>
+                                <Badge
+                                  variant="outline"
+                                  className="cursor-pointer text-[10px] transition-opacity hover:opacity-80"
+                                  style={{
+                                    borderColor: stepColors[s],
+                                    color: stepColors[s],
+                                  }}
+                                >
+                                  {s}
+                                </Badge>
+                              </Link>
                             ))}
                           </div>
                         )}
@@ -162,11 +241,13 @@ const GlossaryPage = () => {
                           <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
                             {t.definition}
                           </p>
+
+                          {/* Guide step links */}
                           {t.relatedSteps && t.relatedSteps.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                               {t.relatedSteps.map((s) => (
                                 <Link
-                                  key={s}
+                                  key={`guide-${s}`}
                                   href={`/knowledge/guide/step/${s}`}
                                   className="text-xs font-medium transition-opacity hover:opacity-80"
                                   style={{ color: stepColors[s] }}
@@ -174,6 +255,63 @@ const GlossaryPage = () => {
                                   View Step {s} Guide →
                                 </Link>
                               ))}
+                            </div>
+                          )}
+
+                          {/* Book chapter + form tool pill links */}
+                          {((t.relatedSteps && t.relatedSteps.length > 0) ||
+                            termFormLinks[t.term]) && (
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {/* Book chapter pills */}
+                              {t.relatedSteps &&
+                                t.relatedSteps.length > 0 &&
+                                t.relatedSteps.length <= 2 &&
+                                t.relatedSteps.map((s) => (
+                                  <Link
+                                    key={`book-${s}`}
+                                    href={`/knowledge/book/${stepBookSlugs[s]}`}
+                                    className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                                    style={{
+                                      borderColor: stepColors[s],
+                                      color: stepColors[s],
+                                    }}
+                                  >
+                                    <BookMarked size={12} />
+                                    Read in Book: {stepBookLabels[s]}
+                                  </Link>
+                                ))}
+                              {/* Single "Read in Book" link when many steps */}
+                              {t.relatedSteps &&
+                                t.relatedSteps.length > 2 &&
+                                t.relatedSteps[0] !== undefined && (
+                                  <Link
+                                    href={`/knowledge/book/${stepBookSlugs[t.relatedSteps[0]]}`}
+                                    className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                                    style={{
+                                      borderColor: 'var(--color-border)',
+                                      color: 'var(--color-text-secondary)',
+                                    }}
+                                  >
+                                    <BookMarked size={12} />
+                                    Read in Book →
+                                  </Link>
+                                )}
+
+                              {/* Form / tool link pill */}
+                              {(() => {
+                                const formLink = termFormLinks[t.term]
+                                if (!formLink) return null
+                                return (
+                                  <Link
+                                    href={formLink.href}
+                                    className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium text-[var(--color-primary)] transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                                    style={{ borderColor: 'var(--color-primary)' }}
+                                  >
+                                    <FileText size={12} />
+                                    {formLink.label} →
+                                  </Link>
+                                )
+                              })()}
                             </div>
                           )}
                         </div>
