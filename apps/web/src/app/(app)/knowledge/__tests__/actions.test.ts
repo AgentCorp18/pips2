@@ -467,7 +467,7 @@ describe('getUserBookmarksWithContent', () => {
 
     const result = await getUserBookmarksWithContent()
     expect(result).toHaveLength(1)
-    expect(result[0].content_node_id).toBe('node-1')
+    expect(result[0]!.content_node_id).toBe('node-1')
   })
 })
 
@@ -736,7 +736,7 @@ describe('getAllReadingSessions', () => {
 
     const result = await getAllReadingSessions()
     expect(result).toHaveLength(1)
-    expect(result[0].pillar).toBe('methodology')
+    expect(result[0]!.pillar).toBe('methodology')
   })
 })
 
@@ -973,7 +973,7 @@ describe('getRecentReadHistoryWithContent', () => {
 
     const result = await getRecentReadHistoryWithContent()
     expect(result).toHaveLength(1)
-    expect(result[0].content_node_id).toBe('node-1')
+    expect(result[0]!.content_node_id).toBe('node-1')
   })
 
   it('accepts a custom limit parameter', async () => {
