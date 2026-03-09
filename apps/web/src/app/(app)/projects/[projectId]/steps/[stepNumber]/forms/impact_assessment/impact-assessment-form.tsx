@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
 import { FormTextarea } from '@/components/pips/form-textarea'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ImpactAssessmentData } from '@/lib/form-schemas'
@@ -153,32 +154,50 @@ type RatingSliderProps = {
   onChange: (value: number) => void
 }
 
-const RatingSlider = ({ id, label, helperText, value, onChange }: RatingSliderProps) => (
-  <div className="flex flex-col gap-1.5">
-    <div className="flex items-center justify-between">
-      <Label htmlFor={id}>{label}</Label>
-      <span className="text-sm font-semibold text-[var(--color-text-primary)]">{value}</span>
+const RatingSlider = ({ id, label, helperText, value, onChange }: RatingSliderProps) => {
+  const mode = useFormViewMode()
+
+  if (mode === 'view') {
+    return (
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-[var(--color-text-primary)]">{label}</span>
+          <span className="text-sm font-semibold text-[var(--color-text-primary)]">
+            {value} / 5
+          </span>
+        </div>
+        <p className="text-xs text-[var(--color-text-tertiary)]">{helperText}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <Label htmlFor={id}>{label}</Label>
+        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{value}</span>
+      </div>
+      <p className="text-xs text-[var(--color-text-tertiary)]">{helperText}</p>
+      <input
+        id={id}
+        type="range"
+        min={1}
+        max={5}
+        step={1}
+        value={value}
+        onChange={(e) => onChange(parseInt(e.target.value, 10))}
+        className="w-full accent-[var(--color-primary)]"
+      />
+      <div className="flex justify-between text-[10px] text-[var(--color-text-tertiary)]">
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+      </div>
     </div>
-    <p className="text-xs text-[var(--color-text-tertiary)]">{helperText}</p>
-    <input
-      id={id}
-      type="range"
-      min={1}
-      max={5}
-      step={1}
-      value={value}
-      onChange={(e) => onChange(parseInt(e.target.value, 10))}
-      className="w-full accent-[var(--color-primary)]"
-    />
-    <div className="flex justify-between text-[10px] text-[var(--color-text-tertiary)]">
-      <span>1</span>
-      <span>2</span>
-      <span>3</span>
-      <span>4</span>
-      <span>5</span>
-    </div>
-  </div>
-)
+  )
+}
 
 /** Color code the RPN value */
 const rpnColor = (rpn: number): string => {

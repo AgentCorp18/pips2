@@ -15,6 +15,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
+import { FormFieldView, FormInlineView } from '@/components/pips/form-field-view'
 import { saveFormData } from '../actions'
 import type { BeforeAfterData } from '@/lib/form-schemas'
 
@@ -111,75 +113,151 @@ export const BeforeAfterForm = ({ projectId, initialData }: Props) => {
       isDirty={dirty}
       key={saveVersion}
     >
-      <div className="space-y-6">
-        <p className="text-sm text-muted-foreground">
-          For each metric, enter the baseline (before) and current (after) values. The improvement
-          will be auto-calculated when both values are numeric.
-        </p>
+      <BeforeAfterFields
+        data={data}
+        update={update}
+        updateMetric={updateMetric}
+        addMetric={addMetric}
+        removeMetric={removeMetric}
+        getImprovementIcon={getImprovementIcon}
+      />
+    </FormShell>
+  )
+}
 
-        {/* Comparison table */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[160px]">Metric</TableHead>
-                <TableHead className="min-w-[100px]">Unit</TableHead>
-                <TableHead className="min-w-[120px]">Before</TableHead>
-                <TableHead className="w-8" />
-                <TableHead className="min-w-[120px]">After</TableHead>
-                <TableHead className="min-w-[160px]">Improvement</TableHead>
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.metrics.map((metric, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>
+/* ---- Inner fields component (reads view mode from context) ---- */
+
+type BeforeAfterFieldsProps = {
+  data: BeforeAfterData
+  update: (next: BeforeAfterData) => void
+  updateMetric: (idx: number, field: string, value: string) => void
+  addMetric: () => void
+  removeMetric: (idx: number) => void
+  getImprovementIcon: (before: string, after: string) => React.ReactNode
+}
+
+const BeforeAfterFields = ({
+  data,
+  update,
+  updateMetric,
+  addMetric,
+  removeMetric,
+  getImprovementIcon,
+}: BeforeAfterFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        {isView
+          ? 'Baseline vs. post-implementation comparison.'
+          : 'For each metric, enter the baseline (before) and current (after) values. The improvement will be auto-calculated when both values are numeric.'}
+      </p>
+
+      {/* Comparison table */}
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-[160px]">Metric</TableHead>
+              <TableHead className="min-w-[100px]">Unit</TableHead>
+              <TableHead className="min-w-[120px]">Before</TableHead>
+              <TableHead className="w-8" />
+              <TableHead className="min-w-[120px]">After</TableHead>
+              <TableHead className="min-w-[160px]">Improvement</TableHead>
+              {!isView && <TableHead className="w-10" />}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.metrics.map((metric, idx) => (
+              <TableRow key={idx}>
+                <TableCell>
+                  {isView ? (
+                    <FormInlineView
+                      value={metric.name}
+                      placeholder="Unnamed metric"
+                      className="text-xs font-medium text-[var(--color-text-primary)]"
+                    />
+                  ) : (
                     <Input
                       value={metric.name}
                       onChange={(e) => updateMetric(idx, 'name', e.target.value)}
                       placeholder="e.g., Processing Time"
                       className="h-7 text-xs"
                     />
-                  </TableCell>
-                  <TableCell>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isView ? (
+                    <FormInlineView
+                      value={metric.unit}
+                      className="text-xs text-[var(--color-text-tertiary)]"
+                    />
+                  ) : (
                     <Input
                       value={metric.unit}
                       onChange={(e) => updateMetric(idx, 'unit', e.target.value)}
                       placeholder="e.g., min"
                       className="h-7 w-20 text-xs"
                     />
-                  </TableCell>
-                  <TableCell>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isView ? (
+                    <FormInlineView
+                      value={metric.before}
+                      placeholder="-"
+                      className="text-xs text-[var(--color-text-secondary)]"
+                    />
+                  ) : (
                     <Input
                       value={metric.before}
                       onChange={(e) => updateMetric(idx, 'before', e.target.value)}
                       placeholder="Baseline"
                       className="h-7 text-xs"
                     />
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <ArrowRight className="mx-auto size-4 text-muted-foreground" />
-                  </TableCell>
-                  <TableCell>
+                  )}
+                </TableCell>
+                <TableCell className="text-center">
+                  <ArrowRight className="mx-auto size-4 text-muted-foreground" />
+                </TableCell>
+                <TableCell>
+                  {isView ? (
+                    <FormInlineView
+                      value={metric.after}
+                      placeholder="-"
+                      className="text-xs text-[var(--color-text-secondary)]"
+                    />
+                  ) : (
                     <Input
                       value={metric.after}
                       onChange={(e) => updateMetric(idx, 'after', e.target.value)}
                       placeholder="Current"
                       className="h-7 text-xs"
                     />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {getImprovementIcon(metric.before, metric.after)}
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    {getImprovementIcon(metric.before, metric.after)}
+                    {isView ? (
+                      <FormInlineView
+                        value={metric.improvement}
+                        placeholder="N/A"
+                        className="text-xs text-[var(--color-text-secondary)]"
+                      />
+                    ) : (
                       <Input
                         value={metric.improvement}
                         onChange={(e) => updateMetric(idx, 'improvement', e.target.value)}
                         placeholder="Auto-calculated"
                         className="h-7 text-xs"
                       />
-                    </div>
-                  </TableCell>
+                    )}
+                  </div>
+                </TableCell>
+                {!isView && (
                   <TableCell>
                     {data.metrics.length > 1 && (
                       <Button variant="ghost" size="icon-xs" onClick={() => removeMetric(idx)}>
@@ -187,18 +265,28 @@ export const BeforeAfterForm = ({ projectId, initialData }: Props) => {
                       </Button>
                     )}
                   </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
+      {!isView && (
         <Button variant="outline" size="sm" onClick={addMetric}>
           <Plus className="size-4" />
           Add Metric
         </Button>
+      )}
 
-        {/* Summary */}
+      {/* Summary */}
+      {isView ? (
+        <FormFieldView
+          label="Summary"
+          value={data.summary}
+          helperText="Overall improvement and key takeaways from the data."
+        />
+      ) : (
         <div className="space-y-2">
           <Label>Summary</Label>
           <p className="text-xs text-muted-foreground">
@@ -212,7 +300,7 @@ export const BeforeAfterForm = ({ projectId, initialData }: Props) => {
             className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           />
         </div>
-      </div>
-    </FormShell>
+      )}
+    </div>
   )
 }

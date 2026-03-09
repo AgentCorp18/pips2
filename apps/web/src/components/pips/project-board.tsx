@@ -21,6 +21,7 @@ export type BoardProject = {
 
 type ProjectBoardProps = {
   projects: BoardProject[]
+  layout?: 'columns' | 'swimlanes'
 }
 
 /* ============================================================
@@ -35,10 +36,10 @@ const BOARD_COLUMNS = [
 ] as const
 
 /* ============================================================
-   Component
+   Column View (original)
    ============================================================ */
 
-export const ProjectBoard = ({ projects }: ProjectBoardProps) => {
+const ColumnView = ({ projects }: { projects: BoardProject[] }) => {
   const grouped: Record<string, BoardProject[]> = {
     active: [],
     on_hold: [],
@@ -111,11 +112,152 @@ export const ProjectBoard = ({ projects }: ProjectBoardProps) => {
 }
 
 /* ============================================================
+   Swim Lane View (rows=steps, cols=status)
+   ============================================================ */
+
+const SwimLaneView = ({ projects }: { projects: BoardProject[] }) => {
+  // Build a 2D grid: step (row) x status (column)
+  const grid: Record<number, Record<string, BoardProject[]>> = {}
+  for (const step of PIPS_STEPS) {
+    grid[step.number] = { active: [], on_hold: [], completed: [], cancelled: [] }
+  }
+
+  for (const project of projects) {
+    const stepNum = Math.max(1, Math.min(6, project.currentStep || 1))
+    const status = project.status in (grid[stepNum] ?? {}) ? project.status : 'active'
+    grid[stepNum]?.[status]?.push(project)
+  }
+
+  return (
+    <div
+      className="overflow-x-auto pb-4"
+      data-testid="project-board"
+      role="region"
+      aria-label="Project board by step and status"
+    >
+      {/* Column headers */}
+      <div className="mb-2 grid grid-cols-[140px_repeat(4,1fr)] gap-2">
+        <div /> {/* Spacer for row labels */}
+        {BOARD_COLUMNS.map((col) => (
+          <div key={col.id} className="flex items-center gap-2 px-2">
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: col.color }}
+            />
+            <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              {col.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Step rows */}
+      {PIPS_STEPS.map((step) => {
+        const rowProjects = grid[step.number] ?? {}
+        const rowTotal = Object.values(rowProjects).reduce((sum, arr) => sum + arr.length, 0)
+
+        return (
+          <div
+            key={step.number}
+            className="mb-2 grid grid-cols-[140px_repeat(4,1fr)] gap-2"
+            data-testid={`swimlane-row-${step.number}`}
+          >
+            {/* Row label */}
+            <div
+              className="flex items-start gap-2 rounded-lg p-2"
+              style={{ borderLeft: `3px solid ${step.color}` }}
+            >
+              <span
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                style={{ backgroundColor: step.color }}
+              >
+                {step.number}
+              </span>
+              <div className="min-w-0">
+                <p
+                  className="truncate text-xs font-semibold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  {step.name}
+                </p>
+                <p className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {rowTotal} project{rowTotal !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+
+            {/* Status cells */}
+            {BOARD_COLUMNS.map((col) => {
+              const cellProjects = rowProjects[col.id] ?? []
+
+              return (
+                <div
+                  key={col.id}
+                  className="min-h-[60px] rounded-lg p-1.5"
+                  style={{ backgroundColor: 'var(--color-bg-secondary, #F9FAFB)' }}
+                  data-testid={`swimlane-cell-${step.number}-${col.id}`}
+                >
+                  <div className="flex flex-col gap-1.5">
+                    {cellProjects.map((project) => (
+                      <ProjectBoardCard key={project.id} project={project} compact />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ============================================================
+   Main Component
+   ============================================================ */
+
+export const ProjectBoard = ({ projects, layout = 'columns' }: ProjectBoardProps) => {
+  if (layout === 'swimlanes') {
+    return <SwimLaneView projects={projects} />
+  }
+  return <ColumnView projects={projects} />
+}
+
+/* ============================================================
    Board Card
    ============================================================ */
 
-const ProjectBoardCard = ({ project }: { project: BoardProject }) => {
+const ProjectBoardCard = ({ project, compact }: { project: BoardProject; compact?: boolean }) => {
   const currentPipsStep = PIPS_STEPS.find((s) => s.number === project.currentStep)
+
+  if (compact) {
+    return (
+      <Link href={`/projects/${project.id}`} className="group block">
+        <Card className="transition-all hover:shadow-[var(--shadow-low)] group-hover:border-[var(--color-primary-light)]">
+          <CardContent className="space-y-1 p-2">
+            <p className="text-xs font-medium leading-snug group-hover:text-[var(--color-primary)]">
+              {project.name}
+            </p>
+            <div className="flex gap-0.5">
+              {PIPS_STEPS.map((step) => (
+                <div
+                  key={step.number}
+                  className="h-0.5 flex-1 rounded-full"
+                  style={{
+                    backgroundColor:
+                      step.number <= project.stepsCompleted
+                        ? `var(--color-step-${step.number})`
+                        : 'var(--color-border)',
+                  }}
+                />
+              ))}
+            </div>
+            <p className="text-[10px] text-[var(--color-text-tertiary)]">{project.ownerName}</p>
+          </CardContent>
+        </Card>
+      </Link>
+    )
+  }
 
   return (
     <Link href={`/projects/${project.id}`} className="group block">

@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { saveFormData } from '../actions'
 import type { CriteriaMatrixData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
@@ -149,22 +150,76 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
       isDirty={dirty}
       key={saveVersion}
     >
-      <div className="space-y-6">
-        {/* Coaching prompt */}
-        <p className="text-sm text-muted-foreground">
-          Add your evaluation criteria with importance weights (1-10), then score each solution
-          (1-5) against each criterion. The weighted totals will highlight the strongest option.
-        </p>
+      <CriteriaMatrixFields
+        data={data}
+        totals={totals}
+        maxTotal={maxTotal}
+        addCriteria={addCriteria}
+        removeCriteria={removeCriteria}
+        updateCriteria={updateCriteria}
+        addSolution={addSolution}
+        removeSolution={removeSolution}
+        updateSolutionName={updateSolutionName}
+        updateScore={updateScore}
+      />
+    </FormShell>
+  )
+}
 
-        {/* Matrix table */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[180px]">Criteria</TableHead>
-                <TableHead className="w-20 text-center">Weight</TableHead>
-                {data.solutions.map((sol, sIdx) => (
-                  <TableHead key={sIdx} className="min-w-[140px]">
+/* ---- Inner fields component (reads view mode from context) ---- */
+
+type CriteriaMatrixFieldsProps = {
+  data: CriteriaMatrixData
+  totals: number[]
+  maxTotal: number
+  addCriteria: () => void
+  removeCriteria: (idx: number) => void
+  updateCriteria: (
+    idx: number,
+    field: 'name' | 'weight' | 'description',
+    value: string | number,
+  ) => void
+  addSolution: () => void
+  removeSolution: (idx: number) => void
+  updateSolutionName: (idx: number, name: string) => void
+  updateScore: (solIdx: number, criteriaName: string, score: number) => void
+}
+
+const CriteriaMatrixFields = ({
+  data,
+  totals,
+  maxTotal,
+  addCriteria,
+  removeCriteria,
+  updateCriteria,
+  addSolution,
+  removeSolution,
+  updateSolutionName,
+  updateScore,
+}: CriteriaMatrixFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        {isView
+          ? 'Criteria-weighted scoring matrix with ranked solutions.'
+          : 'Add your evaluation criteria with importance weights (1-10), then score each solution (1-5) against each criterion. The weighted totals will highlight the strongest option.'}
+      </p>
+
+      {/* Matrix table */}
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-[180px]">Criteria</TableHead>
+              <TableHead className="w-20 text-center">Weight</TableHead>
+              {data.solutions.map((sol, sIdx) => (
+                <TableHead key={sIdx} className="min-w-[140px]">
+                  {isView ? (
+                    <span className="text-xs font-medium">{sol.name || 'Unnamed'}</span>
+                  ) : (
                     <div className="flex items-center gap-1">
                       <Input
                         value={sol.name}
@@ -178,23 +233,35 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
                         </Button>
                       )}
                     </div>
-                  </TableHead>
-                ))}
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.criteria.map((criterion, cIdx) => (
-                <TableRow key={cIdx}>
-                  <TableCell>
+                  )}
+                </TableHead>
+              ))}
+              {!isView && <TableHead className="w-10" />}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.criteria.map((criterion, cIdx) => (
+              <TableRow key={cIdx}>
+                <TableCell>
+                  {isView ? (
+                    <span className="text-xs font-medium text-[var(--color-text-primary)]">
+                      {criterion.name || 'Unnamed'}
+                    </span>
+                  ) : (
                     <Input
                       value={criterion.name}
                       onChange={(e) => updateCriteria(cIdx, 'name', e.target.value)}
                       placeholder="Criterion name"
                       className="h-7 text-xs"
                     />
-                  </TableCell>
-                  <TableCell>
+                  )}
+                </TableCell>
+                <TableCell className="text-center">
+                  {isView ? (
+                    <span className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      {criterion.weight}
+                    </span>
+                  ) : (
                     <Input
                       type="number"
                       min={1}
@@ -205,15 +272,21 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
                       }
                       className="h-7 w-16 text-center text-xs"
                     />
-                  </TableCell>
-                  {data.solutions.map((sol, sIdx) => (
-                    <TableCell key={sIdx}>
+                  )}
+                </TableCell>
+                {data.solutions.map((sol, sIdx) => (
+                  <TableCell key={sIdx}>
+                    {isView ? (
+                      <ScoreView value={sol.scores[criterion.name] ?? 0} />
+                    ) : (
                       <ScoreInput
                         value={sol.scores[criterion.name] ?? 0}
                         onChange={(v) => updateScore(sIdx, criterion.name, v)}
                       />
-                    </TableCell>
-                  ))}
+                    )}
+                  </TableCell>
+                ))}
+                {!isView && (
                   <TableCell>
                     {data.criteria.length > 1 && (
                       <Button variant="ghost" size="icon-xs" onClick={() => removeCriteria(cIdx)}>
@@ -221,39 +294,41 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
                       </Button>
                     )}
                   </TableCell>
-                </TableRow>
-              ))}
-
-              {/* Weighted totals row */}
-              <TableRow className="border-t-2 font-semibold">
-                <TableCell colSpan={2} className="text-right">
-                  Weighted Total
-                </TableCell>
-                {data.solutions.map((_sol, sIdx) => {
-                  const total = totals[sIdx] ?? 0
-                  const isWinner = total > 0 && total === maxTotal
-                  return (
-                    <TableCell
-                      key={sIdx}
-                      className={cn(
-                        'text-center text-base',
-                        isWinner && 'text-[var(--color-success)] font-bold',
-                      )}
-                    >
-                      <div className="flex items-center justify-center gap-1">
-                        {isWinner && <Trophy className="size-4" />}
-                        {total}
-                      </div>
-                    </TableCell>
-                  )
-                })}
-                <TableCell />
+                )}
               </TableRow>
-            </TableBody>
-          </Table>
-        </div>
+            ))}
 
-        {/* Action buttons */}
+            {/* Weighted totals row */}
+            <TableRow className="border-t-2 font-semibold">
+              <TableCell colSpan={2} className="text-right">
+                Weighted Total
+              </TableCell>
+              {data.solutions.map((_sol, sIdx) => {
+                const total = totals[sIdx] ?? 0
+                const isWinner = total > 0 && total === maxTotal
+                return (
+                  <TableCell
+                    key={sIdx}
+                    className={cn(
+                      'text-center text-base',
+                      isWinner && 'text-[var(--color-success)] font-bold',
+                    )}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      {isWinner && <Trophy className="size-4" />}
+                      {total}
+                    </div>
+                  </TableCell>
+                )
+              })}
+              {!isView && <TableCell />}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Action buttons */}
+      {!isView && (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={addCriteria}>
             <Plus className="size-4" />
@@ -264,10 +339,32 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
             Add Solution
           </Button>
         </div>
-      </div>
-    </FormShell>
+      )}
+    </div>
   )
 }
+
+/* ---- Score view (read-only) ---- */
+
+const ScoreView = ({ value }: { value: number }) => (
+  <div className="flex gap-0.5">
+    {[1, 2, 3, 4, 5].map((n) => (
+      <span
+        key={n}
+        className={cn(
+          'flex h-7 w-7 items-center justify-center rounded text-xs font-medium',
+          n === value
+            ? 'bg-[var(--color-step-4)] text-white'
+            : n <= value
+              ? 'bg-[var(--color-step-4)]/30 text-[var(--color-step-4)]'
+              : 'bg-muted text-muted-foreground/40',
+        )}
+      >
+        {n}
+      </span>
+    ))}
+  </div>
+)
 
 /* Score input (1-5 buttons) */
 const ScoreInput = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => (

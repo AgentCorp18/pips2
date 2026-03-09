@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
 import { FormTextarea } from '@/components/pips/form-textarea'
+import { useFormViewMode } from '@/components/pips/form-view-context'
+import { FormFieldView } from '@/components/pips/form-field-view'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -128,20 +130,85 @@ export const ChecksheetForm = ({
       description="A structured tally sheet to collect and quantify data by category over time periods. Define your categories (rows) and time periods (columns), then record occurrences."
       data={data as unknown as Record<string, unknown>}
     >
-      <div className="space-y-6">
-        {/* Problem statement context */}
-        {problemStatementFromStep1 && (
-          <div className="rounded-[var(--radius-md)] border-l-4 border-l-[var(--color-step-2)] bg-[var(--color-step-2-subtle)] px-4 py-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Problem Statement
-            </p>
-            <p className="mt-1 text-sm text-[var(--color-text-primary)]">
-              {problemStatementFromStep1}
-            </p>
-          </div>
-        )}
+      <ChecksheetFields
+        data={data}
+        setData={setData}
+        problemStatementFromStep1={problemStatementFromStep1}
+        addCategory={addCategory}
+        updateCategoryLabel={updateCategoryLabel}
+        removeCategory={removeCategory}
+        addTimePeriod={addTimePeriod}
+        updateTimePeriodLabel={updateTimePeriodLabel}
+        removeTimePeriod={removeTimePeriod}
+        getTally={getTally}
+        setTally={setTally}
+        getRowTotal={getRowTotal}
+        getColumnTotal={getColumnTotal}
+        grandTotal={grandTotal}
+        showGrid={showGrid}
+      />
+    </FormShell>
+  )
+}
 
-        {/* Title */}
+/* ---- Inner fields component (reads view mode from context) ---- */
+
+type ChecksheetFieldsProps = {
+  data: ChecksheetData
+  setData: React.Dispatch<React.SetStateAction<ChecksheetData>>
+  problemStatementFromStep1: string
+  addCategory: () => void
+  updateCategoryLabel: (id: string, label: string) => void
+  removeCategory: (id: string) => void
+  addTimePeriod: () => void
+  updateTimePeriodLabel: (id: string, label: string) => void
+  removeTimePeriod: (id: string) => void
+  getTally: (categoryId: string, timePeriodId: string) => number
+  setTally: (categoryId: string, timePeriodId: string, value: number) => void
+  getRowTotal: (categoryId: string) => number
+  getColumnTotal: (timePeriodId: string) => number
+  grandTotal: number
+  showGrid: boolean
+}
+
+const ChecksheetFields = ({
+  data,
+  setData,
+  problemStatementFromStep1,
+  addCategory,
+  updateCategoryLabel,
+  removeCategory,
+  addTimePeriod,
+  updateTimePeriodLabel,
+  removeTimePeriod,
+  getTally,
+  setTally,
+  getRowTotal,
+  getColumnTotal,
+  grandTotal,
+  showGrid,
+}: ChecksheetFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  return (
+    <div className="space-y-6">
+      {/* Problem statement context */}
+      {problemStatementFromStep1 && (
+        <div className="rounded-[var(--radius-md)] border-l-4 border-l-[var(--color-step-2)] bg-[var(--color-step-2-subtle)] px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            Problem Statement
+          </p>
+          <p className="mt-1 text-sm text-[var(--color-text-primary)]">
+            {problemStatementFromStep1}
+          </p>
+        </div>
+      )}
+
+      {/* Title */}
+      {isView ? (
+        <FormFieldView label="Title" value={data.title} helperText="Name what you are measuring" />
+      ) : (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="checksheet-title">Title</Label>
           <p className="text-xs text-[var(--color-text-tertiary)]">
@@ -155,10 +222,11 @@ export const ChecksheetForm = ({
             className="text-sm"
           />
         </div>
+      )}
 
-        {/* Categories and Time Periods setup */}
+      {/* Categories and Time Periods setup — hide in view mode */}
+      {!isView && (
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Categories (rows) */}
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
@@ -198,7 +266,6 @@ export const ChecksheetForm = ({
             </Button>
           </div>
 
-          {/* Time Periods (columns) */}
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
@@ -238,94 +305,101 @@ export const ChecksheetForm = ({
             </Button>
           </div>
         </div>
+      )}
 
-        {/* Tally Grid */}
-        {showGrid && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Tally Grid</h3>
-            <div className="overflow-x-auto rounded-[var(--radius-md)] border border-[var(--color-border)]">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-[var(--color-surface-secondary)]">
-                    <th className="px-3 py-2 text-left font-medium text-[var(--color-text-secondary)]">
-                      Category
+      {/* Tally Grid — read-only in view mode */}
+      {showGrid && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Tally Grid</h3>
+          <div className="overflow-x-auto rounded-[var(--radius-md)] border border-[var(--color-border)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-[var(--color-surface-secondary)]">
+                  <th className="px-3 py-2 text-left font-medium text-[var(--color-text-secondary)]">
+                    Category
+                  </th>
+                  {data.timePeriods.map((tp) => (
+                    <th
+                      key={tp.id}
+                      className="px-3 py-2 text-center font-medium text-[var(--color-text-secondary)]"
+                    >
+                      {tp.label || '\u2014'}
                     </th>
+                  ))}
+                  <th className="px-3 py-2 text-center font-semibold text-[var(--color-text-primary)]">
+                    Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.categories.map((cat) => (
+                  <tr key={cat.id} className="border-t border-[var(--color-border)]">
+                    <td className="px-3 py-2 font-medium text-[var(--color-text-primary)]">
+                      {cat.label || '\u2014'}
+                    </td>
                     {data.timePeriods.map((tp) => (
-                      <th
-                        key={tp.id}
-                        className="px-3 py-2 text-center font-medium text-[var(--color-text-secondary)]"
-                      >
-                        {tp.label || '—'}
-                      </th>
-                    ))}
-                    <th className="px-3 py-2 text-center font-semibold text-[var(--color-text-primary)]">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.categories.map((cat) => (
-                    <tr key={cat.id} className="border-t border-[var(--color-border)]">
-                      <td className="px-3 py-2 font-medium text-[var(--color-text-primary)]">
-                        {cat.label || '—'}
-                      </td>
-                      {data.timePeriods.map((tp) => (
-                        <td key={tp.id} className="px-1 py-1 text-center">
+                      <td key={tp.id} className="px-1 py-1 text-center">
+                        {isView ? (
+                          <span className="text-sm font-mono text-[var(--color-text-secondary)]">
+                            {getTally(cat.id, tp.id)}
+                          </span>
+                        ) : (
                           <TallyCell
                             value={getTally(cat.id, tp.id)}
                             onChange={(v) => setTally(cat.id, tp.id, v)}
                           />
-                        </td>
-                      ))}
-                      <td className="px-3 py-2 text-center font-semibold font-mono text-[var(--color-text-primary)]">
-                        {getRowTotal(cat.id)}
-                      </td>
-                    </tr>
-                  ))}
-                  {/* Column totals row */}
-                  <tr className="border-t-2 border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
-                    <td className="px-3 py-2 font-semibold text-[var(--color-text-primary)]">
-                      Total
-                    </td>
-                    {data.timePeriods.map((tp) => (
-                      <td
-                        key={tp.id}
-                        className="px-3 py-2 text-center font-semibold font-mono text-[var(--color-text-primary)]"
-                      >
-                        {getColumnTotal(tp.id)}
+                        )}
                       </td>
                     ))}
-                    <td className="px-3 py-2 text-center font-bold font-mono text-[var(--color-primary)]">
-                      {grandTotal}
+                    <td className="px-3 py-2 text-center font-semibold font-mono text-[var(--color-text-primary)]">
+                      {getRowTotal(cat.id)}
                     </td>
                   </tr>
-                </tbody>
-              </table>
-            </div>
+                ))}
+                <tr className="border-t-2 border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
+                  <td className="px-3 py-2 font-semibold text-[var(--color-text-primary)]">
+                    Total
+                  </td>
+                  {data.timePeriods.map((tp) => (
+                    <td
+                      key={tp.id}
+                      className="px-3 py-2 text-center font-semibold font-mono text-[var(--color-text-primary)]"
+                    >
+                      {getColumnTotal(tp.id)}
+                    </td>
+                  ))}
+                  <td className="px-3 py-2 text-center font-bold font-mono text-[var(--color-primary)]">
+                    {grandTotal}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Empty state */}
-        {!showGrid && (
-          <div className="rounded-[var(--radius-md)] border border-dashed border-[var(--color-border)] px-6 py-8 text-center">
-            <p className="text-sm text-[var(--color-text-tertiary)]">
-              Add at least one category and one time period above to start tallying data.
-            </p>
-          </div>
-        )}
+      {/* Empty state */}
+      {!showGrid && (
+        <div className="rounded-[var(--radius-md)] border border-dashed border-[var(--color-border)] px-6 py-8 text-center">
+          <p className="text-sm text-[var(--color-text-tertiary)]">
+            {isView
+              ? 'No categories or time periods have been defined.'
+              : 'Add at least one category and one time period above to start tallying data.'}
+          </p>
+        </div>
+      )}
 
-        {/* Notes */}
-        <FormTextarea
-          id="checksheet-notes"
-          label="Notes"
-          value={data.notes}
-          onChange={(v) => setData((prev) => ({ ...prev, notes: v }))}
-          placeholder="Observations about the data collected..."
-          helperText="Record any patterns, anomalies, or insights you notice in the data."
-          rows={4}
-        />
-      </div>
-    </FormShell>
+      {/* Notes */}
+      <FormTextarea
+        id="checksheet-notes"
+        label="Notes"
+        value={data.notes}
+        onChange={(v) => setData((prev) => ({ ...prev, notes: v }))}
+        placeholder="Observations about the data collected..."
+        helperText="Record any patterns, anomalies, or insights you notice in the data."
+        rows={4}
+      />
+    </div>
   )
 }
 

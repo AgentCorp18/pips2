@@ -52,7 +52,14 @@ export const login = async (
     return { error: 'Invalid email or password' }
   }
 
-  redirect('/dashboard')
+  const redirectTo = (formData.get('redirect') as string) ?? undefined
+  // Only allow internal redirects to prevent open redirect attacks
+  const safeRedirect =
+    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
+      ? redirectTo
+      : '/dashboard'
+
+  redirect(safeRedirect)
 }
 
 export const signup = async (
@@ -78,11 +85,19 @@ export const signup = async (
   }
 
   const supabase = await createClient()
+
+  // Pass redirect param through email confirmation so user returns to intended destination
+  const redirectTo = (formData.get('redirect') as string) ?? undefined
+  const loginUrl =
+    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/login?redirect=${encodeURIComponent(redirectTo)}`
+      : `${process.env.NEXT_PUBLIC_APP_URL}/login`
+
   const { error } = await supabase.auth.signUp({
     email: result.data.email,
     password: result.data.password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+      emailRedirectTo: loginUrl,
       data: {
         display_name: result.data.displayName,
       },

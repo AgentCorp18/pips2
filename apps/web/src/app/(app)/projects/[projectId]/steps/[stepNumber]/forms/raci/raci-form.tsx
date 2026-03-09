@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
 import { saveFormData } from '../actions'
 import type { RaciData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
@@ -161,32 +162,80 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
       isDirty={dirty}
       key={saveVersion}
     >
-      <div className="space-y-6">
-        {/* Legend */}
-        <div className="flex flex-wrap gap-3">
-          {Object.entries(raciLabels).map(([key, label]) => (
-            <div
-              key={key}
-              className={cn('rounded-md px-2 py-1 text-xs font-medium', raciColors[key])}
-            >
-              <span className="font-bold">{key}</span> = {label}
-            </div>
-          ))}
-        </div>
+      <RaciFields
+        data={data}
+        getRaci={getRaci}
+        setRaci={setRaci}
+        updateActivity={updateActivity}
+        removeActivity={removeActivity}
+        addActivity={addActivity}
+        updatePerson={updatePerson}
+        removePerson={removePerson}
+        addPerson={addPerson}
+      />
+    </FormShell>
+  )
+}
 
-        <p className="text-sm text-muted-foreground">
-          List your activities (tasks) as rows and team members as columns. Select the appropriate
-          RACI role for each person per activity.
-        </p>
+/* ---- Inner fields component (reads view mode from context) ---- */
 
-        {/* RACI Matrix */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[200px]">Activity</TableHead>
-                {data.people.map((person, pIdx) => (
-                  <TableHead key={pIdx} className="min-w-[130px]">
+type RaciFieldsProps = {
+  data: RaciData
+  getRaci: (activity: string, person: string) => RaciValue
+  setRaci: (activity: string, person: string, value: RaciValue) => void
+  updateActivity: (idx: number, value: string) => void
+  removeActivity: (idx: number) => void
+  addActivity: () => void
+  updatePerson: (idx: number, value: string) => void
+  removePerson: (idx: number) => void
+  addPerson: () => void
+}
+
+const RaciFields = ({
+  data,
+  getRaci,
+  setRaci,
+  updateActivity,
+  removeActivity,
+  addActivity,
+  updatePerson,
+  removePerson,
+  addPerson,
+}: RaciFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  return (
+    <div className="space-y-6">
+      {/* Legend */}
+      <div className="flex flex-wrap gap-3">
+        {Object.entries(raciLabels).map(([key, label]) => (
+          <div
+            key={key}
+            className={cn('rounded-md px-2 py-1 text-xs font-medium', raciColors[key])}
+          >
+            <span className="font-bold">{key}</span> = {label}
+          </div>
+        ))}
+      </div>
+
+      <p className="text-sm text-muted-foreground">
+        {isView
+          ? 'RACI assignments for each activity and team member.'
+          : 'List your activities (tasks) as rows and team members as columns. Select the appropriate RACI role for each person per activity.'}
+      </p>
+
+      {/* RACI Matrix */}
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-[200px]">Activity</TableHead>
+              {data.people.map((person, pIdx) => (
+                <TableHead key={pIdx} className="min-w-[130px]">
+                  {isView ? (
+                    <span className="text-xs font-medium">{person || 'Unnamed'}</span>
+                  ) : (
                     <div className="flex items-center gap-1">
                       <Input
                         value={person}
@@ -200,30 +249,42 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
                         </Button>
                       )}
                     </div>
-                  </TableHead>
-                ))}
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.activities.map((activity, aIdx) => (
-                <TableRow key={aIdx}>
-                  <TableCell>
+                  )}
+                </TableHead>
+              ))}
+              {!isView && <TableHead className="w-10" />}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.activities.map((activity, aIdx) => (
+              <TableRow key={aIdx}>
+                <TableCell>
+                  {isView ? (
+                    <span className="text-xs font-medium text-[var(--color-text-primary)]">
+                      {activity || 'Unnamed activity'}
+                    </span>
+                  ) : (
                     <Input
                       value={activity}
                       onChange={(e) => updateActivity(aIdx, e.target.value)}
                       placeholder="Activity / task"
                       className="h-7 text-xs"
                     />
-                  </TableCell>
-                  {data.people.map((person, pIdx) => (
-                    <TableCell key={pIdx}>
+                  )}
+                </TableCell>
+                {data.people.map((person, pIdx) => (
+                  <TableCell key={pIdx}>
+                    {isView ? (
+                      <RaciViewCell value={getRaci(activity, person)} />
+                    ) : (
                       <RaciSelect
                         value={getRaci(activity, person)}
                         onChange={(v) => setRaci(activity, person, v)}
                       />
-                    </TableCell>
-                  ))}
+                    )}
+                  </TableCell>
+                ))}
+                {!isView && (
                   <TableCell>
                     {data.activities.length > 1 && (
                       <Button variant="ghost" size="icon-xs" onClick={() => removeActivity(aIdx)}>
@@ -231,13 +292,15 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
                       </Button>
                     )}
                   </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-        {/* Action buttons */}
+      {/* Action buttons */}
+      {!isView && (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={addActivity}>
             <Plus className="size-4" />
@@ -248,8 +311,19 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
             Add Person
           </Button>
         </div>
-      </div>
-    </FormShell>
+      )}
+    </div>
+  )
+}
+
+/* ---- RACI View Cell ---- */
+
+const RaciViewCell = ({ value }: { value: RaciValue }) => {
+  if (!value) return <span className="text-xs text-muted-foreground">-</span>
+  return (
+    <span className={cn('rounded-md px-2 py-0.5 text-xs font-bold', raciColors[value])}>
+      {value}
+    </span>
   )
 }
 

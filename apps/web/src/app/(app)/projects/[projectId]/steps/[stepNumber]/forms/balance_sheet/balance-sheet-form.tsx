@@ -6,6 +6,7 @@ import { Plus, Trash2, TrendingUp, TrendingDown, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -14,6 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormShell } from '@/components/pips/form-shell'
+import { useFormViewMode } from '@/components/pips/form-view-context'
+import { FormFieldView } from '@/components/pips/form-field-view'
 import { saveFormData } from '../actions'
 import type { BalanceSheetData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
@@ -144,14 +147,63 @@ export const BalanceSheetForm = ({ projectId, initialData }: Props) => {
       isDirty={dirty}
       key={saveVersion}
     >
+      <BalanceSheetFields
+        data={data}
+        update={update}
+        addGain={addGain}
+        removeGain={removeGain}
+        updateGain={updateGain}
+        addLoss={addLoss}
+        removeLoss={removeLoss}
+        updateLoss={updateLoss}
+        addObservation={addObservation}
+        removeObservation={removeObservation}
+        updateObservation={updateObservation}
+      />
+    </FormShell>
+  )
+}
+
+/* ---- Inner fields component (reads view mode from context) ---- */
+
+type BalanceSheetFieldsProps = {
+  data: BalanceSheetData
+  update: (next: BalanceSheetData) => void
+  addGain: () => void
+  removeGain: (id: string) => void
+  updateGain: (id: string, field: string, value: string) => void
+  addLoss: () => void
+  removeLoss: (id: string) => void
+  updateLoss: (id: string, field: string, value: string) => void
+  addObservation: () => void
+  removeObservation: (id: string) => void
+  updateObservation: (id: string, field: string, value: string) => void
+}
+
+const BalanceSheetFields = ({
+  data,
+  update,
+  addGain,
+  removeGain,
+  updateGain,
+  addLoss,
+  removeLoss,
+  updateLoss,
+  addObservation,
+  removeObservation,
+  updateObservation,
+}: BalanceSheetFieldsProps) => {
+  const mode = useFormViewMode()
+  const isView = mode === 'view'
+
+  if (isView) {
+    return (
       <div className="space-y-8">
         <p className="text-sm text-muted-foreground">
-          List the positive outcomes (gains), negative outcomes or remaining issues (losses), and
-          neutral observations from the improvement effort. Then summarize your overall assessment
-          and recommend next steps.
+          Balance of gains, losses, and observations from the improvement effort.
         </p>
 
-        {/* ---- Gains Section ---- */}
+        {/* Gains */}
         <SectionCard
           title="Gains"
           subtitle="Positive outcomes and improvements achieved"
@@ -159,47 +211,40 @@ export const BalanceSheetForm = ({ projectId, initialData }: Props) => {
           accentClass="border-l-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20"
           iconClass="text-emerald-600 dark:text-emerald-400"
         >
-          <div className="space-y-4">
-            {data.gains.map((gain) => (
-              <div
-                key={gain.id}
-                className="space-y-3 rounded-[var(--radius-md)] border border-emerald-200 bg-white p-4 dark:border-emerald-800 dark:bg-emerald-950/30"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 space-y-2">
-                    <Input
-                      value={gain.description}
-                      onChange={(e) => updateGain(gain.id, 'description', e.target.value)}
-                      placeholder="Describe the positive outcome..."
-                      className="text-sm"
-                    />
+          <div className="space-y-3">
+            {data.gains.filter((g) => g.description).length === 0 ? (
+              <p className="text-sm italic text-[var(--color-text-tertiary)]">No gains listed.</p>
+            ) : (
+              data.gains
+                .filter((g) => g.description)
+                .map((gain) => (
+                  <div
+                    key={gain.id}
+                    className="space-y-1 rounded-[var(--radius-md)] border border-emerald-200 bg-white p-3 dark:border-emerald-800 dark:bg-emerald-950/30"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[var(--color-text-primary)]">
+                        {gain.description}
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className={cn('text-xs', impactColors[gain.impact])}
+                      >
+                        {gain.impact}
+                      </Badge>
+                    </div>
+                    {gain.evidence && (
+                      <p className="text-xs text-[var(--color-text-tertiary)]">
+                        Evidence: {gain.evidence}
+                      </p>
+                    )}
                   </div>
-                  <ImpactSelector
-                    value={gain.impact}
-                    onChange={(v) => updateGain(gain.id, 'impact', v)}
-                  />
-                  {data.gains.length > 1 && (
-                    <Button variant="ghost" size="icon-xs" onClick={() => removeGain(gain.id)}>
-                      <Trash2 className="size-3 text-muted-foreground" />
-                    </Button>
-                  )}
-                </div>
-                <Input
-                  value={gain.evidence}
-                  onChange={(e) => updateGain(gain.id, 'evidence', e.target.value)}
-                  placeholder="Supporting evidence or data..."
-                  className="text-xs"
-                />
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={addGain} className="gap-1.5">
-              <Plus className="size-4" />
-              Add Gain
-            </Button>
+                ))
+            )}
           </div>
         </SectionCard>
 
-        {/* ---- Losses Section ---- */}
+        {/* Losses */}
         <SectionCard
           title="Losses"
           subtitle="Negative outcomes, remaining issues, or trade-offs"
@@ -207,47 +252,40 @@ export const BalanceSheetForm = ({ projectId, initialData }: Props) => {
           accentClass="border-l-red-500 bg-red-50/50 dark:bg-red-950/20"
           iconClass="text-red-600 dark:text-red-400"
         >
-          <div className="space-y-4">
-            {data.losses.map((loss) => (
-              <div
-                key={loss.id}
-                className="space-y-3 rounded-[var(--radius-md)] border border-red-200 bg-white p-4 dark:border-red-800 dark:bg-red-950/30"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 space-y-2">
-                    <Input
-                      value={loss.description}
-                      onChange={(e) => updateLoss(loss.id, 'description', e.target.value)}
-                      placeholder="Describe the negative outcome or remaining issue..."
-                      className="text-sm"
-                    />
+          <div className="space-y-3">
+            {data.losses.filter((l) => l.description).length === 0 ? (
+              <p className="text-sm italic text-[var(--color-text-tertiary)]">No losses listed.</p>
+            ) : (
+              data.losses
+                .filter((l) => l.description)
+                .map((loss) => (
+                  <div
+                    key={loss.id}
+                    className="space-y-1 rounded-[var(--radius-md)] border border-red-200 bg-white p-3 dark:border-red-800 dark:bg-red-950/30"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[var(--color-text-primary)]">
+                        {loss.description}
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className={cn('text-xs', impactColors[loss.impact])}
+                      >
+                        {loss.impact}
+                      </Badge>
+                    </div>
+                    {loss.mitigation && (
+                      <p className="text-xs text-[var(--color-text-tertiary)]">
+                        Mitigation: {loss.mitigation}
+                      </p>
+                    )}
                   </div>
-                  <ImpactSelector
-                    value={loss.impact}
-                    onChange={(v) => updateLoss(loss.id, 'impact', v)}
-                  />
-                  {data.losses.length > 1 && (
-                    <Button variant="ghost" size="icon-xs" onClick={() => removeLoss(loss.id)}>
-                      <Trash2 className="size-3 text-muted-foreground" />
-                    </Button>
-                  )}
-                </div>
-                <Input
-                  value={loss.mitigation}
-                  onChange={(e) => updateLoss(loss.id, 'mitigation', e.target.value)}
-                  placeholder="Proposed mitigation or action to address this..."
-                  className="text-xs"
-                />
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={addLoss} className="gap-1.5">
-              <Plus className="size-4" />
-              Add Loss
-            </Button>
+                ))
+            )}
           </div>
         </SectionCard>
 
-        {/* ---- Observations Section ---- */}
+        {/* Observations */}
         <SectionCard
           title="Observations"
           subtitle="Neutral findings, notes, or things to watch"
@@ -255,82 +293,250 @@ export const BalanceSheetForm = ({ projectId, initialData }: Props) => {
           accentClass="border-l-slate-400 bg-slate-50/50 dark:bg-slate-950/20"
           iconClass="text-slate-500 dark:text-slate-400"
         >
-          <div className="space-y-4">
-            {data.observations.map((obs) => (
-              <div
-                key={obs.id}
-                className="flex items-start gap-3 rounded-[var(--radius-md)] border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950/30"
-              >
+          <div className="space-y-3">
+            {data.observations.filter((o) => o.description).length === 0 ? (
+              <p className="text-sm italic text-[var(--color-text-tertiary)]">
+                No observations listed.
+              </p>
+            ) : (
+              data.observations
+                .filter((o) => o.description)
+                .map((obs) => (
+                  <div
+                    key={obs.id}
+                    className="rounded-[var(--radius-md)] border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/30"
+                  >
+                    <span className="text-sm text-[var(--color-text-primary)]">
+                      {obs.description}
+                    </span>
+                    {obs.category && (
+                      <span className="ml-2 text-xs text-[var(--color-text-tertiary)]">
+                        ({obs.category})
+                      </span>
+                    )}
+                  </div>
+                ))
+            )}
+          </div>
+        </SectionCard>
+
+        {/* Summary */}
+        <FormFieldView
+          label="Overall Assessment"
+          value={data.summary}
+          helperText="Balance of gains vs. losses and what it means for the project."
+        />
+
+        {/* Recommendation */}
+        <div className="space-y-2">
+          <span className="text-sm font-medium text-[var(--color-text-primary)]">
+            Recommendation
+          </span>
+          {data.recommendation ? (
+            <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-step-6)] bg-[var(--color-step-6)]/10 px-4 py-3 text-sm text-[var(--color-text-primary)]">
+              <RecommendationIcon
+                type={data.recommendation as 'sustain' | 'modify' | 'abandon'}
+                active={true}
+              />
+              <span>{recommendationLabels[data.recommendation]}</span>
+            </div>
+          ) : (
+            <p className="text-sm italic text-[var(--color-text-tertiary)]">
+              No recommendation selected.
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      <p className="text-sm text-muted-foreground">
+        List the positive outcomes (gains), negative outcomes or remaining issues (losses), and
+        neutral observations from the improvement effort. Then summarize your overall assessment and
+        recommend next steps.
+      </p>
+
+      {/* ---- Gains Section ---- */}
+      <SectionCard
+        title="Gains"
+        subtitle="Positive outcomes and improvements achieved"
+        icon={<TrendingUp className="size-5" />}
+        accentClass="border-l-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20"
+        iconClass="text-emerald-600 dark:text-emerald-400"
+      >
+        <div className="space-y-4">
+          {data.gains.map((gain) => (
+            <div
+              key={gain.id}
+              className="space-y-3 rounded-[var(--radius-md)] border border-emerald-200 bg-white p-4 dark:border-emerald-800 dark:bg-emerald-950/30"
+            >
+              <div className="flex items-start gap-3">
                 <div className="flex-1 space-y-2">
                   <Input
-                    value={obs.description}
-                    onChange={(e) => updateObservation(obs.id, 'description', e.target.value)}
-                    placeholder="Describe the observation..."
+                    value={gain.description}
+                    onChange={(e) => updateGain(gain.id, 'description', e.target.value)}
+                    placeholder="Describe the positive outcome..."
                     className="text-sm"
                   />
-                  <Input
-                    value={obs.category}
-                    onChange={(e) => updateObservation(obs.id, 'category', e.target.value)}
-                    placeholder="Category (e.g., Process, Culture, Technical)..."
-                    className="text-xs"
-                  />
                 </div>
-                {data.observations.length > 1 && (
-                  <Button variant="ghost" size="icon-xs" onClick={() => removeObservation(obs.id)}>
+                <ImpactSelector
+                  value={gain.impact}
+                  onChange={(v) => updateGain(gain.id, 'impact', v)}
+                />
+                {data.gains.length > 1 && (
+                  <Button variant="ghost" size="icon-xs" onClick={() => removeGain(gain.id)}>
                     <Trash2 className="size-3 text-muted-foreground" />
                   </Button>
                 )}
               </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={addObservation} className="gap-1.5">
-              <Plus className="size-4" />
-              Add Observation
-            </Button>
-          </div>
-        </SectionCard>
-
-        {/* ---- Summary ---- */}
-        <div className="space-y-2">
-          <Label>Overall Assessment</Label>
-          <p className="text-xs text-muted-foreground">
-            Summarize the balance of gains vs. losses and what it means for the project.
-          </p>
-          <textarea
-            value={data.summary}
-            onChange={(e) => update({ ...data, summary: e.target.value })}
-            placeholder="Describe the overall balance of outcomes, key takeaways, and what the findings suggest..."
-            rows={4}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
+              <Input
+                value={gain.evidence}
+                onChange={(e) => updateGain(gain.id, 'evidence', e.target.value)}
+                placeholder="Supporting evidence or data..."
+                className="text-xs"
+              />
+            </div>
+          ))}
+          <Button variant="outline" size="sm" onClick={addGain} className="gap-1.5">
+            <Plus className="size-4" />
+            Add Gain
+          </Button>
         </div>
+      </SectionCard>
 
-        {/* ---- Recommendation ---- */}
-        <div className="space-y-2">
-          <Label>Recommendation</Label>
-          <p className="text-xs text-muted-foreground">
-            Based on the balance sheet, what should the team do next?
-          </p>
-          <div className="flex flex-col gap-2">
-            {(['sustain', 'modify', 'abandon'] as const).map((rec) => (
-              <button
-                key={rec}
-                type="button"
-                onClick={() => update({ ...data, recommendation: rec })}
-                className={cn(
-                  'flex items-center gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-left text-sm transition-all',
-                  data.recommendation === rec
-                    ? 'border-[var(--color-step-6)] bg-[var(--color-step-6)]/10 text-[var(--color-text-primary)]'
-                    : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-secondary)]',
+      {/* ---- Losses Section ---- */}
+      <SectionCard
+        title="Losses"
+        subtitle="Negative outcomes, remaining issues, or trade-offs"
+        icon={<TrendingDown className="size-5" />}
+        accentClass="border-l-red-500 bg-red-50/50 dark:bg-red-950/20"
+        iconClass="text-red-600 dark:text-red-400"
+      >
+        <div className="space-y-4">
+          {data.losses.map((loss) => (
+            <div
+              key={loss.id}
+              className="space-y-3 rounded-[var(--radius-md)] border border-red-200 bg-white p-4 dark:border-red-800 dark:bg-red-950/30"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-1 space-y-2">
+                  <Input
+                    value={loss.description}
+                    onChange={(e) => updateLoss(loss.id, 'description', e.target.value)}
+                    placeholder="Describe the negative outcome or remaining issue..."
+                    className="text-sm"
+                  />
+                </div>
+                <ImpactSelector
+                  value={loss.impact}
+                  onChange={(v) => updateLoss(loss.id, 'impact', v)}
+                />
+                {data.losses.length > 1 && (
+                  <Button variant="ghost" size="icon-xs" onClick={() => removeLoss(loss.id)}>
+                    <Trash2 className="size-3 text-muted-foreground" />
+                  </Button>
                 )}
-              >
-                <RecommendationIcon type={rec} active={data.recommendation === rec} />
-                <span>{recommendationLabels[rec]}</span>
-              </button>
-            ))}
-          </div>
+              </div>
+              <Input
+                value={loss.mitigation}
+                onChange={(e) => updateLoss(loss.id, 'mitigation', e.target.value)}
+                placeholder="Proposed mitigation or action to address this..."
+                className="text-xs"
+              />
+            </div>
+          ))}
+          <Button variant="outline" size="sm" onClick={addLoss} className="gap-1.5">
+            <Plus className="size-4" />
+            Add Loss
+          </Button>
+        </div>
+      </SectionCard>
+
+      {/* ---- Observations Section ---- */}
+      <SectionCard
+        title="Observations"
+        subtitle="Neutral findings, notes, or things to watch"
+        icon={<Eye className="size-5" />}
+        accentClass="border-l-slate-400 bg-slate-50/50 dark:bg-slate-950/20"
+        iconClass="text-slate-500 dark:text-slate-400"
+      >
+        <div className="space-y-4">
+          {data.observations.map((obs) => (
+            <div
+              key={obs.id}
+              className="flex items-start gap-3 rounded-[var(--radius-md)] border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950/30"
+            >
+              <div className="flex-1 space-y-2">
+                <Input
+                  value={obs.description}
+                  onChange={(e) => updateObservation(obs.id, 'description', e.target.value)}
+                  placeholder="Describe the observation..."
+                  className="text-sm"
+                />
+                <Input
+                  value={obs.category}
+                  onChange={(e) => updateObservation(obs.id, 'category', e.target.value)}
+                  placeholder="Category (e.g., Process, Culture, Technical)..."
+                  className="text-xs"
+                />
+              </div>
+              {data.observations.length > 1 && (
+                <Button variant="ghost" size="icon-xs" onClick={() => removeObservation(obs.id)}>
+                  <Trash2 className="size-3 text-muted-foreground" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button variant="outline" size="sm" onClick={addObservation} className="gap-1.5">
+            <Plus className="size-4" />
+            Add Observation
+          </Button>
+        </div>
+      </SectionCard>
+
+      {/* ---- Summary ---- */}
+      <div className="space-y-2">
+        <Label>Overall Assessment</Label>
+        <p className="text-xs text-muted-foreground">
+          Summarize the balance of gains vs. losses and what it means for the project.
+        </p>
+        <textarea
+          value={data.summary}
+          onChange={(e) => update({ ...data, summary: e.target.value })}
+          placeholder="Describe the overall balance of outcomes, key takeaways, and what the findings suggest..."
+          rows={4}
+          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        />
+      </div>
+
+      {/* ---- Recommendation ---- */}
+      <div className="space-y-2">
+        <Label>Recommendation</Label>
+        <p className="text-xs text-muted-foreground">
+          Based on the balance sheet, what should the team do next?
+        </p>
+        <div className="flex flex-col gap-2">
+          {(['sustain', 'modify', 'abandon'] as const).map((rec) => (
+            <button
+              key={rec}
+              type="button"
+              onClick={() => update({ ...data, recommendation: rec })}
+              className={cn(
+                'flex items-center gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-left text-sm transition-all',
+                data.recommendation === rec
+                  ? 'border-[var(--color-step-6)] bg-[var(--color-step-6)]/10 text-[var(--color-text-primary)]'
+                  : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-secondary)]',
+              )}
+            >
+              <RecommendationIcon type={rec} active={data.recommendation === rec} />
+              <span>{recommendationLabels[rec]}</span>
+            </button>
+          ))}
         </div>
       </div>
-    </FormShell>
+    </div>
   )
 }
 

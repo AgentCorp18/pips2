@@ -11,6 +11,8 @@ import { saveFormData } from '@/app/(app)/projects/[projectId]/steps/[stepNumber
 import type { ProductContext } from '@pips/shared'
 import { buildProductContext } from '@pips/shared'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
+import { FormViewProvider, type FormMode } from './form-view-context'
+import { FormViewToggle } from './form-view-toggle'
 
 type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved'
 
@@ -52,6 +54,9 @@ export const FormShell = (props: FormShellProps) => {
   const { title, description, stepNumber, required = false, cadenceContext, children } = props
   const formType = 'formType' in props ? (props.formType as string | undefined) : undefined
   const derivedCadenceContext = cadenceContext ?? buildProductContext(stepNumber, formType)
+
+  const [viewMode, setViewMode] = useState<FormMode>('edit')
+  const isViewMode = viewMode === 'view'
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [lastSaved, setLastSaved] = useState<string>(props.data ? JSON.stringify(props.data) : '')
@@ -126,55 +131,65 @@ export const FormShell = (props: FormShellProps) => {
   const projectId = props.projectId
 
   return (
-    <div className="space-y-4">
-      {/* Back link + save status bar */}
-      <div className="flex items-center justify-between">
-        {projectId ? (
-          <Link
-            href={`/projects/${projectId}/steps/${stepNumber}`}
-            className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            data-testid="back-to-step-link"
-          >
-            <ArrowLeft size={14} />
-            Back to step
-          </Link>
-        ) : (
-          <div />
-        )}
-        <div className="flex items-center gap-3">
-          <SaveIndicator status={displayStatus} />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleManualSave}
-            disabled={saveState === 'saving'}
-            data-testid="form-save-button"
-          >
-            <CloudUpload size={14} />
-            Save
-          </Button>
-        </div>
-      </div>
-
-      {/* Form card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-lg">{title}</CardTitle>
-            {required && (
-              <Badge variant="secondary" className="text-[10px]">
-                Required
-              </Badge>
+    <FormViewProvider value={viewMode}>
+      <div className="space-y-4">
+        {/* Back link + save status bar */}
+        <div className="flex items-center justify-between">
+          {projectId ? (
+            <Link
+              href={`/projects/${projectId}/steps/${stepNumber}`}
+              className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              data-testid="back-to-step-link"
+            >
+              <ArrowLeft size={14} />
+              Back to step
+            </Link>
+          ) : (
+            <div />
+          )}
+          <div className="flex items-center gap-3">
+            <FormViewToggle
+              mode={viewMode}
+              onToggle={() => setViewMode((m) => (m === 'edit' ? 'view' : 'edit'))}
+            />
+            {!isViewMode && (
+              <>
+                <SaveIndicator status={displayStatus} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleManualSave}
+                  disabled={saveState === 'saving'}
+                  data-testid="form-save-button"
+                >
+                  <CloudUpload size={14} />
+                  Save
+                </Button>
+              </>
             )}
           </div>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent>{children}</CardContent>
-      </Card>
+        </div>
 
-      {/* Knowledge Cadence Bar — contextual content links */}
-      <KnowledgeCadenceBar context={derivedCadenceContext} defaultCollapsed />
-    </div>
+        {/* Form card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">{title}</CardTitle>
+              {required && (
+                <Badge variant="secondary" className="text-[10px]">
+                  Required
+                </Badge>
+              )}
+            </div>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
+          <CardContent>{children}</CardContent>
+        </Card>
+
+        {/* Knowledge Cadence Bar — contextual content links */}
+        <KnowledgeCadenceBar context={derivedCadenceContext} defaultCollapsed />
+      </div>
+    </FormViewProvider>
   )
 }
 

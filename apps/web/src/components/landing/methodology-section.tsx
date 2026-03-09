@@ -18,7 +18,7 @@ export const MethodologySection = () => {
         <h2 className="mb-4 font-serif text-[clamp(1.75rem,4vw,2.25rem)] leading-[1.2] tracking-[-0.02em] text-[var(--color-neutral-800)]">
           Six Steps to Better Processes
         </h2>
-        <p className="text-[1.0625rem] leading-relaxed text-[var(--color-neutral-500)]">
+        <p className="text-[1.0625rem] leading-relaxed text-[var(--color-text-secondary)]">
           A proven methodology that transforms how teams identify problems, generate solutions, and
           measure results.
         </p>
@@ -52,7 +52,7 @@ export const MethodologySection = () => {
               </div>
 
               {/* Description */}
-              <p className="mb-4 text-sm leading-relaxed text-[var(--color-neutral-500)]">
+              <p className="mb-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 {step.description}
               </p>
 
