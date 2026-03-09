@@ -3,23 +3,24 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { LayoutGrid, TableProperties } from 'lucide-react'
+import { Columns3, LayoutGrid, TableProperties } from 'lucide-react'
 
 /* ============================================================
    Types
    ============================================================ */
 
-export type ViewMode = 'table' | 'cards'
+export type ViewMode = 'table' | 'cards' | 'board'
 
 type ViewToggleProps = {
   current: ViewMode
+  basePath?: string
 }
 
 /* ============================================================
    Component
    ============================================================ */
 
-export const ViewToggle = ({ current }: ViewToggleProps) => {
+export const ViewToggle = ({ current, basePath = '/tickets' }: ViewToggleProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -27,9 +28,9 @@ export const ViewToggle = ({ current }: ViewToggleProps) => {
     (view: ViewMode) => {
       const params = new URLSearchParams(searchParams.toString())
       params.set('view', view)
-      router.push(`/tickets?${params.toString()}`)
+      router.push(`${basePath}?${params.toString()}`)
     },
-    [router, searchParams],
+    [router, searchParams, basePath],
   )
 
   return (
@@ -53,6 +54,17 @@ export const ViewToggle = ({ current }: ViewToggleProps) => {
       >
         <LayoutGrid size={14} />
         Cards
+      </Button>
+      <Button
+        variant={current === 'board' ? 'secondary' : 'ghost'}
+        size="xs"
+        onClick={() => setView('board')}
+        className="gap-1"
+        aria-label="Board view"
+        data-testid="view-toggle-board"
+      >
+        <Columns3 size={14} />
+        Board
       </Button>
     </div>
   )

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { KanbanBoard, type BoardTicket } from '../kanban-board'
 
 vi.mock('@hello-pangea/dnd', () => ({
@@ -122,5 +122,33 @@ describe('KanbanBoard', () => {
     // 3 tickets should render as 3 kanban cards
     const cards = screen.getAllByTestId('kanban-card')
     expect(cards.length).toBe(3)
+  })
+
+  it('renders Expand button', () => {
+    render(<KanbanBoard initialTickets={mockTickets} />)
+    expect(screen.getByTestId('kanban-expand-button')).toBeTruthy()
+    expect(screen.getByLabelText('Expand board')).toBeTruthy()
+  })
+
+  it('shows expanded overlay when Expand is clicked', () => {
+    render(<KanbanBoard initialTickets={mockTickets} />)
+    fireEvent.click(screen.getByTestId('kanban-expand-button'))
+    expect(screen.getByTestId('kanban-expanded-overlay')).toBeTruthy()
+    expect(screen.getByText('Ticket Board')).toBeTruthy()
+  })
+
+  it('collapses expanded overlay when Collapse is clicked', () => {
+    render(<KanbanBoard initialTickets={mockTickets} />)
+    fireEvent.click(screen.getByTestId('kanban-expand-button'))
+    expect(screen.getByTestId('kanban-expanded-overlay')).toBeTruthy()
+    fireEvent.click(screen.getByTestId('kanban-collapse-button'))
+    expect(screen.queryByTestId('kanban-expanded-overlay')).toBeNull()
+  })
+
+  it('shows browser fullscreen and collapse buttons in expanded mode', () => {
+    render(<KanbanBoard initialTickets={mockTickets} />)
+    fireEvent.click(screen.getByTestId('kanban-expand-button'))
+    expect(screen.getByTestId('kanban-browser-fullscreen')).toBeTruthy()
+    expect(screen.getByTestId('kanban-collapse-button')).toBeTruthy()
   })
 })

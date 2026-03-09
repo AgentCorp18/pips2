@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useCallback, useTransition } from 'react'
+import { useState, useCallback, useEffect, useTransition } from 'react'
+import { Maximize2, Minimize2, Monitor } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
 import { updateTicketStatus } from '@/app/(app)/tickets/actions'
@@ -72,6 +74,7 @@ const groupByStatus = (tickets: BoardTicket[]): ColumnData => {
 export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
   const [columns, setColumns] = useState<ColumnData>(() => groupByStatus(initialTickets))
   const [, startTransition] = useTransition()
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const onDragEnd = useCallback(
     (result: DropResult) => {
@@ -120,10 +123,44 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
     [initialTickets],
   )
 
-  return (
+  // Lock body scroll when expanded
+  useEffect(() => {
+    if (isExpanded) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isExpanded])
+
+  // ESC key closes expanded mode
+  useEffect(() => {
+    if (!isExpanded) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsExpanded(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isExpanded])
+
+  const toggleBrowserFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen()
+    } else {
+      document.exitFullscreen()
+    }
+  }, [])
+
+  const boardContent = (
     <DragDropContext onDragEnd={onDragEnd}>
       <div
-        className="flex gap-4 overflow-x-auto pb-4"
+        className={`flex gap-4 pb-4 ${isExpanded ? 'h-full overflow-auto' : 'overflow-x-auto'}`}
         role="region"
         aria-label="Kanban board — drag tickets between columns to change status"
       >
@@ -133,7 +170,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
           return (
             <div
               key={col.id}
-              className="flex w-[280px] flex-shrink-0 flex-col"
+              className={`flex flex-shrink-0 flex-col ${isExpanded ? 'min-w-[200px] flex-1' : 'w-[280px]'}`}
               role="group"
               data-testid={`kanban-column-${col.id}`}
               aria-label={`${col.label} column, ${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`}
@@ -210,5 +247,67 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
         })}
       </div>
     </DragDropContext>
+  )
+
+  if (isExpanded) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex flex-col"
+        style={{ backgroundColor: 'var(--color-bg-primary, #FFFFFF)' }}
+        data-testid="kanban-expanded-overlay"
+      >
+        {/* Toolbar */}
+        <div
+          className="flex h-12 flex-shrink-0 items-center justify-between border-b px-4"
+          style={{ borderColor: 'var(--color-border)' }}
+        >
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Ticket Board
+          </h2>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={toggleBrowserFullscreen}
+              aria-label="Toggle browser fullscreen"
+              data-testid="kanban-browser-fullscreen"
+            >
+              <Monitor size={16} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => setIsExpanded(false)}
+              aria-label="Collapse board"
+              data-testid="kanban-collapse-button"
+            >
+              <Minimize2 size={16} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Board fills remaining height */}
+        <div className="flex-1 overflow-hidden p-4">{boardContent}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="mb-3 flex justify-end">
+        <Button
+          variant="ghost"
+          size="xs"
+          onClick={() => setIsExpanded(true)}
+          className="gap-1"
+          aria-label="Expand board"
+          data-testid="kanban-expand-button"
+        >
+          <Maximize2 size={14} />
+          Expand
+        </Button>
+      </div>
+      {boardContent}
+    </div>
   )
 }
