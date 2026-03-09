@@ -4,12 +4,19 @@ import { stepEnumToNumber, PIPS_STEPS } from '@pips/shared'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProjectOverviewClient } from './project-overview-client'
-import { getProjectStats, getProjectMembers, getProjectActivity } from './overview-actions'
+import {
+  getProjectStats,
+  getProjectMembers,
+  getProjectActivity,
+  getStepSummaries,
+} from './overview-actions'
 import { OverviewStats } from './overview-stats'
 import { ActivityFeed } from './activity-feed'
 import { MembersList } from './members-list'
 import { ExportPDFButton } from '@/components/export-pdf-button'
-import { Calendar, User } from 'lucide-react'
+import { ExportOnePagerButton } from '@/components/pips/export-one-pager-button'
+import { StepSummaryCard } from '@/components/pips/step-summary-card'
+import { Calendar, User, BarChart3 } from 'lucide-react'
 
 const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params
@@ -61,10 +68,11 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     step_number: stepEnumToNumber(s.step),
   }))
 
-  const [stats, members, activity] = await Promise.all([
+  const [stats, members, activity, stepSummaries] = await Promise.all([
     getProjectStats(projectId),
     getProjectMembers(projectId),
     getProjectActivity(projectId),
+    getStepSummaries(projectId),
   ])
 
   const profilesRaw = project.profiles as unknown
@@ -88,7 +96,8 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
         orgRole={membership?.role ?? null}
       />
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <ExportOnePagerButton projectId={project.id} projectName={project.title as string} />
         <ExportPDFButton projectId={project.id} projectName={project.title as string} />
       </div>
 
@@ -100,6 +109,43 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
           steps.filter((s) => s.status === 'completed' || s.status === 'skipped').length
         }
       />
+
+      {/* Step Progress & Insights */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BarChart3 size={16} className="text-[var(--color-text-tertiary)]" />
+            Step Progress & Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            data-testid="step-summaries-grid"
+          >
+            {PIPS_STEPS.map((pipStep) => {
+              const stepData = steps.find((s) => s.step_number === pipStep.number)
+              const status = (stepData?.status ?? 'not_started') as
+                | 'not_started'
+                | 'in_progress'
+                | 'completed'
+                | 'skipped'
+              const summary = stepSummaries[pipStep.number]
+              return (
+                <StepSummaryCard
+                  key={pipStep.number}
+                  stepNumber={pipStep.number}
+                  stepName={pipStep.name}
+                  stepColor={pipStep.color}
+                  status={status}
+                  completedAt={stepData?.completed_at}
+                  highlights={summary?.highlights ?? []}
+                />
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Project metadata */}
       <div className="grid gap-4 sm:grid-cols-2">
