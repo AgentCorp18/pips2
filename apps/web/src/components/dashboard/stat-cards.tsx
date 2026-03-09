@@ -1,50 +1,74 @@
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FolderKanban, TicketCheck, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { FolderKanban, TicketCheck, AlertTriangle, CheckCircle2, Users } from 'lucide-react'
 import type { DashboardStats } from '@/app/(app)/dashboard/actions'
 
 type StatCardsProps = {
   stats: DashboardStats
 }
 
-const CARDS = [
+type CardDef = {
+  key: keyof DashboardStats
+  title: string
+  icon: typeof FolderKanban
+  color: string
+  testId: string
+  accentWhenPositive?: string
+  href?: string
+}
+
+const CARDS: CardDef[] = [
   {
-    key: 'activeProjects' as const,
+    key: 'activeProjects',
     title: 'Active Projects',
     icon: FolderKanban,
     color: 'var(--color-step-1)',
+    testId: 'stat-active-projects',
   },
   {
-    key: 'openTickets' as const,
+    key: 'openTickets',
     title: 'Open Tickets',
     icon: TicketCheck,
     color: 'var(--color-step-2)',
+    testId: 'stat-open-tickets',
   },
   {
-    key: 'overdueTickets' as const,
+    key: 'overdueTickets',
     title: 'Overdue',
     icon: AlertTriangle,
     color: 'var(--color-step-2)',
     accentWhenPositive: '#EF4444',
+    testId: 'stat-overdue',
+    href: '/tickets?status=overdue',
   },
   {
-    key: 'completedThisMonth' as const,
+    key: 'completedThisMonth',
     title: 'Completed This Month',
     icon: CheckCircle2,
     color: 'var(--color-step-3)',
+    testId: 'stat-completed',
+  },
+  {
+    key: 'teamMembers',
+    title: 'Team Members',
+    icon: Users,
+    color: 'var(--color-step-4)',
+    testId: 'stat-team-members',
+    href: '/settings/members',
   },
 ]
 
 export const StatCards = ({ stats }: StatCardsProps) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {CARDS.map((card) => {
         const Icon = card.icon
         const value = stats[card.key]
         const isOverduePositive = card.key === 'overdueTickets' && value > 0
         const iconColor = isOverduePositive ? card.accentWhenPositive : card.color
 
-        return (
-          <Card key={card.key}>
+        const inner = (
+          <Card data-testid={card.testId}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle
                 className="text-sm font-medium"
@@ -66,6 +90,17 @@ export const StatCards = ({ stats }: StatCardsProps) => {
             </CardContent>
           </Card>
         )
+
+        if (card.href) {
+          return (
+            <Link key={card.key} href={card.href} className="transition-opacity hover:opacity-80">
+              {inner}
+            </Link>
+          )
+        }
+
+        // For non-linked cards, wrap in a fragment with key
+        return <div key={card.key}>{inner}</div>
       })}
     </div>
   )

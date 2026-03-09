@@ -12,6 +12,7 @@ export type DashboardStats = {
   openTickets: number
   overdueTickets: number
   completedThisMonth: number
+  teamMembers: number
 }
 
 export type StepDistribution = {
@@ -42,7 +43,7 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const today = now.toISOString().split('T')[0]
 
-  const [projectsRes, openTicketsRes, overdueRes, completedRes] = await Promise.all([
+  const [projectsRes, openTicketsRes, overdueRes, completedRes, membersRes] = await Promise.all([
     supabase
       .from('projects')
       .select('id', { count: 'exact', head: true })
@@ -68,6 +69,8 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
       .eq('org_id', orgId)
       .eq('status', 'done')
       .gte('resolved_at', startOfMonth),
+
+    supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
   ])
 
   return {
@@ -75,6 +78,7 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
     openTickets: openTicketsRes.count ?? 0,
     overdueTickets: overdueRes.count ?? 0,
     completedThisMonth: completedRes.count ?? 0,
+    teamMembers: membersRes.count ?? 0,
   }
 }
 
