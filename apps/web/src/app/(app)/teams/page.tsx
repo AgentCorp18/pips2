@@ -13,7 +13,7 @@ import { TeamsEmptyState } from './teams-empty-state'
 import { getTeams } from './actions'
 
 export const metadata: Metadata = {
-  title: 'Teams - PIPS',
+  title: 'Teams',
   description: 'Manage your organization teams',
 }
 

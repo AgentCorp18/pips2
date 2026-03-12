@@ -17,7 +17,7 @@ import { resolveQuickFilters } from '@/components/tickets/quick-filter-resolver'
 import type { QuickFilterKey } from '@/components/tickets/ticket-quick-filters'
 
 export const metadata: Metadata = {
-  title: 'Board - PIPS',
+  title: 'Board',
   description: 'Kanban board view for tickets',
 }
 

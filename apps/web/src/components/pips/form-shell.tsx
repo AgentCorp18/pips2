@@ -71,7 +71,9 @@ export const FormShell = (props: FormShellProps) => {
     if (!props.data) return undefined
     if (!('schema' in props) || !props.schema) return props.data
     const result = props.schema.safeParse(props.data)
-    return result.success ? result.data : props.schema.parse({})
+    if (result.success) return result.data
+    const fallback = props.schema.safeParse({})
+    return fallback.success ? fallback.data : props.data
   })()
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
@@ -103,6 +105,12 @@ export const FormShell = (props: FormShellProps) => {
 
   const isSandbox = 'projectId' in props && props.projectId === SANDBOX_PROJECT_ID
 
+  /* Extract specific prop values to avoid stale-closure from `props` object reference */
+  const onSave = 'onSave' in props ? props.onSave : undefined
+  const data = props.data
+  const projectId = 'projectId' in props ? props.projectId : undefined
+  const onSaveSuccess = 'onSaveSuccess' in props ? props.onSaveSuccess : undefined
+
   /* Unified save function — returns true on success, false on failure */
   const doSave = useCallback(async (): Promise<boolean> => {
     // BUG 1 FIX: Cancel any in-flight save before starting a new one
@@ -114,8 +122,8 @@ export const FormShell = (props: FormShellProps) => {
 
     setSaveState('saving')
 
-    if (props.onSave) {
-      const result = await props.onSave()
+    if (onSave) {
+      const result = await onSave()
       if (controller.signal.aborted) return false
       if (result.error) {
         setSaveState('idle')
@@ -125,15 +133,15 @@ export const FormShell = (props: FormShellProps) => {
         setSaveState('saved')
         return true
       }
-    } else if (isSandbox && props.data && props.formType) {
+    } else if (isSandbox && data && formType) {
       // Sandbox mode: save to localStorage
       try {
-        const key = `pips-sandbox-${props.formType}`
-        localStorage.setItem(key, JSON.stringify(props.data))
+        const key = `pips-sandbox-${formType}`
+        localStorage.setItem(key, JSON.stringify(data))
         if (controller.signal.aborted) return false
         setSaveState('saved')
-        setLastSaved(JSON.stringify(props.data))
-        props.onSaveSuccess?.()
+        setLastSaved(JSON.stringify(data))
+        onSaveSuccess?.()
         return true
       } catch {
         if (controller.signal.aborted) return false
@@ -141,18 +149,13 @@ export const FormShell = (props: FormShellProps) => {
         toast.error('Failed to save to local storage')
         return false
       }
-    } else if (props.data && 'projectId' in props && props.projectId && props.formType) {
-      const result = await saveFormData(
-        props.projectId,
-        props.stepNumber,
-        props.formType,
-        props.data,
-      )
+    } else if (data && projectId && formType) {
+      const result = await saveFormData(projectId, stepNumber, formType, data)
       if (controller.signal.aborted) return false
       if (result.success) {
         setSaveState('saved')
-        setLastSaved(JSON.stringify(props.data))
-        props.onSaveSuccess?.()
+        setLastSaved(JSON.stringify(data))
+        onSaveSuccess?.()
         return true
       } else {
         setSaveState('idle')
@@ -162,7 +165,7 @@ export const FormShell = (props: FormShellProps) => {
     }
 
     return false
-  }, [props, isSandbox])
+  }, [onSave, data, formType, projectId, stepNumber, onSaveSuccess, isSandbox])
 
   /* Auto-save with 2-second debounce — no synchronous setState */
   useEffect(() => {
@@ -185,8 +188,6 @@ export const FormShell = (props: FormShellProps) => {
       if (succeeded) toast.success('Saved')
     })
   }
-
-  const projectId = props.projectId
 
   return (
     <FormViewProvider value={viewMode}>

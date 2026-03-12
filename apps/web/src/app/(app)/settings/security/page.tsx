@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { ChangePasswordForm } from './change-password-form'
 
 export const metadata: Metadata = {
-  title: 'Security - PIPS',
+  title: 'Security',
   description: 'Manage your account security settings',
 }
 

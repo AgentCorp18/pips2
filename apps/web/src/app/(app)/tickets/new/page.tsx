@@ -6,7 +6,7 @@ import { TicketCreateForm } from '@/components/tickets/ticket-create-form'
 import { getParentTicket } from '../actions'
 
 export const metadata: Metadata = {
-  title: 'New Ticket - PIPS',
+  title: 'New Ticket',
   description: 'Create a new ticket',
 }
 

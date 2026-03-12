@@ -6,7 +6,7 @@ import { getOrgWithSettings } from './actions'
 import { OrgSettingsForm } from './org-settings-form'
 
 export const metadata: Metadata = {
-  title: 'Settings - PIPS',
+  title: 'Settings',
   description: 'Manage your organization settings',
 }
 

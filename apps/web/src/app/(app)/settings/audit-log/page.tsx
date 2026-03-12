@@ -18,7 +18,7 @@ import {
 import { getAuditLog, type AuditLogEntry } from './actions'
 
 export const metadata: Metadata = {
-  title: 'Audit Log - PIPS',
+  title: 'Audit Log',
   description: 'View your organization audit trail',
 }
 

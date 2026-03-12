@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 export const metadata: Metadata = {
-  title: 'Tools - PIPS',
+  title: 'Tools',
   description: 'Practice PIPS tools independently in sandbox mode.',
 }
 

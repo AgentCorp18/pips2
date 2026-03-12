@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { OnboardingForm } from './onboarding-form'
 
 export const metadata: Metadata = {
-  title: 'Create Organization - PIPS',
+  title: 'Create Organization',
   description: 'Set up your organization to get started with PIPS',
 }
 

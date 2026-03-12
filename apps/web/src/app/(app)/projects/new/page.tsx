@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ProjectForm } from './project-form'
 
 export const metadata: Metadata = {
-  title: 'New Project - PIPS',
+  title: 'New Project',
   description: 'Create a new PIPS improvement project',
 }
 
