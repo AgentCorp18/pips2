@@ -10,8 +10,9 @@ import {
   LandingFooter,
 } from '@/components/landing'
 import { JsonLd } from '@/components/seo/json-ld'
+import { getBaseUrl } from '@/lib/base-url'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
   title: 'Transform How Your Team Solves Problems | PIPS',

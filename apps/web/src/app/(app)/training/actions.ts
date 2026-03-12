@@ -133,7 +133,17 @@ export const updateTrainingProgress = async (
   } = await supabase.auth.getUser()
   if (!user) return
 
+  // Fetch the existing record to preserve started_at on subsequent updates
+  const { data: existing } = await supabase
+    .from('training_progress')
+    .select('started_at')
+    .eq('user_id', user.id)
+    .eq('module_id', moduleId)
+    .maybeSingle()
+
   const now = new Date().toISOString()
+  const isFirstStart = !existing?.started_at
+
   const update: Record<string, unknown> = {
     user_id: user.id,
     path_id: pathId,
@@ -142,7 +152,8 @@ export const updateTrainingProgress = async (
     updated_at: now,
   }
 
-  if (status === 'in_progress' && !update.started_at) {
+  // Only set started_at when the record does not already have one
+  if (isFirstStart) {
     update.started_at = now
   }
   if (status === 'completed') {
@@ -157,7 +168,8 @@ export const updateTrainingProgress = async (
 
   await supabase.from('training_progress').upsert(update, { onConflict: 'user_id,module_id' })
 
-  if (status === 'in_progress') {
+  // Only fire module_started analytics on the first time the module is started
+  if (status === 'in_progress' && isFirstStart) {
     trackServerEvent('training.module_started', { path_id: pathId, module_id: moduleId })
   } else if (status === 'completed') {
     trackServerEvent('training.exercise_completed', {

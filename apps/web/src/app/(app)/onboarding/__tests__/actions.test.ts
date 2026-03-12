@@ -89,7 +89,23 @@ describe('checkSlugAvailability', () => {
     fromResults = []
   })
 
+  it('returns error when user is not authenticated', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const result = await checkSlugAvailability('my-org')
+    expect(result).toEqual({ available: false, error: 'Unauthorized' })
+  })
+
+  it('returns error when slug fails validation', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+
+    const result = await checkSlugAvailability('INVALID SLUG!')
+    expect(result.available).toBe(false)
+    expect(result.error).toBeDefined()
+  })
+
   it('returns available: true when slug is not taken', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     // from('organizations').select().eq().maybeSingle() -> null
     fromResults = [{ data: null }]
 
@@ -98,6 +114,7 @@ describe('checkSlugAvailability', () => {
   })
 
   it('returns available: false when slug is already taken', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     // from('organizations').select().eq().maybeSingle() -> found
     fromResults = [{ data: { id: 'org-1' } }]
 

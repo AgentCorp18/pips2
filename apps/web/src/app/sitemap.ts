@@ -1,9 +1,10 @@
 import type { MetadataRoute } from 'next'
 import { BOOK_CHAPTER_MAP, STEP_CONTENT } from '@pips/shared'
+import { getBaseUrl } from '@/lib/base-url'
 import { GLOSSARY_TERMS } from './(marketing)/resources/glossary/_glossary-data'
 import { TOOL_DETAILS } from './(marketing)/methodology/tools/[toolSlug]/_tool-details'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
+const BASE_URL = getBaseUrl()
 
 const sitemap = (): MetadataRoute.Sitemap => {
   const now = new Date()

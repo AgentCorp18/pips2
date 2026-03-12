@@ -132,6 +132,18 @@ describe('updateProfile', () => {
     expect(result).toEqual({ error: 'Display name is required' })
   })
 
+  it('returns error when display_name is whitespace only', async () => {
+    const fd = makeFormData({ display_name: '   ' })
+    const result = await updateProfile(emptyState, fd)
+    expect(result).toEqual({ error: 'Display name cannot be empty or whitespace only' })
+  })
+
+  it('returns error when display_name is an empty string', async () => {
+    const fd = makeFormData({ display_name: '' })
+    const result = await updateProfile(emptyState, fd)
+    expect(result).toEqual({ error: 'Display name cannot be empty or whitespace only' })
+  })
+
   it('returns error when display_name is too long', async () => {
     const fd = makeFormData({ display_name: 'x'.repeat(101) })
     const result = await updateProfile(emptyState, fd)

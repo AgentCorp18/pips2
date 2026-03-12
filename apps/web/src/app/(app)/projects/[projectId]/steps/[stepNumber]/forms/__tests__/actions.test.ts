@@ -59,6 +59,9 @@ import { saveFormData, loadFormData } from '../actions'
    Tests
    ============================================================ */
 
+const VALID_PROJECT_ID = '550e8400-e29b-41d4-a716-446655440000'
+const ANOTHER_PROJECT_ID = '550e8400-e29b-41d4-a716-446655440001'
+
 describe('saveFormData', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -69,7 +72,7 @@ describe('saveFormData', () => {
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
-    const result = await saveFormData('proj-1', 1, 'problem_statement', { summary: 'test' })
+    const result = await saveFormData(VALID_PROJECT_ID, 1, 'problem_statement', { summary: 'test' })
     expect(result).toEqual({ success: false, error: 'Not authenticated' })
   })
 
@@ -82,7 +85,7 @@ describe('saveFormData', () => {
       { error: null },
     ]
 
-    const result = await saveFormData('proj-1', 2, 'fishbone', { categories: [] })
+    const result = await saveFormData(VALID_PROJECT_ID, 2, 'fishbone', { categories: [] })
     expect(result).toEqual({ success: true })
   })
 
@@ -93,7 +96,7 @@ describe('saveFormData', () => {
       { data: null },
     ]
 
-    const result = await saveFormData('proj-unknown', 1, 'problem_statement', {})
+    const result = await saveFormData(ANOTHER_PROJECT_ID, 1, 'problem_statement', {})
     expect(result).toEqual({ success: false, error: 'Project not found' })
   })
 
@@ -106,7 +109,7 @@ describe('saveFormData', () => {
       { error: { message: 'duplicate key violation' } },
     ]
 
-    const result = await saveFormData('proj-1', 1, 'problem_statement', {})
+    const result = await saveFormData(VALID_PROJECT_ID, 1, 'problem_statement', {})
     expect(result).toEqual({ success: false, error: 'Failed to save form data. Please try again.' })
   })
 
@@ -119,7 +122,7 @@ describe('saveFormData', () => {
       { error: null },
     ]
 
-    const result = await saveFormData('proj-1', 3, 'brainstorming', { ideas: ['idea1'] })
+    const result = await saveFormData(VALID_PROJECT_ID, 3, 'brainstorming', { ideas: ['idea1'] })
     expect(result).toEqual({ success: true })
   })
 
@@ -132,8 +135,33 @@ describe('saveFormData', () => {
       { error: null },
     ]
 
-    const result = await saveFormData('proj-1', 6, 'lessons_learned', { notes: 'good' })
+    const result = await saveFormData(VALID_PROJECT_ID, 6, 'lessons_learned', { notes: 'good' })
     expect(result).toEqual({ success: true })
+  })
+
+  it('returns error for invalid projectId (not a UUID)', async () => {
+    const result = await saveFormData('not-a-uuid', 1, 'problem_statement', { summary: 'test' })
+    expect(result).toEqual({ success: false, error: 'Invalid input' })
+  })
+
+  it('returns error for out-of-range stepNumber', async () => {
+    const result = await saveFormData(VALID_PROJECT_ID, 7, 'problem_statement', { summary: 'test' })
+    expect(result).toEqual({ success: false, error: 'Invalid input' })
+  })
+
+  it('returns error for unknown formType', async () => {
+    const result = await saveFormData(VALID_PROJECT_ID, 1, 'malicious_payload', { x: '<script>' })
+    expect(result).toEqual({ success: false, error: 'Invalid input' })
+  })
+
+  it('returns error when data is not an object', async () => {
+    const result = await saveFormData(
+      VALID_PROJECT_ID,
+      1,
+      'problem_statement',
+      'not-an-object' as unknown as Record<string, unknown>,
+    )
+    expect(result).toEqual({ success: false, error: 'Invalid input' })
   })
 })
 
@@ -147,7 +175,7 @@ describe('loadFormData', () => {
   it('returns null when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
-    const result = await loadFormData('proj-1', 1, 'problem_statement')
+    const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
     expect(result).toBeNull()
   })
 
@@ -155,7 +183,7 @@ describe('loadFormData', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: { data: { summary: 'Problem is...', gap: '20%' } } }]
 
-    const result = await loadFormData('proj-1', 1, 'problem_statement')
+    const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
     expect(result).toEqual({ summary: 'Problem is...', gap: '20%' })
   })
 
@@ -163,7 +191,7 @@ describe('loadFormData', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: null }]
 
-    const result = await loadFormData('proj-1', 1, 'problem_statement')
+    const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
     expect(result).toBeNull()
   })
 
@@ -171,7 +199,7 @@ describe('loadFormData', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: { data: null } }]
 
-    const result = await loadFormData('proj-1', 1, 'problem_statement')
+    const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
     expect(result).toBeNull()
   })
 
@@ -185,7 +213,7 @@ describe('loadFormData', () => {
     }
     fromResults = [{ data: { data: complexData } }]
 
-    const result = await loadFormData('proj-1', 2, 'fishbone')
+    const result = await loadFormData(VALID_PROJECT_ID, 2, 'fishbone')
     expect(result).toEqual(complexData)
   })
 
@@ -194,7 +222,7 @@ describe('loadFormData', () => {
     const arrayData = { ideas: ['idea1', 'idea2', 'idea3'] }
     fromResults = [{ data: { data: arrayData } }]
 
-    const result = await loadFormData('proj-1', 3, 'brainstorming')
+    const result = await loadFormData(VALID_PROJECT_ID, 3, 'brainstorming')
     expect(result).toEqual(arrayData)
   })
 })

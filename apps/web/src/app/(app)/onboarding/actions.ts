@@ -11,10 +11,32 @@ export type OnboardingActionState = {
   fieldErrors?: Record<string, string>
 }
 
-export const checkSlugAvailability = async (slug: string): Promise<{ available: boolean }> => {
+export const checkSlugAvailability = async (
+  slug: string,
+): Promise<{ available: boolean; error?: string }> => {
+  // Require authenticated user — prevents unauthenticated slug enumeration
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { available: false, error: 'Unauthorized' }
+  }
+
+  // Validate slug format before hitting the DB
+  const parsed = createOrgSchema.shape.slug.safeParse(slug)
+  if (!parsed.success) {
+    return { available: false, error: parsed.error.issues[0]?.message ?? 'Invalid slug' }
+  }
+
   // Use admin client to check ALL orgs, not just those visible via RLS
   const admin = createAdminClient()
-  const { data } = await admin.from('organizations').select('id').eq('slug', slug).maybeSingle()
+  const { data } = await admin
+    .from('organizations')
+    .select('id')
+    .eq('slug', parsed.data)
+    .maybeSingle()
 
   return { available: !data }
 }

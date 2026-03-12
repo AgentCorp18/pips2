@@ -181,17 +181,33 @@ export const declineInvitation = async (token: string): Promise<ActionResult> =>
   const parsed = tokenSchema.safeParse(token)
   if (!parsed.success) return { success: false, error: 'Invalid token' }
 
+  // Require the user to be logged in
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { success: false, error: 'You must be logged in to decline an invitation' }
+
   const admin = createAdminClient()
 
   const { data: invitation } = await admin
     .from('org_invitations')
-    .select('id, status')
+    .select('id, email, status')
     .eq('token', parsed.data)
     .single()
 
   if (!invitation) return { success: false, error: 'Invitation not found' }
   if (invitation.status !== 'pending') {
     return { success: false, error: 'Invitation is no longer valid' }
+  }
+
+  // Verify the user's email matches the invitation
+  if (user.email !== invitation.email) {
+    return {
+      success: false,
+      error: `This invitation was sent to ${invitation.email}. Please log in with that email address.`,
+    }
   }
 
   const { error } = await admin

@@ -264,4 +264,18 @@ describe('getAuditLog', () => {
     expect(result.limit).toBe(10)
     expect(result.total).toBe(100)
   })
+
+  it('caps limit at 100 when an oversized limit is requested', async () => {
+    vi.mocked(getUserOrg).mockResolvedValue({
+      org_id: 'org-1',
+      role: 'owner',
+      organizations: [{ id: 'org-1', name: 'Test', slug: 'test' }],
+    })
+
+    fromResults = [{ count: 500 }, { data: [], error: null }]
+
+    const result = await getAuditLog(1, 9999)
+    expect(result.limit).toBe(100)
+    expect(result.error).toBeUndefined()
+  })
 })

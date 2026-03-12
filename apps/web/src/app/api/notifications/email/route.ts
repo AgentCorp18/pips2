@@ -8,6 +8,7 @@ import { projectUpdatedTemplate } from '@/lib/email/project-updated'
 import { invitationTemplate } from '@/lib/email/invitation'
 import { welcomeTemplate } from '@/lib/email/welcome'
 import { baseTemplate, ctaButton, escapeHtml } from '@/lib/email/base-template'
+import { getBaseUrl } from '@/lib/base-url'
 
 /* ============================================================
    Validation
@@ -40,7 +41,7 @@ const NOTIFICATION_SUBJECTS: Record<string, string> = {
 }
 
 const buildEntityUrl = (entityType?: string, entityId?: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://app.pips.com'
+  const baseUrl = getBaseUrl()
 
   if (!entityType || !entityId) {
     return `${baseUrl}/dashboard`
