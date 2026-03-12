@@ -6,7 +6,7 @@ import { getBaseUrl } from '@/lib/base-url'
 const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'Resources — PIPS Process Improvement Learning Center',
+  title: 'Resources — Process Improvement Learning Center',
   description:
     'Free process improvement resources: the PIPS methodology book, glossary of terms, tool guides, and step-by-step methodology walkthroughs.',
   alternates: {

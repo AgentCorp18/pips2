@@ -7,7 +7,7 @@ import { getBaseUrl } from '@/lib/base-url'
 const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'The Never-Ending Quest — The Complete PIPS Methodology Book',
+  title: 'The Never-Ending Quest — Complete Methodology Book',
   description:
     'Read "The Never-Ending Quest" by Marc Albers — 15 chapters covering the philosophy, practice, and culture of continuous process improvement using the PIPS methodology.',
   alternates: {

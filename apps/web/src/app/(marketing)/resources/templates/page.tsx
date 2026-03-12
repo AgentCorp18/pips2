@@ -13,7 +13,7 @@ import { getBaseUrl } from '@/lib/base-url'
 const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'Free PIPS Templates — Process Improvement Worksheets & Tools',
+  title: 'Free Templates — Process Improvement Worksheets & Tools',
   description:
     'Download free process improvement templates for every step of the PIPS methodology: Problem Statements, Fishbone Diagrams, RACI Charts, Criteria Matrices, and more.',
   alternates: {

@@ -7,7 +7,7 @@ import { getBaseUrl } from '@/lib/base-url'
 const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'PIPS Glossary — Process Improvement Terms & Definitions',
+  title: 'Glossary — Process Improvement Terms & Definitions',
   description:
     'A comprehensive glossary of process improvement and problem solving terms used in the PIPS methodology. Definitions, related tools, and step context for 40+ key concepts.',
   alternates: {
