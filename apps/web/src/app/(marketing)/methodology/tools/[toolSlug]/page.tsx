@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { PIPS_STEPS, STEP_CONTENT } from '@pips/shared'
 import { TOOL_DETAILS } from './_tool-details'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 type ToolPageProps = {
   params: Promise<{ toolSlug: string }>
@@ -37,9 +40,13 @@ export const generateMetadata = async ({ params }: ToolPageProps): Promise<Metad
   return {
     title,
     description,
+    alternates: {
+      canonical: `/methodology/tools/${toolSlug}`,
+    },
     openGraph: {
       title,
       description,
+      url: `${BASE_URL}/methodology/tools/${toolSlug}`,
       type: 'article',
     },
     twitter: {

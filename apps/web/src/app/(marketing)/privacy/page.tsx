@@ -1,12 +1,26 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | PIPS',
+  title: 'Privacy Policy',
   description: 'Privacy policy for PIPS — how we collect, use, and protect your data.',
   alternates: {
     canonical: '/privacy',
+  },
+  openGraph: {
+    title: 'Privacy Policy — PIPS',
+    description: 'Privacy policy for PIPS — how we collect, use, and protect your data.',
+    url: `${BASE_URL}/privacy`,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy — PIPS',
+    description: 'Privacy policy for PIPS — how we collect, use, and protect your data.',
   },
 }
 

@@ -38,6 +38,7 @@ export const SignupForm = () => {
           {redirectParam && <input type="hidden" name="redirect" value={redirectParam} />}
           {state.error && (
             <div
+              role="alert"
               className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
               style={{
                 backgroundColor: 'var(--color-error-subtle)',

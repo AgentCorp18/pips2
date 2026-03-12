@@ -3,12 +3,29 @@ import Link from 'next/link'
 import { ArrowRight, Check, Mail } from 'lucide-react'
 import { PIPS_STEPS } from '@pips/shared'
 
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
+
 export const metadata: Metadata = {
-  title: 'Pricing | PIPS',
+  title: 'Pricing',
   description:
     'Choose the right PIPS plan for your team. Start free with core workflow, upgrade for training, workshops, and enterprise features.',
   alternates: {
     canonical: '/pricing',
+  },
+  openGraph: {
+    title: 'Pricing — PIPS',
+    description:
+      'Choose the right PIPS plan for your team. Start free with core workflow, upgrade for training, workshops, and enterprise features.',
+    url: `${BASE_URL}/pricing`,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Pricing — PIPS',
+    description:
+      'Choose the right PIPS plan for your team. Start free with core workflow, upgrade for training, workshops, and enterprise features.',
   },
 }
 

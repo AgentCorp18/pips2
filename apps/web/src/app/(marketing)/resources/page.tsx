@@ -1,15 +1,22 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, BookText, Download, FileText, GraduationCap } from 'lucide-react'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
   title: 'Resources — PIPS Process Improvement Learning Center',
   description:
     'Free process improvement resources: the PIPS methodology book, glossary of terms, tool guides, and step-by-step methodology walkthroughs.',
+  alternates: {
+    canonical: '/resources',
+  },
   openGraph: {
     title: 'Resources — PIPS Process Improvement Learning Center',
     description:
       'Free process improvement resources: methodology book, glossary, tool guides, and walkthroughs.',
+    url: `${BASE_URL}/resources`,
     type: 'website',
   },
   twitter: {

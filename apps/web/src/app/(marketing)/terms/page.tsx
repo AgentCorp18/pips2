@@ -1,12 +1,26 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | PIPS',
+  title: 'Terms of Service',
   description: 'Terms of service for PIPS — the rules governing use of our platform.',
   alternates: {
     canonical: '/terms',
+  },
+  openGraph: {
+    title: 'Terms of Service — PIPS',
+    description: 'Terms of service for PIPS — the rules governing use of our platform.',
+    url: `${BASE_URL}/terms`,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Terms of Service — PIPS',
+    description: 'Terms of service for PIPS — the rules governing use of our platform.',
   },
 }
 

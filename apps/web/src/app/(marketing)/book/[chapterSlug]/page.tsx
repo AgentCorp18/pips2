@@ -42,9 +42,13 @@ export const generateMetadata = async ({ params }: ChapterPageProps): Promise<Me
   return {
     title,
     description,
+    alternates: {
+      canonical: `/book/${chapterSlug}`,
+    },
     openGraph: {
       title,
       description,
+      url: `${BASE_URL}/book/${chapterSlug}`,
       type: 'article',
     },
     twitter: {

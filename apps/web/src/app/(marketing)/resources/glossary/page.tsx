@@ -2,15 +2,22 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { getGlossaryLetters, getTermsByLetter } from './_glossary-data'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
   title: 'PIPS Glossary — Process Improvement Terms & Definitions',
   description:
     'A comprehensive glossary of process improvement and problem solving terms used in the PIPS methodology. Definitions, related tools, and step context for 35+ key concepts.',
+  alternates: {
+    canonical: '/resources/glossary',
+  },
   openGraph: {
     title: 'PIPS Glossary — Process Improvement Terms & Definitions',
     description:
       'Definitions, related tools, and step context for 35+ process improvement terms used in the PIPS methodology.',
+    url: `${BASE_URL}/resources/glossary`,
     type: 'website',
   },
   twitter: {

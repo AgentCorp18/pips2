@@ -2,15 +2,22 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BookOpen, ArrowRight, Lock } from 'lucide-react'
 import { BOOK_CHAPTER_MAP } from '@pips/shared'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
   title: 'The Never-Ending Quest — The Complete PIPS Methodology Book',
   description:
     'Read "The Never-Ending Quest" by Marc Albers — 15 chapters covering the philosophy, practice, and culture of continuous process improvement using the PIPS methodology.',
+  alternates: {
+    canonical: '/book',
+  },
   openGraph: {
     title: 'The Never-Ending Quest — The Complete PIPS Methodology Book',
     description:
       '15 chapters on the philosophy, practice, and culture of continuous process improvement. Free preview chapters available.',
+    url: `${BASE_URL}/book`,
     type: 'website',
   },
   twitter: {
@@ -21,8 +28,14 @@ export const metadata: Metadata = {
   },
 }
 
-/** Book landing page — lead gen, public */
-const BookLandingPage = () => {
+/**
+ * Book landing page — Table of Contents, public/unauthenticated.
+ *
+ * All chapter links navigate to /book/[chapterSlug] regardless of access level.
+ * The individual chapter pages handle locked/gated states with preview content
+ * and signup CTAs — there is no redirect from this TOC.
+ */
+export const BookLandingPage = () => {
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
       {/* Hero */}
@@ -49,14 +62,17 @@ const BookLandingPage = () => {
         </h2>
         <div className="mt-6 space-y-2">
           {BOOK_CHAPTER_MAP.map((ch, index) => {
-            const isFree = index < 3 // Foreword, Introduction, Ch.1 are free
-            const isEmailGated = index >= 3 && index < 6 // Ch.2-3 email-gated
-            const isPaid = index >= 6
+            const isFree = index < 3 // Foreword, Introduction, Ch.1 are fully free
+            const isEmailGated = index >= 3 && index < 6 // Ch.2–4 are free with signup
+            const isPaid = index >= 6 // Ch.5+ and appendices require a PIPS account
 
             return (
+              // All chapters link directly to their chapter page — never to /pricing or /signup.
+              // Gating and preview CTAs are handled by the chapter page itself.
               <Link
                 key={ch.chapter}
                 href={`/book/${ch.chapter}`}
+                data-testid={`chapter-link-${ch.chapter}`}
                 className={`group flex items-center justify-between rounded-lg border border-[var(--color-border)] px-4 py-3 transition-all ${
                   isFree
                     ? 'cursor-pointer hover:border-[var(--color-primary)] hover:shadow-sm'
