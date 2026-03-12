@@ -114,7 +114,7 @@ export const PricingPage = () => {
           <h1 className="mb-4 font-serif text-[clamp(2rem,5vw,3rem)] leading-[1.1] text-white">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-[1.0625rem] leading-relaxed text-white/60">
+          <p className="text-[1.0625rem] leading-relaxed text-white/80">
             Start free. Upgrade when you are ready. No surprises.
           </p>
         </div>
@@ -174,7 +174,7 @@ export const PricingPage = () => {
               ) : (
                 <button
                   disabled
-                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-neutral-100)] px-6 py-3 text-sm font-semibold text-[var(--color-neutral-400)]"
+                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-neutral-100)] px-6 py-3 text-sm font-semibold text-[var(--color-neutral-500)]"
                 >
                   {tier.cta}
                 </button>
