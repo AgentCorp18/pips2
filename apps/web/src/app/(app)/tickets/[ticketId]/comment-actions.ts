@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { createCommentSchema, updateCommentSchema } from '@/lib/validations'
+import { hasPermission } from '@pips/shared'
+import type { OrgRole } from '@pips/shared'
 
 /* ============================================================
    Types
@@ -132,8 +134,8 @@ export const updateComment = async (
       .eq('user_id', user.id)
       .maybeSingle()
 
-    const role = membership?.role as string | undefined
-    if (role !== 'admin' && role !== 'owner') {
+    const role = membership?.role as OrgRole | undefined
+    if (!role || !hasPermission(role, 'ticket.delete')) {
       return { error: 'You can only edit your own comments' }
     }
   }
@@ -193,8 +195,8 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
       .eq('user_id', user.id)
       .maybeSingle()
 
-    const role = membership?.role as string | undefined
-    if (role !== 'admin' && role !== 'owner') {
+    const role = membership?.role as OrgRole | undefined
+    if (!role || !hasPermission(role, 'ticket.delete')) {
       return { error: 'You can only delete your own comments' }
     }
   }
