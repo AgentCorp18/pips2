@@ -52,7 +52,7 @@ IMPORTANT: After every change, run in this order:
 
 - Don't edit .env files — use Vercel env vars for production
 - Don't edit supabase/migrations/ directly — migrations require careful sequencing
-- Don't skip type checking — 1,945+ unit tests must continue passing
+- Don't skip type checking — 2,339+ unit tests must continue passing
 - Don't use default exports — named exports only
 
 ## Gotchas
