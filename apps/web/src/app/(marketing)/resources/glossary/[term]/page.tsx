@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { PIPS_STEPS } from '@pips/shared'
 import { findTermBySlug, GLOSSARY_TERMS } from '../_glossary-data'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 type TermPageProps = {
   params: Promise<{ term: string }>
@@ -39,9 +42,13 @@ export const generateMetadata = async ({ params }: TermPageProps): Promise<Metad
   return {
     title,
     description,
+    alternates: {
+      canonical: `/resources/glossary/${slug}`,
+    },
     openGraph: {
       title,
       description,
+      url: `${BASE_URL}/resources/glossary/${slug}`,
       type: 'article',
     },
     twitter: {
