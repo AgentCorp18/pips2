@@ -5,6 +5,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { getBaseUrl } from '@/lib/base-url'
 import './globals.css'
 
 const dmSans = DM_Sans({
@@ -29,7 +30,7 @@ const jetBrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'),
+  metadataBase: new URL(getBaseUrl()),
   title: {
     template: '%s | PIPS — Process Improvement & Problem Solving',
     default: 'PIPS — Process Improvement & Problem Solving',

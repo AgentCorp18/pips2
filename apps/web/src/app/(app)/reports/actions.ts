@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { PIPS_STEPS, PIPS_STEP_ENUMS } from '@pips/shared'
+import { requirePermission } from '@/lib/permissions'
 import type { StepProgressData } from '@/components/reports/step-progress-chart'
 import type { TicketVelocityData } from '@/components/reports/ticket-velocity-chart'
 import type { StepFunnelData } from '@/components/reports/step-funnel-chart'
@@ -50,6 +51,7 @@ export type ReportsHubStats = {
 }
 
 export const getReportsHubStats = async (orgId: string): Promise<ReportsHubStats> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const [projectsRes, ticketsRes, membersRes] = await Promise.all([
@@ -101,6 +103,7 @@ export type ProjectHealthKpis = {
 }
 
 export const getProjectHealthKpis = async (orgId: string): Promise<ProjectHealthKpis> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const now = new Date()
@@ -154,6 +157,7 @@ export const getProjectHealthKpis = async (orgId: string): Promise<ProjectHealth
 }
 
 export const getProjectsByStep = async (orgId: string): Promise<StepProgressData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: projects } = await supabase
@@ -182,6 +186,7 @@ export const getProjectsByStep = async (orgId: string): Promise<StepProgressData
 }
 
 export const getTicketVelocity = async (orgId: string): Promise<TicketVelocityData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const now = new Date()
@@ -236,6 +241,7 @@ export const getTicketVelocity = async (orgId: string): Promise<TicketVelocityDa
 }
 
 export const getStepCompletionFunnel = async (orgId: string): Promise<StepFunnelData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: projects } = await supabase
@@ -280,6 +286,7 @@ export type ProjectTableRow = {
 }
 
 export const getProjectsTable = async (orgId: string): Promise<ProjectTableRow[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const today = new Date().toISOString().split('T')[0] ?? ''
@@ -342,6 +349,7 @@ export type TeamActivityKpis = {
 }
 
 export const getTeamActivityKpis = async (orgId: string): Promise<TeamActivityKpis> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const now = new Date()
@@ -395,6 +403,7 @@ export const getTeamActivityKpis = async (orgId: string): Promise<TeamActivityKp
 }
 
 export const getTeamContributions = async (orgId: string): Promise<TeamContributionData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: members } = await supabase.from('org_members').select('user_id').eq('org_id', orgId)
@@ -440,6 +449,7 @@ export const getTeamContributions = async (orgId: string): Promise<TeamContribut
 }
 
 export const getActivityTimeline = async (orgId: string): Promise<ActivityTimelineData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const now = new Date()
@@ -483,6 +493,7 @@ export type TeamMemberRow = {
 }
 
 export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: members } = await supabase
@@ -563,6 +574,7 @@ export type MethodologyKpis = {
 }
 
 export const getMethodologyKpis = async (orgId: string): Promise<MethodologyKpis> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
@@ -642,6 +654,7 @@ export const getMethodologyKpis = async (orgId: string): Promise<MethodologyKpis
 }
 
 export const getFormCompletionByStep = async (orgId: string): Promise<FormCompletionData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
@@ -678,6 +691,7 @@ export const getFormCompletionByStep = async (orgId: string): Promise<FormComple
 }
 
 export const getStepDurations = async (orgId: string): Promise<StepDurationData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
@@ -722,6 +736,7 @@ export const getStepDurations = async (orgId: string): Promise<StepDurationData[
 }
 
 export const getToolPopularity = async (orgId: string): Promise<ToolPopularityData[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
@@ -760,6 +775,7 @@ export type StepBreakdownRow = {
 }
 
 export const getStepBreakdownTable = async (orgId: string): Promise<StepBreakdownRow[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)

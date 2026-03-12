@@ -37,6 +37,9 @@ export const updateProfile = async (
   }
 
   const trimmed = displayName.trim()
+  if (trimmed.length === 0) {
+    return { error: 'Display name cannot be empty or whitespace only' }
+  }
   if (trimmed.length > 100) {
     return { error: 'Display name must be 100 characters or fewer' }
   }
@@ -54,7 +57,7 @@ export const updateProfile = async (
   const { error } = await supabase
     .from('profiles')
     .update({
-      display_name: trimmed || null,
+      display_name: trimmed,
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id)

@@ -28,10 +28,13 @@ export type AuditLogResult = {
 
 const ALLOWED_ROLES: OrgRole[] = ['owner', 'admin']
 
+const MAX_AUDIT_LOG_LIMIT = 100
+
 export const getAuditLog = async (
   page: number = 1,
   limit: number = 25,
 ): Promise<AuditLogResult> => {
+  const cappedLimit = Math.min(limit, MAX_AUDIT_LOG_LIMIT)
   const membership = await getUserOrg()
 
   if (!membership) {
@@ -54,7 +57,7 @@ export const getAuditLog = async (
     .eq('org_id', orgId)
 
   const total = count ?? 0
-  const offset = (page - 1) * limit
+  const offset = (page - 1) * cappedLimit
 
   // Fetch audit log entries (no FK join — audit records survive user deletion)
   const { data: entries, error } = await supabase
@@ -64,11 +67,11 @@ export const getAuditLog = async (
     )
     .eq('org_id', orgId)
     .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1)
+    .range(offset, offset + cappedLimit - 1)
 
   if (error) {
     console.error('Failed to fetch audit log:', error.message)
-    return { entries: [], total: 0, page, limit, error: 'Failed to fetch audit log' }
+    return { entries: [], total: 0, page, limit: cappedLimit, error: 'Failed to fetch audit log' }
   }
 
   // Fetch display names for users
@@ -103,5 +106,5 @@ export const getAuditLog = async (
     user_display_name: entry.user_id ? (profileMap.get(entry.user_id as string) ?? null) : null,
   }))
 
-  return { entries: mapped, total, page, limit }
+  return { entries: mapped, total, page, limit: cappedLimit }
 }

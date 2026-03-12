@@ -304,20 +304,47 @@ describe('updateTrainingProgress', () => {
     fromResults = []
   })
 
-  it('upserts progress for in_progress status', async () => {
+  it('upserts progress for in_progress status (first start — no existing record)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null, error: null }]
+    // Call 1: fetch existing record (no record found)
+    // Call 2: upsert
+    fromResults = [
+      { data: null, error: null },
+      { data: null, error: null },
+    ]
 
     const result = await updateTrainingProgress('path-1', 'mod-1', 'in_progress')
     expect(result).toBeUndefined()
+    // Both the fetch and the upsert should have been called
+    expect(fromCallIndex).toBe(2)
+  })
+
+  it('does not overwrite started_at when record already has one', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    // Call 1: fetch existing record — started_at already set
+    // Call 2: upsert
+    fromResults = [
+      { data: { started_at: '2026-01-01T00:00:00Z' }, error: null },
+      { data: null, error: null },
+    ]
+
+    const result = await updateTrainingProgress('path-1', 'mod-1', 'in_progress', 10)
+    expect(result).toBeUndefined()
+    expect(fromCallIndex).toBe(2)
   })
 
   it('upserts progress for completed status with optional fields', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null, error: null }]
+    // Call 1: fetch existing record
+    // Call 2: upsert
+    fromResults = [
+      { data: null, error: null },
+      { data: null, error: null },
+    ]
 
     const result = await updateTrainingProgress('path-1', 'mod-1', 'completed', 45, 85)
     expect(result).toBeUndefined()
+    expect(fromCallIndex).toBe(2)
   })
 
   it('returns early when user is not authenticated', async () => {
@@ -331,18 +358,30 @@ describe('updateTrainingProgress', () => {
 
   it('upserts progress for not_started status', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null, error: null }]
+    // Call 1: fetch existing record
+    // Call 2: upsert
+    fromResults = [
+      { data: null, error: null },
+      { data: null, error: null },
+    ]
 
     const result = await updateTrainingProgress('path-1', 'mod-1', 'not_started')
     expect(result).toBeUndefined()
+    expect(fromCallIndex).toBe(2)
   })
 
   it('includes timeSpentMinutes when provided', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null, error: null }]
+    // Call 1: fetch existing record
+    // Call 2: upsert
+    fromResults = [
+      { data: null, error: null },
+      { data: null, error: null },
+    ]
 
     const result = await updateTrainingProgress('path-1', 'mod-1', 'in_progress', 30)
     expect(result).toBeUndefined()
+    expect(fromCallIndex).toBe(2)
   })
 })
 

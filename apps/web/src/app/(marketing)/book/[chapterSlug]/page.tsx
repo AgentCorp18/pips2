@@ -5,8 +5,9 @@ import { ArrowLeft, ArrowRight, BookOpen, Lock, Mail } from 'lucide-react'
 import { BOOK_CHAPTER_MAP } from '@pips/shared'
 import { CHAPTER_PREVIEWS } from './_chapter-previews'
 import { JsonLd } from '@/components/seo/json-ld'
+import { getBaseUrl } from '@/lib/base-url'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
+const BASE_URL = getBaseUrl()
 
 type ChapterPageProps = {
   params: Promise<{ chapterSlug: string }>

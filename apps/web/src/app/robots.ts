@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
+import { getBaseUrl } from '@/lib/base-url'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
+const BASE_URL = getBaseUrl()
 
 const robots = (): MetadataRoute.Robots => ({
   rules: [

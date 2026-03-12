@@ -567,7 +567,21 @@ describe('declineInvitation', () => {
     expect(result).toEqual({ success: false, error: 'Invalid token' })
   })
 
+  it('returns error when user is not logged in', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const result = await declineInvitation('valid-token')
+
+    expect(result).toEqual({
+      success: false,
+      error: 'You must be logged in to decline an invitation',
+    })
+  })
+
   it('returns error when invitation is not found', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'user@example.com' } },
+    })
     adminResults = [{ data: null }]
 
     const result = await declineInvitation('nonexistent-token')
@@ -576,9 +590,12 @@ describe('declineInvitation', () => {
   })
 
   it('returns error when invitation is no longer pending', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'user@example.com' } },
+    })
     adminResults = [
       {
-        data: { id: 'inv-1', status: 'accepted' },
+        data: { id: 'inv-1', email: 'user@example.com', status: 'accepted' },
       },
     ]
 
@@ -587,10 +604,32 @@ describe('declineInvitation', () => {
     expect(result).toEqual({ success: false, error: 'Invitation is no longer valid' })
   })
 
+  it('returns error when email does not match', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'wrong@example.com' } },
+    })
+    adminResults = [
+      {
+        data: { id: 'inv-1', email: 'correct@example.com', status: 'pending' },
+      },
+    ]
+
+    const result = await declineInvitation('token-abc')
+
+    expect(result).toEqual({
+      success: false,
+      error:
+        'This invitation was sent to correct@example.com. Please log in with that email address.',
+    })
+  })
+
   it('declines a pending invitation successfully', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'user@example.com' } },
+    })
     adminResults = [
       // from('org_invitations').select() -> pending invitation
-      { data: { id: 'inv-1', status: 'pending' } },
+      { data: { id: 'inv-1', email: 'user@example.com', status: 'pending' } },
       // from('org_invitations').update() -> success
       { data: null, error: null },
     ]
@@ -601,8 +640,11 @@ describe('declineInvitation', () => {
   })
 
   it('returns error when update fails', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'user@example.com' } },
+    })
     adminResults = [
-      { data: { id: 'inv-1', status: 'pending' } },
+      { data: { id: 'inv-1', email: 'user@example.com', status: 'pending' } },
       // update fails
       { error: { message: 'DB error' } },
     ]

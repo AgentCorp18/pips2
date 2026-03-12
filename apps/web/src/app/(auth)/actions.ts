@@ -8,6 +8,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from '@/lib/validations'
+import { getBaseUrl } from '@/lib/base-url'
 
 export type AuthActionState = {
   error?: string
@@ -90,8 +91,8 @@ export const signup = async (
   const redirectTo = (formData.get('redirect') as string) ?? undefined
   const loginUrl =
     redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/login?redirect=${encodeURIComponent(redirectTo)}`
-      : `${process.env.NEXT_PUBLIC_APP_URL}/login`
+      ? `${getBaseUrl()}/login?redirect=${encodeURIComponent(redirectTo)}`
+      : `${getBaseUrl()}/login`
 
   const { error } = await supabase.auth.signUp({
     email: result.data.email,
@@ -136,7 +137,7 @@ export const forgotPassword = async (
 
   const supabase = await createClient()
   const { error } = await supabase.auth.resetPasswordForEmail(result.data.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
+    redirectTo: `${getBaseUrl()}/reset-password`,
   })
 
   if (error) {

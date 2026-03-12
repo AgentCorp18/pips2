@@ -6,6 +6,7 @@ import { requirePermission } from '@/lib/permissions'
 import { canManageRole, ROLE_LABELS, type OrgRole } from '@pips/shared'
 import { sendEmail } from '@/lib/email/send'
 import { invitationTemplate } from '@/lib/email/invitation'
+import { getBaseUrl } from '@/lib/base-url'
 
 interface ActionResult {
   success: boolean
@@ -221,7 +222,7 @@ export const inviteMember = async (
     }
 
     // Send invitation email (non-blocking — don't fail the action if email fails)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const baseUrl = getBaseUrl()
     const inviteUrl = `${baseUrl}/invite/${invitation.token}`
 
     const html = invitationTemplate({

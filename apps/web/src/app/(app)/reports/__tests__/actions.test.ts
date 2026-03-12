@@ -46,10 +46,15 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+vi.mock('@/lib/permissions', () => ({
+  requirePermission: vi.fn().mockResolvedValue('admin'),
+}))
+
 /* ============================================================
    Import after mocks
    ============================================================ */
 
+import { requirePermission } from '@/lib/permissions'
 import {
   getReportsHubStats,
   getProjectHealthKpis,
@@ -68,6 +73,14 @@ describe('getReportsHubStats', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+  })
+
+  it('throws when caller is not a member of the org', async () => {
+    vi.mocked(requirePermission).mockRejectedValue(new Error('Not a member of this organization'))
+
+    await expect(getReportsHubStats('org-1')).rejects.toThrow('Not a member of this organization')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'data.view')
   })
 
   it('returns hub stats with counts from parallel queries', async () => {

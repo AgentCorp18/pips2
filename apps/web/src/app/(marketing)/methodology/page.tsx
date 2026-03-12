@@ -3,8 +3,9 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { PIPS_STEPS, STEP_CONTENT } from '@pips/shared'
 import { JsonLd } from '@/components/seo/json-ld'
+import { getBaseUrl } from '@/lib/base-url'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'
+const BASE_URL = getBaseUrl()
 
 const organizationJsonLd = {
   '@context': 'https://schema.org',

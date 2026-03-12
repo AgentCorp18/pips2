@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
@@ -11,6 +12,33 @@ export type FormActionResult = {
   error?: string
 }
 
+const saveFormDataSchema = z.object({
+  projectId: z.string().uuid(),
+  stepNumber: z.number().int().min(1).max(6),
+  formType: z.enum([
+    'balance_sheet',
+    'before_after',
+    'brainstorming',
+    'brainwriting',
+    'checksheet',
+    'criteria_matrix',
+    'evaluation',
+    'fishbone',
+    'five_why',
+    'force_field',
+    'impact_assessment',
+    'implementation_checklist',
+    'implementation_plan',
+    'lessons_learned',
+    'milestone_tracker',
+    'paired_comparisons',
+    'problem_statement',
+    'raci',
+    'root_cause',
+  ]),
+  data: z.record(z.string(), z.unknown()),
+})
+
 /** Upsert form data (JSONB) into project_forms */
 export const saveFormData = async (
   projectId: string,
@@ -18,6 +46,10 @@ export const saveFormData = async (
   formType: string,
   data: Record<string, unknown>,
 ): Promise<FormActionResult> => {
+  const parsed = saveFormDataSchema.safeParse({ projectId, stepNumber, formType, data })
+  if (!parsed.success) {
+    return { success: false, error: 'Invalid input' }
+  }
   const supabase = await createClient()
 
   const {
