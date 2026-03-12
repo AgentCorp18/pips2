@@ -61,7 +61,6 @@ const statusConfig: Record<
 export const MilestoneTrackerForm = ({ projectId, initialData }: Props) => {
   const [data, setData] = useState<MilestoneTrackerData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
 
   const calcProgress = (milestones: MilestoneTrackerData['milestones']) => {
     if (milestones.length === 0) return 0
@@ -77,7 +76,6 @@ export const MilestoneTrackerForm = ({ projectId, initialData }: Props) => {
     const overallProgress = calcProgress(next.milestones)
     setData({ ...next, overallProgress })
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
@@ -165,7 +163,6 @@ export const MilestoneTrackerForm = ({ projectId, initialData }: Props) => {
       stepNumber={5}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <div className="space-y-6">
         {/* Progress bar */}

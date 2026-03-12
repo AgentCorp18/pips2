@@ -33,11 +33,84 @@ type Props = {
   initialData: RaciData | null
 }
 
-const defaultData: RaciData = {
-  activities: [''],
-  people: [''],
-  matrix: {},
+/* Internal types with stable IDs for React keys */
+
+type InternalItem = {
+  id: string
+  value: string
 }
+
+/**
+ * Internal matrix keyed by activityId -> personId -> RaciValue.
+ * This avoids corruption when duplicate names exist.
+ */
+type InternalMatrix = Record<string, Record<string, RaciValue>>
+
+type InternalData = {
+  activities: InternalItem[]
+  people: InternalItem[]
+  matrix: InternalMatrix
+}
+
+/* Helpers to convert between schema format and internal format */
+
+const toInternal = (data: RaciData): InternalData => {
+  const activities: InternalItem[] = data.activities.map((v) => ({
+    id: crypto.randomUUID(),
+    value: v,
+  }))
+  const people: InternalItem[] = data.people.map((v) => ({
+    id: crypto.randomUUID(),
+    value: v,
+  }))
+
+  const activityNameToId = new Map(activities.map((a) => [a.value, a.id]))
+  const personNameToId = new Map(people.map((p) => [p.value, p.id]))
+
+  const matrix: InternalMatrix = {}
+  for (const [activityName, assignments] of Object.entries(data.matrix)) {
+    const activityId = activityNameToId.get(activityName)
+    if (activityId === undefined) continue
+    matrix[activityId] = {}
+    for (const [personName, raciVal] of Object.entries(assignments)) {
+      const personId = personNameToId.get(personName)
+      if (personId !== undefined) {
+        matrix[activityId][personId] = raciVal as RaciValue
+      }
+    }
+  }
+
+  return { activities, people, matrix }
+}
+
+const fromInternal = (internal: InternalData): RaciData => {
+  const activityIdToName = new Map(internal.activities.map((a) => [a.id, a.value]))
+  const personIdToName = new Map(internal.people.map((p) => [p.id, p.value]))
+
+  const activities = internal.activities.map((a) => a.value)
+  const people = internal.people.map((p) => p.value)
+
+  const matrix: RaciData['matrix'] = {}
+  for (const [activityId, assignments] of Object.entries(internal.matrix)) {
+    const activityName = activityIdToName.get(activityId)
+    if (activityName === undefined) continue
+    matrix[activityName] = {}
+    for (const [personId, raciVal] of Object.entries(assignments)) {
+      const personName = personIdToName.get(personId)
+      if (personName !== undefined) {
+        matrix[activityName][personName] = raciVal
+      }
+    }
+  }
+
+  return { activities, people, matrix }
+}
+
+const makeDefaultInternal = (): InternalData => ({
+  activities: [{ id: crypto.randomUUID(), value: '' }],
+  people: [{ id: crypto.randomUUID(), value: '' }],
+  matrix: {},
+})
 
 const raciColors: Record<string, string> = {
   R: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -54,22 +127,23 @@ const raciLabels: Record<string, string> = {
 }
 
 export const RaciForm = ({ projectId, initialData }: Props) => {
-  const [data, setData] = useState<RaciData>(initialData ?? defaultData)
+  const [internal, setInternal] = useState<InternalData>(() =>
+    initialData ? toInternal(initialData) : makeDefaultInternal(),
+  )
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
 
-  const update = (next: RaciData) => {
-    setData(next)
+  const update = (next: InternalData) => {
+    setInternal(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
+    const schemaData = fromInternal(internal)
     const result = await saveFormData(
       projectId,
       4,
       'raci',
-      data as unknown as Record<string, unknown>,
+      schemaData as unknown as Record<string, unknown>,
     )
     if (result.error) {
       toast.error(result.error)
@@ -77,81 +151,70 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
     }
     setDirty(false)
     return { success: true }
-  }, [projectId, data])
+  }, [projectId, internal])
 
   const addActivity = () => {
-    update({ ...data, activities: [...data.activities, ''] })
+    update({
+      ...internal,
+      activities: [...internal.activities, { id: crypto.randomUUID(), value: '' }],
+    })
   }
 
-  const removeActivity = (idx: number) => {
-    const activity = data.activities[idx] ?? ''
-    const matrix = { ...data.matrix }
-    delete matrix[activity]
+  const removeActivity = (id: string) => {
+    const matrix = { ...internal.matrix }
+    delete matrix[id]
     update({
-      ...data,
-      activities: data.activities.filter((_, i) => i !== idx),
+      ...internal,
+      activities: internal.activities.filter((a) => a.id !== id),
       matrix,
     })
   }
 
-  const updateActivity = (idx: number, value: string) => {
-    const oldName = data.activities[idx] ?? ''
-    const activities = data.activities.map((a, i) => (i === idx ? value : a))
-    const matrix = { ...data.matrix }
-    if (oldName !== value && oldName in matrix) {
-      matrix[value] = matrix[oldName] ?? {}
-      delete matrix[oldName]
-    }
-    update({ ...data, activities, matrix })
+  const updateActivity = (id: string, value: string) => {
+    update({
+      ...internal,
+      activities: internal.activities.map((a) => (a.id === id ? { ...a, value } : a)),
+    })
   }
 
   const addPerson = () => {
-    update({ ...data, people: [...data.people, ''] })
+    update({ ...internal, people: [...internal.people, { id: crypto.randomUUID(), value: '' }] })
   }
 
-  const removePerson = (idx: number) => {
-    const person = data.people[idx] ?? ''
-    const matrix: RaciData['matrix'] = {}
-    for (const [activity, assignments] of Object.entries(data.matrix)) {
+  const removePerson = (id: string) => {
+    const matrix: InternalMatrix = {}
+    for (const [activityId, assignments] of Object.entries(internal.matrix)) {
       const copy = { ...assignments }
-      delete copy[person]
-      matrix[activity] = copy
+      delete copy[id]
+      matrix[activityId] = copy
     }
     update({
-      ...data,
-      people: data.people.filter((_, i) => i !== idx),
+      ...internal,
+      people: internal.people.filter((p) => p.id !== id),
       matrix,
     })
   }
 
-  const updatePerson = (idx: number, value: string) => {
-    const oldName = data.people[idx] ?? ''
-    const people = data.people.map((p, i) => (i === idx ? value : p))
-    const matrix: RaciData['matrix'] = {}
-    for (const [activity, assignments] of Object.entries(data.matrix)) {
-      const copy = { ...assignments }
-      if (oldName !== value && oldName in copy) {
-        copy[value] = copy[oldName] ?? ''
-        delete copy[oldName]
-      }
-      matrix[activity] = copy
-    }
-    update({ ...data, people, matrix })
+  const updatePerson = (id: string, value: string) => {
+    update({
+      ...internal,
+      people: internal.people.map((p) => (p.id === id ? { ...p, value } : p)),
+    })
   }
 
-  const setRaci = (activity: string, person: string, value: RaciValue) => {
-    const activityRow = data.matrix[activity] ?? {}
+  const setRaci = (activityId: string, personId: string, value: RaciValue) => {
+    const activityRow = internal.matrix[activityId] ?? {}
     update({
-      ...data,
+      ...internal,
       matrix: {
-        ...data.matrix,
-        [activity]: { ...activityRow, [person]: value },
+        ...internal.matrix,
+        [activityId]: { ...activityRow, [personId]: value },
       },
     })
   }
 
-  const getRaci = (activity: string, person: string): RaciValue =>
-    data.matrix[activity]?.[person] ?? ''
+  const getRaci = (activityId: string, personId: string): RaciValue =>
+    internal.matrix[activityId]?.[personId] ?? ''
 
   return (
     <FormShell
@@ -160,10 +223,9 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
       stepNumber={4}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <RaciFields
-        data={data}
+        internal={internal}
         getRaci={getRaci}
         setRaci={setRaci}
         updateActivity={updateActivity}
@@ -180,19 +242,19 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
 /* ---- Inner fields component (reads view mode from context) ---- */
 
 type RaciFieldsProps = {
-  data: RaciData
-  getRaci: (activity: string, person: string) => RaciValue
-  setRaci: (activity: string, person: string, value: RaciValue) => void
-  updateActivity: (idx: number, value: string) => void
-  removeActivity: (idx: number) => void
+  internal: InternalData
+  getRaci: (activityId: string, personId: string) => RaciValue
+  setRaci: (activityId: string, personId: string, value: RaciValue) => void
+  updateActivity: (id: string, value: string) => void
+  removeActivity: (id: string) => void
   addActivity: () => void
-  updatePerson: (idx: number, value: string) => void
-  removePerson: (idx: number) => void
+  updatePerson: (id: string, value: string) => void
+  removePerson: (id: string) => void
   addPerson: () => void
 }
 
 const RaciFields = ({
-  data,
+  internal,
   getRaci,
   setRaci,
   updateActivity,
@@ -231,20 +293,24 @@ const RaciFields = ({
           <TableHeader>
             <TableRow>
               <TableHead className="min-w-[200px]">Activity</TableHead>
-              {data.people.map((person, pIdx) => (
-                <TableHead key={pIdx} className="min-w-[130px]">
+              {internal.people.map((person) => (
+                <TableHead key={person.id} className="min-w-[130px]">
                   {isView ? (
-                    <span className="text-xs font-medium">{person || 'Unnamed'}</span>
+                    <span className="text-xs font-medium">{person.value || 'Unnamed'}</span>
                   ) : (
                     <div className="flex items-center gap-1">
                       <Input
-                        value={person}
-                        onChange={(e) => updatePerson(pIdx, e.target.value)}
+                        value={person.value}
+                        onChange={(e) => updatePerson(person.id, e.target.value)}
                         placeholder="Person"
                         className="h-7 text-xs"
                       />
-                      {data.people.length > 1 && (
-                        <Button variant="ghost" size="icon-xs" onClick={() => removePerson(pIdx)}>
+                      {internal.people.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => removePerson(person.id)}
+                        >
                           <Trash2 className="size-3 text-muted-foreground" />
                         </Button>
                       )}
@@ -256,38 +322,42 @@ const RaciFields = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.activities.map((activity, aIdx) => (
-              <TableRow key={aIdx}>
+            {internal.activities.map((activity) => (
+              <TableRow key={activity.id}>
                 <TableCell>
                   {isView ? (
                     <span className="text-xs font-medium text-[var(--color-text-primary)]">
-                      {activity || 'Unnamed activity'}
+                      {activity.value || 'Unnamed activity'}
                     </span>
                   ) : (
                     <Input
-                      value={activity}
-                      onChange={(e) => updateActivity(aIdx, e.target.value)}
+                      value={activity.value}
+                      onChange={(e) => updateActivity(activity.id, e.target.value)}
                       placeholder="Activity / task"
                       className="h-7 text-xs"
                     />
                   )}
                 </TableCell>
-                {data.people.map((person, pIdx) => (
-                  <TableCell key={pIdx}>
+                {internal.people.map((person) => (
+                  <TableCell key={person.id}>
                     {isView ? (
-                      <RaciViewCell value={getRaci(activity, person)} />
+                      <RaciViewCell value={getRaci(activity.id, person.id)} />
                     ) : (
                       <RaciSelect
-                        value={getRaci(activity, person)}
-                        onChange={(v) => setRaci(activity, person, v)}
+                        value={getRaci(activity.id, person.id)}
+                        onChange={(v) => setRaci(activity.id, person.id, v)}
                       />
                     )}
                   </TableCell>
                 ))}
                 {!isView && (
                   <TableCell>
-                    {data.activities.length > 1 && (
-                      <Button variant="ghost" size="icon-xs" onClick={() => removeActivity(aIdx)}>
+                    {internal.activities.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => removeActivity(activity.id)}
+                      >
                         <Trash2 className="size-3 text-muted-foreground" />
                       </Button>
                     )}

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
+import { z } from 'zod'
 import { FormShell, type FormShellProps } from '../form-shell'
 
 /* ============================================================
@@ -341,5 +342,126 @@ describe('FormShell manual save', () => {
     await act(async () => {
       resolveSave({ success: true })
     })
+  })
+
+  it('shows error toast (not success toast) when manual save fails', async () => {
+    mockSaveFormData.mockResolvedValue({ success: false, error: 'Server error' })
+
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Error test' }} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+
+    await waitFor(() => {
+      expect(mockToast.error).toHaveBeenCalledWith('Server error')
+    })
+    expect(mockToast.success).not.toHaveBeenCalled()
+  })
+})
+
+/* ============================================================
+   Tests — Concurrent save protection (AbortController)
+   ============================================================ */
+
+describe('FormShell concurrent save protection', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    mockSaveFormData.mockReset()
+    mockToast.error.mockReset()
+    mockToast.success.mockReset()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('suppresses stale error from a first auto-save aborted by a second auto-save', async () => {
+    // First auto-save is slow and eventually fails with an error.
+    // Before it completes, a second auto-save starts (cancelling the first).
+    // When the first finally resolves with an error, the abort guard should
+    // prevent the error toast — only the second save's outcome counts.
+    let resolveFirst!: (val: { success: boolean; error?: string }) => void
+
+    mockSaveFormData
+      .mockReturnValueOnce(
+        new Promise((r) => {
+          resolveFirst = r
+        }),
+      )
+      .mockResolvedValueOnce({ success: true })
+
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+
+    // Trigger first auto-save after 2s debounce
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'First' }} />)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100)
+    })
+    // First save is now in-flight (saveState === 'saving')
+
+    // Immediately change data again to queue second auto-save
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Second' }} />)
+    // Advance 2s — second auto-save fires, aborting the first
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100)
+    })
+
+    // Now resolve the first save with a failure — should be silently ignored
+    await act(async () => {
+      resolveFirst({ success: false, error: 'Stale network error' })
+    })
+
+    // The error from the aborted first save must NOT be shown
+    expect(mockToast.error).not.toHaveBeenCalled()
+
+    // saveFormData was called twice
+    expect(mockSaveFormData).toHaveBeenCalledTimes(2)
+  })
+})
+
+/* ============================================================
+   Tests — Zod schema validation of initialData (BUG 3)
+   ============================================================ */
+
+describe('FormShell schema validation', () => {
+  beforeEach(() => {
+    mockSaveFormData.mockReset()
+    mockToast.error.mockReset()
+    mockToast.success.mockReset()
+  })
+
+  const testSchema = z.object({
+    cause: z.string().default('default-cause'),
+    severity: z.number().default(1),
+  })
+
+  it('uses data as-is when it passes schema validation', () => {
+    render(
+      <FormShell
+        {...dataDrivenProps}
+        data={{ cause: 'valid-cause', severity: 3 }}
+        schema={testSchema}
+      />,
+    )
+    // No error thrown; data is accepted
+    expect(screen.getByTestId('child-content')).toBeInTheDocument()
+  })
+
+  it('falls back to schema defaults when data has an invalid shape', () => {
+    // Data with a wrong type for 'severity' — should fail safeParse
+    render(
+      <FormShell
+        {...dataDrivenProps}
+        data={{ cause: 'valid', severity: 'not-a-number' }}
+        schema={testSchema}
+      />,
+    )
+    // Component should render without crashing (fallback to defaults)
+    expect(screen.getByTestId('child-content')).toBeInTheDocument()
+  })
+
+  it('renders without schema prop (backward compatible)', () => {
+    render(<FormShell {...dataDrivenProps} data={{ cause: 'no schema' }} />)
+    expect(screen.getByTestId('child-content')).toBeInTheDocument()
   })
 })

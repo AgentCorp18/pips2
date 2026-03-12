@@ -24,28 +24,106 @@ type Props = {
   initialData: CriteriaMatrixData | null
 }
 
-const defaultData: CriteriaMatrixData = {
-  criteria: [{ name: 'Cost', weight: 5, description: 'Total implementation cost' }],
-  solutions: [{ name: 'Solution A', scores: {} }],
+/* Internal types with stable IDs for React keys */
+
+type InternalCriterion = {
+  id: string
+  name: string
+  weight: number
+  description: string
 }
 
-export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
-  const [data, setData] = useState<CriteriaMatrixData>(initialData ?? defaultData)
-  const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
+type InternalSolution = {
+  id: string
+  name: string
+  /** scores keyed by criterion ID */
+  scores: Record<string, number>
+}
 
-  const update = (next: CriteriaMatrixData) => {
-    setData(next)
+type InternalData = {
+  criteria: InternalCriterion[]
+  solutions: InternalSolution[]
+}
+
+/* Helpers to convert between schema format and internal format */
+
+const toInternal = (data: CriteriaMatrixData): InternalData => {
+  const criteria: InternalCriterion[] = data.criteria.map((c) => ({
+    id: crypto.randomUUID(),
+    name: c.name,
+    weight: c.weight,
+    description: c.description,
+  }))
+
+  const nameToId = new Map(criteria.map((c) => [c.name, c.id]))
+
+  const solutions: InternalSolution[] = data.solutions.map((s) => {
+    const scores: Record<string, number> = {}
+    for (const [name, score] of Object.entries(s.scores)) {
+      const id = nameToId.get(name)
+      if (id !== undefined) {
+        scores[id] = score
+      }
+    }
+    return { id: crypto.randomUUID(), name: s.name, scores }
+  })
+
+  return { criteria, solutions }
+}
+
+const fromInternal = (internal: InternalData): CriteriaMatrixData => {
+  const idToName = new Map(internal.criteria.map((c) => [c.id, c.name]))
+
+  const criteria = internal.criteria.map(({ name, weight, description }) => ({
+    name,
+    weight,
+    description,
+  }))
+
+  const solutions = internal.solutions.map((s) => {
+    const scores: Record<string, number> = {}
+    for (const [id, score] of Object.entries(s.scores)) {
+      const name = idToName.get(id)
+      if (name !== undefined && score > 0) {
+        scores[name] = score
+      }
+    }
+    return { name: s.name, scores }
+  })
+
+  return { criteria, solutions }
+}
+
+const makeDefaultInternal = (): InternalData => ({
+  criteria: [
+    {
+      id: crypto.randomUUID(),
+      name: 'Cost',
+      weight: 5,
+      description: 'Total implementation cost',
+    },
+  ],
+  solutions: [{ id: crypto.randomUUID(), name: 'Solution A', scores: {} }],
+})
+
+export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
+  const [internal, setInternal] = useState<InternalData>(() =>
+    initialData ? toInternal(initialData) : makeDefaultInternal(),
+  )
+  const [dirty, setDirty] = useState(false)
+
+  const update = (next: InternalData) => {
+    setInternal(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
+    const schemaData = fromInternal(internal)
     const result = await saveFormData(
       projectId,
       4,
       'criteria_matrix',
-      data as unknown as Record<string, unknown>,
+      schemaData as unknown as Record<string, unknown>,
     )
     if (result.error) {
       toast.error(result.error)
@@ -53,92 +131,78 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
     }
     setDirty(false)
     return { success: true }
-  }, [projectId, data])
+  }, [projectId, internal])
 
   const addCriteria = () => {
     update({
-      ...data,
-      criteria: [...data.criteria, { name: '', weight: 5, description: '' }],
+      ...internal,
+      criteria: [
+        ...internal.criteria,
+        { id: crypto.randomUUID(), name: '', weight: 5, description: '' },
+      ],
     })
   }
 
-  const removeCriteria = (idx: number) => {
-    const name = data.criteria[idx]?.name ?? ''
-    const nextSolutions = data.solutions.map((s) => {
-      const scores = { ...s.scores }
-      delete scores[name]
-      return { ...s, scores }
-    })
+  const removeCriteria = (id: string) => {
     update({
-      ...data,
-      criteria: data.criteria.filter((_, i) => i !== idx),
-      solutions: nextSolutions,
+      ...internal,
+      criteria: internal.criteria.filter((c) => c.id !== id),
+      solutions: internal.solutions.map((s) => {
+        const scores = { ...s.scores }
+        delete scores[id]
+        return { ...s, scores }
+      }),
     })
   }
 
   const updateCriteria = (
-    idx: number,
+    id: string,
     field: 'name' | 'weight' | 'description',
     value: string | number,
   ) => {
-    const prev = data.criteria[idx]
-    if (!prev) return
-    const oldName = prev.name
-
-    const next = data.criteria.map((c, i) => (i === idx ? { ...c, [field]: value } : c))
-
-    let nextSolutions = data.solutions
-    if (field === 'name' && typeof value === 'string' && oldName !== value) {
-      nextSolutions = data.solutions.map((s) => {
-        const scores = { ...s.scores }
-        if (oldName in scores) {
-          scores[value] = scores[oldName] ?? 0
-          delete scores[oldName]
-        }
-        return { ...s, scores }
-      })
-    }
-
-    update({ ...data, criteria: next, solutions: nextSolutions })
+    update({
+      ...internal,
+      criteria: internal.criteria.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
+    })
   }
 
   const addSolution = () => {
     update({
-      ...data,
-      solutions: [...data.solutions, { name: '', scores: {} }],
+      ...internal,
+      solutions: [...internal.solutions, { id: crypto.randomUUID(), name: '', scores: {} }],
     })
   }
 
-  const removeSolution = (idx: number) => {
+  const removeSolution = (id: string) => {
     update({
-      ...data,
-      solutions: data.solutions.filter((_, i) => i !== idx),
+      ...internal,
+      solutions: internal.solutions.filter((s) => s.id !== id),
     })
   }
 
-  const updateSolutionName = (idx: number, name: string) => {
+  const updateSolutionName = (id: string, name: string) => {
     update({
-      ...data,
-      solutions: data.solutions.map((s, i) => (i === idx ? { ...s, name } : s)),
+      ...internal,
+      solutions: internal.solutions.map((s) => (s.id === id ? { ...s, name } : s)),
     })
   }
 
-  const updateScore = (solIdx: number, criteriaName: string, score: number) => {
+  const updateScore = (solutionId: string, criterionId: string, score: number) => {
     update({
-      ...data,
-      solutions: data.solutions.map((s, i) =>
-        i === solIdx ? { ...s, scores: { ...s.scores, [criteriaName]: score } } : s,
+      ...internal,
+      solutions: internal.solutions.map((s) =>
+        s.id === solutionId ? { ...s, scores: { ...s.scores, [criterionId]: score } } : s,
       ),
     })
   }
 
-  const weightedTotal = (solution: CriteriaMatrixData['solutions'][number]) =>
-    data.criteria.reduce((sum, c) => {
-      const score = solution.scores[c.name] ?? 0
+  const weightedTotal = (solution: InternalSolution) =>
+    internal.criteria.reduce((sum, c) => {
+      const score = solution.scores[c.id] ?? 0
       return sum + score * c.weight
     }, 0)
 
-  const totals = data.solutions.map(weightedTotal)
+  const totals = internal.solutions.map(weightedTotal)
   const maxTotal = Math.max(...totals, 0)
 
   return (
@@ -148,10 +212,9 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
       stepNumber={4}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <CriteriaMatrixFields
-        data={data}
+        internal={internal}
         totals={totals}
         maxTotal={maxTotal}
         addCriteria={addCriteria}
@@ -169,24 +232,24 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
 /* ---- Inner fields component (reads view mode from context) ---- */
 
 type CriteriaMatrixFieldsProps = {
-  data: CriteriaMatrixData
+  internal: InternalData
   totals: number[]
   maxTotal: number
   addCriteria: () => void
-  removeCriteria: (idx: number) => void
+  removeCriteria: (id: string) => void
   updateCriteria: (
-    idx: number,
+    id: string,
     field: 'name' | 'weight' | 'description',
     value: string | number,
   ) => void
   addSolution: () => void
-  removeSolution: (idx: number) => void
-  updateSolutionName: (idx: number, name: string) => void
-  updateScore: (solIdx: number, criteriaName: string, score: number) => void
+  removeSolution: (id: string) => void
+  updateSolutionName: (id: string, name: string) => void
+  updateScore: (solutionId: string, criterionId: string, score: number) => void
 }
 
 const CriteriaMatrixFields = ({
-  data,
+  internal,
   totals,
   maxTotal,
   addCriteria,
@@ -215,20 +278,24 @@ const CriteriaMatrixFields = ({
             <TableRow>
               <TableHead className="min-w-[180px]">Criteria</TableHead>
               <TableHead className="w-20 text-center">Weight</TableHead>
-              {data.solutions.map((sol, sIdx) => (
-                <TableHead key={sIdx} className="min-w-[140px]">
+              {internal.solutions.map((sol) => (
+                <TableHead key={sol.id} className="min-w-[140px]">
                   {isView ? (
                     <span className="text-xs font-medium">{sol.name || 'Unnamed'}</span>
                   ) : (
                     <div className="flex items-center gap-1">
                       <Input
                         value={sol.name}
-                        onChange={(e) => updateSolutionName(sIdx, e.target.value)}
+                        onChange={(e) => updateSolutionName(sol.id, e.target.value)}
                         placeholder="Solution name"
                         className="h-7 text-xs"
                       />
-                      {data.solutions.length > 1 && (
-                        <Button variant="ghost" size="icon-xs" onClick={() => removeSolution(sIdx)}>
+                      {internal.solutions.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => removeSolution(sol.id)}
+                        >
                           <Trash2 className="size-3 text-muted-foreground" />
                         </Button>
                       )}
@@ -240,8 +307,8 @@ const CriteriaMatrixFields = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.criteria.map((criterion, cIdx) => (
-              <TableRow key={cIdx}>
+            {internal.criteria.map((criterion) => (
+              <TableRow key={criterion.id}>
                 <TableCell>
                   {isView ? (
                     <span className="text-xs font-medium text-[var(--color-text-primary)]">
@@ -250,7 +317,7 @@ const CriteriaMatrixFields = ({
                   ) : (
                     <Input
                       value={criterion.name}
-                      onChange={(e) => updateCriteria(cIdx, 'name', e.target.value)}
+                      onChange={(e) => updateCriteria(criterion.id, 'name', e.target.value)}
                       placeholder="Criterion name"
                       className="h-7 text-xs"
                     />
@@ -268,28 +335,32 @@ const CriteriaMatrixFields = ({
                       max={10}
                       value={criterion.weight}
                       onChange={(e) =>
-                        updateCriteria(cIdx, 'weight', parseInt(e.target.value, 10) || 1)
+                        updateCriteria(criterion.id, 'weight', parseInt(e.target.value, 10) || 1)
                       }
                       className="h-7 w-16 text-center text-xs"
                     />
                   )}
                 </TableCell>
-                {data.solutions.map((sol, sIdx) => (
-                  <TableCell key={sIdx}>
+                {internal.solutions.map((sol) => (
+                  <TableCell key={sol.id}>
                     {isView ? (
-                      <ScoreView value={sol.scores[criterion.name] ?? 0} />
+                      <ScoreView value={sol.scores[criterion.id] ?? 0} />
                     ) : (
                       <ScoreInput
-                        value={sol.scores[criterion.name] ?? 0}
-                        onChange={(v) => updateScore(sIdx, criterion.name, v)}
+                        value={sol.scores[criterion.id] ?? 0}
+                        onChange={(v) => updateScore(sol.id, criterion.id, v)}
                       />
                     )}
                   </TableCell>
                 ))}
                 {!isView && (
                   <TableCell>
-                    {data.criteria.length > 1 && (
-                      <Button variant="ghost" size="icon-xs" onClick={() => removeCriteria(cIdx)}>
+                    {internal.criteria.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => removeCriteria(criterion.id)}
+                      >
                         <Trash2 className="size-3 text-muted-foreground" />
                       </Button>
                     )}
@@ -303,12 +374,12 @@ const CriteriaMatrixFields = ({
               <TableCell colSpan={2} className="text-right">
                 Weighted Total
               </TableCell>
-              {data.solutions.map((_sol, sIdx) => {
+              {internal.solutions.map((sol, sIdx) => {
                 const total = totals[sIdx] ?? 0
                 const isWinner = total > 0 && total === maxTotal
                 return (
                   <TableCell
-                    key={sIdx}
+                    key={sol.id}
                     className={cn(
                       'text-center text-base',
                       isWinner && 'text-[var(--color-success)] font-bold',

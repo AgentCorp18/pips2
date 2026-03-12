@@ -24,13 +24,11 @@ const defaultData: ImplementationChecklistData = {
 export const ImplementationChecklistForm = ({ projectId, initialData }: Props) => {
   const [data, setData] = useState<ImplementationChecklistData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
   const [isCreatingTickets, startTicketTransition] = useTransition()
 
   const update = (next: ImplementationChecklistData) => {
     setData(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
@@ -126,7 +124,6 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
       stepNumber={5}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <ChecklistFields
         grouped={grouped}
