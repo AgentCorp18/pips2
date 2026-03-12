@@ -221,6 +221,14 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
 export const getComments = async (ticketId: string) => {
   const supabase = await createClient()
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('comments')
     .select(

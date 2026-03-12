@@ -149,6 +149,12 @@ export const inviteMember = async (
   role: OrgRole,
 ): Promise<ActionResult> => {
   try {
+    // Validate email at runtime — the server action can be called with arbitrary input
+    const emailResult = z.string().email().safeParse(email)
+    if (!emailResult.success) {
+      return { success: false, error: 'Invalid email address' }
+    }
+
     // Validate role at runtime — the server action can be called with arbitrary input
     const roleValidation = orgRoleSchema.safeParse(role)
     if (!roleValidation.success) {

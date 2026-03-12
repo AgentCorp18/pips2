@@ -288,6 +288,12 @@ export const deleteTicket = async (ticketId: string): Promise<TicketActionState>
    ============================================================ */
 
 export const getTickets = async (orgId: string, rawFilters?: Record<string, unknown>) => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return { tickets: [], total: 0 }
+  }
+
   const filters = ticketFiltersSchema.parse(rawFilters ?? {})
 
   const supabase = await createClient()
@@ -417,6 +423,12 @@ export const getTicketsForBoard = async (
     type?: string[]
   },
 ) => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return []
+  }
+
   const supabase = await createClient()
 
   let query = supabase
@@ -629,7 +641,11 @@ export const setParentTicket = async (
     return { error: 'Tickets must belong to the same organization' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.update')
+  try {
+    await requirePermission(ticket.org_id, 'ticket.update')
+  } catch {
+    return { error: 'Insufficient permissions' }
+  }
 
   // Helper to fetch a ticket's parent_id (breaks TS circular inference)
   const fetchParentId = async (id: string): Promise<string | null> => {
@@ -711,7 +727,11 @@ export const removeParentTicket = async (ticketId: string): Promise<TicketAction
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.update')
+  try {
+    await requirePermission(ticket.org_id, 'ticket.update')
+  } catch {
+    return { error: 'Insufficient permissions' }
+  }
 
   const previousParentId = ticket.parent_id
 

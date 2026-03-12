@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createProjectSchema } from '@/lib/validations'
 import { trackServerEvent } from '@/lib/analytics'
+import { requirePermission } from '@/lib/permissions'
 
 export type CreateProjectActionState = {
   error?: string
@@ -56,6 +57,12 @@ export const createProject = async (
 
   if (!membership) {
     return { error: 'You must belong to an organization to create a project' }
+  }
+
+  try {
+    await requirePermission(membership.org_id, 'project.create')
+  } catch {
+    return { error: 'Insufficient permissions' }
   }
 
   // Create project
