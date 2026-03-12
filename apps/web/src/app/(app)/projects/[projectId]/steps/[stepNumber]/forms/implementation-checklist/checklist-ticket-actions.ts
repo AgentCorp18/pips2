@@ -39,7 +39,7 @@ export const createTicketsFromChecklist = async (
     .eq('user_id', user.id)
     .order('joined_at', { ascending: true })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     return { created: 0, error: 'You must belong to an organization' }

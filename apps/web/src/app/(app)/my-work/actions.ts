@@ -19,8 +19,18 @@ export type GroupedTickets = {
   later: MyWorkTicket[]
 }
 
-export const getMyTickets = async (userId: string, orgId: string): Promise<GroupedTickets> => {
+export const getMyTickets = async (orgId: string): Promise<GroupedTickets> => {
   const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { overdue: [], dueToday: [], thisWeek: [], later: [] }
+  }
+
+  const userId = user.id
 
   const { data: tickets } = await supabase
     .from('tickets')

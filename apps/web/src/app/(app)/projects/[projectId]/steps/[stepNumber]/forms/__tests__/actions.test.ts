@@ -45,6 +45,10 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
+vi.mock('@/lib/permissions', () => ({
+  requirePermission: vi.fn().mockResolvedValue('member'),
+}))
+
 /* ============================================================
    Import after mocks
    ============================================================ */
@@ -71,16 +75,36 @@ describe('saveFormData', () => {
 
   it('returns success when upsert succeeds', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // from('project_forms').upsert() -> success
-    fromResults = [{ error: null }]
+    fromResults = [
+      // Call 0: from('projects').select('org_id') -> project found
+      { data: { org_id: 'org-1' } },
+      // Call 1: from('project_forms').upsert() -> success
+      { error: null },
+    ]
 
     const result = await saveFormData('proj-1', 2, 'fishbone', { categories: [] })
     expect(result).toEqual({ success: true })
   })
 
+  it('returns error when project is not found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // Call 0: from('projects').select('org_id') -> not found
+      { data: null },
+    ]
+
+    const result = await saveFormData('proj-unknown', 1, 'problem_statement', {})
+    expect(result).toEqual({ success: false, error: 'Project not found' })
+  })
+
   it('returns generic error message when upsert fails (no internal details leaked)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: { message: 'duplicate key violation' } }]
+    fromResults = [
+      // Call 0: from('projects').select('org_id') -> project found
+      { data: { org_id: 'org-1' } },
+      // Call 1: from('project_forms').upsert() -> fails
+      { error: { message: 'duplicate key violation' } },
+    ]
 
     const result = await saveFormData('proj-1', 1, 'problem_statement', {})
     expect(result).toEqual({ success: false, error: 'Failed to save form data. Please try again.' })
@@ -88,7 +112,12 @@ describe('saveFormData', () => {
 
   it('can save different form types', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: null }]
+    fromResults = [
+      // Call 0: from('projects').select('org_id') -> project found
+      { data: { org_id: 'org-1' } },
+      // Call 1: from('project_forms').upsert() -> success
+      { error: null },
+    ]
 
     const result = await saveFormData('proj-1', 3, 'brainstorming', { ideas: ['idea1'] })
     expect(result).toEqual({ success: true })
@@ -96,7 +125,12 @@ describe('saveFormData', () => {
 
   it('can save form data for step 6', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: null }]
+    fromResults = [
+      // Call 0: from('projects').select('org_id') -> project found
+      { data: { org_id: 'org-1' } },
+      // Call 1: from('project_forms').upsert() -> success
+      { error: null },
+    ]
 
     const result = await saveFormData('proj-1', 6, 'lessons_learned', { notes: 'good' })
     expect(result).toEqual({ success: true })

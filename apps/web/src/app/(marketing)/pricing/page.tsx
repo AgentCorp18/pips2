@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: 'Pricing | PIPS',
   description:
     'Choose the right PIPS plan for your team. Start free with core workflow, upgrade for training, workshops, and enterprise features.',
+  alternates: {
+    canonical: '/pricing',
+  },
 }
 
 const TIERS = [
@@ -70,7 +73,7 @@ const TIERS = [
 
 export const PricingPage = () => {
   return (
-    <main className="min-h-screen">
+    <main id="main-content" className="min-h-screen">
       {/* Header */}
       <section className="relative overflow-hidden bg-[var(--color-primary-deep)] px-6 pb-16 pt-32 text-center md:px-8 md:pt-40">
         <div

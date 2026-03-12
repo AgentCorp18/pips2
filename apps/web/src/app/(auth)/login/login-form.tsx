@@ -26,6 +26,7 @@ export const LoginForm = () => {
   return (
     <Card>
       <CardHeader>
+        <h1 className="sr-only">Sign In</h1>
         <CardTitle className="text-center text-xl">Welcome back</CardTitle>
         <CardDescription className="text-center">
           Sign in to your account to continue

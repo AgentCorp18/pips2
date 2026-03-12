@@ -11,22 +11,25 @@ const dmSans = DM_Sans({
   variable: '--font-dm-sans',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
+  display: 'swap',
 })
 
 const dmSerifDisplay = DM_Serif_Display({
   variable: '--font-dm-serif-display',
   subsets: ['latin'],
   weight: ['400'],
+  display: 'swap',
 })
 
 const jetBrainsMono = JetBrains_Mono({
   variable: '--font-jetbrains-mono',
   subsets: ['latin'],
   weight: ['400', '500'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://pipsapp.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://pips-app.vercel.app'),
   title: {
     template: '%s | PIPS — Process Improvement & Problem Solving',
     default: 'PIPS — Process Improvement & Problem Solving',
@@ -56,7 +59,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'PIPS — Process Improvement & Problem Solving',
     description:
       'PIPS guides teams through 6 proven steps to identify problems, analyze root causes, and implement lasting process improvements.',
@@ -64,6 +67,9 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  alternates: {
+    canonical: '/',
   },
 }
 
@@ -80,6 +86,12 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
       <body
         className={`${dmSans.variable} ${dmSerifDisplay.variable} ${jetBrainsMono.variable} font-sans antialiased`}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-[var(--radius-md)] focus:bg-[var(--color-primary)] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline-none"
+        >
+          Skip to main content
+        </a>
         <ThemeProvider>
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster />

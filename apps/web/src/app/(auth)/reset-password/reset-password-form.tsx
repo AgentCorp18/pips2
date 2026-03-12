@@ -15,6 +15,7 @@ export const ResetPasswordForm = () => {
   return (
     <Card>
       <CardHeader>
+        <h1 className="sr-only">Set New Password</h1>
         <CardTitle className="text-center text-xl">Set new password</CardTitle>
         <CardDescription className="text-center">Enter your new password below</CardDescription>
       </CardHeader>

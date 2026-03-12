@@ -51,30 +51,42 @@ export const getAdminData = async () => {
   const supabase = await createClient()
 
   // Fetch all data in parallel
-  const [membersResult, teamsResult, projectsResult, ticketsResult, formsResult] =
-    await Promise.all([
-      supabase
-        .from('org_members')
-        .select('id, user_id, role, joined_at, profiles(full_name, email)')
-        .eq('org_id', orgId)
-        .order('joined_at', { ascending: true }),
-      supabase.from('teams').select('id, name').eq('org_id', orgId).order('name'),
-      supabase
-        .from('projects')
-        .select(
-          'id, title, status, current_step, owner_id, profiles!projects_owner_id_fkey(full_name)',
-        )
-        .eq('org_id', orgId)
-        .order('created_at', { ascending: false }),
-      supabase.from('tickets').select('id, status').eq('org_id', orgId),
-      supabase.from('project_forms').select('id').eq('org_id', orgId),
-    ])
+  const [
+    membersResult,
+    teamsResult,
+    projectsResult,
+    ticketsResult,
+    openTicketsResult,
+    formsResult,
+  ] = await Promise.all([
+    supabase
+      .from('org_members')
+      .select('id, user_id, role, joined_at, profiles(full_name, email)')
+      .eq('org_id', orgId)
+      .order('joined_at', { ascending: true }),
+    supabase.from('teams').select('id, name').eq('org_id', orgId).order('name'),
+    supabase
+      .from('projects')
+      .select(
+        'id, title, status, current_step, owner_id, profiles!projects_owner_id_fkey(full_name)',
+      )
+      .eq('org_id', orgId)
+      .order('created_at', { ascending: false }),
+    supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('org_id', orgId),
+    supabase
+      .from('tickets')
+      .select('*', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .not('status', 'in', '("done","cancelled")'),
+    supabase.from('project_forms').select('*', { count: 'exact', head: true }).eq('org_id', orgId),
+  ])
 
   const members = membersResult.data ?? []
   const teams = teamsResult.data ?? []
   const projects = projectsResult.data ?? []
-  const tickets = ticketsResult.data ?? []
-  const forms = formsResult.data ?? []
+  const ticketCount = ticketsResult.count ?? 0
+  const openTicketCount = openTicketsResult.count ?? 0
+  const formCount = formsResult.count ?? 0
 
   // Get team member counts
   const teamIds = teams.map((t) => t.id)
@@ -157,18 +169,15 @@ export const getAdminData = async () => {
   })
 
   const activeProjectCount = projects.filter((p) => p.status === 'active').length
-  const openTicketCount = tickets.filter(
-    (t) => t.status !== 'done' && t.status !== 'cancelled',
-  ).length
 
   const stats: AdminStats = {
     memberCount: members.length,
     teamCount: teams.length,
     projectCount: projects.length,
     activeProjectCount,
-    ticketCount: tickets.length,
+    ticketCount,
     openTicketCount,
-    formCount: forms.length,
+    formCount,
   }
 
   return {

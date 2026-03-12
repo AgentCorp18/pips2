@@ -155,7 +155,7 @@ export const updateTicket = async (
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.create')
+  await requirePermission(ticket.org_id, 'ticket.update')
 
   // Build update payload, strip empty strings to null
   const update: Record<string, unknown> = {}
@@ -225,7 +225,7 @@ export const deleteTicket = async (ticketId: string): Promise<TicketActionState>
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.create')
+  await requirePermission(ticket.org_id, 'ticket.delete')
 
   const { error: deleteError } = await supabase.from('tickets').delete().eq('id', ticketId)
 
@@ -431,7 +431,7 @@ export const bulkUpdateTickets = async (
     return { error: 'You must belong to an organization' }
   }
 
-  await requirePermission(membership.org_id, 'ticket.create')
+  await requirePermission(membership.org_id, 'ticket.update')
 
   const update: Record<string, unknown> = {}
   if (data.status) update.status = data.status
@@ -554,7 +554,7 @@ export const setParentTicket = async (
     return { error: 'Tickets must belong to the same organization' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.create')
+  await requirePermission(ticket.org_id, 'ticket.update')
 
   // Helper to fetch a ticket's parent_id (breaks TS circular inference)
   const fetchParentId = async (id: string): Promise<string | null> => {
@@ -636,7 +636,7 @@ export const removeParentTicket = async (ticketId: string): Promise<TicketAction
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.create')
+  await requirePermission(ticket.org_id, 'ticket.update')
 
   const previousParentId = ticket.parent_id
 
@@ -688,7 +688,7 @@ export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActi
     return { error: 'You must belong to an organization' }
   }
 
-  await requirePermission(membership.org_id, 'ticket.create')
+  await requirePermission(membership.org_id, 'ticket.delete')
 
   const { error: deleteError } = await supabase
     .from('tickets')

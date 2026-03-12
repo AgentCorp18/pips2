@@ -63,12 +63,13 @@ describe('getMyTickets', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
   })
 
   it('returns empty groups when no tickets are found', async () => {
     fromResults = [{ data: null }]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result).toEqual({
       overdue: [],
@@ -81,7 +82,7 @@ describe('getMyTickets', () => {
   it('returns empty groups when tickets array is empty', async () => {
     fromResults = [{ data: [] }]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result).toEqual({
       overdue: [],
@@ -112,7 +113,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result.overdue).toHaveLength(1)
     expect(result.overdue[0]?.title).toBe('Overdue task')
@@ -140,7 +141,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result.dueToday).toHaveLength(1)
     expect(result.dueToday[0]?.title).toBe('Today task')
@@ -164,7 +165,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result.later).toHaveLength(1)
     expect(result.later[0]?.title).toBe('No date task')
@@ -192,7 +193,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result.later).toHaveLength(1)
     expect(result.later[0]?.title).toBe('Future task')
@@ -238,7 +239,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result.overdue).toHaveLength(1)
     expect(result.dueToday).toHaveLength(1)
@@ -265,7 +266,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result.dueToday).toHaveLength(1)
     expect(result.dueToday[0]?.project).toEqual({ id: 'p-1', title: 'Project A' })
@@ -290,7 +291,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
 
     expect(result.dueToday).toHaveLength(1)
     expect(result.dueToday[0]?.project).toBeNull()
@@ -315,7 +316,7 @@ describe('getMyTickets', () => {
       },
     ]
 
-    const result = await getMyTickets('user-1', 'org-1')
+    const result = await getMyTickets('org-1')
     const ticket = result.dueToday[0]
 
     expect(ticket).toEqual({

@@ -16,6 +16,8 @@ export const PERMISSIONS = {
   'project.create': ['owner', 'admin', 'manager', 'member'],
   'project.update': ['owner', 'admin', 'manager'],
   'ticket.create': ['owner', 'admin', 'manager', 'member'],
+  'ticket.update': ['owner', 'admin', 'manager', 'member'],
+  'ticket.delete': ['owner', 'admin', 'manager'],
   'ticket.assign': ['owner', 'admin', 'manager', 'member'],
   'ticket.comment': ['owner', 'admin', 'manager', 'member'],
   'step.complete': ['owner', 'admin', 'manager'],

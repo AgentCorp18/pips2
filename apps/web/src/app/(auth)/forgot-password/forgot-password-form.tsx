@@ -23,6 +23,7 @@ export const ForgotPasswordForm = () => {
   return (
     <Card>
       <CardHeader>
+        <h1 className="sr-only">Reset Password</h1>
         <CardTitle className="text-center text-xl">Reset password</CardTitle>
         <CardDescription className="text-center">
           Enter your email and we&apos;ll send you a reset link

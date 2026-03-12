@@ -5,13 +5,16 @@ import { ArrowLeft } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Privacy Policy | PIPS',
   description: 'Privacy policy for PIPS — how we collect, use, and protect your data.',
+  alternates: {
+    canonical: '/privacy',
+  },
 }
 
 const LAST_UPDATED = 'March 9, 2026'
 
 export const PrivacyPage = () => {
   return (
-    <main className="min-h-screen bg-white">
+    <main id="main-content" className="min-h-screen bg-white">
       {/* Header */}
       <section className="bg-[var(--color-primary-deep)] px-6 pb-12 pt-32 md:px-8 md:pt-36">
         <div className="mx-auto max-w-[720px]">
