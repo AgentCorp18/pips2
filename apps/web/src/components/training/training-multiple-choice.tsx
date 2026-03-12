@@ -3,32 +3,38 @@
 import { useState } from 'react'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { checkAnswer } from '@/app/(app)/training/exercise-actions'
 
 type MultipleChoiceConfig = {
   question: string
   options: string[]
-  correctIndex: number
 }
 
 type TrainingMultipleChoiceProps = {
+  exerciseId: string
   config: MultipleChoiceConfig
   savedAnswer?: number | null
   onComplete: (selectedIndex: number, isCorrect: boolean) => void
 }
 
 export const TrainingMultipleChoice = ({
+  exerciseId,
   config,
   savedAnswer,
   onComplete,
 }: TrainingMultipleChoiceProps) => {
   const [selected, setSelected] = useState<number | null>(savedAnswer ?? null)
   const [submitted, setSubmitted] = useState(savedAnswer !== null && savedAnswer !== undefined)
-  const isCorrect = selected === config.correctIndex
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const [correctIndex, setCorrectIndex] = useState<number | null>(null)
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selected === null) return
+    const result = await checkAnswer(exerciseId, selected)
+    setIsCorrect(result.isCorrect)
+    setCorrectIndex(result.isCorrect ? selected : null)
     setSubmitted(true)
-    onComplete(selected, selected === config.correctIndex)
+    onComplete(selected, result.isCorrect)
   }
 
   return (
@@ -40,8 +46,8 @@ export const TrainingMultipleChoice = ({
       <div className="space-y-2" role="radiogroup" aria-labelledby="mc-question">
         {config.options.map((option, index) => {
           const isSelected = selected === index
-          const showCorrect = submitted && index === config.correctIndex
-          const showIncorrect = submitted && isSelected && !isCorrect
+          const showCorrect = submitted && correctIndex !== null && index === correctIndex
+          const showIncorrect = submitted && isSelected && isCorrect === false
 
           let borderClass = 'border-[var(--color-border)]'
           if (showCorrect) borderClass = 'border-emerald-500 bg-emerald-50'
@@ -82,9 +88,7 @@ export const TrainingMultipleChoice = ({
           role="alert"
           className={`rounded-lg p-3 text-sm ${isCorrect ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}
         >
-          {isCorrect
-            ? 'Correct! Well done.'
-            : `Not quite. The correct answer is: ${config.options[config.correctIndex]}`}
+          {isCorrect ? 'Correct! Well done.' : 'Not quite. Please review the correct answer above.'}
         </div>
       )}
 

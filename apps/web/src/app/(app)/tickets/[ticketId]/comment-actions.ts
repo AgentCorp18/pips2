@@ -115,7 +115,7 @@ export const updateComment = async (
   // Verify ownership
   const { data: comment } = await supabase
     .from('comments')
-    .select('author_id, ticket_id')
+    .select('author_id, ticket_id, org_id')
     .eq('id', commentId)
     .single()
 
@@ -124,7 +124,18 @@ export const updateComment = async (
   }
 
   if (comment.author_id !== user.id) {
-    return { error: 'You can only edit your own comments' }
+    // Allow admins and owners to edit any comment
+    const { data: membership } = await supabase
+      .from('org_members')
+      .select('role')
+      .eq('org_id', comment.org_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const role = membership?.role as string | undefined
+    if (role !== 'admin' && role !== 'owner') {
+      return { error: 'You can only edit your own comments' }
+    }
   }
 
   const mentions = extractMentions(result.data.body)
@@ -165,7 +176,7 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
 
   const { data: comment } = await supabase
     .from('comments')
-    .select('author_id, ticket_id')
+    .select('author_id, ticket_id, org_id')
     .eq('id', commentId)
     .single()
 
@@ -174,7 +185,18 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
   }
 
   if (comment.author_id !== user.id) {
-    return { error: 'You can only delete your own comments' }
+    // Allow admins and owners to delete any comment
+    const { data: membership } = await supabase
+      .from('org_members')
+      .select('role')
+      .eq('org_id', comment.org_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const role = membership?.role as string | undefined
+    if (role !== 'admin' && role !== 'owner') {
+      return { error: 'You can only delete your own comments' }
+    }
   }
 
   const { error: deleteError } = await supabase.from('comments').delete().eq('id', commentId)

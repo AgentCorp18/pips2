@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useTransition } from 'react'
+import { useState, useCallback, useEffect, useTransition, useRef } from 'react'
 import { Maximize2, Minimize2, Monitor } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
@@ -75,53 +75,68 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
   const [columns, setColumns] = useState<ColumnData>(() => groupByStatus(initialTickets))
   const [, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
+  // Tracks the last successfully persisted board state so error reverts are accurate
+  // even after multiple successful drags since the component first mounted.
+  const lastKnownGoodState = useRef<ColumnData>(groupByStatus(initialTickets))
 
-  const onDragEnd = useCallback(
-    (result: DropResult) => {
-      const { source, destination, draggableId } = result
+  const onDragEnd = useCallback((result: DropResult) => {
+    const { source, destination, draggableId } = result
 
-      if (!destination) return
-      if (source.droppableId === destination.droppableId && source.index === destination.index) {
-        return
+    if (!destination) return
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return
+    }
+
+    const sourceStatus = source.droppableId as TicketStatus
+    const destStatus = destination.droppableId as TicketStatus
+
+    // Capture the optimistic next state so we can promote it to lastKnownGoodState
+    // after a successful server round-trip, or discard it on failure.
+    let optimisticState: ColumnData | null = null
+
+    setColumns((prev) => {
+      const next = { ...prev }
+      const sourceItems = [...next[sourceStatus]]
+      const moved = sourceItems.splice(source.index, 1)[0]
+
+      if (!moved) return prev
+
+      if (sourceStatus === destStatus) {
+        sourceItems.splice(destination.index, 0, moved)
+        next[sourceStatus] = sourceItems
+      } else {
+        const destItems = [...next[destStatus]]
+        const updated: BoardTicket = { ...moved, status: destStatus }
+        destItems.splice(destination.index, 0, updated)
+        next[sourceStatus] = sourceItems
+        next[destStatus] = destItems
       }
 
-      const sourceStatus = source.droppableId as TicketStatus
-      const destStatus = destination.droppableId as TicketStatus
+      optimisticState = next
+      return next
+    })
 
-      setColumns((prev) => {
-        const next = { ...prev }
-        const sourceItems = [...next[sourceStatus]]
-        const moved = sourceItems.splice(source.index, 1)[0]
-
-        if (!moved) return prev
-
-        if (sourceStatus === destStatus) {
-          sourceItems.splice(destination.index, 0, moved)
-          next[sourceStatus] = sourceItems
+    if (sourceStatus !== destStatus) {
+      // Persist status change to server
+      startTransition(async () => {
+        const serverResult = await updateTicketStatus(draggableId, destStatus)
+        if (serverResult.error) {
+          // Revert to last known good state — NOT the stale initialTickets prop
+          setColumns(lastKnownGoodState.current)
         } else {
-          const destItems = [...next[destStatus]]
-          const updated: BoardTicket = { ...moved, status: destStatus }
-          destItems.splice(destination.index, 0, updated)
-          next[sourceStatus] = sourceItems
-          next[destStatus] = destItems
-        }
-
-        return next
-      })
-
-      // Persist to server if status changed
-      if (sourceStatus !== destStatus) {
-        startTransition(async () => {
-          const result = await updateTicketStatus(draggableId, destStatus)
-          if (result.error) {
-            // Revert on error
-            setColumns(groupByStatus(initialTickets))
+          // Advance checkpoint on success
+          if (optimisticState !== null) {
+            lastKnownGoodState.current = optimisticState
           }
-        })
+        }
+      })
+    } else {
+      // Same-column reorder is purely local — always safe to advance checkpoint
+      if (optimisticState !== null) {
+        lastKnownGoodState.current = optimisticState
       }
-    },
-    [initialTickets],
-  )
+    }
+  }, [])
 
   // Lock body scroll when expanded
   useEffect(() => {

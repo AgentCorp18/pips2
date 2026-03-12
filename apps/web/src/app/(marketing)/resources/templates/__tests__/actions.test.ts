@@ -35,7 +35,7 @@ describe('requestTemplateDownload', () => {
     vi.spyOn(console, 'info').mockImplementation(() => {})
   })
 
-  it('returns success with valid email and templateId', async () => {
+  it('returns coming-soon error with valid email and templateId', async () => {
     const fd = makeFormData({
       email: 'user@example.com',
       templateId: 'tmpl-001',
@@ -44,13 +44,13 @@ describe('requestTemplateDownload', () => {
     const result = await requestTemplateDownload(initialState, fd)
 
     expect(result).toEqual({
-      success: true,
-      error: null,
-      templateId: 'tmpl-001',
+      success: false,
+      error: 'Template downloads are coming soon. Please check back later.',
+      templateId: null,
     })
   })
 
-  it('logs download event on success', async () => {
+  it('does not log anything when validation passes (feature not implemented)', async () => {
     const fd = makeFormData({
       email: 'user@example.com',
       templateId: 'tmpl-002',
@@ -58,14 +58,7 @@ describe('requestTemplateDownload', () => {
 
     await requestTemplateDownload(initialState, fd)
 
-    expect(console.info).toHaveBeenCalledWith(
-      '[template-download]',
-      expect.objectContaining({
-        email: 'user@example.com',
-        templateId: 'tmpl-002',
-        timestamp: expect.any(String),
-      }),
-    )
+    expect(console.info).not.toHaveBeenCalled()
   })
 
   it('returns error for invalid email', async () => {
@@ -153,9 +146,9 @@ describe('requestTemplateDownload', () => {
     const result = await requestTemplateDownload(prevState, fd)
 
     expect(result).toEqual({
-      success: true,
-      error: null,
-      templateId: 'tmpl-new',
+      success: false,
+      error: 'Template downloads are coming soon. Please check back later.',
+      templateId: null,
     })
   })
 })

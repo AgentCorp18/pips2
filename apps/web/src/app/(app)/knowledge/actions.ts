@@ -101,16 +101,11 @@ export const getContentChildren = cache(async (parentId: string): Promise<Conten
 /** Full-text search across content nodes */
 export const searchContent = async (query: string, pillar?: string): Promise<ContentNodeRow[]> => {
   const supabase = await createClient()
-  const tsQuery = query
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => `${w}:*`)
-    .join(' & ')
 
   let q = supabase
     .from('content_nodes')
     .select('*')
-    .textSearch('search_vector', tsQuery)
+    .textSearch('search_vector', query.slice(0, 100), { type: 'websearch' })
     .order('sort_order')
     .limit(20)
 

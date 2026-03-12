@@ -21,7 +21,7 @@ const EvaluationPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 6, 'evaluation')
-  const initialData = (saved?.data ?? null) as EvaluationData | null
+  const initialData = (saved ?? null) as EvaluationData | null
 
   return <EvaluationForm projectId={projectId} initialData={initialData} />
 }

@@ -140,19 +140,34 @@ export const acceptInvitation = async (token: string): Promise<ActionResult> => 
     }
   }
 
-  // Check if already a member
-  const { data: existing } = await admin
+  // Check if already a member of this specific org
+  const { data: existingMember } = await admin
     .from('org_members')
     .select('id')
     .eq('org_id', invitation.org_id)
     .eq('user_id', user.id)
     .single()
 
-  if (existing) {
+  if (existingMember) {
     // Mark invitation as accepted anyway
     await admin.from('org_invitations').update({ status: 'accepted' }).eq('id', invitation.id)
 
     redirect('/dashboard')
+  }
+
+  // Guard against multi-org membership (not yet supported)
+  const { data: anyMembership } = await admin
+    .from('org_members')
+    .select('id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  if (anyMembership) {
+    return {
+      success: false,
+      error: 'You are already a member of an organization. Multi-org support is coming soon.',
+    }
   }
 
   // Add user to the organization

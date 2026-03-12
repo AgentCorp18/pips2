@@ -65,6 +65,32 @@ export const getUserExerciseData = async (
   return data ?? []
 }
 
+/**
+ * Check a multiple-choice answer server-side.
+ * Returns only { isCorrect } — the correctIndex is never sent to the client.
+ */
+export const checkAnswer = async (
+  exerciseId: string,
+  selectedIndex: number,
+): Promise<{ isCorrect: boolean }> => {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('training_exercises')
+    .select('config')
+    .eq('id', exerciseId)
+    .single()
+
+  if (error || !data) {
+    console.error('checkAnswer error:', error)
+    return { isCorrect: false }
+  }
+
+  const config = data.config as Record<string, unknown>
+  const correctIndex = config['correctIndex']
+  return { isCorrect: selectedIndex === correctIndex }
+}
+
 /** Complete or update an exercise */
 export const completeExercise = async (
   exerciseId: string,
@@ -79,6 +105,16 @@ export const completeExercise = async (
 
   const now = new Date().toISOString()
 
+  // Read existing record to determine current attempts count
+  const { data: existing } = await supabase
+    .from('training_exercise_data')
+    .select('attempts')
+    .eq('user_id', user.id)
+    .eq('exercise_id', exerciseId)
+    .maybeSingle()
+
+  const attempts = (existing?.attempts ?? 0) + 1
+
   const { error } = await supabase.from('training_exercise_data').upsert(
     {
       user_id: user.id,
@@ -86,7 +122,7 @@ export const completeExercise = async (
       status: 'completed' as const,
       data: exerciseData,
       score: score ?? null,
-      attempts: 1,
+      attempts,
       last_attempt_at: now,
       updated_at: now,
     },

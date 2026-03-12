@@ -21,7 +21,7 @@ const BeforeAfterPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 6, 'before_after')
-  const initialData = (saved?.data ?? null) as BeforeAfterData | null
+  const initialData = (saved ?? null) as BeforeAfterData | null
 
   return <BeforeAfterForm projectId={projectId} initialData={initialData} />
 }

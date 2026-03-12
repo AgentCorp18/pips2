@@ -14,9 +14,10 @@ export type TemplateDownloadState = {
 }
 
 /**
- * Server action to capture an email before template download.
+ * Server action to handle a template download request.
  *
- * Currently logs the download request. In production, this would:
+ * Template file delivery is not yet implemented. The action validates inputs
+ * but always returns a "coming soon" error until delivery is wired up:
  * 1. Store the email + template in a `template_downloads` table
  * 2. Add the email to a marketing list (Resend audience, etc.)
  * 3. Return a signed download URL
@@ -40,18 +41,11 @@ export const requestTemplateDownload = async (
     }
   }
 
-  const { email, templateId } = parsed.data
-
-  // Log the download event (replace with database insert when Supabase table is ready)
-  console.info('[template-download]', {
-    email,
-    templateId,
-    timestamp: new Date().toISOString(),
-  })
-
+  // Template file delivery is not yet implemented.
+  // Return an honest "coming soon" error so the UI shows the correct message.
   return {
-    success: true,
-    error: null,
-    templateId,
+    success: false,
+    error: 'Template downloads are coming soon. Please check back later.',
+    templateId: null,
   }
 }

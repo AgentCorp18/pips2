@@ -9,6 +9,7 @@ import {
   resetPasswordSchema,
 } from '@/lib/validations'
 import { getBaseUrl } from '@/lib/base-url'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export type AuthActionState = {
   error?: string
@@ -35,6 +36,12 @@ export const login = async (
       }
     }
     return { fieldErrors }
+  }
+
+  // Rate limit: 10 login attempts per minute per email
+  const loginRateLimit = checkRateLimit(`login:${result.data.email}`, 10, 60_000)
+  if (!loginRateLimit.allowed) {
+    return { error: 'Too many login attempts. Please wait a moment before trying again.' }
   }
 
   const supabase = await createClient()
@@ -85,6 +92,12 @@ export const signup = async (
     return { fieldErrors }
   }
 
+  // Rate limit: 5 signup attempts per 15 minutes per email
+  const signupRateLimit = checkRateLimit(`signup:${result.data.email}`, 5, 15 * 60_000)
+  if (!signupRateLimit.allowed) {
+    return { error: 'Too many signup attempts. Please wait before trying again.' }
+  }
+
   const supabase = await createClient()
 
   // Pass redirect param through email confirmation so user returns to intended destination
@@ -133,6 +146,19 @@ export const forgotPassword = async (
       }
     }
     return { fieldErrors }
+  }
+
+  // Rate limit: 3 password reset requests per 15 minutes per email
+  const forgotPasswordRateLimit = checkRateLimit(
+    `forgot-password:${result.data.email}`,
+    3,
+    15 * 60_000,
+  )
+  if (!forgotPasswordRateLimit.allowed) {
+    // Still return success to prevent email enumeration even when rate limited
+    return {
+      success: 'If an account exists with that email, you will receive a password reset link.',
+    }
   }
 
   const supabase = await createClient()

@@ -36,6 +36,10 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+vi.mock('@/lib/permissions', () => ({
+  requirePermission: vi.fn(async () => 'member'),
+}))
+
 /* ============================================================
    Import after mocks
    ============================================================ */

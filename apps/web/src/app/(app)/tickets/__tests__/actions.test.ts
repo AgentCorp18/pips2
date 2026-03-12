@@ -175,9 +175,34 @@ describe('createTicket', () => {
     expect(result).toEqual({ error: 'You do not have permission to create tickets' })
   })
 
+  it('returns error when assignee is not in same org', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // from('org_members') -> membership
+      { data: { org_id: 'org-1' } },
+      // from('org_members') -> assignee not found
+      { data: null },
+    ]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    const fd = makeFormData({
+      ...validTicketFields,
+      assignee_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
+    })
+    const result = await createTicket({}, fd)
+    expect(result).toEqual({ error: 'Assignee is not an active member of this organization' })
+  })
+
   it('creates ticket successfully with all fields', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: null }]
+    fromResults = [
+      // from('org_members') -> membership
+      { data: { org_id: 'org-1' } },
+      // from('org_members') -> assignee found
+      { data: { user_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d' } },
+      // from('tickets').insert() -> success
+      { error: null },
+    ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const fd = makeFormData({
@@ -267,7 +292,7 @@ describe('updateTicket', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // from('tickets').select().eq().single() -> ticket found
-      { data: { org_id: 'org-99' } },
+      { data: { org_id: 'org-99', started_at: null, status: 'todo' } },
       // from('tickets').update().eq() -> success
       { error: null },
     ]
@@ -279,15 +304,16 @@ describe('updateTicket', () => {
 
   it('returns error when permission is denied', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }]
+    fromResults = [{ data: { org_id: 'org-1', started_at: null, status: 'todo' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
-    await expect(updateTicket('ticket-1', { status: 'done' })).rejects.toThrow('No permission')
+    const result = await updateTicket('ticket-1', { status: 'done' })
+    expect(result).toEqual({ error: 'You do not have permission to update tickets' })
   })
 
   it('updates ticket successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: null }]
+    fromResults = [{ data: { org_id: 'org-1', started_at: null, status: 'todo' } }, { error: null }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await updateTicket('ticket-1', { title: 'Updated title', priority: 'high' })
@@ -298,11 +324,55 @@ describe('updateTicket', () => {
 
   it('returns error when update fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: { message: 'DB error' } }]
+    fromResults = [
+      { data: { org_id: 'org-1', started_at: null, status: 'todo' } },
+      { error: { message: 'DB error' } },
+    ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await updateTicket('ticket-1', { status: 'todo' })
     expect(result).toEqual({ error: 'Failed to update ticket. Please try again.' })
+  })
+
+  it('returns error when assignee is not in same org', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // from('tickets').select() -> ticket found
+      { data: { org_id: 'org-1', started_at: null, status: 'todo' } },
+      // from('org_members') -> assignee not found
+      { data: null },
+    ]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    const result = await updateTicket('ticket-1', {
+      assignee_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
+    })
+    expect(result).toEqual({ error: 'Assignee is not an active member of this organization' })
+  })
+
+  it('does not overwrite started_at when already set', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // ticket already has started_at set
+      { data: { org_id: 'org-1', started_at: '2026-01-01T00:00:00.000Z', status: 'in_progress' } },
+      { error: null },
+    ]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    const result = await updateTicket('ticket-1', { status: 'in_review' })
+    expect(result).toEqual({})
+  })
+
+  it('clears resolved_at when transitioning away from done', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      { data: { org_id: 'org-1', started_at: '2026-01-01T00:00:00.000Z', status: 'done' } },
+      { error: null },
+    ]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    const result = await updateTicket('ticket-1', { status: 'in_progress' })
+    expect(result).toEqual({})
   })
 })
 
@@ -319,7 +389,7 @@ describe('updateTicketStatus', () => {
 
   it('delegates to updateTicket with status', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: null }]
+    fromResults = [{ data: { org_id: 'org-1', started_at: null, status: 'todo' } }, { error: null }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await updateTicketStatus('ticket-1', 'in_progress')
@@ -365,7 +435,8 @@ describe('deleteTicket', () => {
     fromResults = [{ data: { org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
-    await expect(deleteTicket('ticket-1')).rejects.toThrow('No permission')
+    const result = await deleteTicket('ticket-1')
+    expect(result).toEqual({ error: 'You do not have permission to delete tickets' })
   })
 
   it('deletes ticket successfully', async () => {
@@ -457,6 +528,26 @@ describe('getTickets', () => {
 
     const result = await getTickets('org-1')
     expect(result).toEqual({ tickets: [], total: 0 })
+  })
+
+  it('sorts by priority ordinal in JS when sort_by is priority', async () => {
+    const ticketData = [
+      { id: 'tkt-1', priority: 'low' },
+      { id: 'tkt-2', priority: 'critical' },
+      { id: 'tkt-3', priority: 'medium' },
+      { id: 'tkt-4', priority: 'high' },
+    ]
+    fromResults = [{ data: ticketData, count: 4, error: null }]
+
+    const result = await getTickets('org-1', { sort_by: 'priority', sort_order: 'asc' })
+    expect(result.total).toBe(4)
+    // Should be sorted critical < high < medium < low
+    expect(result.tickets.map((t) => (t as Record<string, unknown>).priority)).toEqual([
+      'critical',
+      'high',
+      'medium',
+      'low',
+    ])
   })
 })
 
@@ -602,7 +693,17 @@ describe('bulkUpdateTickets', () => {
     fromResults = [{ data: { org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
-    await expect(bulkUpdateTickets(['tkt-1'], { status: 'done' })).rejects.toThrow('No permission')
+    const result = await bulkUpdateTickets(['tkt-1'], { status: 'done' })
+    expect(result).toEqual({ error: 'You do not have permission to update tickets' })
+  })
+
+  it('returns error when no fields to update', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1' } }]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    const result = await bulkUpdateTickets(['tkt-1'], {})
+    expect(result).toEqual({ error: 'No fields to update' })
   })
 
   it('bulk updates tickets successfully', async () => {
@@ -658,6 +759,15 @@ describe('bulkDeleteTickets', () => {
 
     const result = await bulkDeleteTickets(['tkt-1'])
     expect(result).toEqual({ error: 'You must belong to an organization' })
+  })
+
+  it('returns error when permission is denied', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1' } }]
+    vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
+
+    const result = await bulkDeleteTickets(['tkt-1'])
+    expect(result).toEqual({ error: 'You do not have permission to delete tickets' })
   })
 
   it('deletes tickets successfully', async () => {

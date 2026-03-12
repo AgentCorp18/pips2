@@ -21,7 +21,7 @@ const PairedComparisonsPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 4, 'paired_comparisons')
-  const initialData = (saved?.data ?? null) as PairedComparisonsData | null
+  const initialData = (saved ?? null) as PairedComparisonsData | null
 
   return <PairedComparisonsForm projectId={projectId} initialData={initialData} />
 }

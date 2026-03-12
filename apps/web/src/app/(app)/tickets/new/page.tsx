@@ -38,10 +38,14 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
     redirect('/onboarding')
   }
 
+  // Validate parent search param is a well-formed UUID before hitting the DB
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const validatedParentId = parentId && UUID_REGEX.test(parentId) ? parentId : undefined
+
   // Fetch parent ticket if creating a sub-ticket
   let parentContext: { id: string; title: string; sequenceId: string } | null = null
-  if (parentId) {
-    const parentData = await getParentTicket(parentId)
+  if (validatedParentId) {
+    const parentData = await getParentTicket(validatedParentId)
     if (parentData) {
       const { data: parentOrgSettings } = await supabase
         .from('org_settings')

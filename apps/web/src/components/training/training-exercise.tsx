@@ -110,9 +110,15 @@ export const TrainingExercise = ({
         <div className="ml-11">
           {exercise.type === 'multiple-choice' && (
             <TrainingMultipleChoice
-              config={
-                exercise.config as { question: string; options: string[]; correctIndex: number }
-              }
+              exerciseId={exercise.id}
+              config={(() => {
+                const { correctIndex: _ci, ...safeConfig } = exercise.config as {
+                  question: string
+                  options: string[]
+                  correctIndex?: number
+                }
+                return safeConfig
+              })()}
               savedAnswer={
                 exerciseData?.status === 'completed'
                   ? ((exerciseData.data as { selectedIndex?: number }).selectedIndex ?? null)

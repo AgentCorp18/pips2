@@ -14,6 +14,25 @@ import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-ca
 import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
 
+/**
+ * Serialize a value to JSON with keys sorted at every level.
+ * This prevents false-positive "unsaved changes" when the same data arrives
+ * with keys in a different insertion order.
+ */
+const stableStringify = (value: unknown): string => {
+  if (value === null || typeof value !== 'object') {
+    return JSON.stringify(value)
+  }
+  if (Array.isArray(value)) {
+    return '[' + value.map(stableStringify).join(',') + ']'
+  }
+  const sorted = Object.keys(value as Record<string, unknown>)
+    .sort()
+    .map((k) => JSON.stringify(k) + ':' + stableStringify((value as Record<string, unknown>)[k]))
+    .join(',')
+  return '{' + sorted + '}'
+}
+
 type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved'
 
 /* Data-driven mode (Steps 1-3): FormShell handles save internally */
@@ -54,22 +73,31 @@ export type FormShellProps = DataDrivenProps | CallbackProps
 export const SANDBOX_PROJECT_ID = '__sandbox__'
 
 export const FormShell = (props: FormShellProps) => {
-  const { title, description, stepNumber, required = false, cadenceContext, children } = props
-  const formType = 'formType' in props ? (props.formType as string | undefined) : undefined
+  const { title, description, required = false, cadenceContext, children } = props
+
+  // Destructure specific primitive/stable props so useCallback deps are stable
+  const projectId = props.projectId
+  const stepNumber = props.stepNumber
+  const formType = 'formType' in props ? props.formType : undefined
+  const propsData = 'data' in props ? props.data : undefined
+  const onSave = 'onSave' in props ? props.onSave : undefined
+  const isDirty = 'isDirty' in props ? props.isDirty : undefined
+  const onSaveSuccess = 'onSaveSuccess' in props ? props.onSaveSuccess : undefined
+
   const derivedCadenceContext = cadenceContext ?? buildProductContext(stepNumber, formType)
 
   const [viewMode, setViewMode] = useState<FormMode>('edit')
   const isViewMode = viewMode === 'view'
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
-  const [lastSaved, setLastSaved] = useState<string>(props.data ? JSON.stringify(props.data) : '')
+  const [lastSaved, setLastSaved] = useState<string>(propsData ? stableStringify(propsData) : '')
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   /* Derive pending-changes status from state (no refs in render) */
-  const hasPendingChanges = props.onSave
-    ? props.isDirty
-    : props.data
-      ? JSON.stringify(props.data) !== lastSaved
+  const hasPendingChanges = onSave
+    ? isDirty
+    : propsData
+      ? stableStringify(propsData) !== lastSaved
       : false
 
   /* Compute display status */
@@ -82,49 +110,44 @@ export const FormShell = (props: FormShellProps) => {
           ? 'saved'
           : 'idle'
 
-  const isSandbox = 'projectId' in props && props.projectId === SANDBOX_PROJECT_ID
+  const isSandbox = projectId === SANDBOX_PROJECT_ID
 
-  /* Unified save function */
+  /* Unified save function — depends on destructured stable values, not the props object */
   const doSave = useCallback(async () => {
     setSaveState('saving')
 
-    if (props.onSave) {
-      const result = await props.onSave()
+    if (onSave) {
+      const result = await onSave()
       if (result.error) {
         setSaveState('idle')
         toast.error(result.error)
       } else {
         setSaveState('saved')
       }
-    } else if (isSandbox && props.data && props.formType) {
+    } else if (isSandbox && propsData && formType) {
       // Sandbox mode: save to localStorage
       try {
-        const key = `pips-sandbox-${props.formType}`
-        localStorage.setItem(key, JSON.stringify(props.data))
+        const key = `pips-sandbox-${formType}`
+        localStorage.setItem(key, JSON.stringify(propsData))
         setSaveState('saved')
-        setLastSaved(JSON.stringify(props.data))
-        props.onSaveSuccess?.()
+        setLastSaved(stableStringify(propsData))
+        onSaveSuccess?.()
       } catch {
         setSaveState('idle')
         toast.error('Failed to save to local storage')
       }
-    } else if (props.data && 'projectId' in props && props.projectId && props.formType) {
-      const result = await saveFormData(
-        props.projectId,
-        props.stepNumber,
-        props.formType,
-        props.data,
-      )
+    } else if (propsData && projectId && formType) {
+      const result = await saveFormData(projectId, stepNumber, formType, propsData)
       if (result.success) {
         setSaveState('saved')
-        setLastSaved(JSON.stringify(props.data))
-        props.onSaveSuccess?.()
+        setLastSaved(stableStringify(propsData))
+        onSaveSuccess?.()
       } else {
         setSaveState('idle')
         toast.error(result.error ?? 'Failed to save')
       }
     }
-  }, [props, isSandbox])
+  }, [projectId, stepNumber, formType, propsData, onSave, onSaveSuccess, isSandbox])
 
   /* Auto-save with 2-second debounce — no synchronous setState */
   useEffect(() => {
@@ -144,8 +167,6 @@ export const FormShell = (props: FormShellProps) => {
     if (timerRef.current) clearTimeout(timerRef.current)
     void doSave().then(() => toast.success('Saved'))
   }
-
-  const projectId = props.projectId
 
   return (
     <FormViewProvider value={viewMode}>

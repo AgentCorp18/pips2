@@ -1,9 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
-import { canManageRole, ROLE_LABELS, type OrgRole } from '@pips/shared'
+import { canManageRole, ROLE_LABELS, ROLES_ORDERED, type OrgRole } from '@pips/shared'
 import { sendEmail } from '@/lib/email/send'
 import { invitationTemplate } from '@/lib/email/invitation'
 import { getBaseUrl } from '@/lib/base-url'
@@ -12,6 +13,10 @@ interface ActionResult {
   success: boolean
   error?: string
 }
+
+// Runtime Zod validation schema for OrgRole — guards against invalid strings
+// reaching the DB when the server action is called outside the TypeScript type system.
+const orgRoleSchema = z.enum(ROLES_ORDERED as [OrgRole, ...OrgRole[]])
 
 export const changeMemberRole = async (
   orgId: string,
@@ -144,10 +149,17 @@ export const inviteMember = async (
   role: OrgRole,
 ): Promise<ActionResult> => {
   try {
+    // Validate role at runtime — the server action can be called with arbitrary input
+    const roleValidation = orgRoleSchema.safeParse(role)
+    if (!roleValidation.success) {
+      return { success: false, error: 'Invalid role specified' }
+    }
+    const validatedRole = roleValidation.data
+
     const actorRole = await requirePermission(orgId, 'org.members.manage')
 
     // Cannot invite someone to a role at or above your level
-    if (!canManageRole(actorRole, role)) {
+    if (!canManageRole(actorRole, validatedRole)) {
       return { success: false, error: 'Cannot invite a member with a role at or above your own' }
     }
 
@@ -210,7 +222,7 @@ export const inviteMember = async (
       .insert({
         org_id: orgId,
         email,
-        role,
+        role: validatedRole,
         invited_by: user.id,
       })
       .select('token')
@@ -228,7 +240,7 @@ export const inviteMember = async (
     const html = invitationTemplate({
       recipientEmail: email,
       orgName: org?.name ?? 'an organization',
-      role: ROLE_LABELS[role],
+      role: ROLE_LABELS[validatedRole],
       inviterName: (inviterProfile?.full_name as string) ?? 'A team member',
       acceptUrl: inviteUrl,
     })

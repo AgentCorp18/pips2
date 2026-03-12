@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/permissions'
 import { PIPS_STEPS } from '@pips/shared'
 
 /* ============================================================
@@ -37,6 +38,7 @@ export type ActivityItem = {
    ============================================================ */
 
 export const getDashboardStats = async (orgId: string): Promise<DashboardStats> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const now = new Date()
@@ -96,6 +98,7 @@ const STEP_ENUM_TO_INDEX: Record<string, number> = {
 }
 
 export const getProjectsByStep = async (orgId: string): Promise<StepDistribution[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: projects } = await supabase
@@ -130,6 +133,7 @@ export const getProjectsByStep = async (orgId: string): Promise<StepDistribution
    ============================================================ */
 
 export const getRecentActivity = async (orgId: string, limit = 10): Promise<ActivityItem[]> => {
+  await requirePermission(orgId, 'data.view')
   const supabase = await createClient()
 
   const { data: logs } = await supabase

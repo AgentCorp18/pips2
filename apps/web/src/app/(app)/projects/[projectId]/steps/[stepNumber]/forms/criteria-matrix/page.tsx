@@ -21,7 +21,7 @@ const CriteriaMatrixPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 4, 'criteria_matrix')
-  const initialData = (saved?.data ?? null) as CriteriaMatrixData | null
+  const initialData = (saved ?? null) as CriteriaMatrixData | null
 
   return <CriteriaMatrixForm projectId={projectId} initialData={initialData} />
 }

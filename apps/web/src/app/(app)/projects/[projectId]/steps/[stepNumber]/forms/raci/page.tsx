@@ -21,7 +21,7 @@ const RaciPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 4, 'raci')
-  const initialData = (saved?.data ?? null) as RaciData | null
+  const initialData = (saved ?? null) as RaciData | null
 
   return <RaciForm projectId={projectId} initialData={initialData} />
 }

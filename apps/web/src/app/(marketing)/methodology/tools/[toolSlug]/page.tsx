@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react'
@@ -10,6 +11,19 @@ const BASE_URL = getBaseUrl()
 
 type ToolPageProps = {
   params: Promise<{ toolSlug: string }>
+}
+
+const renderInlineMarkdown = (text: string): ReactNode => {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i}>{part.slice(1, -1)}</em>
+    }
+    return part
+  })
 }
 
 /** Find a form definition by its slugified type */
@@ -130,7 +144,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
                 className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
               >
                 <span className="mt-1 text-[var(--color-primary)]">&#x2022;</span>
-                {item}
+                {renderInlineMarkdown(item)}
               </li>
             ))}
           </ul>
@@ -155,7 +169,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
                 <div>
                   <p className="text-sm font-medium text-[var(--color-text-primary)]">{s.title}</p>
                   <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">
-                    {s.description}
+                    {renderInlineMarkdown(s.description)}
                   </p>
                 </div>
               </li>
@@ -172,7 +186,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
             {detail.example.scenario}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-            {detail.example.walkthrough}
+            {renderInlineMarkdown(detail.example.walkthrough)}
           </p>
         </section>
       )}
@@ -191,7 +205,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
                 className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
               >
                 <span className="mt-1 text-emerald-500">&#x2713;</span>
-                {tip}
+                {renderInlineMarkdown(tip)}
               </li>
             ))}
           </ul>
@@ -204,7 +218,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
           Facilitation Guide
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-          {stepContent.methodology.facilitationGuide}
+          {renderInlineMarkdown(stepContent.methodology.facilitationGuide)}
         </p>
       </section>
 

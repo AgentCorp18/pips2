@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { updateOrgSettingsSchema } from '@/lib/validations'
 
@@ -136,5 +137,6 @@ export const updateOrgSettings = async (
     return { error: 'Failed to update organization settings' }
   }
 
+  revalidatePath('/settings')
   return { success: 'Settings updated successfully' }
 }

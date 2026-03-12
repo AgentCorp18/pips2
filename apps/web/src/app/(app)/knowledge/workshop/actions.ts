@@ -286,6 +286,23 @@ export const setCurrentModule = async (
     await requireWorkshopPermission()
     const supabase = await createClient()
 
+    // Bounds check: reject if moduleIndex is out of range
+    const { data: session } = await supabase
+      .from('workshop_sessions')
+      .select('modules')
+      .eq('id', sessionId)
+      .single()
+
+    if (!session) return { success: false, error: 'Session not found' }
+
+    const modules = session.modules as WorkshopModule[]
+    if (moduleIndex >= modules.length) {
+      return {
+        success: false,
+        error: `Module index ${moduleIndex} is out of range (session has ${modules.length} modules)`,
+      }
+    }
+
     const { error } = await supabase
       .from('workshop_sessions')
       .update({ current_module_index: moduleIndex })
@@ -335,6 +352,7 @@ export const updateParticipantCount = async (
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
+    await requireWorkshopPermission()
     const supabase = await createClient()
     const { error } = await supabase
       .from('workshop_sessions')
