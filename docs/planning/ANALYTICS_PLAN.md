@@ -1,11 +1,27 @@
 # PIPS 2.0 -- Analytics Plan
 
-> **Version:** v1.0 -- Created 2026-03-04
+> **Version:** v1.1 -- Updated 2026-03-12
 > **Author:** Data & Analytics Agent (Claude Opus 4.6)
-> **Status:** Active -- No analytics instrumentation deployed yet
+> **Status:** Active -- Baseline analytics deployed (see Current State below)
 > **Inputs:** BUSINESS_PLAN.md v1.1, PRODUCT_REQUIREMENTS.md v1.1, PRODUCT_ROADMAP.md v1.1, SYSTEM_ARCHITECTURE.md v1.1, TECHNICAL_PLAN.md v1.1, CUSTOMER_INSIGHTS_REPORT.md, AI_AGENT_COORDINATION.md, DATAANALYTICS_AGENT.md
 >
 > This document defines the analytics strategy, event taxonomy, dashboard specifications, instrumentation plan, reporting queries, and success metrics for PIPS 2.0. It covers what to measure, how to measure it, and when each metric matters.
+>
+> ### Current State (as of March 12, 2026)
+>
+> The following analytics infrastructure is **deployed and active**:
+>
+> - **Vercel Analytics** -- page view tracking and web analytics are live in production
+> - **Vercel Speed Insights** -- Core Web Vitals monitoring is deployed and active (CSP was fixed on March 12 to unblock it)
+> - **`trackServerEvent()` utility** -- custom server-side event tracking function exists at `apps/web/src/lib/analytics.ts`, using `@vercel/analytics/server`. It is integrated into 8+ server actions (tickets, forms, training, onboarding, projects, search, knowledge).
+> - **Basic page view analytics** -- working via Vercel Analytics automatic instrumentation
+>
+> What is **not yet deployed**:
+>
+> - Custom `analytics_events` Supabase table (described in Section 4.2) -- not yet created
+> - Dashboard visualizations for analytics data (Section 3) -- not yet built
+> - SQL views (Section 5) -- not yet created
+> - P0/P1 event instrumentation via the custom events table -- deferred in favor of Vercel Analytics for baseline tracking
 
 ---
 
@@ -93,14 +109,14 @@ Not applicable until Stripe billing is integrated (Phase 3). Defined here for fo
 
 These monitor platform reliability and performance.
 
-| #   | Metric                     | Definition                                                             | Calculation                                                           | Source                   | Target      | Refresh                   | Caveats                                                                                                   |
-| --- | -------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------ | ----------- | ------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| O1  | **Server Error Rate**      | % of server actions / API routes returning 5xx errors                  | Sentry error count / total request count                              | Sentry, Vercel Analytics | <0.1%       | Real-time (Sentry alerts) | Distinguish between user-caused errors (validation) and system errors (DB timeout, unhandled exception).  |
-| O2  | **P95 Page Load Time**     | 95th percentile time from navigation start to largest contentful paint | Vercel Analytics Speed Insights                                       | Vercel Analytics         | <2s         | Daily                     | Mobile and desktop should be tracked separately.                                                          |
-| O3  | **Database Query Latency** | P95 query execution time for the 10 slowest query patterns             | Supabase Dashboard > Query Performance                                | Supabase                 | <500ms      | Daily                     | Watch for full-table scans as data grows. Key risk: RLS policy evaluation adding latency on large tables. |
-| O4  | **Uptime**                 | % of time the application responds to health check                     | Vercel / external uptime monitor (e.g., BetterUptime)                 | External monitor         | >99.9%      | Real-time                 | Monthly target: <43 minutes of downtime.                                                                  |
-| O5  | **Email Delivery Rate**    | % of transactional emails successfully delivered (not bounced)         | Resend dashboard delivery metrics                                     | Resend                   | >98%        | Daily                     | Track by email type (invitation, notification, digest). Bounce rate >5% = deliverability problem.         |
-| O6  | **Audit Log Volume**       | Rows inserted into `audit_log` per day                                 | `COUNT(*) FROM audit_log WHERE created_at > NOW() - INTERVAL '1 day'` | `audit_log`              | Track trend | org_id                    | Daily                                                                                                     | Growth rate indicates data volume trajectory. Plan for partitioning if >100K rows/day. |
+| #   | Metric                     | Definition                                                             | Calculation                                                           | Source                   | Target      | Refresh                   | Caveats                                                                                                                                                             |
+| --- | -------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------ | ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| O1  | **Server Error Rate**      | % of server actions / API routes returning 5xx errors                  | Sentry error count / total request count                              | Sentry, Vercel Analytics | <0.1%       | Real-time (Sentry alerts) | **DEPLOYED** — Sentry configured, Vercel Analytics active. Distinguish between user-caused errors (validation) and system errors (DB timeout, unhandled exception). |
+| O2  | **P95 Page Load Time**     | 95th percentile time from navigation start to largest contentful paint | Vercel Analytics Speed Insights                                       | Vercel Analytics         | <2s         | Daily                     | **DEPLOYED** — Vercel Speed Insights active (CSP fixed March 12). Mobile and desktop should be tracked separately.                                                  |
+| O3  | **Database Query Latency** | P95 query execution time for the 10 slowest query patterns             | Supabase Dashboard > Query Performance                                | Supabase                 | <500ms      | Daily                     | Watch for full-table scans as data grows. Key risk: RLS policy evaluation adding latency on large tables.                                                           |
+| O4  | **Uptime**                 | % of time the application responds to health check                     | Vercel / external uptime monitor (e.g., BetterUptime)                 | External monitor         | >99.9%      | Real-time                 | Monthly target: <43 minutes of downtime.                                                                                                                            |
+| O5  | **Email Delivery Rate**    | % of transactional emails successfully delivered (not bounced)         | Resend dashboard delivery metrics                                     | Resend                   | >98%        | Daily                     | Track by email type (invitation, notification, digest). Bounce rate >5% = deliverability problem.                                                                   |
+| O6  | **Audit Log Volume**       | Rows inserted into `audit_log` per day                                 | `COUNT(*) FROM audit_log WHERE created_at > NOW() - INTERVAL '1 day'` | `audit_log`              | Track trend | org_id                    | Daily                                                                                                                                                               | Growth rate indicates data volume trajectory. Plan for partitioning if >100K rows/day. |
 
 ---
 
@@ -342,6 +358,8 @@ Frame this dashboard as "workload balance" and "where does the team need help" -
 
 ### 4.1 Recommended Approach: Custom Events Table in Supabase
 
+> **Implementation Update (March 12, 2026):** The initial analytics deployment uses **Vercel Analytics** (automatic page views) and **Vercel Speed Insights** (Core Web Vitals) as the baseline. A `trackServerEvent()` utility function wrapping `@vercel/analytics/server` is deployed and actively tracking custom events from server actions. The custom Supabase `analytics_events` table described below is a planned enhancement for when more granular, queryable event data is needed beyond what Vercel Analytics provides.
+
 **Decision: Use a custom `analytics_events` table in the existing Supabase PostgreSQL database.**
 
 Rationale:
@@ -432,10 +450,37 @@ CREATE POLICY "Service role can insert analytics events"
 
 ### 4.3 Implementation Approach: Server Actions + Utility Function
 
+> **Implementation Update (March 12, 2026):** The actual implementation uses Vercel Analytics as the transport layer instead of a custom Supabase table. The `trackServerEvent()` function in `apps/web/src/lib/analytics.ts` wraps `@vercel/analytics/server` and is already integrated into 8+ server actions (tickets, forms, training, onboarding, projects, search, knowledge). The Supabase-based approach below remains a valid future option for when SQL-queryable event data is needed.
+
 Events are captured via a server-side utility function called from Server Actions and API routes. This avoids client-side JavaScript tracking (no ad blockers, no CORS issues, no additional bundle size).
 
+**Actual implementation (deployed):**
+
 ```typescript
-// lib/analytics.ts
+// apps/web/src/lib/analytics.ts (DEPLOYED)
+
+import { track as serverTrack } from '@vercel/analytics/server'
+import { headers } from 'next/headers'
+
+type AllowedValue = string | number | boolean | null | undefined
+
+export const trackServerEvent = async (
+  name: string,
+  properties?: Record<string, AllowedValue>,
+): Promise<void> => {
+  try {
+    const reqHeaders = await headers()
+    await serverTrack(name, properties ?? {}, { headers: reqHeaders })
+  } catch {
+    // Silently ignore — analytics must never block user actions
+  }
+}
+```
+
+**Planned Supabase-based implementation (for future granular analytics):**
+
+```typescript
+// lib/analytics.ts (PLANNED — not yet deployed)
 
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -813,19 +858,21 @@ When materializing, add a `refreshed_at` timestamp column so dashboards can disp
 
 Each phase has specific analytics goals that determine what to instrument, what dashboards to build, and what success looks like.
 
-### Phase 1.5: Post-MVP Stabilization (Current)
+### Phase 1.5: Post-MVP Stabilization (COMPLETE)
 
 **Analytics goal:** Instrument core activation events. Build the `analytics_events` table. Get baseline measurements before beta users arrive.
 
-| Metric                      | Target  | Instrumentation Needed                         |
-| --------------------------- | ------- | ---------------------------------------------- |
-| Signup-to-Org Rate (A1)     | >90%    | `user.signed_up`, `org.created` events         |
-| Signup-to-Project Rate (A2) | >60%    | `project.created` event                        |
-| Step 1 Completion Rate (A3) | >70%    | `step.advanced` event                          |
-| Time to First Form (A5)     | <20 min | `form.saved` event                             |
-| Invite-to-Accept Rate (A6)  | >50%    | `user.invited` event + query `org_invitations` |
-| Server Error Rate (O1)      | <0.1%   | Sentry (already deployed)                      |
-| P95 Page Load (O2)          | <2s     | Vercel Analytics (already deployed)            |
+**Status (March 12, 2026):** Phase complete. Vercel Analytics and Speed Insights are deployed. `trackServerEvent()` is integrated into server actions for projects, tickets, forms, training, onboarding, search, and knowledge. The custom `analytics_events` Supabase table has not been created yet — Vercel Analytics is serving as the baseline.
+
+| Metric                      | Target  | Instrumentation Needed                         | Status                                                 |
+| --------------------------- | ------- | ---------------------------------------------- | ------------------------------------------------------ |
+| Signup-to-Org Rate (A1)     | >90%    | `user.signed_up`, `org.created` events         | Partially tracked via `trackServerEvent` in onboarding |
+| Signup-to-Project Rate (A2) | >60%    | `project.created` event                        | IMPLEMENTED — tracked in project creation action       |
+| Step 1 Completion Rate (A3) | >70%    | `step.advanced` event                          | IMPLEMENTED — tracked in step advancement action       |
+| Time to First Form (A5)     | <20 min | `form.saved` event                             | IMPLEMENTED — tracked in form save action              |
+| Invite-to-Accept Rate (A6)  | >50%    | `user.invited` event + query `org_invitations` | Queryable from DB                                      |
+| Server Error Rate (O1)      | <0.1%   | Sentry (already deployed)                      | DEPLOYED — Sentry configured                           |
+| P95 Page Load (O2)          | <2s     | Vercel Analytics (already deployed)            | DEPLOYED — Vercel Analytics + Speed Insights active    |
 
 **Dashboards to build:** None yet. Use SQL queries directly against the DB for the first 5-10 beta users.
 
@@ -960,14 +1007,14 @@ Partitioning allows efficient pruning of old data and faster queries on recent d
 
 ### 8.1 Phase 1 (Immediate -- before first beta users)
 
-1. Create `analytics_events` table and RLS policy (migration)
-2. Create `trackEvent()` utility function (`lib/analytics.ts`)
-3. Add `is_sample` column to `projects` table
-4. Instrument 8 P0 events: `user.signed_up`, `org.created`, `project.created`, `step.viewed`, `step.advanced`, `form.created`, `form.saved`, `ticket.created`
-5. Create `v_project_step_funnel` view
-6. Create `v_stalled_projects` view
+1. ~~Create `analytics_events` table and RLS policy (migration)~~ — DEFERRED (using Vercel Analytics as baseline instead)
+2. ~~Create `trackEvent()` utility function (`lib/analytics.ts`)~~ — **DONE** (implemented as `trackServerEvent()` using `@vercel/analytics/server`)
+3. Add `is_sample` column to `projects` table — NOT YET DONE
+4. ~~Instrument 8 P0 events~~ — **PARTIALLY DONE** (project.created, form.saved, step.advanced, ticket.created, and others are tracked via `trackServerEvent` in server actions)
+5. Create `v_project_step_funnel` view — NOT YET DONE
+6. Create `v_stalled_projects` view — NOT YET DONE
 
-**Estimated effort:** 1-2 days for a single developer.
+**Estimated effort:** 1-2 days for remaining items (views + is_sample column).
 
 ### 8.2 Phase 2 (Before 10 active orgs)
 

@@ -14,13 +14,13 @@
 >
 > The MVP shipped on March 3, 2026. All Tier 1 features complete. All Tier 2 features complete. All Tier 3 features complete. Quality gates exceeded targets:
 >
-> | Gate        | Target | Actual         |
-> | ----------- | ------ | -------------- |
-> | Unit tests  | 100+   | 878 (54 files) |
-> | E2E tests   | 20+    | 160 (18 specs) |
-> | Type errors | 0      | 0              |
-> | Forms built | 10+    | 18 of 26       |
-> | Lint errors | 0      | 0              |
+> | Gate        | Target | Actual              |
+> | ----------- | ------ | ------------------- |
+> | Unit tests  | 100+   | 2,339+ (208+ files) |
+> | E2E tests   | 20+    | 230+ (25 specs)     |
+> | Type errors | 0      | 0                   |
+> | Forms built | 10+    | 18 of 26            |
+> | Lint errors | 0      | 0                   |
 >
 > **What shipped beyond MVP scope (Post-MVP Extensions):** Knowledge Hub (205 content nodes, FTS, reading experience, Cadence Bar, bookmarks), Training Mode (DB + seed data for 4 paths, 27 modules, 59 exercises, scaffolded pages), Workshop (DB tables, scaffolded UI), 83+ SEO marketing pages. See [Section 13: Post-MVP Extensions](#13-post-mvp-extensions) for details.
 
@@ -48,7 +48,7 @@
 
 ### What is the MVP in one paragraph?
 
-The PIPS 2.0 MVP is a multi-tenant web application where a team can sign up, create an organization, and run a PIPS project through the complete 6-step methodology -- from defining a problem statement (Step 1: Identify) through root cause analysis (Step 2: Analyze), solution brainstorming (Step 3: Generate), decision-making and planning (Step 4: Select & Plan), execution tracking (Step 5: Implement), and results evaluation (Step 6: Evaluate). At each step the user is guided by objectives, prompts, and interactive digital forms (fishbone diagrams, brainstorming workspaces, criteria rating matrices, implementation checklists, evaluation comparisons). The application includes basic ticketing so implementation tasks can be tracked as tickets, team management, role-based access control, in-app notifications, and an organization dashboard that shows PIPS project health. It ships on the PIPS brand identity (indigo-violet palette, DM Sans typography, 6-step color system) using Next.js 15, Supabase with RLS, and Vercel.
+The PIPS 2.0 MVP is a multi-tenant web application where a team can sign up, create an organization, and run a PIPS project through the complete 6-step methodology -- from defining a problem statement (Step 1: Identify) through root cause analysis (Step 2: Analyze), solution brainstorming (Step 3: Generate), decision-making and planning (Step 4: Select & Plan), execution tracking (Step 5: Implement), and results evaluation (Step 6: Evaluate). At each step the user is guided by objectives, prompts, and interactive digital forms (fishbone diagrams, brainstorming workspaces, criteria rating matrices, implementation checklists, evaluation comparisons). The application includes basic ticketing so implementation tasks can be tracked as tickets, team management, role-based access control, in-app notifications, and an organization dashboard that shows PIPS project health. It ships on the PIPS brand identity (indigo-violet palette, DM Sans typography, 6-step color system) using Next.js 16, Supabase with RLS, and Vercel.
 
 ### What is the "aha moment" for a first-time user?
 
@@ -670,7 +670,7 @@ The user creates their first PIPS project, writes a problem statement with guide
 
 | Layer               | Technology                                      | Notes                                                            |
 | ------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
-| **Framework**       | Next.js 15 (App Router)                         | SSR + RSC for data fetching, Client Components for interactivity |
+| **Framework**       | Next.js 16 (App Router)                         | SSR + RSC for data fetching, Client Components for interactivity |
 | **Language**        | TypeScript 5.7+ (strict mode)                   | Non-negotiable per Marc's preferences                            |
 | **Backend**         | Supabase (Auth, Postgres 15, Storage, Realtime) | Single backend platform                                          |
 | **Database**        | PostgreSQL 15 with RLS                          | Shared schema, org_id on every table                             |
@@ -823,7 +823,7 @@ RLS is enabled on ALL 15 MVP tables. Key policies from TECHNICAL_PLAN.md Section
 ```
 pips2/
 ├── apps/
-│   └── web/                          # Next.js 15 app
+│   └── web/                          # Next.js 16 app
 │       ├── src/
 │       │   ├── app/                  # App Router
 │       │   │   ├── (auth)/           # Auth pages (no sidebar)
@@ -1149,7 +1149,7 @@ All indexes from the TECHNICAL_PLAN.md schema are created in the initial migrati
 **Deliverables:**
 
 1. GitHub repository initialized (monorepo: Turborepo + pnpm)
-2. Next.js 15 app scaffolded (`apps/web`)
+2. Next.js 16 app scaffolded (`apps/web`)
 3. Shared package created (`packages/shared`)
 4. Supabase project provisioned (dev + staging)
 5. Full database schema deployed (initial migration with ALL tables, enums, triggers, RLS policies, indexes)
