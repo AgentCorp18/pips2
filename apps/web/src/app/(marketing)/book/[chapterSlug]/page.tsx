@@ -118,7 +118,7 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
       <JsonLd data={articleJsonLd} />
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
@@ -284,7 +284,7 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
           Back to Table of Contents
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

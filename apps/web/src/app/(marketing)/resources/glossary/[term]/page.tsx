@@ -71,7 +71,7 @@ const TermPage = async ({ params }: TermPageProps) => {
     .filter((t): t is NonNullable<typeof t> => t !== null)
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/resources" className="hover:text-[var(--color-primary)]">
@@ -220,7 +220,7 @@ const TermPage = async ({ params }: TermPageProps) => {
           Back to Glossary
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

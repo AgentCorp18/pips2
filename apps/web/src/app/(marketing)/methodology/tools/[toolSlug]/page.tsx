@@ -84,7 +84,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
   const detail = TOOL_DETAILS[toolSlug]
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/methodology" className="hover:text-[var(--color-primary)]">
@@ -275,7 +275,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
           Back to Step {stepNumber}: {stepContent.title}
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

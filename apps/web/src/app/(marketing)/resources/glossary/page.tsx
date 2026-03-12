@@ -48,7 +48,7 @@ const GlossaryPage = () => {
   const termsByLetter = getTermsByLetter()
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
       {/* Header */}
       <section className="text-center">
         <h1 className="font-serif text-4xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-5xl">
@@ -145,7 +145,7 @@ const GlossaryPage = () => {
           Get Started Free
         </Link>
       </section>
-    </div>
+    </main>
   )
 }
 

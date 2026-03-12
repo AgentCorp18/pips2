@@ -47,7 +47,7 @@ const TemplatesPage = () => {
   const grouped = getTemplatesByCategory()
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-5xl px-6 py-16">
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/resources" className="hover:text-[var(--color-primary)]">
@@ -179,7 +179,7 @@ const TemplatesPage = () => {
           Back to Resources
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

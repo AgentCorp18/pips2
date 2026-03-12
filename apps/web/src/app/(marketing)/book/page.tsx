@@ -37,7 +37,7 @@ export const metadata: Metadata = {
  */
 export const BookLandingPage = () => {
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
       {/* Hero */}
       <section className="text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-primary)]/10">
@@ -125,7 +125,7 @@ export const BookLandingPage = () => {
           Sign Up Free
         </Link>
       </section>
-    </div>
+    </main>
   )
 }
 
