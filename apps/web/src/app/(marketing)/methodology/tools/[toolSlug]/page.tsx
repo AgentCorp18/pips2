@@ -48,24 +48,25 @@ export const generateMetadata = async ({ params }: ToolPageProps): Promise<Metad
   }
 
   const detail = TOOL_DETAILS[toolSlug]
-  const title = `${result.form.name} — PIPS Process Improvement Tool`
+  const pageTitle = `${result.form.name} — Process Improvement Tool`
+  const ogTitle = `${result.form.name} — PIPS Process Improvement Tool`
   const description = detail?.seoDescription ?? result.form.description
 
   return {
-    title,
+    title: pageTitle,
     description,
     alternates: {
       canonical: `/methodology/tools/${toolSlug}`,
     },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url: `${BASE_URL}/methodology/tools/${toolSlug}`,
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: ogTitle,
       description,
     },
   }

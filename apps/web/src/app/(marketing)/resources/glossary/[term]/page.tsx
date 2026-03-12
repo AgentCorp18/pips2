@@ -36,24 +36,25 @@ export const generateMetadata = async ({ params }: TermPageProps): Promise<Metad
     return { title: 'Term Not Found' }
   }
 
-  const title = `${glossaryTerm.term} — PIPS Glossary`
+  const pageTitle = `${glossaryTerm.term} — Glossary`
+  const ogTitle = `${glossaryTerm.term} — PIPS Glossary`
   const description = glossaryTerm.definition
 
   return {
-    title,
+    title: pageTitle,
     description,
     alternates: {
       canonical: `/resources/glossary/${slug}`,
     },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url: `${BASE_URL}/resources/glossary/${slug}`,
       type: 'article',
     },
     twitter: {
       card: 'summary',
-      title,
+      title: ogTitle,
       description,
     },
   }
