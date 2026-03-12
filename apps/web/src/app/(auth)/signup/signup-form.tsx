@@ -26,6 +26,7 @@ export const SignupForm = () => {
   return (
     <Card>
       <CardHeader>
+        <h1 className="sr-only">Sign Up</h1>
         <CardTitle className="text-center text-xl">Create an account</CardTitle>
         <CardDescription className="text-center">
           Get started with PIPS process improvement

@@ -32,6 +32,9 @@ export const metadata: Metadata = {
   title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
   description:
     'A principle-driven, 6-step framework for solving problems and driving continuous improvement. Identify problems, analyze root causes, generate solutions, and deliver measurable results.',
+  alternates: {
+    canonical: '/methodology',
+  },
   openGraph: {
     title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
     description:
@@ -39,7 +42,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
     description:
       'A principle-driven, 6-step framework for solving problems and driving continuous improvement in any team, any industry.',
@@ -49,7 +52,7 @@ export const metadata: Metadata = {
 /** SEO pillar page: /methodology — public, no auth required */
 const MethodologyPage = () => {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-5xl px-6 py-16">
       <JsonLd data={organizationJsonLd} />
       {/* Hero */}
       <section className="text-center">
@@ -211,7 +214,7 @@ const MethodologyPage = () => {
           </Link>
         </div>
       </section>
-    </div>
+    </main>
   )
 }
 

@@ -1,3 +1,8 @@
+// WARNING: This in-memory rate limiter is ineffective in serverless/multi-instance
+// deployments (e.g., Vercel). Each cold start creates a fresh Map, resetting counters.
+// TODO: Replace with a persistent store (Upstash Redis, Vercel KV, or Supabase)
+// before enabling paid AI features or exposing to high traffic.
+
 /**
  * Simple in-memory rate limiter for API routes.
  * Resets on deploy/restart — sufficient for beta.

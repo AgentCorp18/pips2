@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
 
@@ -25,6 +26,24 @@ export const saveFormData = async (
 
   if (!user) {
     return { success: false, error: 'Not authenticated' }
+  }
+
+  // Verify project exists and user belongs to the project's org
+  const { data: project } = await supabase
+    .from('projects')
+    .select('org_id')
+    .eq('id', projectId)
+    .single()
+
+  if (!project) {
+    return { success: false, error: 'Project not found' }
+  }
+
+  // Check permission — saving form data requires data.view (member+)
+  try {
+    await requirePermission(project.org_id, 'data.view')
+  } catch {
+    return { success: false, error: 'Insufficient permissions to save form data' }
   }
 
   const stepEnum = stepNumberToEnum(stepNumber)

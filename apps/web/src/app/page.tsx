@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: 'Transform How Your Team Solves Problems | PIPS',
   description:
     'PIPS embeds a proven 6-step methodology into your workflow — guiding teams from problem identification through measurable results.',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'PIPS — Transform How Your Team Solves Problems',
     description:
@@ -24,7 +27,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'PIPS — Transform How Your Team Solves Problems',
     description:
       'A 6-step methodology embedded in project management software. Guide your team from problem identification through measurable results.',
@@ -60,7 +63,7 @@ const webApplicationJsonLd = {
 
 export const HomePage = () => {
   return (
-    <main className="min-h-screen">
+    <main id="main-content" className="min-h-screen">
       <JsonLd data={webApplicationJsonLd} />
       <LandingNav />
       <HeroSection />

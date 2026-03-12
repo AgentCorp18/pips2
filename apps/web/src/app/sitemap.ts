@@ -47,6 +47,24 @@ const sitemap = (): MetadataRoute.Sitemap => {
       priority: 0.7,
     },
     {
+      url: `${BASE_URL}/pricing`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/privacy`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
       url: `${BASE_URL}/login`,
       lastModified: now,
       changeFrequency: 'yearly',

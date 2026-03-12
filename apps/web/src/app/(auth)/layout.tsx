@@ -24,7 +24,10 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="step-gradient-stripe" />
 
       {/* Centered content */}
-      <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
+      <main
+        id="main-content"
+        className="flex flex-1 flex-col items-center justify-center px-4 py-8"
+      >
         {/* Logo */}
         <div className="mb-8">
           <PipDotsLogo />
@@ -37,7 +40,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         <p className="mt-8 text-center text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
           Process Improvement &amp; Problem Solving
         </p>
-      </div>
+      </main>
     </div>
   )
 }

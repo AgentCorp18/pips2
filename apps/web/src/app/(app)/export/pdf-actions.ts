@@ -79,7 +79,7 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
       .from('tickets')
       .select('id', { count: 'exact', head: true })
       .eq('project_id', projectId)
-      .eq('status', 'open'),
+      .eq('status', 'todo'),
     supabase
       .from('tickets')
       .select('id', { count: 'exact', head: true })
@@ -89,7 +89,7 @@ export const getProjectPDFData = async (projectId: string): Promise<PDFDataResul
       .from('tickets')
       .select('id', { count: 'exact', head: true })
       .eq('project_id', projectId)
-      .eq('status', 'review'),
+      .eq('status', 'in_review'),
     supabase
       .from('tickets')
       .select('id', { count: 'exact', head: true })

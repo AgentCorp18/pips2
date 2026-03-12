@@ -167,7 +167,7 @@ const MyWorkPage = async () => {
     redirect('/onboarding')
   }
 
-  const grouped = await getMyTickets(user.id, membership.org_id)
+  const grouped = await getMyTickets(membership.org_id)
   const totalCount =
     grouped.overdue.length +
     grouped.dueToday.length +

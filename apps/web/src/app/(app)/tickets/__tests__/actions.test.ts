@@ -263,7 +263,7 @@ describe('updateTicket', () => {
     expect(result).toEqual({ error: 'Ticket not found' })
   })
 
-  it('checks ticket.create permission with ticket org_id', async () => {
+  it('checks ticket.update permission with ticket org_id', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // from('tickets').select().eq().single() -> ticket found
@@ -274,7 +274,7 @@ describe('updateTicket', () => {
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     await updateTicket('ticket-1', { status: 'done' })
-    expect(requirePermission).toHaveBeenCalledWith('org-99', 'ticket.create')
+    expect(requirePermission).toHaveBeenCalledWith('org-99', 'ticket.update')
   })
 
   it('returns error when permission is denied', async () => {
@@ -932,7 +932,7 @@ describe('setParentTicket', () => {
     expect(result).toEqual({ error: 'Failed to set parent ticket. Please try again.' })
   })
 
-  it('checks ticket.create permission', async () => {
+  it('checks ticket.update permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       { data: { org_id: 'org-1', parent_id: null } },
@@ -944,7 +944,7 @@ describe('setParentTicket', () => {
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     await setParentTicket('tkt-child', 'tkt-parent')
-    expect(requirePermission).toHaveBeenCalledWith('org-1', 'ticket.create')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'ticket.update')
   })
 })
 
@@ -1015,12 +1015,12 @@ describe('removeParentTicket', () => {
     expect(result).toEqual({ error: 'Failed to remove parent ticket. Please try again.' })
   })
 
-  it('checks ticket.create permission', async () => {
+  it('checks ticket.update permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: { org_id: 'org-1', parent_id: null } }, { error: null }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     await removeParentTicket('tkt-1')
-    expect(requirePermission).toHaveBeenCalledWith('org-1', 'ticket.create')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'ticket.update')
   })
 })
