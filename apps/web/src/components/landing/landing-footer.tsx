@@ -49,9 +49,9 @@ export const LandingFooter = () => {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
             <div key={heading}>
-              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.08em] text-white/80">
+              <h3 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.08em] text-white/80">
                 {heading}
-              </p>
+              </h3>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
                   <li key={link.label}>
