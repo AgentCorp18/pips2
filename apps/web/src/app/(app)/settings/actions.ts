@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { updateOrgSettingsSchema } from '@/lib/validations'
+import { hasPermission } from '@pips/shared'
+import type { OrgRole } from '@pips/shared'
 
 export type SettingsActionState = {
   error?: string
@@ -106,7 +108,7 @@ export const updateOrgSettings = async (
     return { error: 'You are not a member of any organization' }
   }
 
-  if (membership.role !== 'owner' && membership.role !== 'admin') {
+  if (!hasPermission(membership.role as OrgRole, 'org.members.manage')) {
     return { error: 'Only owners and admins can update organization settings' }
   }
 

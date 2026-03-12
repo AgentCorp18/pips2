@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { hasPermission } from '@pips/shared'
+import type { OrgRole } from '@pips/shared'
 import { getOrgWithSettings } from './actions'
 import { OrgSettingsForm } from './org-settings-form'
 
@@ -15,7 +17,7 @@ const SettingsPage = async () => {
     redirect('/onboarding')
   }
 
-  const canEdit = data.role === 'owner' || data.role === 'admin'
+  const canEdit = hasPermission(data.role as OrgRole, 'org.members.manage')
 
   return (
     <div>
