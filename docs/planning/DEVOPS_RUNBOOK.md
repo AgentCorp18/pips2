@@ -1,22 +1,30 @@
 # PIPS 2.0 -- DevOps & Infrastructure Runbook
 
-> **Version:** 1.1 — Updated 2026-03-04
-> **Date:** 2026-03-02 (created), 2026-03-04 (updated)
+> **Version:** 1.2 — Updated 2026-03-12
+> **Date:** 2026-03-02 (created), 2026-03-04 (updated), 2026-03-12 (metrics refresh)
 > **Status:** Current — reflects ACTUAL deployed system state
 > **Author:** Marc Albers + Claude (DevOps Agent)
 > **Companion doc:** `AI_AGENT_COORDINATION.md` (defines how agents use this infrastructure)
 > **Production URL:** https://pips-app.vercel.app
 > **Supabase Project:** `cmrribhjgfybbxhrsxqi` (us-east-2)
 >
+> **v1.2 changes (2026-03-12):**
+>
+> - Updated test counts: 2,339+ unit tests (210+ files), up from 896 (56 files)
+> - Updated migration count: 13 migrations, up from 11
+> - Updated repository visibility: public (was private)
+> - Updated lint warnings: 30 (was 20)
+> - Updated Next.js references to 16
+>
 > **v1.1 changes (2026-03-04):**
 >
 > - Added build-status markers ([CONFIGURED], [PLANNED]) throughout
 > - Updated CI/CD pipeline documentation to match actual `.github/workflows/` files
 > - Added Content Pipeline Operations section (compile-content, seed-content, seed-training)
-> - Added migration management for Knowledge Hub + Training tables (11 migrations documented)
+> - Added migration management for Knowledge Hub + Training tables (11 migrations at that time)
 > - Added Disaster Recovery procedures
 > - Updated Environment Variable documentation to match actual `.env.example`
-> - Updated deployment state: live at pips-app.vercel.app, 896 unit tests, 160 E2E tests
+> - Updated deployment state (at that time: 896 unit tests, 160 E2E tests)
 > - Updated tooling versions: pnpm 10, Next.js 16.1.6, Tailwind v4
 > - Updated quick reference commands with content pipeline and training scripts
 
@@ -35,11 +43,11 @@ Throughout this document, section headers and descriptions include a status mark
 
 > **Production URL:** https://pips-app.vercel.app (live since March 3, 2026)
 > **Supabase:** Project `cmrribhjgfybbxhrsxqi` (us-east-2)
-> **Unit tests:** 896 passing (56 files)
-> **E2E tests:** 160 specs (18 files)
+> **Unit tests:** 2,339+ passing (210+ files)
+> **E2E tests:** 230+ test cases (25 spec files)
 > **Type errors:** 0
-> **Lint errors:** 0 (20 warnings, acceptable)
-> **DB migrations:** 11 applied to production
+> **Lint errors:** 0 (30 warnings, acceptable)
+> **DB migrations:** 13 applied to production
 > **Content nodes:** 205 seeded (FTS active)
 > **Training data:** 4 paths, 27 modules, 59 exercises seeded
 > **Marketing pages:** 83+ SEO pages
@@ -78,8 +86,8 @@ This section walks through every step required to go from zero to a working deve
 #### Create GitHub Repository
 
 ```bash
-# Create the private repo under AgentCorp18
-gh repo create AgentCorp18/pips2 --private --description "PIPS 2.0 - Methodology-embedded project management SaaS" --clone
+# Create the public repo under AgentCorp18
+gh repo create AgentCorp18/pips2 --public --description "PIPS 2.0 - Methodology-embedded project management SaaS" --clone
 cd pips2
 ```
 
@@ -388,7 +396,7 @@ ls supabase/migrations/
 ## Project Overview
 
 - **App**: Multi-tenant SaaS for process improvement methodology (PIPS)
-- **Stack**: Next.js 15 (App Router), Supabase, Stripe, Vercel
+- **Stack**: Next.js 16 (App Router), Supabase, Stripe, Vercel
 - **Language**: TypeScript strict mode
 - **Monorepo**: Turborepo + pnpm workspaces
 - **Testing**: Vitest (unit), Playwright (e2e)
@@ -462,7 +470,7 @@ pnpm create next-app@latest . --typescript --tailwind --eslint --app --src-dir -
 
 # Verify it works
 pnpm dev
-# Expected: Next.js 15 running at http://localhost:3000
+# Expected: Next.js 16 running at http://localhost:3000
 ```
 
 #### Configure TypeScript (strict mode + path aliases)
@@ -3311,17 +3319,17 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### 11.1 Service Pricing Summary
 
-| Service           | Plan                 | Monthly Cost     | Notes                                                  |
-| ----------------- | -------------------- | ---------------- | ------------------------------------------------------ |
-| **Vercel**        | Pro                  | $20/member       | Includes 100GB bandwidth, 1TB edge, 100 hrs serverless |
-| **Supabase**      | Pro                  | $25/project      | 8GB storage, 50GB bandwidth, 500MB RAM, PITR           |
-| **Stripe**        | Pay-as-you-go        | 2.9% + $0.30/txn | No monthly fee. Volume discounts available.            |
-| **Resend**        | Free tier            | $0               | 3,000 emails/month. Pro at $20/mo for 50K emails.      |
-| **Sentry**        | Developer            | $0               | 5K errors/month. Team at $26/mo for 50K errors.        |
-| **Upstash Redis** | Pay-as-you-go        | ~$0-10           | 10K commands/day free. $0.20 per 100K commands after.  |
-| **GitHub**        | Free (private repos) | $0               | 2,000 CI minutes/month free.                           |
-| **Domain**        | Annual               | ~$12/year        | Standard .com domain                                   |
-| **Better Uptime** | Free                 | $0               | 5 monitors. Pro at $20/mo for 50 monitors.             |
+| Service           | Plan               | Monthly Cost     | Notes                                                  |
+| ----------------- | ------------------ | ---------------- | ------------------------------------------------------ |
+| **Vercel**        | Pro                | $20/member       | Includes 100GB bandwidth, 1TB edge, 100 hrs serverless |
+| **Supabase**      | Pro                | $25/project      | 8GB storage, 50GB bandwidth, 500MB RAM, PITR           |
+| **Stripe**        | Pay-as-you-go      | 2.9% + $0.30/txn | No monthly fee. Volume discounts available.            |
+| **Resend**        | Free tier          | $0               | 3,000 emails/month. Pro at $20/mo for 50K emails.      |
+| **Sentry**        | Developer          | $0               | 5K errors/month. Team at $26/mo for 50K errors.        |
+| **Upstash Redis** | Pay-as-you-go      | ~$0-10           | 10K commands/day free. $0.20 per 100K commands after.  |
+| **GitHub**        | Free (public repo) | $0               | 2,000 CI minutes/month free.                           |
+| **Domain**        | Annual             | ~$12/year        | Standard .com domain                                   |
+| **Better Uptime** | Free               | $0               | 5 monitors. Pro at $20/mo for 50 monitors.             |
 
 ### 11.2 Monthly Cost Projections
 
@@ -3633,7 +3641,7 @@ In the worst case (complete rebuild):
 # 1. Ensure Supabase project exists and is accessible
 supabase link --project-ref cmrribhjgfybbxhrsxqi
 
-# 2. Apply all 11 migrations
+# 2. Apply all 13 migrations
 supabase db push
 
 # 3. Seed content

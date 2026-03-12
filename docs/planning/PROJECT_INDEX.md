@@ -1,13 +1,13 @@
 # PIPS 2.0 — Project Planning Index
 
-> **Version:** 1.1 — Updated 2026-03-04
+> **Version:** 1.2 — Updated 2026-03-12
 > **Created:** March 3, 2026
 > **Owner:** Project Manager Agent (Control Tower)
-> **Status:** MVP Complete — Post-MVP Phases 1.5-4 Complete, Phase 5 Next
+> **Status:** MVP Complete — All Post-MVP Phases (1.5-6) COMPLETE, Beta Launch Ready
 > **Product Name:** PIPS (Process Improvement and Problem Solving)
 > **Owner (Human):** Marc Albers (GitHub: AgentCorp18)
 > **Production URL:** https://pips-app.vercel.app
-> **Repository:** AgentCorp18/pips2 (private)
+> **Repository:** AgentCorp18/pips2 (public)
 > **Supabase Project:** `cmrribhjgfybbxhrsxqi` (us-east-2)
 
 ---
@@ -24,33 +24,33 @@ Tech Stack: Next.js 16 + TypeScript (strict) + Supabase + Vercel + Tailwind v4 +
 
 ## Current Build Status
 
-| Metric          | Value                                             |
-| --------------- | ------------------------------------------------- |
-| Unit tests      | 896 passing (56 files)                            |
-| E2E tests       | 160 specs (18 files, 47 failing — selector drift) |
-| Type errors     | 0                                                 |
-| Lint errors     | 0 (20 warnings)                                   |
-| PIPS forms      | 18 interactive methodology forms                  |
-| DB migrations   | 11 applied to production                          |
-| Content nodes   | 205 seeded (FTS active)                           |
-| Training data   | 4 paths, 27 modules, 59 exercises                 |
-| Marketing pages | 83+ SEO pages                                     |
-| Production      | Live since March 3, 2026                          |
+| Metric          | Value                                                     |
+| --------------- | --------------------------------------------------------- |
+| Unit tests      | 2,339+ passing (210+ files)                               |
+| E2E tests       | 230+ test cases, 25 spec files (in `apps/web/tests/e2e/`) |
+| Type errors     | 0                                                         |
+| Lint errors     | 0                                                         |
+| PIPS forms      | 18 interactive methodology forms                          |
+| DB migrations   | 13 applied to production                                  |
+| Content nodes   | 205 seeded (FTS active)                                   |
+| Training data   | 4 paths, 27 modules, 59 exercises                         |
+| Marketing pages | 83+ SEO pages                                             |
+| Production      | Live since March 3, 2026                                  |
 
 ### Phase Completion
 
-| Phase                               | Status      | Commit                          |
-| ----------------------------------- | ----------- | ------------------------------- |
-| Phase 0 (Foundation)                | COMPLETE    | MVP sprints                     |
-| Phase 1 (MVP)                       | COMPLETE    | Live since 2026-03-03           |
-| Phase 1.5 (Stabilization)           | COMPLETE    | `85506c3`                       |
-| Phase 2A (Knowledge Hub Foundation) | COMPLETE    | `8c3b012`                       |
-| Phase 2B (Reading Experience)       | COMPLETE    | `7ec1a48`                       |
-| Phase 2C (Cadence Bar)              | COMPLETE    | `0358558`                       |
-| Phase 3 (Training Mode)             | COMPLETE    | `ca51d93`, `64b2a03`, `6851176` |
-| Phase 4 (Marketing Content + SEO)   | COMPLETE    | `f493409`, `79acef7`            |
-| Phase 5 (Workshop Facilitation)     | NOT STARTED | --                              |
-| Phase 6 (Polish & Quality)          | NOT STARTED | --                              |
+| Phase                               | Status   | Commit                                  |
+| ----------------------------------- | -------- | --------------------------------------- |
+| Phase 0 (Foundation)                | COMPLETE | MVP sprints                             |
+| Phase 1 (MVP)                       | COMPLETE | Live since 2026-03-03                   |
+| Phase 1.5 (Stabilization)           | COMPLETE | `85506c3`                               |
+| Phase 2A (Knowledge Hub Foundation) | COMPLETE | `8c3b012`                               |
+| Phase 2B (Reading Experience)       | COMPLETE | `7ec1a48`                               |
+| Phase 2C (Cadence Bar)              | COMPLETE | `0358558`                               |
+| Phase 3 (Training Mode)             | COMPLETE | `ca51d93`, `64b2a03`, `6851176`         |
+| Phase 4 (Marketing Content + SEO)   | COMPLETE | `f493409`, `79acef7`                    |
+| Phase 5 (Workshop Facilitation)     | COMPLETE | `f910c5b`, `29d9bcf`, `2cf29ec`         |
+| Phase 6 (Polish & Quality)          | COMPLETE | ~98% — only WP-6.9 (Final Gate) remains |
 
 ---
 
@@ -141,7 +141,7 @@ All planning documents in `docs/planning/`, organized by domain with version, ow
 | -------------------------- | ------- | ---------------------- | ------ | ------------------------------------------------------------------------------------ |
 | `FULL_PROJECT_PLAN.md`     | v1.1    | Project Manager Agent  | ~900   | Master execution plan, phase status, critical path, risk register, agent assignments |
 | `DEVELOPMENT_TASK_LIST.md` | v1.2    | Development Lead Agent | ~1,600 | Tactical task list with 59 work packages, status tracking, parallelization map       |
-| `PROJECT_INDEX.md`         | v1.1    | Project Manager Agent  | ~280   | This document — system navigation guide and planning document registry               |
+| `PROJECT_INDEX.md`         | v1.2    | Project Manager Agent  | ~280   | This document — system navigation guide and planning document registry               |
 
 ### Coordination Documents
 
@@ -213,8 +213,8 @@ Intelligence (Supporting)
 ```bash
 pnpm typecheck        # tsc --noEmit
 pnpm lint             # ESLint
-pnpm test             # Vitest (896 tests)
-pnpm test:e2e         # Playwright (160 specs)
+pnpm test             # Vitest (2,339+ tests)
+pnpm test:e2e         # Playwright (25 spec files)
 pnpm build            # Next.js production build
 ```
 
@@ -228,22 +228,24 @@ pnpm training:seed    # Seed training paths, modules, exercises
 
 ### Key Directories
 
-| Directory          | Purpose                             |
-| ------------------ | ----------------------------------- |
-| `apps/web/`        | Next.js web application             |
-| `packages/shared/` | Shared types and utilities          |
-| `supabase/`        | Migrations, functions, seed data    |
-| `scripts/`         | Content pipeline scripts            |
-| `docs/planning/`   | Planning documents (this directory) |
-| `docs/AGENTS/`     | Agent seed documents                |
-| `docs/work-log/`   | Daily work logs                     |
-| `tests/e2e/`       | E2E test specs                      |
+| Directory             | Purpose                             |
+| --------------------- | ----------------------------------- |
+| `apps/web/`           | Next.js web application             |
+| `packages/shared/`    | Shared types and utilities          |
+| `supabase/`           | Migrations, functions, seed data    |
+| `scripts/`            | Content pipeline scripts            |
+| `docs/planning/`      | Planning documents (this directory) |
+| `docs/AGENTS/`        | Agent seed documents                |
+| `docs/work-log/`      | Daily work logs                     |
+| `apps/web/tests/e2e/` | E2E test specs (25 spec files)      |
 
 ---
 
 ## What to Read Next
 
-- **Starting a new work session?** Read `FULL_PROJECT_PLAN.md` for current priorities
+- **Starting a new work session?** Read `FULL_PROJECT_PLAN.md` for current priorities (beta launch readiness)
+- **Security review findings?** Read `docs/reviews/2026-03-12-critical-review.md` for 26 findings (5 critical fixed)
+- **Planning health check?** Read `docs/planning/2026-03-12-plan-review.md` for plan-vs-reality audit
 - **Need task details?** Read `DEVELOPMENT_TASK_LIST.md` for work packages
 - **Building a feature?** Read `TECHNICAL_PLAN.md` for architecture and `CLAUDE.md` for conventions
 - **Testing?** Read `TEST_STRATEGY.md` for testing approach

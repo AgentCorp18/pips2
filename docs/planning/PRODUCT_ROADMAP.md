@@ -3,8 +3,8 @@
 > Version: 1.2
 > Author: Marc Albers
 > Created: 2026-03-02
-> Status: Active — All feature phases COMPLETE, Polish ~90%
-> Last Updated: March 9, 2026 (Docs Agent — phase statuses updated to reflect overnight session completions)
+> Status: Active — All feature phases COMPLETE, Polish COMPLETE
+> Last Updated: March 12, 2026 (phase statuses, version refs, and test counts updated)
 
 ---
 
@@ -14,7 +14,7 @@
 > **Phase 1 (MVP):** COMPLETE — Live at pips-app.vercel.app
 > **Phase 1.5 (Post-MVP Stabilization):** COMPLETE — All bugs fixed, all features wired
 > **Post-MVP Phases (Dev Task List 1.5-5):** ALL COMPLETE — Knowledge Hub, Training, Workshop, Marketing all shipped
-> **Phase 6 (Polish & Quality):** ~90% COMPLETE — mobile, accessibility, performance, data-testid done; E2E specs + analytics remaining
+> **Phase 6 (Polish & Quality):** COMPLETE — mobile, accessibility, performance, data-testid, E2E specs, Lighthouse audit, security hardening all done
 > **Original Roadmap Phase 2-6:** Updated timelines below — several phases were completed far ahead of schedule
 >
 > **What shipped ahead of schedule (in MVP instead of Phase 2+):**
@@ -32,7 +32,7 @@
 > - Workshop facilitation (session CRUD, timer, Realtime, templates) (not in original roadmap)
 > - Interactive guide overhaul (9 components, 4 new pages) (not in original roadmap)
 > - Sprint 0 production hardening (security headers, rate limiting) (not in original roadmap)
-> - 2,199+ unit tests across 196 files (far exceeding any target)
+> - 2,339+ unit tests across 210 files (far exceeding any target)
 
 ---
 
@@ -41,7 +41,7 @@
 1. [Product Vision & North Star](#1-product-vision--north-star)
 2. [Phase 0: Foundation — COMPLETE](#2-phase-0-foundation-weeks-1-4)
 3. [Phase 1: MVP — COMPLETE](#3-phase-1-mvp--core-pips-workflow-weeks-5-12)
-4. [Phase 1.5: Post-MVP Stabilization — IN PROGRESS](#4-phase-15-post-mvp-stabilization)
+4. [Phase 1.5: Post-MVP Stabilization — COMPLETE](#4-phase-15-post-mvp-stabilization)
 5. [Phase 2: Knowledge Hub & Training Completion](#5-phase-2-knowledge-hub--training-completion)
 6. [Phase 3: Workshop, Billing & Polish](#6-phase-3-workshop-billing--polish)
 7. [Phase 4: Integrations & API](#7-phase-4-integrations--api)
@@ -108,7 +108,7 @@ Establish the technical foundation, design system, authentication layer, and mul
 
 #### Week 1: Project Setup & Infrastructure
 
-- Initialize Next.js 15 project with TypeScript strict mode
+- Initialize Next.js 16 project with TypeScript strict mode
 - Configure path aliases (`@/*` for `src/*`)
 - Set up Supabase project (database, auth, storage)
 - Configure Vercel deployment pipeline (preview + production)
@@ -132,7 +132,7 @@ Establish the technical foundation, design system, authentication layer, and mul
   - Loading states (skeleton, spinner)
   - Empty state pattern
 - Implement responsive layout system (sidebar + main content)
-- Set up Storybook for component documentation
+- ~~Set up Storybook for component documentation~~ (descoped — never built; components documented via co-located tests instead)
 - Establish white-label token architecture (CSS custom properties driven by tenant config)
 - PIPS step color system: Step 1 through Step 6 each get a primary and accent color, consistent across all UI
 
@@ -188,12 +188,12 @@ Establish the technical foundation, design system, authentication layer, and mul
 2. **As a new user**, I can sign up with email/password, create an organization, and land on an empty dashboard.
 3. **As an org owner**, I can invite another user by email, and they join my organization upon accepting.
 4. **As a developer**, I can verify via automated tests that User A in Org 1 cannot read or write any data belonging to Org 2.
-5. **As a developer**, I can view all UI components in Storybook with their variants and states documented.
+5. **As a developer**, I can view all UI components in Storybook with their variants and states documented. _(Storybook was descoped; component quality is verified via co-located unit tests.)_
 
 ### Exit Criteria / Definition of Done
 
 - [x] `tsc --noEmit` passes with zero errors
-- [x] All component library primitives render in Storybook with at least 2 variants each
+- [x] ~~All component library primitives render in Storybook with at least 2 variants each~~ (Storybook descoped — component coverage verified via co-located unit tests instead)
 - [x] Auth flows work end-to-end: sign up, sign in, sign out, magic link
 - [x] Multi-tenancy RLS tests pass: 100% tenant isolation verified
 - [x] CI/CD pipeline runs on every PR: lint + type-check + test + build
@@ -216,7 +216,7 @@ Establish the technical foundation, design system, authentication layer, and mul
 ## 3. Phase 1: MVP -- Core PIPS Workflow (Weeks 5-12) — COMPLETE
 
 > **Status: COMPLETE** — MVP live at pips-app.vercel.app since March 3, 2026.
-> 878 unit tests, 160 E2E tests, 0 type errors. 18 of 26 forms built. Full 6-step workflow operational.
+> 2,339+ unit tests (210 files), 0 type errors. 18 of 26 forms built. Full 6-step workflow operational.
 > Several Phase 2 features (Kanban, parent/child tickets, notifications, search, dark mode, audit log, CSV/PDF export) were pulled forward and shipped with MVP.
 
 ### Goal
@@ -330,7 +330,7 @@ Deliver the minimum viable product: users can create a PIPS improvement project,
 - [x] Dashboard shows active projects, assigned tickets, and recent activity
 - [x] Teams can be created and assigned to projects
 - [x] All features work on mobile viewport (375px+) -- responsive design verified
-- [x] Test coverage >70% on core PIPS workflow logic (878 unit tests, 160 E2E tests)
+- [x] Test coverage >70% on core PIPS workflow logic (2,339+ unit tests, 230+ E2E tests)
 - [x] Performance: page load <2s on 3G connection (Lighthouse)
 - [ ] 3 real users (internal or beta testers) have completed a full PIPS project end-to-end — NOT YET (no beta users onboarded)
 
@@ -554,7 +554,7 @@ Complete the remaining ticketing and project management features that were defer
 - [x] Notification preferences are respected (in-app and email) — SHIPPED IN MVP
 - [x] Email notifications deliver within 60 seconds of the triggering event — SHIPPED IN MVP
 - [x] All features work on mobile viewport; Kanban board scrolls horizontally on small screens — SHIPPED IN MVP
-- [x] Test coverage >70% on ticketing logic; E2E tests cover critical paths — 878 unit + 160 E2E tests
+- [x] Test coverage >70% on ticketing logic; E2E tests cover critical paths — 2,339+ unit tests + 230+ E2E tests
 
 ### Risks Specific to This Phase
 
@@ -1167,36 +1167,36 @@ These features are on the horizon but are intentionally deferred. They are liste
 
 ### Phase 0: Foundation — COMPLETE
 
-| Metric                     | Target                                     | Actual                   |
-| -------------------------- | ------------------------------------------ | ------------------------ |
-| TypeScript strict mode     | Zero errors                                | ACHIEVED — 0 type errors |
-| Component library coverage | All base primitives in Storybook           | ACHIEVED                 |
-| RLS test coverage          | 100% of tables have tenant isolation tests | ACHIEVED                 |
-| CI/CD pipeline             | Green on every merge to main               | ACHIEVED                 |
-| Lighthouse performance     | >90 on empty dashboard                     | ACHIEVED                 |
+| Metric                     | Target                                     | Actual                                                          |
+| -------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
+| TypeScript strict mode     | Zero errors                                | ACHIEVED — 0 type errors                                        |
+| Component library coverage | All base primitives in Storybook           | DESCOPED — Storybook never built; coverage via co-located tests |
+| RLS test coverage          | 100% of tables have tenant isolation tests | ACHIEVED                                                        |
+| CI/CD pipeline             | Green on every merge to main               | ACHIEVED                                                        |
+| Lighthouse performance     | >90 on empty dashboard                     | ACHIEVED                                                        |
 
 ### Phase 1: MVP — COMPLETE
 
-| Metric                             | Target                                | Actual                                |
-| ---------------------------------- | ------------------------------------- | ------------------------------------- |
-| Beta users                         | 5-10 users actively testing           | PENDING — no beta users onboarded yet |
-| PIPS projects completed end-to-end | At least 3 (by beta testers)          | PENDING — no real users yet           |
-| Digital forms functional           | 10+ of 26 templates (prioritized set) | EXCEEDED — 18 forms built             |
-| Core test coverage                 | >70% on workflow logic                | EXCEEDED — 878 unit + 160 E2E tests   |
-| Page load time                     | <2s on 3G                             | ACHIEVED                              |
-| Critical bugs                      | Zero open P0 bugs                     | ACHIEVED — 5 bugs fixed post-MVP      |
-| Revenue                            | $0 (free beta)                        | ON TRACK — $0 as expected             |
+| Metric                             | Target                                | Actual                                                   |
+| ---------------------------------- | ------------------------------------- | -------------------------------------------------------- |
+| Beta users                         | 5-10 users actively testing           | PENDING — no beta users onboarded yet                    |
+| PIPS projects completed end-to-end | At least 3 (by beta testers)          | PENDING — no real users yet                              |
+| Digital forms functional           | 10+ of 26 templates (prioritized set) | EXCEEDED — 18 forms built                                |
+| Core test coverage                 | >70% on workflow logic                | EXCEEDED — 2,339+ unit tests (210 files), 230+ E2E tests |
+| Page load time                     | <2s on 3G                             | ACHIEVED                                                 |
+| Critical bugs                      | Zero open P0 bugs                     | ACHIEVED — 5 bugs fixed post-MVP                         |
+| Revenue                            | $0 (free beta)                        | ON TRACK — $0 as expected                                |
 
-### Phase 1.5: Post-MVP Stabilization — IN PROGRESS
+### Phase 1.5: Post-MVP Stabilization — COMPLETE
 
-| Metric                          | Target                                                         |
-| ------------------------------- | -------------------------------------------------------------- |
-| Production bugs fixed           | All identified bugs resolved                                   |
-| Adoption friction items         | Top 5 friction risks mitigated (from Customer Insights Report) |
-| Email notification verification | All critical paths verified with Resend                        |
-| Training pages wired            | All 4 learning paths rendering from DB                         |
-| Knowledge Hub workbook          | Exercise-to-form linking operational                           |
-| Beta readiness                  | First 5 beta users can complete full 6-step cycle              |
+| Metric                          | Target                                                         | Actual                      |
+| ------------------------------- | -------------------------------------------------------------- | --------------------------- |
+| Production bugs fixed           | All identified bugs resolved                                   | ACHIEVED                    |
+| Adoption friction items         | Top 5 friction risks mitigated (from Customer Insights Report) | ACHIEVED                    |
+| Email notification verification | All critical paths verified with Resend                        | ACHIEVED                    |
+| Training pages wired            | All 4 learning paths rendering from DB                         | ACHIEVED                    |
+| Knowledge Hub workbook          | Exercise-to-form linking operational                           | ACHIEVED                    |
+| Beta readiness                  | First 5 beta users can complete full 6-step cycle              | PENDING — no beta users yet |
 
 ### Phase 2: Ticketing & Project Management
 

@@ -15,7 +15,7 @@
 > - Updated project structure to reflect actual codebase (knowledge/, training/, seo/, knowledge-cadence/ component directories)
 > - Aligned with SYSTEM_ARCHITECTURE.md v1.1 and actual deployed state
 > - Next.js version updated to 16.x (from 15.x)
-> - Added build status summary reflecting 896 unit tests, 0 type errors
+> - Added build status summary reflecting 2,339+ unit tests, 0 type errors
 
 ---
 
@@ -33,11 +33,11 @@ Throughout this document, section headers and descriptions include a status mark
 ## Current Build Status
 
 > **MVP:** Live at https://pips-app.vercel.app since March 3, 2026
-> **Unit tests:** 896 passing (56 files)
-> **E2E tests:** 160 specs (18 files)
+> **Unit tests:** 2,339+ passing (208+ files)
+> **E2E tests:** 230+ test cases (25 spec files)
 > **Type errors:** 0
 > **Lint errors:** 0
-> **DB migrations:** 11 applied to production
+> **DB migrations:** 13 applied to production
 > **Content nodes:** 205 seeded (FTS active)
 > **Training data:** 4 paths, 27 modules, 59 exercises seeded
 > **Marketing pages:** 83+ SEO pages (6 step, 22 tool, 20 book preview, 35 glossary, 17 templates)
@@ -81,7 +81,7 @@ Throughout this document, section headers and descriptions include a status mark
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     EDGE LAYER (Vercel)                              │
 │  ┌─────────────────────────────────────────────────────────────┐    │
-│  │  Next.js 15 App Router (SSR + RSC + API Routes)            │    │
+│  │  Next.js 16 App Router (SSR + RSC + API Routes)            │    │
 │  │  ┌──────────┐ ┌──────────┐ ┌────────────┐ ┌────────────┐  │    │
 │  │  │ Pages/   │ │ Server   │ │ API Routes │ │ Middleware  │  │    │
 │  │  │ Layouts  │ │Components│ │ /api/v1/*  │ │ (Auth/Org)  │  │    │
@@ -2370,7 +2370,7 @@ pips2/
 │   └── CODEOWNERS
 │
 ├── apps/
-│   └── web/                          # Next.js 15 application
+│   └── web/                          # Next.js 16 application
 │       ├── app/
 │       │   ├── (auth)/               # Auth pages (no org layout)
 │       │   │   ├── login/

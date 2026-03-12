@@ -1,6 +1,6 @@
 # PIPS 2.0 — Test Strategy
 
-> **Version:** 1.0 — Created 2026-03-04
+> **Version:** 1.1 — Updated 2026-03-12
 > **Author:** QA Agent (Claude Opus 4.6)
 > **Status:** Active
 > **Companion Docs:** `QA_AGENT.md`, `DEVELOPMENT_TASK_LIST.md`, `MVP_SPECIFICATION.md`, `TECHNICAL_PLAN.md`
@@ -28,17 +28,18 @@
 
 ## 1. Current Test Coverage Analysis
 
-### 1.1 Summary (as of 2026-03-04)
+### 1.1 Summary (as of 2026-03-12)
 
-| Metric                     | Count | Notes                                              |
-| -------------------------- | ----- | -------------------------------------------------- |
-| Unit test files            | 56    | Vitest + jsdom environment                         |
-| Unit tests passing         | 896   | Across all test files                              |
-| E2E spec files             | 18    | Playwright + Chromium                              |
-| E2E tests defined          | 160   | 47 currently failing against prod (selector drift) |
-| Type errors                | 0     | `tsc --noEmit` clean                               |
-| Lint errors                | 0     | 20 warnings (acceptable)                           |
-| Vitest coverage thresholds | 40%   | Statements, branches, functions, lines             |
+| Metric                     | Count  | Notes                                                              |
+| -------------------------- | ------ | ------------------------------------------------------------------ |
+| Unit test files            | 210+   | Vitest + jsdom environment (apps/web + packages/shared)            |
+| Unit tests passing         | 2,339+ | Across all test files                                              |
+| E2E spec files             | 25     | Playwright + Chromium                                              |
+| E2E tests defined          | 230+   | Selector drift fixed via data-testid migration, 18 new specs added |
+| Type errors                | 0      | `tsc --noEmit` clean                                               |
+| Lint errors                | 0      | 30 warnings (acceptable)                                           |
+| Vitest coverage thresholds | 40%    | Statements 53.96%, Branches 49.86%, Functions 40.18%, Lines 55.65% |
+| DB migrations              | 13     | Applied to production                                              |
 
 ### 1.2 Unit Test File Inventory
 
@@ -163,13 +164,13 @@ The PIPS 2.0 test strategy follows a standard test pyramid, weighted toward unit
 
 ```
          /\
-        /  \        E2E Tests (~160)
+        /  \        E2E Tests (~230+)
        / E2E\       Real browser, real Supabase, real auth
       /------\
      /        \     Integration Tests (planned)
     / Integr.  \    Server actions + Supabase client, no browser
    /------------\
-  /              \  Unit Tests (~896)
+  /              \  Unit Tests (~2,339+)
  /  Unit + Comp.  \ Zod schemas, utils, components, hooks, stores
 /------------------\
 ```
@@ -298,17 +299,17 @@ The PIPS 2.0 test strategy follows a standard test pyramid, weighted toward unit
 
 **Config file:** `apps/web/vitest.config.ts`
 
-| Setting             | Value                                                   | Rationale                                           |
-| ------------------- | ------------------------------------------------------- | --------------------------------------------------- |
-| Environment         | `jsdom`                                                 | Browser-like DOM for component tests                |
-| Setup file          | `src/test-setup.ts`                                     | Global mocks, RTL cleanup                           |
-| Globals             | `true`                                                  | `describe`, `it`, `expect` available without import |
-| Include pattern     | `src/**/*.test.{ts,tsx}`                                | Co-located tests                                    |
-| Coverage provider   | `v8`                                                    | Fast, built-in                                      |
-| Coverage reporters  | `text`, `text-summary`, `lcov`, `json-summary`          | Console + CI artifact                               |
-| Coverage thresholds | 40% (all metrics)                                       | Current baseline; target increase to 60%            |
-| Coverage excludes   | Test files, layouts, pages, `ui/`                       | Focus on business logic                             |
-| Path aliases        | `@/` -> `src/`, `@pips/shared` -> `packages/shared/src` | Match app aliases                                   |
+| Setting             | Value                                                   | Rationale                                                                      |
+| ------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Environment         | `jsdom`                                                 | Browser-like DOM for component tests                                           |
+| Setup file          | `src/test-setup.ts`                                     | Global mocks, RTL cleanup                                                      |
+| Globals             | `true`                                                  | `describe`, `it`, `expect` available without import                            |
+| Include pattern     | `src/**/*.test.{ts,tsx}`                                | Co-located tests                                                               |
+| Coverage provider   | `v8`                                                    | Fast, built-in                                                                 |
+| Coverage reporters  | `text`, `text-summary`, `lcov`, `json-summary`          | Console + CI artifact                                                          |
+| Coverage thresholds | 40% (all metrics)                                       | Threshold 40%; actual: Stmts 53.96%, Branch 49.86%, Funcs 40.18%, Lines 55.65% |
+| Coverage excludes   | Test files, layouts, pages, `ui/`                       | Focus on business logic                                                        |
+| Path aliases        | `@/` -> `src/`, `@pips/shared` -> `packages/shared/src` | Match app aliases                                                              |
 
 ### 3.2 Playwright Configuration
 
@@ -595,12 +596,12 @@ BASE_URL=https://pips-app.vercel.app pnpm exec playwright test  # against prod
 
 ### 5.4 Coverage Threshold Roadmap
 
-| Phase                | Threshold         | Timeline                   |
-| -------------------- | ----------------- | -------------------------- |
-| Current (MVP)        | 40% (all metrics) | Now                        |
-| Phase 5 (Workshop)   | 50% (all metrics) | After Workshop UI is built |
-| Phase 6 (Polish)     | 60% (all metrics) | Before beta launch         |
-| Phase 7 (Enterprise) | 70% (all metrics) | Before paid tier launch    |
+| Phase                | Threshold         | Timeline                   | Actual (2026-03-12)                                     |
+| -------------------- | ----------------- | -------------------------- | ------------------------------------------------------- |
+| Current (MVP)        | 40% (all metrics) | Now                        | Stmts 53.96%, Branch 49.86%, Funcs 40.18%, Lines 55.65% |
+| Phase 5 (Workshop)   | 50% (all metrics) | After Workshop UI is built | Statements and Lines already exceed; Branches close     |
+| Phase 6 (Polish)     | 60% (all metrics) | Before beta launch         | —                                                       |
+| Phase 7 (Enterprise) | 70% (all metrics) | Before paid tier launch    | —                                                       |
 
 ---
 

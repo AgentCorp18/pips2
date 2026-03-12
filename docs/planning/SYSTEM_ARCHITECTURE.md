@@ -1,11 +1,13 @@
 # PIPS 2.0 — System Architecture
 
-> **Version:** 1.1 — Updated 2026-03-04
+> **Version:** 1.2 — Updated 2026-03-12
 > **Created:** March 3, 2026
 > **Author:** Chief Architect Agent (Claude Opus 4.6)
 > **Status:** Current — documents the ACTUAL deployed system + planned architecture
 > **Production URL:** https://pips-app.vercel.app
 > **Supabase Project:** `cmrribhjgfybbxhrsxqi` (us-east-2)
+>
+> **v1.2 changes (2026-03-12):** Training Mode upgraded from [SCAFFOLDED] to [BUILT] — fully functional with 4 paths, 27 modules, 59 exercises. Workshop upgraded from [SCAFFOLDED] to [BUILT] — session CRUD, timer, Supabase Realtime sync. Real-time collaboration upgraded from [DEFERRED] to [BUILT] (via Workshop Realtime). Migration count updated to 13. Added new subsystems: Admin Dashboard, Tools Sandbox, Ticket Change Log, Security Settings, Swim Lane Board, Forms View/Edit Toggle.
 >
 > **v1.1 changes:** Added build-status markers ([BUILT], [SCAFFOLDED], [PLANNED]) throughout. New sections: Knowledge Hub Architecture (13), Training Mode Architecture (14), Marketing & SEO Architecture (15), Content Pipeline Architecture (16). Updated domain model with 11 new tables. Updated component tree with new component families. Added Architecture Decision Records and risk register.
 
@@ -51,28 +53,34 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a 6-step process imp
 
 ### Core Capabilities
 
-| Capability              | Status           | Description                                                                                                        |
-| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------ |
-| 6-step PIPS workflow    | **[BUILT]**      | Guided projects with objectives, prompts, 18 interactive forms, completion criteria, step gating                   |
-| Ticketing system        | **[BUILT]**      | Kanban board, list view, parent/child tickets, auto-sequenced IDs (`ORG-123`), filters, comments                   |
-| Multi-tenancy           | **[BUILT]**      | Shared-schema with RLS, org-scoped data isolation, 5-role RBAC                                                     |
-| Knowledge Hub           | **[BUILT]**      | 4-pillar content system (Book, Guide, Workbook, Workshop), 205 content nodes, FTS, bookmarks, reading sessions     |
-| Cadence Bar             | **[BUILT]**      | Contextual methodology content surfaced on forms, ticket detail, and dashboard                                     |
-| Training Mode           | **[SCAFFOLDED]** | DB tables + seed data (4 paths, 27 modules, 59 exercises), landing/path/module/progress pages, exercise components |
-| Workshop Facilitation   | **[SCAFFOLDED]** | DB table (`workshop_sessions`) created, UI scaffolded                                                              |
-| Marketing Pages         | **[BUILT]**      | 6 step pages, 22 tool pages, 20 book previews, 35 glossary terms, 17 templates, resources hub                      |
-| SEO                     | **[BUILT]**      | Dynamic `sitemap.ts`, `robots.ts`, JSON-LD structured data component                                               |
-| Team management         | **[BUILT]**      | Teams with lead/member roles, cross-team membership, project assignment                                            |
-| Notifications           | **[BUILT]**      | In-app bell with unread count, email notifications via Resend                                                      |
-| Dashboard               | **[BUILT]**      | Project health metrics, projects-by-step chart, recent activity feed                                               |
-| Global search           | **[BUILT]**      | Cmd/Ctrl+K command palette, Postgres FTS across projects and tickets                                               |
-| Dark mode               | **[BUILT]**      | CSS variable-based theming with light/dark toggle                                                                  |
-| CSV/PDF export          | **[BUILT]**      | Project and ticket data export                                                                                     |
-| Billing                 | **[DEFERRED]**   | No Stripe integration. Schema ready (`stripe_customer_id`, `stripe_subscription_id`)                               |
-| SSO/SAML                | **[DEFERRED]**   | No implementation. Phase 4+                                                                                        |
-| External integrations   | **[DEFERRED]**   | Jira, Azure DevOps, AHA! — schema columns exist, no sync code                                                      |
-| White-label             | **[DEFERRED]**   | `org_settings` table has branding columns, no UI                                                                   |
-| Real-time collaboration | **[DEFERRED]**   | Supabase Realtime reserved, not wired                                                                              |
+| Capability              | Status         | Description                                                                                                    |
+| ----------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
+| 6-step PIPS workflow    | **[BUILT]**    | Guided projects with objectives, prompts, 18 interactive forms, completion criteria, step gating               |
+| Ticketing system        | **[BUILT]**    | Kanban board, list view, parent/child tickets, auto-sequenced IDs (`ORG-123`), filters, comments               |
+| Multi-tenancy           | **[BUILT]**    | Shared-schema with RLS, org-scoped data isolation, 5-role RBAC                                                 |
+| Knowledge Hub           | **[BUILT]**    | 4-pillar content system (Book, Guide, Workbook, Workshop), 205 content nodes, FTS, bookmarks, reading sessions |
+| Cadence Bar             | **[BUILT]**    | Contextual methodology content surfaced on forms, ticket detail, and dashboard                                 |
+| Training Mode           | **[BUILT]**    | 4 paths, 27 modules, 59 exercises, landing/path/module/progress pages, exercise components fully functional    |
+| Workshop Facilitation   | **[BUILT]**    | Session CRUD, timer with pause/resume, Supabase Realtime sync, facilitator guide, scenarios                    |
+| Marketing Pages         | **[BUILT]**    | 6 step pages, 22 tool pages, 20 book previews, 35 glossary terms, 17 templates, resources hub                  |
+| SEO                     | **[BUILT]**    | Dynamic `sitemap.ts`, `robots.ts`, JSON-LD structured data component                                           |
+| Team management         | **[BUILT]**    | Teams with lead/member roles, cross-team membership, project assignment                                        |
+| Notifications           | **[BUILT]**    | In-app bell with unread count, email notifications via Resend                                                  |
+| Dashboard               | **[BUILT]**    | Project health metrics, projects-by-step chart, recent activity feed                                           |
+| Global search           | **[BUILT]**    | Cmd/Ctrl+K command palette, Postgres FTS across projects and tickets                                           |
+| Dark mode               | **[BUILT]**    | CSS variable-based theming with light/dark toggle                                                              |
+| CSV/PDF export          | **[BUILT]**    | Project and ticket data export                                                                                 |
+| Billing                 | **[DEFERRED]** | No Stripe integration. Schema ready (`stripe_customer_id`, `stripe_subscription_id`)                           |
+| SSO/SAML                | **[DEFERRED]** | No implementation. Phase 4+                                                                                    |
+| External integrations   | **[DEFERRED]** | Jira, Azure DevOps, AHA! — schema columns exist, no sync code                                                  |
+| Admin Dashboard         | **[BUILT]**    | Org-level admin stats, user/project/ticket counts, system health overview                                      |
+| Tools Sandbox           | **[BUILT]**    | Standalone methodology tools (Fishbone, Brainstorming, etc.) with localStorage — no project required           |
+| Ticket Change Log       | **[BUILT]**    | Audit trail for ticket field changes with before/after values                                                  |
+| Security Settings       | **[BUILT]**    | Password change form in user profile/settings                                                                  |
+| Swim Lane Board         | **[BUILT]**    | Projects grouped by PIPS step with drag-and-drop                                                               |
+| Forms View/Edit Toggle  | **[BUILT]**    | Read-only view mode vs edit mode on all 18 PIPS forms                                                          |
+| Real-time collaboration | **[BUILT]**    | Supabase Realtime used in Workshop for live timer sync and participant updates                                 |
+| White-label             | **[DEFERRED]** | `org_settings` table has branding columns, no UI                                                               |
 
 ### Technology Stack
 
@@ -160,7 +168,7 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds a 6-step process imp
 │  │  PostgreSQL 15+                                            │    │
 │  │                                                            │    │
 │  │  33 tables  ·  11 enums  ·  RLS on every tenant table     │    │
-│  │  11 migrations  ·  FTS (tsvector + ts_rank)               │    │
+│  │  13 migrations  ·  FTS (tsvector + ts_rank)               │    │
 │  │  JSONB for forms + content tags  ·  Audit triggers        │    │
 │  │  Auto-timestamps  ·  Generated search vectors             │    │
 │  └──────────────────────────────────────────────────────────┘    │
@@ -255,7 +263,7 @@ pips2.0/
 │       │   │   │   │   ├── workshop/ # Workshop pillar content reader
 │       │   │   │   │   ├── bookmarks/# User's saved bookmarks
 │       │   │   │   │   └── search/   # Knowledge Hub FTS
-│       │   │   │   ├── training/     # [SCAFFOLDED] Training paths and exercises
+│       │   │   │   ├── training/     # [BUILT] Training paths and exercises
 │       │   │   │   │   ├── path/     # Path detail pages
 │       │   │   │   │   ├── practice/ # Exercise practice pages
 │       │   │   │   │   └── progress/ # User progress dashboard
@@ -279,7 +287,7 @@ pips2.0/
 │       │   │   ├── dashboard/        # [BUILT] Dashboard widgets (stat-cards, chart, activity)
 │       │   │   ├── knowledge/        # [BUILT] Knowledge Hub (bookmark, reader, markdown)
 │       │   │   ├── knowledge-cadence/# [BUILT] Cadence bar
-│       │   │   ├── training/         # [SCAFFOLDED] Training components (landing, exercises)
+│       │   │   ├── training/         # [BUILT] Training components (landing, exercises)
 │       │   │   ├── seo/              # [BUILT] JSON-LD structured data component
 │       │   │   └── landing/          # [BUILT] Marketing page sections
 │       │   ├── hooks/                # Custom hooks (use-mounted, use-permissions)
@@ -308,7 +316,7 @@ pips2.0/
 │           └── index.ts              # Barrel export
 │
 ├── supabase/
-│   ├── migrations/                   # 11 SQL migrations (YYYYMMDDHHMMSS format)
+│   ├── migrations/                   # 13 SQL migrations (YYYYMMDDHHMMSS format)
 │   │   ├── 20260303000000_initial_schema.sql
 │   │   ├── 20260303120000_notification_triggers.sql
 │   │   ├── 20260303180000_security_hardening.sql
@@ -319,7 +327,9 @@ pips2.0/
 │   │   ├── 20260303230000_fix_org_creation_rls.sql
 │   │   ├── 20260303240000_fix_org_members_rls_recursion.sql
 │   │   ├── 20260303250000_fix_profile_display_name.sql
-│   │   └── 20260304000000_knowledge_hub_tables.sql   # Knowledge Hub + Training + Workshop
+│   │   ├── 20260304000000_knowledge_hub_tables.sql   # Knowledge Hub + Training + Workshop
+│   │   ├── 20260304100000_workshop_modules_column.sql  # Workshop module additions
+│   │   └── 20260308000000_workshop_participants.sql    # Workshop participant tracking
 │   ├── functions/                    # Supabase Edge Functions (reserved, unused)
 │   └── seed.sql                      # Dev seed data
 │
@@ -331,7 +341,7 @@ pips2.0/
 │       └── content-nodes.json        # [BUILT] 205 compiled content nodes
 │
 ├── tests/
-│   └── e2e/                          # Playwright E2E tests (18 specs, 160 tests)
+│   └── e2e/                          # Playwright E2E tests (25 specs, 230+ tests)
 │       ├── helpers/
 │       │   ├── auth-fixture.ts
 │       │   ├── test-factories.ts
@@ -494,7 +504,7 @@ pips2.0/
 
 **Content Read History** — Tracks which nodes a user has read, with `first_read_at`, `last_read_at`, and `read_count`. One row per user per node. User-scoped RLS.
 
-### Training Mode Domain Objects [SCAFFOLDED]
+### Training Mode Domain Objects [BUILT]
 
 **Training Path** — Top-level training grouping. 4 paths seeded: one per role (Leader, Facilitator, Team Member, Champion). Global catalog (no RLS). Fields: `title`, `description`, `estimated_hours`, `target_audience`.
 
@@ -506,7 +516,7 @@ pips2.0/
 
 **Training Exercise Data** — Per-user, per-exercise submission data. Stores exercise responses as JSONB in `data` column, with `score`, `attempts`, and `last_attempt_at`. User-scoped RLS.
 
-### Workshop Domain Object [SCAFFOLDED]
+### Workshop Domain Object [BUILT]
 
 **Workshop Session** — Org-scoped facilitated session. Has `facilitator_id`, `scenario_id`, timer state (JSONB), participant count, and status lifecycle (`draft` > `active` > `paused` > `completed`). RLS: org members can view, manager+ can create, facilitator can update, admin+ can delete.
 
@@ -736,7 +746,7 @@ components/
 │                                    Uses buildProductContext() + matchContentNodes()
 │                                    Integrated: forms, step-view, ticket detail, dashboard
 │
-├── training/        # [SCAFFOLDED] Training mode
+├── training/        # [BUILT] Training mode
 │   ├── training-landing.tsx        # Training hub landing with path cards
 │   ├── training-progress-ring.tsx  # Circular progress indicator (SVG)
 │   ├── training-module-card.tsx    # Module card with status badge
@@ -1053,7 +1063,7 @@ install ──► typecheck ──┐
 
 Migrations are applied to production via `supabase db push` or the Supabase Dashboard. The Supabase CLI tracks applied migrations in the `supabase_migrations` table.
 
-**Current state:** 11 migrations applied, covering initial schema + security hardening + Knowledge Hub/Training/Workshop tables.
+**Current state:** 13 migrations applied, covering initial schema + security hardening + Knowledge Hub/Training/Workshop tables + workshop participants.
 
 ---
 
@@ -1192,7 +1202,7 @@ Content is organized into four pillars, each serving a different learning modali
 | **Book**     | Deep methodology — chapters, case studies, philosophy     | PIPS Book (20 markdown files)  | Sequential reading |
 | **Guide**    | Step-by-step methodology — tools, roles, processes        | Planned: structured guides     | [PLANNED]          |
 | **Workbook** | Hands-on practice — exercises, templates                  | Planned: interactive exercises | [PLANNED]          |
-| **Workshop** | Facilitation — timed sessions, scenarios, team activities | Planned: facilitation scripts  | [PLANNED]          |
+| **Workshop** | Facilitation — timed sessions, scenarios, team activities | Session CRUD, timer, Realtime  | **[BUILT]**        |
 
 Currently, the **Book** pillar has 205 content nodes seeded. Guide, Workbook, and Workshop pillars have the schema and taxonomy ready but lack seeded content.
 
@@ -1267,9 +1277,9 @@ The Cadence Bar renders one card per pillar (max 4 cards), each linking to the m
 
 ---
 
-## 14. Training Mode Architecture [SCAFFOLDED]
+## 14. Training Mode Architecture [BUILT]
 
-Training Mode provides structured learning paths that teach users the PIPS methodology through progressive exercises.
+Training Mode provides structured learning paths that teach users the PIPS methodology through progressive exercises. Fully functional with 4 paths, 27 modules, 59 exercises, progress tracking, and exercise submission.
 
 ### Training Data Model
 
@@ -1309,12 +1319,12 @@ Exercises store their config in `training_exercises.config` (JSONB) — e.g., an
 
 ### Training Page Architecture
 
-| Route                             | Purpose                                   | Status           |
-| --------------------------------- | ----------------------------------------- | ---------------- |
-| `/training`                       | Landing — path cards with progress        | **[SCAFFOLDED]** |
-| `/training/path/[pathId]`         | Path detail — module list with completion | **[SCAFFOLDED]** |
-| `/training/practice/[exerciseId]` | Exercise runner                           | **[SCAFFOLDED]** |
-| `/training/progress`              | User progress dashboard                   | **[SCAFFOLDED]** |
+| Route                             | Purpose                                   | Status      |
+| --------------------------------- | ----------------------------------------- | ----------- |
+| `/training`                       | Landing — path cards with progress        | **[BUILT]** |
+| `/training/path/[pathId]`         | Path detail — module list with completion | **[BUILT]** |
+| `/training/practice/[exerciseId]` | Exercise runner                           | **[BUILT]** |
+| `/training/progress`              | User progress dashboard                   | **[BUILT]** |
 
 ### Training Actions
 
@@ -1551,19 +1561,19 @@ scripts/seed-training.ts     npx tsx scripts/seed-training.ts
 
 ## 18. Architecture Risk Register
 
-| ID   | Risk                                                                                   | Severity | Likelihood | Mitigation                                                                                                                                                                  | Status                                          |
-| ---- | -------------------------------------------------------------------------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| R-01 | Knowledge Hub content access not enforced at DB level                                  | Medium   | Low        | Application-layer checks in Server Components. Re-evaluate when Stripe billing is added.                                                                                    | Accepted                                        |
-| R-02 | Training Mode exercises share form components with PIPS workflow — tight coupling risk | Medium   | Medium     | Exercise `fill-form` type reuses form components read-only. If forms change, exercises may break. Add integration tests.                                                    | Monitor                                         |
-| R-03 | Content pipeline has no automated validation                                           | Low      | Medium     | Add a CI step that runs `compile-content.ts` and validates output JSON against ContentNode schema.                                                                          | Open                                            |
-| R-04 | 104+ marketing pages increase build time                                               | Low      | Low        | Marketing pages are statically renderable. Monitor Vercel build times. Add ISR if build exceeds 3 minutes.                                                                  | Monitor                                         |
-| R-05 | No rate limiting on Knowledge Hub search                                               | Medium   | Low        | FTS queries are relatively fast. Add rate limiting if abuse detected or if search is exposed to unauthenticated users.                                                      | Open                                            |
-| R-06 | Workshop session real-time collaboration not architectured                             | Medium   | Medium     | `workshop_sessions.timer_state` stores state as JSONB but there is no real-time sync mechanism. Supabase Realtime will be needed for live workshops.                        | Planned — Phase 5                               |
-| R-07 | Training progress data could grow large for high-user-count organizations              | Low      | Low        | `training_progress` and `training_exercise_data` are user-scoped (not org-scoped). Growth is linear per user, not per org. Partition by `path_id` if needed.                | Monitor                                         |
-| R-08 | Single Supabase region (us-east-2) creates latency for non-US users                    | Medium   | Medium     | Accept for MVP. Add read replicas or consider multi-region when international customers onboard.                                                                            | Accepted                                        |
-| R-09 | No cache layer between Supabase and Vercel                                             | Low      | Medium     | RSC fetches fresh data on every navigation. Knowledge Hub and Training catalog are static content candidates for ISR caching. Implement when performance metrics show need. | Open                                            |
-| R-10 | name→title mapping in projects table creates confusion                                 | Low      | High       | DB column is `title`, but some frontend code and older planning docs reference `name`. Server actions map between them. Document clearly and enforce in code reviews.       | Mitigated — documented in ADR, 16 files updated |
+| ID   | Risk                                                                                   | Severity   | Likelihood | Mitigation                                                                                                                                                                  | Status                                          |
+| ---- | -------------------------------------------------------------------------------------- | ---------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| R-01 | Knowledge Hub content access not enforced at DB level                                  | Medium     | Low        | Application-layer checks in Server Components. Re-evaluate when Stripe billing is added.                                                                                    | Accepted                                        |
+| R-02 | Training Mode exercises share form components with PIPS workflow — tight coupling risk | Medium     | Medium     | Exercise `fill-form` type reuses form components read-only. If forms change, exercises may break. Add integration tests.                                                    | Monitor                                         |
+| R-03 | Content pipeline has no automated validation                                           | Low        | Medium     | Add a CI step that runs `compile-content.ts` and validates output JSON against ContentNode schema.                                                                          | Open                                            |
+| R-04 | 104+ marketing pages increase build time                                               | Low        | Low        | Marketing pages are statically renderable. Monitor Vercel build times. Add ISR if build exceeds 3 minutes.                                                                  | Monitor                                         |
+| R-05 | No rate limiting on Knowledge Hub search                                               | Medium     | Low        | FTS queries are relatively fast. Add rate limiting if abuse detected or if search is exposed to unauthenticated users.                                                      | Open                                            |
+| R-06 | ~~Workshop session real-time collaboration not architectured~~                         | ~~Medium~~ | ~~Medium~~ | Supabase Realtime implemented for live timer sync and participant updates in Workshop sessions.                                                                             | **Resolved** — Phase 5 complete                 |
+| R-07 | Training progress data could grow large for high-user-count organizations              | Low        | Low        | `training_progress` and `training_exercise_data` are user-scoped (not org-scoped). Growth is linear per user, not per org. Partition by `path_id` if needed.                | Monitor                                         |
+| R-08 | Single Supabase region (us-east-2) creates latency for non-US users                    | Medium     | Medium     | Accept for MVP. Add read replicas or consider multi-region when international customers onboard.                                                                            | Accepted                                        |
+| R-09 | No cache layer between Supabase and Vercel                                             | Low        | Medium     | RSC fetches fresh data on every navigation. Knowledge Hub and Training catalog are static content candidates for ISR caching. Implement when performance metrics show need. | Open                                            |
+| R-10 | name→title mapping in projects table creates confusion                                 | Low        | High       | DB column is `title`, but some frontend code and older planning docs reference `name`. Server actions map between them. Document clearly and enforce in code reviews.       | Mitigated — documented in ADR, 16 files updated |
 
 ---
 
-_This document describes the PIPS 2.0 system as deployed on March 3, 2026, with post-MVP additions through March 4, 2026. It is maintained by the Chief Architect Agent and should be updated when architectural decisions change._
+_This document describes the PIPS 2.0 system as deployed on March 3, 2026, with post-MVP additions through March 12, 2026. It is maintained by the Chief Architect Agent and should be updated when architectural decisions change._
