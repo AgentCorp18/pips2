@@ -137,6 +137,18 @@ export const SignupForm = () => {
           <Button type="submit" className="mt-2 w-full" disabled={isPending}>
             {isPending ? 'Creating account...' : 'Create account'}
           </Button>
+
+          <p className="text-center text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            By creating an account, you agree to our{' '}
+            <Link href="/terms" className="underline hover:no-underline">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="underline hover:no-underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </form>
       </CardContent>
 

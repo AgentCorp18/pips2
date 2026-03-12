@@ -15,6 +15,8 @@ export type AuthActionState = {
   error?: string
   fieldErrors?: Record<string, string>
   success?: string
+  /** Preserved email for re-populating the field after failed login */
+  email?: string
 }
 
 export const login = async (
@@ -35,13 +37,16 @@ export const login = async (
         fieldErrors[field] = issue.message
       }
     }
-    return { fieldErrors }
+    return { fieldErrors, email: raw.email as string | undefined }
   }
 
   // Rate limit: 10 login attempts per minute per email
   const loginRateLimit = checkRateLimit(`login:${result.data.email}`, 10, 60_000)
   if (!loginRateLimit.allowed) {
-    return { error: 'Too many login attempts. Please wait a moment before trying again.' }
+    return {
+      error: 'Too many login attempts. Please wait a moment before trying again.',
+      email: result.data.email,
+    }
   }
 
   const supabase = await createClient()
@@ -55,9 +60,10 @@ export const login = async (
       return {
         error:
           'Please confirm your email address before signing in. Check your inbox for a confirmation link.',
+        email: result.data.email,
       }
     }
-    return { error: 'Invalid email or password' }
+    return { error: 'Invalid email or password', email: result.data.email }
   }
 
   const redirectTo = (formData.get('redirect') as string) ?? undefined

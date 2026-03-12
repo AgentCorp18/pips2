@@ -68,6 +68,7 @@ export const LoginForm = () => {
               autoComplete="email"
               required
               disabled={isPending}
+              defaultValue={state.email ?? ''}
               aria-invalid={!!state.fieldErrors?.email}
               aria-describedby={state.fieldErrors?.email ? 'email-error' : undefined}
             />
