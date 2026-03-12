@@ -67,13 +67,19 @@ export const getUserExerciseData = async (
 
 /**
  * Check a multiple-choice answer server-side.
- * Returns only { isCorrect } — the correctIndex is never sent to the client.
+ * Returns { isCorrect, correctIndex } — correctIndex is only revealed after submission,
+ * so it cannot be gamed by inspecting the client payload before answering.
  */
 export const checkAnswer = async (
   exerciseId: string,
   selectedIndex: number,
-): Promise<{ isCorrect: boolean }> => {
+): Promise<{ isCorrect: boolean; correctIndex: number }> => {
   const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { isCorrect: false, correctIndex: -1 }
 
   const { data, error } = await supabase
     .from('training_exercises')
@@ -83,12 +89,12 @@ export const checkAnswer = async (
 
   if (error || !data) {
     console.error('checkAnswer error:', error)
-    return { isCorrect: false }
+    return { isCorrect: false, correctIndex: -1 }
   }
 
   const config = data.config as Record<string, unknown>
-  const correctIndex = config['correctIndex']
-  return { isCorrect: selectedIndex === correctIndex }
+  const correct = config['correctIndex'] as number
+  return { isCorrect: selectedIndex === correct, correctIndex: correct }
 }
 
 /** Complete or update an exercise */

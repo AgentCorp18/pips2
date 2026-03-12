@@ -161,7 +161,7 @@ export const acceptInvitation = async (token: string): Promise<ActionResult> => 
     .select('id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (anyMembership) {
     return {

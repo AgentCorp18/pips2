@@ -58,9 +58,9 @@ export const getMyTickets = async (orgId: string): Promise<GroupedTickets> => {
   const todayStr = now.toISOString().split('T')[0] ?? ''
 
   // End of current week (Saturday). On Sunday (getDay()=0) this yields 6 days ahead,
-  // on Saturday (getDay()=6) it yields 7 — keeping Saturday as the boundary.
+  // on Saturday (getDay()=6) it yields 0 — today is already the boundary.
   const endOfWeek = new Date(now)
-  const daysUntilSaturday = (6 - now.getDay() + 7) % 7 || 7
+  const daysUntilSaturday = (6 - now.getDay() + 7) % 7
   endOfWeek.setDate(now.getDate() + daysUntilSaturday)
   const endOfWeekStr = endOfWeek.toISOString().split('T')[0] ?? ''
 

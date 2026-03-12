@@ -32,7 +32,7 @@ export const TrainingMultipleChoice = ({
     if (selected === null) return
     const result = await checkAnswer(exerciseId, selected)
     setIsCorrect(result.isCorrect)
-    setCorrectIndex(result.isCorrect ? selected : null)
+    setCorrectIndex(result.correctIndex)
     setSubmitted(true)
     onComplete(selected, result.isCorrect)
   }

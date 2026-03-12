@@ -84,7 +84,7 @@ describe('TrainingMultipleChoice', () => {
   })
 
   it('calls onComplete with correct answer on submit', async () => {
-    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true })
+    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true, correctIndex: 0 })
     render(
       <TrainingMultipleChoice exerciseId="ex-1" config={DEFAULT_CONFIG} onComplete={onComplete} />,
     )
@@ -94,7 +94,7 @@ describe('TrainingMultipleChoice', () => {
   })
 
   it('calls onComplete with incorrect answer on submit', async () => {
-    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: false })
+    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: false, correctIndex: 0 })
     render(
       <TrainingMultipleChoice exerciseId="ex-1" config={DEFAULT_CONFIG} onComplete={onComplete} />,
     )
@@ -104,7 +104,7 @@ describe('TrainingMultipleChoice', () => {
   })
 
   it('shows "Correct!" feedback for right answer', async () => {
-    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true })
+    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true, correctIndex: 0 })
     render(
       <TrainingMultipleChoice exerciseId="ex-1" config={DEFAULT_CONFIG} onComplete={onComplete} />,
     )
@@ -114,7 +114,7 @@ describe('TrainingMultipleChoice', () => {
   })
 
   it('shows "Not quite" feedback for wrong answer', async () => {
-    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: false })
+    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: false, correctIndex: 0 })
     render(
       <TrainingMultipleChoice exerciseId="ex-1" config={DEFAULT_CONFIG} onComplete={onComplete} />,
     )
@@ -124,7 +124,7 @@ describe('TrainingMultipleChoice', () => {
   })
 
   it('hides Submit button after submission', async () => {
-    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true })
+    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true, correctIndex: 0 })
     render(
       <TrainingMultipleChoice exerciseId="ex-1" config={DEFAULT_CONFIG} onComplete={onComplete} />,
     )
@@ -134,7 +134,7 @@ describe('TrainingMultipleChoice', () => {
   })
 
   it('disables options after submission', async () => {
-    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true })
+    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: true, correctIndex: 0 })
     render(
       <TrainingMultipleChoice exerciseId="ex-1" config={DEFAULT_CONFIG} onComplete={onComplete} />,
     )
@@ -170,7 +170,7 @@ describe('TrainingMultipleChoice', () => {
   })
 
   it('calls checkAnswer server action on submit', async () => {
-    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: false })
+    mockCheckAnswer.mockResolvedValueOnce({ isCorrect: false, correctIndex: 0 })
     render(
       <TrainingMultipleChoice exerciseId="ex-42" config={DEFAULT_CONFIG} onComplete={onComplete} />,
     )

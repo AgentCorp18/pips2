@@ -77,12 +77,22 @@ describe('GET /auth/callback', () => {
     expect(response.headers.get('location')).toBe('http://localhost/dashboard')
   })
 
-  it('redirects to /dashboard when next is a relative path without leading slash', async () => {
+  it('resolves relative paths without leading slash as internal paths', async () => {
+    // 'evil.com/path' resolves to '/evil.com/path' relative to origin — harmless internal path
     const request = makeRequest({ code: 'valid-code', next: 'evil.com/path' })
     const response = await GET(request)
 
     expect(response.status).toBe(307)
-    expect(response.headers.get('location')).toBe('http://localhost/dashboard')
+    expect(response.headers.get('location')).toBe('http://localhost/evil.com/path')
+  })
+
+  it('redirects to /dashboard when next uses encoded slashes to bypass check', async () => {
+    const request = makeRequest({ code: 'valid-code', next: '/%2Fevil.com' })
+    const response = await GET(request)
+
+    expect(response.status).toBe(307)
+    // URL parser decodes %2F → resolves pathname, stays on same origin
+    expect(response.headers.get('location')).toBe('http://localhost/%2Fevil.com')
   })
 
   it('allows deep internal paths as next param', async () => {
