@@ -25,6 +25,7 @@ export const LoginForm = () => {
   // `redirect` is set by invite links and other in-app redirects.
   const nextParam = searchParams.get('next')
   const redirectParam = searchParams.get('redirect')
+  const errorParam = searchParams.get('error')
   const isProtectedRedirect = !!nextParam
 
   return (
@@ -44,6 +45,18 @@ export const LoginForm = () => {
           {nextParam && <input type="hidden" name="redirect" value={nextParam} />}
           {!nextParam && redirectParam && (
             <input type="hidden" name="redirect" value={redirectParam} />
+          )}
+          {errorParam && !state.error && (
+            <div
+              role="alert"
+              className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
+              style={{
+                backgroundColor: 'var(--color-error-subtle)',
+                color: 'var(--color-error)',
+              }}
+            >
+              Authentication failed. Please try signing in again.
+            </div>
           )}
           {state.error && (
             <div
