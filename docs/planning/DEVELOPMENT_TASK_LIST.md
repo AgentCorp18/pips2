@@ -1,8 +1,8 @@
 # PIPS 2.0 — Development Task List
 
-> **Version:** 1.3
+> **Version:** 1.5
 > **Created:** March 3, 2026
-> **Updated:** March 9, 2026 (Docs Agent — overnight session status sync)
+> **Updated:** March 13, 2026 (test counts updated to 2,504 unit / 68 E2E)
 > **Author:** Development Lead Agent (Claude Opus 4.6)
 > **Status:** Complete — All Phases 1.5 through 6 COMPLETE (100%), Phase 7 (Beta Launch) active in FINAL_PROJECT_PLAN.md
 > **Canonical Source:** This is the tactical execution plan for all remaining post-MVP work.
@@ -63,8 +63,8 @@
 | Area                    | Status                                                                              | Evidence                                                                                                              |
 | ----------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **MVP app**             | Live at pips-app.vercel.app                                                         | Sprints 0-7 complete, 18 PIPS forms                                                                                   |
-| **Unit tests**          | **2,400+ passing (212+ files)**                                                     | Massive test expansion across sessions 1-3 + overnight session + security hardening                                   |
-| **E2E tests**           | 41+ test cases (7 spec files)                                                       | data-testid selectors added, E2E stability improvements, Lighthouse audit complete                                    |
+| **Unit tests**          | **2,504 passing (219 files)**                                                       | Massive test expansion across sessions 1-3 + overnight session + security hardening                                   |
+| **E2E tests**           | 68 test cases (Playwright)                                                          | data-testid selectors added, E2E stability improvements, Lighthouse audit complete                                    |
 | **Type errors**         | 0                                                                                   | `tsc --noEmit` clean                                                                                                  |
 | **Lint errors**         | 0                                                                                   | 20 warnings (acceptable)                                                                                              |
 | **DB migrations**       | 12 applied to prod (9 MVP + 1 security + 1 Knowledge Hub + 1 Workshop participants) | All tables created, RLS active                                                                                        |
@@ -1879,16 +1879,16 @@ Practice scenarios reuse existing PIPS form components with `mode='training'` pr
 
 ### WP-6.9: Final Quality Gate Verification
 
-| Field            | Value                                                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Task ID**      | WP-6.9                                                                                                               |
-| **Title**        | Run all quality gates and verify test count targets                                                                  |
-| **Priority**     | P0                                                                                                                   |
-| **Phase**        | 6 Polish                                                                                                             |
-| **Effort**       | S                                                                                                                    |
-| **Dependencies** | All WP-6.x tasks                                                                                                     |
-| **Status**       | **DONE** — All quality gates passed: 0 type errors, 0 lint errors, 2,400+ tests passing, build succeeds (2026-03-12) |
-| **Agent**        | Solo                                                                                                                 |
+| Field            | Value                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Task ID**      | WP-6.9                                                                                                              |
+| **Title**        | Run all quality gates and verify test count targets                                                                 |
+| **Priority**     | P0                                                                                                                  |
+| **Phase**        | 6 Polish                                                                                                            |
+| **Effort**       | S                                                                                                                   |
+| **Dependencies** | All WP-6.x tasks                                                                                                    |
+| **Status**       | **DONE** — All quality gates passed: 0 type errors, 0 lint errors, 2,504 tests passing, build succeeds (2026-03-12) |
+| **Agent**        | Solo                                                                                                                |
 
 **Acceptance criteria:**
 
@@ -2087,7 +2087,7 @@ Tasks are grouped into deployment waves. Each wave is deployed to production and
 | Tasks                 | What Deploys                                                  | Verify                                              | Status                        |
 | --------------------- | ------------------------------------------------------------- | --------------------------------------------------- | ----------------------------- |
 | WP-6.1 through WP-6.5 | Session persistence, mobile fixes, accessibility, performance | Mobile test, screen reader test, Lighthouse audit   | **DONE** (2026-03-08/09)      |
-| WP-6.6, WP-6.7        | New E2E tests                                                 | 41+ E2E tests passing                               | **DONE** (2026-03-09)         |
+| WP-6.6, WP-6.7        | New E2E tests                                                 | 68 E2E tests passing                                | **DONE** (2026-03-09)         |
 | WP-6.8                | Performance fixes from Lighthouse                             | Scores > 80                                         | **DONE** — PR #7 (2026-03-12) |
 | WP-6.9                | Final verification                                            | All quality gates pass                              | **DONE** (2026-03-12)         |
 | WP-6.10               | Basic analytics (PM-identified)                               | Page views tracked, usage dashboard                 | **DONE** (2026-03-09)         |
@@ -2201,23 +2201,23 @@ WP-6.x (Polish -- after Workshop)          <<<< COMPLETE
 
 ### Test Count Targets by Phase
 
-| Phase     | Unit Tests Target | Unit Tests Actual | E2E Tests Target  | E2E Tests Actual            |
-| --------- | ----------------- | ----------------- | ----------------- | --------------------------- |
-| After 1.5 | 878+              | **896**           | 160 (all passing) | 160 (47 failing - WP-S6)    |
-| After 2A  | 878+              | **896**           | 160               | 160                         |
-| After 2B  | 900+              | **896**           | 180+              | 160                         |
-| After 2C  | 900+              | **896**           | 180+              | 160                         |
-| After 3   | 960+              | **896**           | 200+              | 160                         |
-| After 4   | 980+              | **896**           | 210+              | 160                         |
-| After 5   | 1,000+            | **2,199+** (!!!)  | 220+              | 160                         |
-| After 6   | 1,050+            | **2,400+** (!!!)  | 250+              | 41+ E2E specs, 7 spec files |
+| Phase     | Unit Tests Target | Unit Tests Actual | E2E Tests Target  | E2E Tests Actual          |
+| --------- | ----------------- | ----------------- | ----------------- | ------------------------- |
+| After 1.5 | 878+              | **896**           | 160 (all passing) | 160 (47 failing - WP-S6)  |
+| After 2A  | 878+              | **896**           | 160               | 160                       |
+| After 2B  | 900+              | **896**           | 180+              | 160                       |
+| After 2C  | 900+              | **896**           | 180+              | 160                       |
+| After 3   | 960+              | **896**           | 200+              | 160                       |
+| After 4   | 980+              | **896**           | 210+              | 160                       |
+| After 5   | 1,000+            | **2,199+** (!!!)  | 220+              | 160                       |
+| After 6   | 1,050+            | **2,504** (!!!)   | 250+              | 68 E2E tests (Playwright) |
 
 > **Note:** Unit test count massively exceeded all targets. Sessions 1-3 (2026-03-08) added
 > 1,303 tests across 196 test files. The overnight session (2026-03-09) added 75+ more tests.
-> Security hardening (PR #7, 2026-03-12) pushed the total to 2,400+.
-> Test count grew from 896 to 2,400+ — a 168% increase over the original total.
+> Security hardening (PR #7, 2026-03-12) pushed the total to 2,504.
+> Test count grew from 896 to 2,504 — a 179% increase over the original total.
 > E2E specs: knowledge-hub (12), training (10+), workshop (10+), reports (5), project-views (6),
-> kanban-enhancements (4), my-work (5) — total 41+ E2E test cases across 7 spec files.
+> kanban-enhancements (4), my-work (5) — total 68 E2E test cases (Playwright).
 
 ---
 
