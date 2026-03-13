@@ -69,13 +69,21 @@ describe('shared type exports compile correctly', () => {
   })
 
   it('TicketPriority accepts valid priorities', () => {
-    const priorities: TicketPriority[] = ['low', 'medium', 'high', 'critical']
-    expect(priorities).toHaveLength(4)
+    const priorities: TicketPriority[] = ['none', 'low', 'medium', 'high', 'critical']
+    expect(priorities).toHaveLength(5)
   })
 
   it('TicketStatus accepts valid statuses', () => {
-    const statuses: TicketStatus[] = ['open', 'in_progress', 'review', 'done', 'blocked']
-    expect(statuses).toHaveLength(5)
+    const statuses: TicketStatus[] = [
+      'backlog',
+      'todo',
+      'in_progress',
+      'in_review',
+      'blocked',
+      'done',
+      'cancelled',
+    ]
+    expect(statuses).toHaveLength(7)
   })
 
   it('Permission type can reference known permissions', () => {
