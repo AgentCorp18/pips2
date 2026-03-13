@@ -18,12 +18,14 @@ describe('CreateSampleProject', () => {
 
   it('renders description', () => {
     render(<CreateSampleProject />)
-    expect(screen.getByText(/Parking Lot Safety Improvement/)).toBeTruthy()
+    expect(screen.getByText(/pre-filled project/)).toBeTruthy()
   })
 
-  it('renders Try a Sample Project button', () => {
+  it('renders template buttons for all 3 templates', () => {
     render(<CreateSampleProject />)
-    expect(screen.getByText('Try a Sample Project')).toBeTruthy()
+    expect(screen.getByTestId('sample-project-parking-lot-safety')).toBeTruthy()
+    expect(screen.getByTestId('sample-project-customer-onboarding')).toBeTruthy()
+    expect(screen.getByTestId('sample-project-employee-turnover')).toBeTruthy()
   })
 
   it('renders heading as h3', () => {

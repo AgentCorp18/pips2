@@ -4,22 +4,23 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Beaker, Loader2 } from 'lucide-react'
+import { PROJECT_TEMPLATES } from '@pips/shared'
 import { createSampleProject } from './sample-project-action'
 
 export const CreateSampleProject = () => {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handleClick = async () => {
-    setLoading(true)
+  const handleClick = async (templateId: string) => {
+    setLoadingId(templateId)
     setError(null)
 
-    const result = await createSampleProject()
+    const result = await createSampleProject(templateId)
 
     if (result.error) {
       setError(result.error)
-      setLoading(false)
+      setLoadingId(null)
       return
     }
 
@@ -48,26 +49,34 @@ export const CreateSampleProject = () => {
             New to PIPS? Try a sample project
           </h3>
           <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Explore a pre-filled &ldquo;Parking Lot Safety Improvement&rdquo; project with completed
-            Steps 1-2 so you can see how the methodology works.
+            Explore a pre-filled project with completed steps to see how the methodology works.
           </p>
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3 gap-2"
-            onClick={handleClick}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 size={14} className="animate-spin" />
-                Creating...
-              </>
-            ) : (
-              'Try a Sample Project'
-            )}
-          </Button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {PROJECT_TEMPLATES.map((t) => (
+              <Button
+                key={t.id}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => handleClick(t.id)}
+                disabled={loadingId !== null}
+                data-testid={`sample-project-${t.id}`}
+              >
+                {loadingId === t.id ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  t.name
+                )}
+              </Button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            {PROJECT_TEMPLATES.map((t) => t.industry).join(' · ')}
+          </p>
         </div>
       </div>
     </div>
