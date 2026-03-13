@@ -1,10 +1,10 @@
 # PIPS 2.0 Product Roadmap
 
-> Version: 1.2
+> Version: 1.3
 > Author: Marc Albers
 > Created: 2026-03-02
-> Status: Active — All feature phases COMPLETE, Polish COMPLETE
-> Last Updated: March 12, 2026 (phase statuses, version refs, and test counts updated)
+> Status: Active — All feature phases COMPLETE, Polish COMPLETE, Beta Launch (Phase 7) COMPLETE
+> Last Updated: March 13, 2026 (test counts updated to 2,504 unit / 68 E2E)
 
 ---
 
@@ -32,7 +32,7 @@
 > - Workshop facilitation (session CRUD, timer, Realtime, templates) (not in original roadmap)
 > - Interactive guide overhaul (9 components, 4 new pages) (not in original roadmap)
 > - Sprint 0 production hardening (security headers, rate limiting) (not in original roadmap)
-> - 2,400+ unit tests across 212 files (far exceeding any target)
+> - 2,504 unit tests across 219 files (far exceeding any target)
 
 ---
 
@@ -216,7 +216,7 @@ Establish the technical foundation, design system, authentication layer, and mul
 ## 3. Phase 1: MVP -- Core PIPS Workflow (Weeks 5-12) — COMPLETE
 
 > **Status: COMPLETE** — MVP live at pips-app.vercel.app since March 3, 2026.
-> 2,400+ unit tests (212 files), 0 type errors. 18 of 26 forms built. Full 6-step workflow operational.
+> 2,504 unit tests (219 files), 0 type errors. 18 of 26 forms built. Full 6-step workflow operational.
 > Several Phase 2 features (Kanban, parent/child tickets, notifications, search, dark mode, audit log, CSV/PDF export) were pulled forward and shipped with MVP.
 
 ### Goal
@@ -330,7 +330,7 @@ Deliver the minimum viable product: users can create a PIPS improvement project,
 - [x] Dashboard shows active projects, assigned tickets, and recent activity
 - [x] Teams can be created and assigned to projects
 - [x] All features work on mobile viewport (375px+) -- responsive design verified
-- [x] Test coverage >70% on core PIPS workflow logic (2,400+ unit tests, 41+ E2E tests)
+- [x] Test coverage >70% on core PIPS workflow logic (2,504 unit tests, 68 E2E tests)
 - [x] Performance: page load <2s on 3G connection (Lighthouse)
 - [ ] 3 real users (internal or beta testers) have completed a full PIPS project end-to-end — NOT YET (no beta users onboarded)
 
@@ -554,7 +554,7 @@ Complete the remaining ticketing and project management features that were defer
 - [x] Notification preferences are respected (in-app and email) — SHIPPED IN MVP
 - [x] Email notifications deliver within 60 seconds of the triggering event — SHIPPED IN MVP
 - [x] All features work on mobile viewport; Kanban board scrolls horizontally on small screens — SHIPPED IN MVP
-- [x] Test coverage >70% on ticketing logic; E2E tests cover critical paths — 2,400+ unit tests + 41+ E2E tests
+- [x] Test coverage >70% on ticketing logic; E2E tests cover critical paths — 2,504 unit tests + 68 E2E tests
 
 ### Risks Specific to This Phase
 
@@ -1177,15 +1177,15 @@ These features are on the horizon but are intentionally deferred. They are liste
 
 ### Phase 1: MVP — COMPLETE
 
-| Metric                             | Target                                | Actual                                                  |
-| ---------------------------------- | ------------------------------------- | ------------------------------------------------------- |
-| Beta users                         | 5-10 users actively testing           | PENDING — no beta users onboarded yet                   |
-| PIPS projects completed end-to-end | At least 3 (by beta testers)          | PENDING — no real users yet                             |
-| Digital forms functional           | 10+ of 26 templates (prioritized set) | EXCEEDED — 18 forms built                               |
-| Core test coverage                 | >70% on workflow logic                | EXCEEDED — 2,400+ unit tests (212 files), 41+ E2E tests |
-| Page load time                     | <2s on 3G                             | ACHIEVED                                                |
-| Critical bugs                      | Zero open P0 bugs                     | ACHIEVED — 5 bugs fixed post-MVP                        |
-| Revenue                            | $0 (free beta)                        | ON TRACK — $0 as expected                               |
+| Metric                             | Target                                | Actual                                                |
+| ---------------------------------- | ------------------------------------- | ----------------------------------------------------- |
+| Beta users                         | 5-10 users actively testing           | PENDING — no beta users onboarded yet                 |
+| PIPS projects completed end-to-end | At least 3 (by beta testers)          | PENDING — no real users yet                           |
+| Digital forms functional           | 10+ of 26 templates (prioritized set) | EXCEEDED — 18 forms built                             |
+| Core test coverage                 | >70% on workflow logic                | EXCEEDED — 2,504 unit tests (219 files), 68 E2E tests |
+| Page load time                     | <2s on 3G                             | ACHIEVED                                              |
+| Critical bugs                      | Zero open P0 bugs                     | ACHIEVED — 5 bugs fixed post-MVP                      |
+| Revenue                            | $0 (free beta)                        | ON TRACK — $0 as expected                             |
 
 ### Phase 1.5: Post-MVP Stabilization — COMPLETE
 

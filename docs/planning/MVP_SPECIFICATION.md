@@ -4,7 +4,7 @@
 > **Date:** 2026-03-03
 > **Author:** Marc Albers + Claude (MVP Specification Agent)
 > **Status:** COMPLETE — MVP shipped and live at pips-app.vercel.app
-> **Last Updated:** March 3, 2026 (Product Manager Agent — marked COMPLETE, added Post-MVP Extensions section)
+> **Last Updated:** March 13, 2026 (test counts updated to 2,504 unit / 68 E2E)
 > **Timeline:** 6-8 weeks (solo developer + AI agent assistance) — **DELIVERED ON SCHEDULE**
 > **Prerequisite reading:** BUSINESS_PLAN.md, TECHNICAL_PLAN.md, PRODUCT_ROADMAP.md, PRODUCT_REQUIREMENTS.md, MARKETING_STRATEGY.md, BRAND_GUIDE_V2.md, CONTENT_MIGRATION.md, DEVOPS_RUNBOOK.md
 >
@@ -14,13 +14,13 @@
 >
 > The MVP shipped on March 3, 2026. All Tier 1 features complete. All Tier 2 features complete. All Tier 3 features complete. Quality gates exceeded targets:
 >
-> | Gate        | Target | Actual              |
-> | ----------- | ------ | ------------------- |
-> | Unit tests  | 100+   | 2,400+ (212+ files) |
-> | E2E tests   | 20+    | 230+ (25 specs)     |
-> | Type errors | 0      | 0                   |
-> | Forms built | 10+    | 18 of 26            |
-> | Lint errors | 0      | 0                   |
+> | Gate        | Target | Actual            |
+> | ----------- | ------ | ----------------- |
+> | Unit tests  | 100+   | 2,504 (219 files) |
+> | E2E tests   | 20+    | 68 (Playwright)   |
+> | Type errors | 0      | 0                 |
+> | Forms built | 10+    | 18 of 26          |
+> | Lint errors | 0      | 0                 |
 >
 > **What shipped beyond MVP scope (Post-MVP Extensions):** Knowledge Hub (205 content nodes, FTS, reading experience, Cadence Bar, bookmarks), Training Mode (DB + seed data for 4 paths, 27 modules, 59 exercises, scaffolded pages), Workshop (DB tables, scaffolded UI), 83+ SEO marketing pages. See [Section 13: Post-MVP Extensions](#13-post-mvp-extensions) for details.
 
@@ -2055,15 +2055,15 @@ The Knowledge Hub compiles the full PIPS methodology book ("The Never-Ending Que
 
 **What shipped:**
 
-| Feature                  | Status     | Details                                                                                                       |
-| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| Book content compilation | DONE       | 205 content nodes from 20 markdown source files, stored in `book_content` table                               |
-| Full-text search         | DONE       | Postgres tsvector-based FTS across all content nodes                                                          |
-| Reading experience       | DONE       | Dedicated reader view with clean typography, markdown rendering                                               |
-| Cadence Bar              | DONE       | Contextual content widget integrated into step-view and dashboard, provides step-relevant methodology content |
-| Bookmark system          | DONE       | Save, list, and navigate to bookmarked content nodes                                                          |
-| Knowledge Hub landing    | DONE       | Hub page with content categories, search bar, navigation                                                      |
-| Workbook scaffolding     | SCAFFOLDED | Step-by-step practice mode with guided exercises (UI exists, exercise-to-form wiring in progress)             |
+| Feature                  | Status | Details                                                                                                       |
+| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------- |
+| Book content compilation | DONE   | 205 content nodes from 20 markdown source files, stored in `book_content` table                               |
+| Full-text search         | DONE   | Postgres tsvector-based FTS across all content nodes                                                          |
+| Reading experience       | DONE   | Dedicated reader view with clean typography, markdown rendering                                               |
+| Cadence Bar              | DONE   | Contextual content widget integrated into step-view and dashboard, provides step-relevant methodology content |
+| Bookmark system          | DONE   | Save, list, and navigate to bookmarked content nodes                                                          |
+| Knowledge Hub landing    | DONE   | Hub page with content categories, search bar, navigation                                                      |
+| Workbook scaffolding     | BUILT  | Step-by-step practice mode with guided exercises, fully wired                                                 |
 
 **Codebase locations:**
 

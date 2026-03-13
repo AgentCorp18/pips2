@@ -1,8 +1,8 @@
 # PIPS 2.0 — Technical Architecture Plan
 
-> **Version:** 1.1
-> **Date:** 2026-03-04
-> **Status:** Active — MVP Complete, Post-MVP Phases 1.5 through 4 Complete
+> **Version:** 1.2
+> **Date:** 2026-03-13
+> **Status:** Active — MVP Complete, Post-MVP Phases 1.5 through 7 Complete
 > **Author:** Development Lead Agent (Claude Opus 4.6)
 > **Original Author:** Marc Albers + Claude
 >
@@ -15,7 +15,7 @@
 > - Updated project structure to reflect actual codebase (knowledge/, training/, seo/, knowledge-cadence/ component directories)
 > - Aligned with SYSTEM_ARCHITECTURE.md v1.1 and actual deployed state
 > - Next.js version updated to 16.x (from 15.x)
-> - Added build status summary reflecting 2,339+ unit tests, 0 type errors
+> - Added build status summary reflecting 2,504 unit tests, 0 type errors
 
 ---
 
@@ -33,8 +33,8 @@ Throughout this document, section headers and descriptions include a status mark
 ## Current Build Status
 
 > **MVP:** Live at https://pips-app.vercel.app since March 3, 2026
-> **Unit tests:** 2,400+ passing (212+ files)
-> **E2E tests:** 230+ test cases (25 spec files)
+> **Unit tests:** 2,504 passing (219 files)
+> **E2E tests:** 68 test cases (Playwright)
 > **Type errors:** 0
 > **Lint errors:** 0
 > **DB migrations:** 13 applied to production
