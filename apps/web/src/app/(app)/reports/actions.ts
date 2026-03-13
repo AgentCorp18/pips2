@@ -65,7 +65,7 @@ export const getReportsHubStats = async (orgId: string): Promise<ReportsHubStats
     return { activeProjects: 0, openTickets: 0, totalMembers: 0, formsCompleted: 0 }
   const supabase = await createClient()
 
-  const [projectsRes, ticketsRes, membersRes] = await Promise.all([
+  const [projectsRes, ticketsRes, membersRes] = await Promise.allSettled([
     supabase
       .from('projects')
       .select('id', { count: 'exact', head: true })
@@ -82,22 +82,26 @@ export const getReportsHubStats = async (orgId: string): Promise<ReportsHubStats
   ])
 
   // For forms we need to go through projects since project_forms doesn't have org_id
-  const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
-
   let formsCount = 0
-  if (orgProjects && orgProjects.length > 0) {
-    const projectIds = orgProjects.map((p) => p.id)
-    const { count } = await supabase
-      .from('project_forms')
-      .select('id', { count: 'exact', head: true })
-      .in('project_id', projectIds)
-    formsCount = count ?? 0
+  try {
+    const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
+
+    if (orgProjects && orgProjects.length > 0) {
+      const projectIds = orgProjects.map((p) => p.id)
+      const { count } = await supabase
+        .from('project_forms')
+        .select('id', { count: 'exact', head: true })
+        .in('project_id', projectIds)
+      formsCount = count ?? 0
+    }
+  } catch {
+    // formsCount stays 0 on error
   }
 
   return {
-    activeProjects: projectsRes.count ?? 0,
-    openTickets: ticketsRes.count ?? 0,
-    totalMembers: membersRes.count ?? 0,
+    activeProjects: projectsRes.status === 'fulfilled' ? (projectsRes.value.count ?? 0) : 0,
+    openTickets: ticketsRes.status === 'fulfilled' ? (ticketsRes.value.count ?? 0) : 0,
+    totalMembers: membersRes.status === 'fulfilled' ? (membersRes.value.count ?? 0) : 0,
     formsCompleted: formsCount,
   }
 }

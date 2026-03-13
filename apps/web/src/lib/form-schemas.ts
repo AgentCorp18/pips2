@@ -342,6 +342,14 @@ export const balanceSheetSchema = z.object({
 export type BalanceSheetData = z.infer<typeof balanceSheetSchema>
 
 /* ============================================================
+   Step 2 — Root Cause (flexible form — captures analyst notes)
+   ============================================================ */
+
+export const rootCauseSchema = z.record(z.string(), z.unknown())
+
+export type RootCauseData = z.infer<typeof rootCauseSchema>
+
+/* ============================================================
    Schema Map — for dynamic lookup by form_type
    ============================================================ */
 
@@ -364,4 +372,5 @@ export const FORM_SCHEMAS: Record<string, z.ZodType> = {
   evaluation: evaluationSchema,
   lessons_learned: lessonsLearnedSchema,
   balance_sheet: balanceSheetSchema,
+  root_cause: rootCauseSchema,
 }

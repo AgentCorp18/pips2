@@ -52,9 +52,13 @@ export const saveFormData = async (
     return { success: false, error: 'Invalid input' }
   }
 
-  // FIX 1: Form-specific schema validation (graceful degradation for unknown types)
+  // Enforce form-specific schema validation — all known form types must have a schema
   const formSchema = FORM_SCHEMAS[formType]
-  if (formSchema) {
+  if (!formSchema) {
+    return { success: false, error: 'Unknown form type' }
+  }
+  // Allow empty saves (initial save / clear) to bypass schema validation
+  if (Object.keys(data).length > 0) {
     const formResult = formSchema.safeParse(data)
     if (!formResult.success) {
       return { success: false, error: 'Invalid form data' }

@@ -317,6 +317,31 @@ describe('getRecentActivity', () => {
     expect(result[0]?.userName).toBe('Unknown')
   })
 
+  it('shows "Unknown" when profile has no display_name or full_name', async () => {
+    fromResults = [
+      {
+        data: [
+          {
+            id: 'log-null-name',
+            action: 'insert',
+            entity_type: 'ticket',
+            entity_id: 'tkt-null',
+            new_data: { title: 'Some Ticket' },
+            user_id: 'user-no-name',
+            created_at: '2026-03-01T06:00:00Z',
+          },
+        ],
+      },
+      {
+        data: [{ id: 'user-no-name', display_name: null, full_name: null }],
+      },
+    ]
+
+    const result = await getRecentActivity('org-1')
+    expect(result[0]?.userName).toBe('Unknown')
+    expect(result[0]?.description).toBe('Unknown created ticket "Some Ticket"')
+  })
+
   it('shows "System" when user_id is null', async () => {
     fromResults = [
       {

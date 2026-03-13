@@ -177,7 +177,7 @@ export const getRecentActivity = async (orgId: string, limit = 10): Promise<Acti
 
     if (profiles) {
       for (const p of profiles) {
-        userMap.set(p.id, p.display_name || p.full_name || null)
+        userMap.set(p.id, p.display_name || p.full_name || 'Unknown')
       }
     }
   }
