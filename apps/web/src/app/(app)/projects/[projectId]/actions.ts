@@ -16,6 +16,10 @@ export const advanceStep = async (
   projectId: string,
   stepNumber: number,
 ): Promise<StepActionResult> => {
+  if (stepNumber < 1 || stepNumber > 6 || !Number.isInteger(stepNumber)) {
+    return { success: false, error: 'Invalid step number' }
+  }
+
   const supabase = await createClient()
 
   const {
@@ -70,23 +74,36 @@ export const advanceStep = async (
     const nextStepEnum = stepNumberToEnum(stepNumber + 1)
 
     // Update project current_step
-    await supabase
+    const { error: projectError } = await supabase
       .from('projects')
       .update({ current_step: nextStepEnum, updated_at: now })
       .eq('id', projectId)
 
+    if (projectError) {
+      console.error('Failed to advance project current_step:', projectError.message)
+      return { success: false, error: 'Failed to advance to next step' }
+    }
+
     // Start next step
-    await supabase
+    const { error: nextStepError } = await supabase
       .from('project_steps')
       .update({ status: 'in_progress', started_at: now })
       .eq('project_id', projectId)
       .eq('step', nextStepEnum)
+
+    if (nextStepError) {
+      console.error('Failed to start next step:', nextStepError.message)
+    }
   } else {
     // All 6 steps complete — mark project as completed
-    await supabase
+    const { error: completeError } = await supabase
       .from('projects')
       .update({ status: 'completed', updated_at: now })
       .eq('id', projectId)
+
+    if (completeError) {
+      console.error('Failed to mark project completed:', completeError.message)
+    }
   }
 
   trackServerEvent('step.advanced', {
@@ -108,6 +125,10 @@ export const overrideStep = async (
   projectId: string,
   stepNumber: number,
 ): Promise<StepActionResult> => {
+  if (stepNumber < 1 || stepNumber > 6 || !Number.isInteger(stepNumber)) {
+    return { success: false, error: 'Invalid step number' }
+  }
+
   const supabase = await createClient()
 
   const {
@@ -162,21 +183,34 @@ export const overrideStep = async (
   if (stepNumber < 6) {
     const nextStepEnum = stepNumberToEnum(stepNumber + 1)
 
-    await supabase
+    const { error: projectError } = await supabase
       .from('projects')
       .update({ current_step: nextStepEnum, updated_at: now })
       .eq('id', projectId)
 
-    await supabase
+    if (projectError) {
+      console.error('Failed to advance project after override:', projectError.message)
+      return { success: false, error: 'Failed to advance to next step' }
+    }
+
+    const { error: nextStepError } = await supabase
       .from('project_steps')
       .update({ status: 'in_progress', started_at: now })
       .eq('project_id', projectId)
       .eq('step', nextStepEnum)
+
+    if (nextStepError) {
+      console.error('Failed to start next step after override:', nextStepError.message)
+    }
   } else {
-    await supabase
+    const { error: completeError } = await supabase
       .from('projects')
       .update({ status: 'completed', updated_at: now })
       .eq('id', projectId)
+
+    if (completeError) {
+      console.error('Failed to mark project completed after override:', completeError.message)
+    }
   }
 
   revalidatePath(`/projects/${projectId}`)

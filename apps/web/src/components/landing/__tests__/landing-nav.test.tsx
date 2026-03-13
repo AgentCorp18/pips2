@@ -26,9 +26,9 @@ describe('LandingNav', () => {
     expect(links.length).toBeGreaterThan(0)
   })
 
-  it('renders Features nav link', () => {
+  it('renders Book nav link', () => {
     render(<LandingNav />)
-    const links = screen.getAllByText('Features')
+    const links = screen.getAllByText('Book')
     expect(links.length).toBeGreaterThan(0)
   })
 
