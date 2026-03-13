@@ -1,21 +1,38 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { WelcomeCards } from '../welcome-cards'
 
 vi.mock('next/link', () => ({
   default: ({
     children,
     href,
+    onClick,
     ...props
   }: {
     children: React.ReactNode
     href: string
+    onClick?: () => void
     [key: string]: unknown
   }) => (
-    <a href={href} {...props}>
+    <a href={href} onClick={onClick} {...props}>
       {children}
     </a>
   ),
+}))
+
+const mockDismiss = vi.fn()
+const mockCompleteStep = vi.fn()
+const mockIsStepComplete = vi.fn().mockReturnValue(false)
+
+vi.mock('@/hooks/use-onboarding-progress', () => ({
+  useOnboardingProgress: () => ({
+    completedSteps: [],
+    isStepComplete: mockIsStepComplete,
+    completeStep: mockCompleteStep,
+    dismiss: mockDismiss,
+    allComplete: false,
+    dismissed: false,
+  }),
 }))
 
 describe('WelcomeCards', () => {
@@ -27,41 +44,43 @@ describe('WelcomeCards', () => {
   it('renders the heading', () => {
     render(<WelcomeCards />)
     expect(screen.getByTestId('welcome-cards-heading')).toBeTruthy()
-    expect(screen.getByText('Get started with PIPS')).toBeTruthy()
+    expect(screen.getByText('Your first 30 minutes with PIPS')).toBeTruthy()
   })
 
   it('renders description text', () => {
     render(<WelcomeCards />)
-    expect(screen.getByText(/Here are a few things you can do/)).toBeTruthy()
+    expect(screen.getByText(/Complete these steps to get the most/)).toBeTruthy()
   })
 
-  it('renders the Create a Project action card', () => {
+  it('renders all four onboarding steps', () => {
     render(<WelcomeCards />)
-    const card = screen.getByTestId('welcome-action-create-project')
-    expect(card).toBeTruthy()
-    expect(card.getAttribute('href')).toBe('/projects/new')
-    expect(screen.getByText('Create a Project')).toBeTruthy()
+    expect(screen.getByTestId('onboarding-step-read-overview')).toBeTruthy()
+    expect(screen.getByTestId('onboarding-step-explore-sample')).toBeTruthy()
+    expect(screen.getByTestId('onboarding-step-create-project')).toBeTruthy()
+    expect(screen.getByTestId('onboarding-step-invite-member')).toBeTruthy()
   })
 
-  it('renders the Explore the Methodology action card', () => {
+  it('shows the first step as active with a Go button', () => {
     render(<WelcomeCards />)
-    const card = screen.getByTestId('welcome-action-explore-methodology')
-    expect(card).toBeTruthy()
-    expect(card.getAttribute('href')).toBe('/knowledge')
-    expect(screen.getByText('Explore the Methodology')).toBeTruthy()
+    expect(screen.getByTestId('onboarding-action-read-overview')).toBeTruthy()
+    expect(screen.getByTestId('onboarding-action-read-overview').getAttribute('href')).toBe(
+      '/knowledge/guide/getting-started',
+    )
   })
 
-  it('renders the Invite Your Team action card', () => {
+  it('shows progress counter', () => {
     render(<WelcomeCards />)
-    const card = screen.getByTestId('welcome-action-invite-team')
-    expect(card).toBeTruthy()
-    expect(card.getAttribute('href')).toBe('/settings/members')
-    expect(screen.getByText('Invite Your Team')).toBeTruthy()
+    expect(screen.getByText('0/4')).toBeTruthy()
   })
 
-  it('renders three "Get started" links', () => {
+  it('renders dismiss button', () => {
     render(<WelcomeCards />)
-    const links = screen.getAllByText('Get started')
-    expect(links.length).toBe(3)
+    expect(screen.getByTestId('dismiss-onboarding')).toBeTruthy()
+  })
+
+  it('calls dismiss when dismiss button is clicked', () => {
+    render(<WelcomeCards />)
+    fireEvent.click(screen.getByTestId('dismiss-onboarding'))
+    expect(mockDismiss).toHaveBeenCalled()
   })
 })

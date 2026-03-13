@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { STEP_CONTENT, buildProductContext, type StepFormDef } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
@@ -14,6 +15,11 @@ import {
   SkipForward,
   MessageSquare,
   Star,
+  Clock,
+  AlertTriangle,
+  Info,
+  ChevronDown,
+  Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
@@ -33,6 +39,8 @@ type StepViewProps = {
   onAdvance?: () => void
   onOverride?: () => void
   isPending?: boolean
+  /** Current project step (1-based) — used for dependency warnings */
+  currentProjectStep?: PipsStepNumber
 }
 
 const RECOMMENDED_FORMS: Record<number, Set<string>> = {
@@ -54,6 +62,7 @@ export const StepView = ({
   onAdvance,
   onOverride,
   isPending = false,
+  currentProjectStep,
 }: StepViewProps) => {
   const content = STEP_CONTENT[stepNumber]
   const isCompleted = status === 'completed' || status === 'skipped'
@@ -66,8 +75,34 @@ export const StepView = ({
 
   const cadenceContext = buildProductContext(stepNumber)
 
+  // 1.3: Split forms into required and optional
+  const requiredForms = content.forms.filter((f) => f.required)
+  const optionalForms = content.forms.filter((f) => !f.required)
+
+  // 1.6: Dependency warning — viewing a step ahead of current project step
+  const showDependencyWarning =
+    currentProjectStep !== undefined && stepNumber > currentProjectStep && !isCompleted
+
   return (
     <div className="space-y-6">
+      {/* 1.6: Step Dependency Warning */}
+      {showDependencyWarning && (
+        <div
+          className="flex items-start gap-3 rounded-lg border border-[var(--color-accent)] bg-[var(--color-accent)]/5 px-4 py-3"
+          data-testid="step-dependency-warning"
+        >
+          <Info size={18} className="mt-0.5 shrink-0 text-[var(--color-accent)]" />
+          <div>
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">
+              Step {stepNumber} builds on Step {stepNumber - 1}
+            </p>
+            <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">
+              Complete earlier steps first for best results. You can still explore this step.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Objective */}
       <Card>
         <CardHeader>
@@ -90,6 +125,13 @@ export const StepView = ({
           </p>
         </CardContent>
       </Card>
+
+      {/* 1.1: Step Context Banner — why this step matters + time + top pitfall */}
+      <StepContextBanner
+        timeEstimate={content.timeEstimate}
+        topMistake={content.topMistake}
+        stepNumber={stepNumber}
+      />
 
       {/* Guided Prompts */}
       <Card>
@@ -117,32 +159,96 @@ export const StepView = ({
         </CardContent>
       </Card>
 
-      {/* Forms */}
-      <Card>
-        <CardHeader>
-          <CardTitle
-            className="flex items-center gap-2 text-base"
-            data-testid="analysis-tools-title"
-          >
-            <FileText size={16} className="text-[var(--color-text-tertiary)]" />
-            Analysis Tools
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {content.forms.map((form) => (
-              <FormRow
-                key={form.type}
-                form={form}
-                projectId={projectId}
-                stepNumber={stepNumber}
-                started={formStatuses.some((fs) => fs.form_type === form.type && fs.started)}
-                recommended={RECOMMENDED_FORMS[stepNumber]?.has(form.type) ?? false}
-              />
+      {/* 1.3: Forms — split into Required Tools and Optional Tools */}
+      {requiredForms.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle
+              className="flex items-center gap-2 text-base"
+              data-testid="required-tools-title"
+            >
+              <FileText size={16} className="text-[var(--color-text-tertiary)]" />
+              Required Tools
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {requiredForms.map((form) => (
+                <FormRow
+                  key={form.type}
+                  form={form}
+                  projectId={projectId}
+                  stepNumber={stepNumber}
+                  started={formStatuses.some((fs) => fs.form_type === form.type && fs.started)}
+                  recommended={RECOMMENDED_FORMS[stepNumber]?.has(form.type) ?? false}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {optionalForms.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle
+              className="flex items-center gap-2 text-base"
+              data-testid="optional-tools-title"
+            >
+              <FileText size={16} className="text-[var(--color-text-tertiary)]" />
+              Optional Tools
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {optionalForms.map((form) => (
+                <FormRow
+                  key={form.type}
+                  form={form}
+                  projectId={projectId}
+                  stepNumber={stepNumber}
+                  started={formStatuses.some((fs) => fs.form_type === form.type && fs.started)}
+                  recommended={RECOMMENDED_FORMS[stepNumber]?.has(form.type) ?? false}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 2.2: Common Mistakes (collapsible) */}
+      {content.commonMistakes.length > 0 && (
+        <CollapsibleCard
+          title="Common Mistakes to Avoid"
+          icon={<AlertTriangle size={16} className="text-[var(--color-warning)]" />}
+          testId="common-mistakes"
+        >
+          <ul className="space-y-2">
+            {content.commonMistakes.map((mistake) => (
+              <li
+                key={mistake}
+                className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
+              >
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-warning)]" />
+                {mistake}
+              </li>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+          </ul>
+        </CollapsibleCard>
+      )}
+
+      {/* 2.3: Facilitation Guide (collapsible) */}
+      {content.methodology.facilitationGuide && (
+        <CollapsibleCard
+          title="Facilitation Guide"
+          icon={<Users size={16} className="text-[var(--color-text-tertiary)]" />}
+          testId="facilitation-guide"
+        >
+          <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
+            {content.methodology.facilitationGuide}
+          </p>
+        </CollapsibleCard>
+      )}
 
       {/* Completion Criteria */}
       <Card>
@@ -206,6 +312,80 @@ export const StepView = ({
 
 /* ---- Sub-components ---- */
 
+/** 1.1: Compact context banner — time estimate, top pitfall */
+const StepContextBanner = ({
+  timeEstimate,
+  topMistake,
+  stepNumber,
+}: {
+  timeEstimate: string
+  topMistake: string
+  stepNumber: PipsStepNumber
+}) => (
+  <div
+    className="flex flex-wrap items-start gap-4 rounded-lg border px-4 py-3"
+    style={{
+      borderColor: `var(--color-step-${stepNumber})`,
+      backgroundColor: `color-mix(in srgb, var(--color-step-${stepNumber}) 5%, transparent)`,
+    }}
+    data-testid="step-context-banner"
+  >
+    <div className="flex items-center gap-2">
+      <Clock size={14} className="shrink-0 text-[var(--color-text-tertiary)]" />
+      <span className="text-sm text-[var(--color-text-secondary)]">
+        <span className="font-medium">Time:</span> {timeEstimate}
+      </span>
+    </div>
+    <div className="flex items-start gap-2">
+      <AlertTriangle size={14} className="mt-0.5 shrink-0 text-[var(--color-warning)]" />
+      <span className="text-sm text-[var(--color-text-secondary)]">
+        <span className="font-medium">Top pitfall:</span> {topMistake}
+      </span>
+    </div>
+  </div>
+)
+
+/** Collapsible card section — used for facilitation guide, common mistakes */
+const CollapsibleCard = ({
+  title,
+  icon,
+  children,
+  testId,
+}: {
+  title: string
+  icon: React.ReactNode
+  children: React.ReactNode
+  testId?: string
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <Card data-testid={testId}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between px-6 py-4 text-left"
+        aria-expanded={isOpen}
+      >
+        <span className="flex items-center gap-2 text-base font-semibold text-[var(--color-text-primary)]">
+          {icon}
+          {title}
+        </span>
+        <ChevronDown
+          size={16}
+          className={cn(
+            'text-[var(--color-text-tertiary)] transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
+      </button>
+      {isOpen && (
+        <CardContent className="border-t border-[var(--color-border)] pt-4">{children}</CardContent>
+      )}
+    </Card>
+  )
+}
+
 const StatusBadge = ({
   status,
 }: {
@@ -246,7 +426,11 @@ const FormRow = ({ form, projectId, stepNumber, started, recommended }: FormRowP
       started
         ? 'border-[var(--color-success)] bg-[var(--color-success-subtle)]'
         : 'border-[var(--color-border)]',
+      form.required && !started && 'border-l-4',
     )}
+    style={
+      form.required && !started ? { borderLeftColor: `var(--color-step-${stepNumber})` } : undefined
+    }
   >
     <div className="flex items-center gap-3">
       {started ? (
@@ -260,6 +444,17 @@ const FormRow = ({ form, projectId, stepNumber, started, recommended }: FormRowP
       </div>
     </div>
     <div className="flex items-center gap-2">
+      {/* 1.2: Time estimate badge */}
+      {form.timeEstimate && (
+        <Badge
+          variant="outline"
+          className="gap-1 text-[10px] text-[var(--color-text-tertiary)]"
+          data-testid={`time-badge-${form.type}`}
+        >
+          <Clock size={10} />
+          {form.timeEstimate}
+        </Badge>
+      )}
       {recommended && (
         <Badge
           variant="outline"

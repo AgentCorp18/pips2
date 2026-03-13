@@ -12,6 +12,7 @@ export type StepFormDef = {
   name: string
   description: string
   required: boolean
+  timeEstimate?: string
 }
 
 export type StepMethodology = {
@@ -23,6 +24,9 @@ export type StepMethodology = {
 export type StepContent = {
   title: string
   objective: string
+  timeEstimate: string
+  topMistake: string
+  commonMistakes: string[]
   prompts: string[]
   forms: StepFormDef[]
   completionCriteria: string[]
@@ -33,6 +37,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
   1: {
     title: 'Identify',
     objective: 'Define a clear, measurable problem statement that the team agrees on.',
+    timeEstimate: '60–90 min',
+    topMistake: 'Jumping to solutions instead of defining the problem',
+    commonMistakes: [
+      'Jumping to solutions before fully understanding the problem',
+      'Writing vague problem statements without measurable gaps',
+      'Skipping stakeholder input — one perspective is never enough',
+      'Confusing symptoms with the actual problem',
+    ],
     prompts: [
       'What is the current state (As-Is)?',
       'What is the desired state?',
@@ -45,12 +57,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         name: 'Problem Statement',
         description: 'Define As-Is, Desired State, and Gap',
         required: true,
+        timeEstimate: '~20 min',
       },
       {
         type: 'impact_assessment',
         name: 'Impact Assessment',
         description: 'Quantify the problem impact',
         required: false,
+        timeEstimate: '~15 min',
       },
     ],
     completionCriteria: [
@@ -79,6 +93,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
   2: {
     title: 'Analyze',
     objective: 'Identify root causes of the problem using structured analysis tools.',
+    timeEstimate: '90–120 min',
+    topMistake: 'Stopping at symptoms instead of drilling to root causes',
+    commonMistakes: [
+      'Stopping at symptoms instead of drilling to true root causes',
+      'Using only one analysis tool — combine fishbone with 5-Why for depth',
+      'Accepting the first "why" answer without probing further',
+      'Ignoring data — validate suspected causes with evidence',
+    ],
     prompts: [
       'What are the major categories of causes?',
       'What are the contributing factors in each category?',
@@ -92,18 +114,21 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description:
           'Cause-and-effect analysis across categories (People, Process, Equipment, Materials, Environment, Management)',
         required: true,
+        timeEstimate: '~30 min',
       },
       {
         type: 'five_why',
         name: '5 Why Analysis',
         description: 'Drill down to root cause by asking "why" iteratively',
         required: false,
+        timeEstimate: '~15 min',
       },
       {
         type: 'force_field',
         name: 'Force Field Analysis',
         description: 'Map driving forces vs. restraining forces for change',
         required: false,
+        timeEstimate: '~20 min',
       },
       {
         type: 'checksheet',
@@ -111,6 +136,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description:
           'Structured tally sheet to collect and quantify data by category over time periods',
         required: false,
+        timeEstimate: '~15 min',
       },
     ],
     completionCriteria: [
@@ -139,6 +165,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
   3: {
     title: 'Generate',
     objective: 'Brainstorm a wide range of potential solutions without judgment.',
+    timeEstimate: '45–60 min',
+    topMistake: 'Filtering ideas too early — quantity over quality',
+    commonMistakes: [
+      'Evaluating or criticizing ideas during brainstorming',
+      'Letting one voice dominate — use silent writing first',
+      'Setting the bar too low — aim for 30+ ideas to push past obvious ones',
+      'Skipping "wild" ideas that often spark practical innovations',
+    ],
     prompts: [
       'What are all possible solutions — no idea is too bold?',
       'How have other organizations solved similar problems?',
@@ -151,12 +185,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         name: 'Brainstorming',
         description: 'Free-form idea generation with the team',
         required: true,
+        timeEstimate: '~30 min',
       },
       {
         type: 'brainwriting',
         name: 'Brainwriting (6-3-5)',
         description: "Silent written idea generation and building on others' ideas",
         required: false,
+        timeEstimate: '~30 min',
       },
     ],
     completionCriteria: [
@@ -185,6 +221,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
   4: {
     title: 'Select & Plan',
     objective: 'Evaluate solutions objectively and create a detailed implementation plan.',
+    timeEstimate: '2–3 hours',
+    topMistake: 'Choosing a solution without defining criteria first',
+    commonMistakes: [
+      'Choosing a favorite solution without objective criteria',
+      'Assigning multiple "Accountable" people per task in the RACI',
+      'Building an implementation plan without risk mitigation',
+      'Setting unrealistic timelines without consulting the people doing the work',
+    ],
     prompts: [
       'What criteria matter most for evaluating solutions?',
       'How does each solution score against the criteria?',
@@ -197,24 +241,28 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         name: 'Criteria Matrix',
         description: 'Score and rank solutions against weighted criteria',
         required: true,
+        timeEstimate: '~30 min',
       },
       {
         type: 'paired_comparisons',
         name: 'Paired Comparisons',
         description: 'Systematically compare options in pairs to produce a ranked list',
         required: false,
+        timeEstimate: '~20 min',
       },
       {
         type: 'raci',
         name: 'RACI Chart',
         description: 'Assign roles: Responsible, Accountable, Consulted, Informed',
         required: false,
+        timeEstimate: '~20 min',
       },
       {
         type: 'implementation_plan',
         name: 'Implementation Plan',
         description: 'Timeline, resources, milestones, and risk mitigation',
         required: true,
+        timeEstimate: '~45 min',
       },
     ],
     completionCriteria: [
@@ -243,6 +291,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
   5: {
     title: 'Implement',
     objective: 'Execute the plan, track progress, and manage issues as they arise.',
+    timeEstimate: 'Ongoing (weekly check-ins)',
+    topMistake: 'No escalation path for blockers',
+    commonMistakes: [
+      'No defined escalation path — blockers fester until they derail the timeline',
+      'Skipping regular check-ins and losing visibility into progress',
+      'Not documenting deviations from the plan for Step 6 review',
+      'Rolling out to everyone at once instead of piloting first',
+    ],
     prompts: [
       'Are all tasks assigned and understood by their owners?',
       'What milestones have been reached?',
@@ -255,12 +311,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         name: 'Milestone Tracker',
         description: 'Track progress against planned milestones and dates',
         required: true,
+        timeEstimate: '~15 min',
       },
       {
         type: 'implementation_checklist',
         name: 'Implementation Checklist',
         description: 'Detailed task checklist with status and owners',
         required: false,
+        timeEstimate: '~20 min',
       },
     ],
     completionCriteria: [
@@ -289,6 +347,14 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
   6: {
     title: 'Evaluate',
     objective: 'Measure results, capture lessons learned, and determine next steps.',
+    timeEstimate: '~90 min',
+    topMistake: 'Measuring different metrics than defined in Step 1',
+    commonMistakes: [
+      'Measuring different metrics than what was defined in Step 1',
+      'Waiting too long to capture lessons learned — memories fade fast',
+      'Treating unmet goals as failure instead of input for the next cycle',
+      'Not sharing results with the broader organization',
+    ],
     prompts: [
       'What were the measurable results vs. the original target?',
       'What worked well during this improvement cycle?',

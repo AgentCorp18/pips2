@@ -106,6 +106,9 @@ describe('shared type exports compile correctly', () => {
     const content: StepContent = {
       title: 'Identify',
       objective: 'Define the problem',
+      timeEstimate: '60-90 min',
+      topMistake: 'Jumping to solutions',
+      commonMistakes: ['Mistake 1', 'Mistake 2'],
       prompts: ['What is the problem?'],
       forms: [{ type: 'problem_statement', name: 'PS', description: 'desc', required: true }],
       completionCriteria: ['Problem defined'],

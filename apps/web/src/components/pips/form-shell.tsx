@@ -3,16 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, CloudUpload, Loader2 } from 'lucide-react'
+import { ArrowLeft, Check, CloudUpload, Loader2, Clock, ChevronDown, Lightbulb } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { saveFormData } from '@/app/(app)/projects/[projectId]/steps/[stepNumber]/forms/actions'
 import type { ProductContext } from '@pips/shared'
-import { buildProductContext } from '@pips/shared'
+import { buildProductContext, STEP_CONTENT } from '@pips/shared'
+import type { PipsStepNumber } from '@pips/shared'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
+import { cn } from '@/lib/utils'
 import type { ZodType } from 'zod'
 
 type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved'
@@ -60,6 +62,14 @@ export const FormShell = (props: FormShellProps) => {
   const { title, description, stepNumber, required = false, cadenceContext, children } = props
   const formType = 'formType' in props ? (props.formType as string | undefined) : undefined
   const derivedCadenceContext = cadenceContext ?? buildProductContext(stepNumber, formType)
+
+  // 1.2: Derive time estimate and tips from STEP_CONTENT for this form
+  const stepContent =
+    stepNumber >= 1 && stepNumber <= 6 ? STEP_CONTENT[stepNumber as PipsStepNumber] : undefined
+  const formDef = stepContent?.forms.find((f) => f.type === formType)
+  const formTimeEstimate = formDef?.timeEstimate
+  const aboutThisTool = stepContent?.methodology.tips
+  const bestPractices = stepContent?.methodology.bestPractices
 
   const [viewMode, setViewMode] = useState<FormMode>('edit')
   const isViewMode = viewMode === 'view'
@@ -253,16 +263,142 @@ export const FormShell = (props: FormShellProps) => {
                   Required
                 </Badge>
               )}
+              {/* 1.2: Time estimate badge from form definition */}
+              {formTimeEstimate && (
+                <Badge
+                  variant="outline"
+                  className="gap-1 text-[10px] text-[var(--color-text-tertiary)]"
+                  data-testid="form-time-badge"
+                >
+                  <Clock size={10} />
+                  {formTimeEstimate}
+                </Badge>
+              )}
             </div>
             <CardDescription>{description}</CardDescription>
           </CardHeader>
           <CardContent>{children}</CardContent>
         </Card>
 
+        {/* 1.2: About This Tool — collapsible guidance from methodology */}
+        {aboutThisTool && <AboutThisToolSection tips={aboutThisTool} />}
+
+        {/* 2.4: Best Practices — collapsible panel */}
+        {bestPractices && bestPractices.length > 0 && (
+          <BestPracticesSection practices={bestPractices} />
+        )}
+
         {/* Knowledge Cadence Bar — contextual content links */}
         <KnowledgeCadenceBar context={derivedCadenceContext} defaultCollapsed />
       </div>
     </FormViewProvider>
+  )
+}
+
+/* ---- Best Practices (collapsible, progressive disclosure) ---- */
+
+const BestPracticesSection = ({ practices }: { practices: string[] }) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  if (practices.length === 0) return null
+
+  return (
+    <div className="rounded-lg border border-[var(--color-border)]" data-testid="best-practices">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        aria-expanded={isOpen}
+      >
+        <span className="flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary)]">
+          <Check size={14} className="text-[var(--color-success)]" />
+          Best Practices
+          {!isOpen && (
+            <span className="text-xs font-normal text-[var(--color-text-tertiary)]">
+              — {practices[0]?.replace(/\*\*/g, '').slice(0, 50)}...
+            </span>
+          )}
+        </span>
+        <ChevronDown
+          size={14}
+          className={cn(
+            'text-[var(--color-text-tertiary)] transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
+      </button>
+      {isOpen && (
+        <div className="border-t border-[var(--color-border)] px-4 py-3">
+          <ul className="space-y-2">
+            {practices.map((practice) => (
+              <li
+                key={practice}
+                className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
+              >
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-success)]" />
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: practice
+                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                      .replace(/\*(.*?)\*/g, '<em>$1</em>'),
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ---- About This Tool (collapsible tips) ---- */
+
+const AboutThisToolSection = ({ tips }: { tips: string[] }) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="rounded-lg border border-[var(--color-border)]" data-testid="about-this-tool">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        aria-expanded={isOpen}
+      >
+        <span className="flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary)]">
+          <Lightbulb size={14} className="text-[var(--color-accent)]" />
+          About This Tool
+        </span>
+        <ChevronDown
+          size={14}
+          className={cn(
+            'text-[var(--color-text-tertiary)] transition-transform duration-200',
+            isOpen && 'rotate-180',
+          )}
+        />
+      </button>
+      {isOpen && (
+        <div className="border-t border-[var(--color-border)] px-4 py-3">
+          <ul className="space-y-2">
+            {tips.map((tip) => (
+              <li
+                key={tip}
+                className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
+              >
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent)]" />
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: tip
+                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                      .replace(/\*(.*?)\*/g, '<em>$1</em>'),
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   )
 }
 
