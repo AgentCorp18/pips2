@@ -81,9 +81,9 @@ describe('ProjectCard', () => {
     expect(screen.getByText('On Hold')).toBeInTheDocument()
   })
 
-  it('shows "Cancelled" badge when status is cancelled', () => {
-    render(<ProjectCard {...defaultProps} status="cancelled" />)
-    expect(screen.getByText('Cancelled')).toBeInTheDocument()
+  it('shows "Archived" badge when status is archived', () => {
+    render(<ProjectCard {...defaultProps} status="archived" />)
+    expect(screen.getByText('Archived')).toBeInTheDocument()
   })
 
   it('shows the current step name and number', () => {

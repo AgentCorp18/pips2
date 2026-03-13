@@ -32,7 +32,7 @@ const BOARD_COLUMNS = [
   { id: 'active', label: 'Active', color: '#3B82F6' },
   { id: 'on_hold', label: 'On Hold', color: '#F59E0B' },
   { id: 'completed', label: 'Completed', color: '#10B981' },
-  { id: 'cancelled', label: 'Cancelled', color: 'var(--color-text-tertiary)' },
+  { id: 'archived', label: 'Archived', color: 'var(--color-text-tertiary)' },
 ] as const
 
 /* ============================================================
@@ -44,7 +44,7 @@ const ColumnView = ({ projects }: { projects: BoardProject[] }) => {
     active: [],
     on_hold: [],
     completed: [],
-    cancelled: [],
+    archived: [],
   }
 
   for (const project of projects) {
@@ -119,7 +119,7 @@ const SwimLaneView = ({ projects }: { projects: BoardProject[] }) => {
   // Build a 2D grid: step (row) x status (column)
   const grid: Record<number, Record<string, BoardProject[]>> = {}
   for (const step of PIPS_STEPS) {
-    grid[step.number] = { active: [], on_hold: [], completed: [], cancelled: [] }
+    grid[step.number] = { active: [], on_hold: [], completed: [], archived: [] }
   }
 
   for (const project of projects) {

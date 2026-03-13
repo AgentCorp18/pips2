@@ -220,7 +220,7 @@ export const overrideStep = async (
 /** Update project status */
 export const updateProjectStatus = async (
   projectId: string,
-  status: 'active' | 'completed' | 'on_hold' | 'cancelled',
+  status: 'active' | 'completed' | 'on_hold' | 'archived',
 ): Promise<StepActionResult> => {
   const supabase = await createClient()
 

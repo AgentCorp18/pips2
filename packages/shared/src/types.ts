@@ -33,7 +33,7 @@ export type OrgRole = 'owner' | 'admin' | 'manager' | 'member' | 'viewer'
 export type PipsStep = 1 | 2 | 3 | 4 | 5 | 6
 
 /** Project status */
-export type ProjectStatus = 'active' | 'completed' | 'archived'
+export type ProjectStatus = 'draft' | 'active' | 'on_hold' | 'completed' | 'archived'
 
 /** Ticket priority */
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical'

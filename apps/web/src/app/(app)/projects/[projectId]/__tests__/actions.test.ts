@@ -306,7 +306,7 @@ describe('updateProjectStatus', () => {
     fromResults = [{ data: { id: 'proj-1', org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
-    const result = await updateProjectStatus('proj-1', 'cancelled')
+    const result = await updateProjectStatus('proj-1', 'archived')
     expect(result).toEqual({
       success: false,
       error: 'Insufficient permissions to update project status',

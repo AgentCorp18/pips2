@@ -22,7 +22,7 @@ const STATUS_COLORS: Record<string, string> = {
   active: '#3B82F6',
   on_hold: '#F59E0B',
   completed: '#10B981',
-  cancelled: 'var(--color-text-tertiary)',
+  archived: 'var(--color-text-tertiary)',
 }
 
 const roleBadgeVariant = (role: OrgRole) => {

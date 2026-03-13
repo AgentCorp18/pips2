@@ -64,8 +64,8 @@ describe('shared type exports compile correctly', () => {
   })
 
   it('ProjectStatus accepts valid statuses', () => {
-    const statuses: ProjectStatus[] = ['active', 'completed', 'archived']
-    expect(statuses).toHaveLength(3)
+    const statuses: ProjectStatus[] = ['draft', 'active', 'on_hold', 'completed', 'archived']
+    expect(statuses).toHaveLength(5)
   })
 
   it('TicketPriority accepts valid priorities', () => {
