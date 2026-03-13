@@ -1,7 +1,7 @@
 # PIPS 2.0 — Final Project Plan
 
-**Last Updated:** March 12, 2026 (evening session)
-**Status:** Pre-Beta — All P0 complete, all P1 security fixes complete, docs updated
+**Last Updated:** March 12, 2026 (late evening)
+**Status:** Beta-Ready — All P0 complete, all P1 security fixes complete, Sentry configured, docs updated
 **Live:** pips-app.vercel.app
 
 ---
@@ -13,7 +13,7 @@
 | Unit tests                     | 2,406 passing (212 files)                         |
 | E2E tests                      | 68 passing, 64 skipped (auth-gated), 7 spec files |
 | Type errors                    | 0                                                 |
-| Lint errors                    | 0 (31 warnings)                                   |
+| Lint errors                    | 0 (0 warnings)                                    |
 | PRs merged today               | #6, #7, #11, #12 (all merged)                     |
 | Phases complete                | MVP + 1.5 through 6                               |
 | Critical security issues fixed | 5 of 5                                            |
@@ -34,8 +34,8 @@
 | 2   | **Verify GitHub PAT rotation**                    | 15 min | Marc  | **COMPLETE** — Old PAT from March 8 revoked. No secrets remain in any file. Verified clean.                                                                              |
 | 3   | **Run full CI pipeline as quality gate (WP-6.9)** | 30 min | Agent | **COMPLETE** — `pnpm tsc --noEmit && pnpm lint && pnpm test && pnpm build` all pass. 2,400+ tests, 0 type errors, 0 lint errors.                                         |
 | 4   | **Run Playwright E2E suite against production**   | 1 hr   | Agent | **COMPLETE** — 41+ E2E tests across 7 spec files passing. No critical failures.                                                                                          |
-| 5   | **Manual smoke test by Marc**                     | 30 min | Marc  | Follow `docs/testing/SMOKE_TEST_CHECKLIST.md`. Sign in, create project, fill one form, create ticket, check dashboard.                                                   |
-| 6   | **Set up Sentry DSN in Vercel env vars**          | 15 min | Marc  | `NEXT_PUBLIC_SENTRY_DSN` configured in Vercel. Verify errors appear in Sentry dashboard.                                                                                 |
+| 5   | **Manual smoke test by Marc**                     | 30 min | Marc  | **COMPLETE** — Marc completed smoke test on 2026-03-12.                                                                                                                  |
+| 6   | **Set up Sentry DSN in Vercel env vars**          | 15 min | Marc  | **COMPLETE** — `NEXT_PUBLIC_SENTRY_DSN` configured in Vercel on 2026-03-12. SDK fully integrated (@sentry/nextjs ^10.42.0).                                              |
 
 ### P1 — Must Do Within First Week of Beta
 
