@@ -139,13 +139,39 @@ describe('POST /api/ai/assist', () => {
   it('uses solution system prompt for solution fieldType', async () => {
     await POST(makeRequest({ prompt: 'help', fieldType: 'solution', context: '' }))
     const args = mockStreamText.mock.calls[0]![0]
-    expect(args.system).toContain('creative solutions')
+    expect(args.system).toContain('generate solutions')
   })
 
   it('uses lessons_learned system prompt for lessons_learned fieldType', async () => {
     await POST(makeRequest({ prompt: 'help', fieldType: 'lessons_learned', context: '' }))
     const args = mockStreamText.mock.calls[0]![0]
     expect(args.system).toContain('lessons learned')
+  })
+
+  it('includes tone instruction in system prompt', async () => {
+    await POST(makeRequest({ prompt: 'test', fieldType: 'general', context: '', tone: 'concise' }))
+    const args = mockStreamText.mock.calls[0]![0]
+    expect(args.system).toContain('brief and to the point')
+    expect(args.maxOutputTokens).toBe(512)
+  })
+
+  it('uses higher token limit for detailed tone', async () => {
+    await POST(makeRequest({ prompt: 'test', fieldType: 'general', context: '', tone: 'detailed' }))
+    const args = mockStreamText.mock.calls[0]![0]
+    expect(args.system).toContain('thorough and comprehensive')
+    expect(args.maxOutputTokens).toBe(2048)
+  })
+
+  it('defaults tone to professional when not specified', async () => {
+    await POST(makeRequest({ prompt: 'test', fieldType: 'general', context: '' }))
+    const args = mockStreamText.mock.calls[0]![0]
+    expect(args.system).toContain('professional, business-appropriate')
+  })
+
+  it('includes plain text instruction in system prompt', async () => {
+    await POST(makeRequest({ prompt: 'test', fieldType: 'general', context: '' }))
+    const args = mockStreamText.mock.calls[0]![0]
+    expect(args.system).toContain('plain text only')
   })
 
   it('returns 429 when rate limit is exceeded', async () => {

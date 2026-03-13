@@ -78,7 +78,7 @@ describe('StatCards', () => {
     render(<StatCards stats={defaultStats} />)
     const overdueCard = screen.getByTestId('stat-overdue')
     const link = overdueCard.closest('a')
-    expect(link).toHaveAttribute('href', '/tickets?status=overdue')
+    expect(link).toHaveAttribute('href', '/tickets?quick=overdue')
   })
 
   it('renders team members card as a link', () => {

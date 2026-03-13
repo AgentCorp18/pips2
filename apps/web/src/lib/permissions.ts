@@ -1,5 +1,7 @@
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { hasPermission, type Permission, type OrgRole } from '@pips/shared'
+import { ORG_COOKIE_NAME } from '@/lib/get-current-org'
 
 /** Get current user's role in an org (system admins get 'owner' everywhere) */
 export const getUserOrgRole = async (orgId: string): Promise<OrgRole | null> => {
@@ -41,7 +43,7 @@ export const requirePermission = async (
   return role
 }
 
-/** Get current user's org membership (org + role) */
+/** Get current user's org membership (org + role), respecting the active org cookie */
 export const getUserOrg = async () => {
   const supabase = await createClient()
   const {
@@ -49,6 +51,22 @@ export const getUserOrg = async () => {
   } = await supabase.auth.getUser()
   if (!user) return null
 
+  // Check if a specific org is selected via cookie
+  const cookieStore = await cookies()
+  const cookieOrgId = cookieStore.get(ORG_COOKIE_NAME)?.value ?? null
+
+  if (cookieOrgId) {
+    const { data: cookieMembership } = await supabase
+      .from('org_members')
+      .select('org_id, role, organizations(id, name, slug)')
+      .eq('user_id', user.id)
+      .eq('org_id', cookieOrgId)
+      .maybeSingle()
+
+    if (cookieMembership) return cookieMembership
+  }
+
+  // Fallback: first org by joined_at
   const { data } = await supabase
     .from('org_members')
     .select('org_id, role, organizations(id, name, slug)')

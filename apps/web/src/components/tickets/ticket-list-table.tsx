@@ -4,48 +4,11 @@ import { useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { SortableHeader, type SortDirection } from '@/components/ui/sortable-header'
 import { BulkActionsBar } from './bulk-actions-bar'
 import { TicketTableRow } from './ticket-table-row'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
-
-/* ---- Sort indicator & sortable header (defined outside component) ---- */
-
-const SortIcon = ({
-  column,
-  sortBy,
-  sortOrder,
-}: {
-  column: string
-  sortBy: string
-  sortOrder: 'asc' | 'desc'
-}) => {
-  if (sortBy !== column) return null
-  return sortOrder === 'asc' ? (
-    <ArrowUp size={14} className="ml-1 inline" />
-  ) : (
-    <ArrowDown size={14} className="ml-1 inline" />
-  )
-}
-
-const SortableHead = ({
-  column,
-  sortBy,
-  sortOrder,
-  onSort,
-  children,
-}: {
-  column: string
-  sortBy: string
-  sortOrder: 'asc' | 'desc'
-  onSort: (column: string) => void
-  children: React.ReactNode
-}) => (
-  <TableHead className="cursor-pointer select-none" onClick={() => onSort(column)}>
-    {children}
-    <SortIcon column={column} sortBy={sortBy} sortOrder={sortOrder} />
-  </TableHead>
-)
 
 export type TicketRow = {
   id: string
@@ -127,6 +90,9 @@ export const TicketListTable = ({
 
   const clearSelection = () => setSelectedIds(new Set())
 
+  /* Map server-side sortBy/sortOrder to SortableHeader props */
+  const currentDirection: SortDirection = sortOrder === 'asc' ? 'asc' : 'desc'
+
   return (
     <div>
       {selectedIds.size > 0 && (
@@ -149,42 +115,62 @@ export const TicketListTable = ({
                   aria-label="Select all tickets"
                 />
               </TableHead>
-              <SortableHead
-                column="sequence_number"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
+              <SortableHeader
+                label="ID"
+                sortKey="sequence_number"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
                 onSort={handleSort}
-              >
-                ID
-              </SortableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Status</TableHead>
-              <SortableHead
-                column="priority"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
+              />
+              <SortableHeader
+                label="Title"
+                sortKey="title"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
                 onSort={handleSort}
-              >
-                Priority
-              </SortableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Assignee</TableHead>
-              <SortableHead
-                column="due_date"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
+              />
+              <SortableHeader
+                label="Status"
+                sortKey="status"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
                 onSort={handleSort}
-              >
-                Due Date
-              </SortableHead>
-              <SortableHead
-                column="created_at"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
+              />
+              <SortableHeader
+                label="Priority"
+                sortKey="priority"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
                 onSort={handleSort}
-              >
-                Created
-              </SortableHead>
+              />
+              <SortableHeader
+                label="Type"
+                sortKey="type"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Assignee"
+                sortKey="assignee_name"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Due Date"
+                sortKey="due_date"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Created"
+                sortKey="created_at"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
+                onSort={handleSort}
+              />
             </TableRow>
           </TableHeader>
           <TableBody>

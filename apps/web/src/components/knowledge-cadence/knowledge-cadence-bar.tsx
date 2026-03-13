@@ -157,7 +157,7 @@ const PillarCard = ({ pillar, node }: PillarCardProps) => {
   return (
     <Link
       href={href}
-      aria-label={node ? `${meta.label}: ${node.title}` : `${meta.label} — no match`}
+      aria-label={node ? `${meta.label}: ${node.title}` : `${meta.label} — coming soon`}
       className="rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
     >
       <div
@@ -181,7 +181,7 @@ const PillarCard = ({ pillar, node }: PillarCardProps) => {
               {node.title}
             </p>
           ) : (
-            <p className="mt-2 text-xs italic text-[var(--color-text-tertiary)]">No match</p>
+            <p className="mt-2 text-xs italic text-[var(--color-text-tertiary)]">Coming soon</p>
           )}
         </div>
         {node && (
