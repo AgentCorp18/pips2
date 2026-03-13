@@ -3,7 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, CloudUpload, Loader2, Clock, ChevronDown, Lightbulb } from 'lucide-react'
+import {
+  ArrowLeft,
+  Check,
+  CloudUpload,
+  Download,
+  Loader2,
+  Clock,
+  ChevronDown,
+  Lightbulb,
+  X,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +22,7 @@ import type { ProductContext } from '@pips/shared'
 import { buildProductContext, STEP_CONTENT } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
+import { CreateTicketFromForm } from './create-ticket-from-form'
 import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
 import { cn } from '@/lib/utils'
@@ -32,6 +43,8 @@ type DataDrivenProps = {
   data: Record<string, unknown>
   /** Optional Zod schema — used to validate initialData and fall back to defaults on shape mismatch */
   schema?: ZodType<Record<string, unknown>>
+  /** 3.4: Callback to import sandbox data into form state */
+  onImportData?: (data: Record<string, unknown>) => void
   onSaveSuccess?: () => void
   onSave?: never
   isDirty?: never
@@ -116,6 +129,7 @@ export const FormShell = (props: FormShellProps) => {
           : 'idle'
 
   const isSandbox = 'projectId' in props && props.projectId === SANDBOX_PROJECT_ID
+  const onImportData = 'onImportData' in props ? props.onImportData : undefined
 
   /* Extract specific prop values to avoid stale-closure from `props` object reference */
   const onSave = 'onSave' in props ? props.onSave : undefined
@@ -237,6 +251,14 @@ export const FormShell = (props: FormShellProps) => {
             <div />
           )}
           <div className="flex items-center gap-3">
+            {/* 3.2: Create Ticket button — only in project mode */}
+            {!isSandbox && projectId && (
+              <CreateTicketFromForm
+                projectId={projectId}
+                stepNumber={stepNumber}
+                formTitle={title}
+              />
+            )}
             <FormViewToggle
               mode={viewMode}
               onToggle={() => setViewMode((m) => (m === 'edit' ? 'view' : 'edit'))}
@@ -258,6 +280,11 @@ export const FormShell = (props: FormShellProps) => {
             )}
           </div>
         </div>
+
+        {/* 3.4: Sandbox import banner — show when project form has sandbox data available */}
+        {!isSandbox && formType && onImportData && (
+          <SandboxImportBanner formType={formType} onImport={onImportData} />
+        )}
 
         {/* Form card */}
         <Card>
@@ -409,6 +436,69 @@ const AboutThisToolSection = ({ tips }: { tips: string[] }) => {
           </ul>
         </div>
       )}
+    </div>
+  )
+}
+
+/* ---- 3.4: Sandbox import banner ---- */
+
+const checkSandboxData = (formType: string): boolean => {
+  try {
+    return !!localStorage.getItem(`pips-sandbox-${formType}`)
+  } catch {
+    return false
+  }
+}
+
+const SandboxImportBanner = ({
+  formType,
+  onImport,
+}: {
+  formType: string
+  onImport: (data: Record<string, unknown>) => void
+}) => {
+  const [dismissed, setDismissed] = useState(false)
+  const hasSandboxData = checkSandboxData(formType)
+
+  if (dismissed || !hasSandboxData) return null
+
+  const handleImport = () => {
+    try {
+      const raw = localStorage.getItem(`pips-sandbox-${formType}`)
+      if (!raw) return
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      onImport(parsed)
+      setDismissed(true)
+      toast.success('Sandbox data imported successfully')
+    } catch {
+      toast.error('Failed to import sandbox data')
+    }
+  }
+
+  return (
+    <div
+      className="flex items-center justify-between rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary-subtle)] px-4 py-3"
+      data-testid="sandbox-import-banner"
+    >
+      <div className="flex items-center gap-2">
+        <Download size={14} className="text-[var(--color-primary)]" />
+        <span className="text-sm text-[var(--color-text-secondary)]">
+          You have sandbox data for this form.
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="xs" onClick={handleImport}>
+          Import
+        </Button>
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+          aria-label="Dismiss"
+        >
+          <X size={14} />
+        </button>
+      </div>
     </div>
   )
 }
