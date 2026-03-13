@@ -27,6 +27,14 @@ export type ProjectTemplateStep = {
   status: 'completed' | 'in_progress' | 'not_started'
 }
 
+export type ProjectTemplateTicket = {
+  title: string
+  description: string
+  status: 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'done'
+  priority: 'critical' | 'high' | 'medium' | 'low'
+  type: 'task' | 'bug' | 'improvement' | 'investigation'
+}
+
 export type ProjectTemplate = {
   id: string
   name: string
@@ -35,6 +43,7 @@ export type ProjectTemplate = {
   currentStep: string
   steps: ProjectTemplateStep[]
   forms: ProjectTemplateForm[]
+  tickets: ProjectTemplateTicket[]
 }
 
 const STEP_LIST: ProjectTemplateStep[] = [
@@ -575,6 +584,64 @@ const parkingLotSafety: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Replace burned-out parking lot lights with LED fixtures',
+      description:
+        'Audit all 22 pole lights and replace non-functional units with energy-efficient LED fixtures. Establish quarterly maintenance schedule.',
+      status: 'done',
+      priority: 'critical',
+      type: 'task',
+    },
+    {
+      title: 'Repaint lane markings and add pedestrian crosswalks',
+      description:
+        'Contract paving crew to repaint all lane lines, stop bars, and add three high-visibility zebra-striped pedestrian crossings.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Install speed bumps at lot entrance and building doors',
+      description:
+        'Install three speed bumps at key locations and post speed limit signage to reduce vehicle speed through the lot.',
+      status: 'done',
+      priority: 'high',
+      type: 'improvement',
+    },
+    {
+      title: 'Construct bollard-protected pedestrian walkway from overflow lot',
+      description:
+        'Install 180-foot dedicated pedestrian path with bollard separation from vehicle lanes and non-slip surface coating.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Add parking safety to new hire onboarding checklist',
+      description:
+        'Update onboarding materials to include parking lot safety rules and embed the new safety video in the onboarding portal.',
+      status: 'done',
+      priority: 'medium',
+      type: 'task',
+    },
+    {
+      title: 'Investigate drainage improvements to prevent winter ice',
+      description:
+        'Assess current drainage capacity in the overflow lot and recommend improvements to eliminate recurring icy patches during winter months.',
+      status: 'done',
+      priority: 'medium',
+      type: 'investigation',
+    },
+    {
+      title: 'Add parking lot to annual facilities safety audit scope',
+      description:
+        'Update the annual safety audit charter to formally include the parking lot, ensuring ongoing oversight as company headcount grows.',
+      status: 'in_review',
+      priority: 'medium',
+      type: 'improvement',
+    },
+  ],
 }
 
 /* ============================================================
@@ -1062,6 +1129,64 @@ const customerOnboarding: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Write standardized onboarding playbook with day-by-day task guide',
+      description:
+        'Document the end-to-end onboarding journey with day-by-day responsibilities for the CS team, including the day-1 kickoff agenda and integration setup steps.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Create pre-approved IT security questionnaire package',
+      description:
+        'Prepare a pre-filled SOC 2 summary and standard security questionnaire that Sales can share with customer IT teams before contract signing to eliminate security review delays.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Configure HubSpot onboarding pipeline with automated task reminders',
+      description:
+        'Set up 8-stage onboarding pipeline in HubSpot with automated email reminders to both the CS team and customer contacts at each stage transition.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Build self-service customer onboarding portal with guided setup wizard',
+      description:
+        'Develop a self-service portal where customers can complete account setup, configure integrations, and import their data without waiting on the CS team.',
+      status: 'done',
+      priority: 'critical',
+      type: 'improvement',
+    },
+    {
+      title: 'Add CSV data import tool to onboarding portal',
+      description:
+        'Implement a self-service CSV import tool so customers can migrate their existing data without requiring Engineering involvement for each migration.',
+      status: 'done',
+      priority: 'high',
+      type: 'improvement',
+    },
+    {
+      title: 'Investigate onboarding NPS drop for enterprise customers',
+      description:
+        'Enterprise customers with complex integrations still show lower onboarding NPS (54) versus SMB (76). Investigate whether the portal wizard handles enterprise edge cases adequately.',
+      status: 'done',
+      priority: 'medium',
+      type: 'investigation',
+    },
+    {
+      title: 'Expand portal to include live integration health monitoring',
+      description:
+        'Add an integration health dashboard to the portal so customers can self-diagnose connectivity issues without opening a support ticket.',
+      status: 'in_review',
+      priority: 'medium',
+      type: 'improvement',
+    },
+  ],
 }
 
 /* ============================================================
@@ -1422,6 +1547,56 @@ const manufacturingDefect: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Install automated stencil cleaning station and update interval to 500 prints',
+      description:
+        'Procure and install the DEK auto-wash unit on the SMT line and update SOPs to enforce the 500-print cleaning interval for the current solder paste supplier.',
+      status: 'done',
+      priority: 'critical',
+      type: 'task',
+    },
+    {
+      title: 'Enforce ECN gate for all material changes in MES workflow',
+      description:
+        'Update the MES engineering change notice workflow to require Quality Engineer sign-off before any material substitution is approved for production use.',
+      status: 'done',
+      priority: 'high',
+      type: 'improvement',
+    },
+    {
+      title: 'Deploy SPC control charts for paste volume and AOI pass rate',
+      description:
+        'Work with MES vendor to implement real-time Statistical Process Control charts for solder paste volume, component offset, and AOI pass rate on the shop floor.',
+      status: 'in_progress',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Investigate reflow oven profile validation for all active product families',
+      description:
+        'Audit reflow oven temperature profiles across all active board types and validate that profiles are correctly matched to current paste and component specifications.',
+      status: 'in_progress',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Build and install real-time defect rate dashboard on shop floor displays',
+      description:
+        'Configure shop floor TV dashboard showing live defect rate, SPC control chart status, and daily rework cost to give supervisors real-time visibility.',
+      status: 'todo',
+      priority: 'medium',
+      type: 'task',
+    },
+    {
+      title: 'Schedule pick-and-place nozzle PM at 200K placements',
+      description:
+        'Update the preventive maintenance schedule to replace pick-and-place nozzles every 200K placements instead of 500K to eliminate component offset defects.',
+      status: 'todo',
+      priority: 'medium',
+      type: 'improvement',
+    },
+  ],
 }
 
 /* ============================================================
@@ -1639,6 +1814,56 @@ const employeeTurnover: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Analyze exit interview data to validate top turnover drivers',
+      description:
+        'Review the last 24 months of exit interview summaries and categorize departure reasons to confirm that manager relationships and career path gaps are the primary drivers.',
+      status: 'done',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Benchmark compensation bands against current market data',
+      description:
+        'Conduct a market compensation survey across Engineering, Sales, and Operations to identify roles where pay is more than 10% below market median.',
+      status: 'done',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Design 30/60/90-day onboarding program with manager check-ins',
+      description:
+        'Create a structured new hire onboarding program with scheduled milestone check-ins at 30, 60, and 90 days to catch early disengagement signals.',
+      status: 'in_progress',
+      priority: 'critical',
+      type: 'improvement',
+    },
+    {
+      title: 'Develop manager effectiveness training curriculum',
+      description:
+        'Design and pilot a manager training program covering coaching skills, delivering feedback, and conducting effective 1:1s targeting the 60% of managers who hold fewer than two 1:1s per month.',
+      status: 'in_progress',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Create career path frameworks for all departments',
+      description:
+        'Document clear career progression criteria and leveling rubrics for all roles beyond Engineering, giving employees a visible growth roadmap.',
+      status: 'todo',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Implement quarterly engagement pulse survey with manager action requirements',
+      description:
+        'Launch a quarterly pulse survey tool and establish a process requiring managers to present action plans for teams scoring below threshold within 30 days.',
+      status: 'todo',
+      priority: 'medium',
+      type: 'improvement',
+    },
+  ],
 }
 
 /* ============================================================
@@ -1829,6 +2054,48 @@ const itHelpdeskResponse: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Audit top 30 ticket categories and resolution time by type',
+      description:
+        'Pull ServiceNow data to identify the 30 most common ticket categories and measure average resolution time for each, to prioritize knowledge base content and triage rules.',
+      status: 'done',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Build knowledge base articles for top 15 ticket categories',
+      description:
+        'Create step-by-step resolution guides in ServiceNow Knowledge for the 15 most frequent ticket types, starting with password resets, VPN issues, and MFA problems.',
+      status: 'todo',
+      priority: 'critical',
+      type: 'task',
+    },
+    {
+      title: 'Configure ServiceNow priority routing and ticket triage queues',
+      description:
+        'Set up multi-tier ticket queues in ServiceNow with automated routing rules that separate P1/P2 incidents from standard requests and assign to the appropriate agent group.',
+      status: 'todo',
+      priority: 'high',
+      type: 'improvement',
+    },
+    {
+      title: 'Revise Tier 1 resolution authority to include MFA resets and access provisioning',
+      description:
+        'Update the IT security policy to allow Tier 1 agents to resolve MFA resets and standard access provisioning requests without Tier 2 escalation.',
+      status: 'backlog',
+      priority: 'high',
+      type: 'improvement',
+    },
+    {
+      title: 'Investigate ServiceNow automation module for common ticket auto-resolution',
+      description:
+        'Evaluate the ServiceNow automation module to identify which ticket types (e.g., password resets, software installs) could be fully automated without agent involvement.',
+      status: 'backlog',
+      priority: 'medium',
+      type: 'investigation',
+    },
+  ],
 }
 
 /* ============================================================
@@ -1893,6 +2160,40 @@ const warehouseInventory: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Perform full cycle count and categorize discrepancy types',
+      description:
+        'Complete a comprehensive cycle count across all warehouse zones and classify each discrepancy as phantom inventory or unrecorded stock to quantify the split by location.',
+      status: 'done',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Identify top 5 root causes of receiving discrepancies',
+      description:
+        'Interview receiving staff and review the last 6 months of receiving discrepancy reports to identify whether errors originate at inbound scanning, put-away, or system entry.',
+      status: 'todo',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Investigate ERP inventory adjustment logs for unauthorized changes',
+      description:
+        'Audit the ERP adjustment log to identify users, frequencies, and justification codes for manual inventory adjustments over the past 12 months.',
+      status: 'todo',
+      priority: 'medium',
+      type: 'investigation',
+    },
+    {
+      title: 'Evaluate barcode scanning hardware in receiving dock',
+      description:
+        'Assess whether current barcode scanners in the receiving area are causing scan errors or skips that contribute to inbound inventory discrepancies.',
+      status: 'backlog',
+      priority: 'medium',
+      type: 'investigation',
+    },
+  ],
 }
 
 /* ============================================================
@@ -1909,6 +2210,40 @@ const patientWaitTime: ProjectTemplate = {
   currentStep: 'identify',
   steps: makeSteps(0),
   forms: [],
+  tickets: [
+    {
+      title: 'Collect 6-month ED throughput data by time of day and day of week',
+      description:
+        'Pull door-to-triage, triage-to-physician, and door-to-discharge times from the EMR system segmented by shift to identify peak congestion windows.',
+      status: 'backlog',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Define problem statement and assemble improvement team',
+      description:
+        'Formally document the door-to-physician time gap, identify team members from nursing, physician staff, and registration, and schedule the project kickoff meeting.',
+      status: 'backlog',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Benchmark peer ED wait times and identify best-practice facilities',
+      description:
+        'Research national ED benchmarks from CMS and ACEP and identify two to three peer facilities with door-to-physician times under 30 minutes for site learning.',
+      status: 'backlog',
+      priority: 'medium',
+      type: 'investigation',
+    },
+    {
+      title: 'Review LWBS (left without being seen) incident reports',
+      description:
+        'Analyze the last 12 months of LWBS events to understand timing patterns and whether patients who left correlate with specific shift staffing levels.',
+      status: 'backlog',
+      priority: 'medium',
+      type: 'investigation',
+    },
+  ],
 }
 
 /* ============================================================
@@ -2345,6 +2680,64 @@ const softwareReleaseCycle: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Parallelize CI pipeline across 8 GitHub Actions agents',
+      description:
+        'Refactor the CI configuration to use a matrix strategy across 8 agents with sharded test runs, targeting a reduction in build time from 48 minutes to under 10 minutes.',
+      status: 'done',
+      priority: 'critical',
+      type: 'improvement',
+    },
+    {
+      title: 'Integrate LaunchDarkly feature flags into all services',
+      description:
+        'Add the LaunchDarkly SDK to the codebase and migrate the first three features behind feature flags to enable zero-downtime rollouts and instant rollback capability.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Replace 3 manual release sign-offs with automated quality gate',
+      description:
+        'Configure CI to block deployments automatically unless test coverage is at or above 70%, all tests pass, and the Snyk security scan returns no high-severity findings.',
+      status: 'done',
+      priority: 'high',
+      type: 'improvement',
+    },
+    {
+      title: 'Write automated Playwright regression suite for 200 critical paths',
+      description:
+        'Create 200+ end-to-end tests covering authentication, checkout, and core user workflows, targeting full suite execution in under 12 minutes within the CI pipeline.',
+      status: 'done',
+      priority: 'critical',
+      type: 'task',
+    },
+    {
+      title: 'Align staging and production environments using Terraform IaC',
+      description:
+        'Define infrastructure-as-code for both staging and production environments to eliminate the database version drift that was causing staging-to-production failures.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Instrument DORA metrics dashboard in engineering reporting',
+      description:
+        'Add deployment frequency, lead time for changes, MTTR, and change failure rate to the monthly engineering retrospective dashboard.',
+      status: 'done',
+      priority: 'medium',
+      type: 'improvement',
+    },
+    {
+      title: 'Investigate expanding feature flag usage to A/B testing and gradual rollouts',
+      description:
+        'Evaluate using LaunchDarkly for customer-segment-specific feature rollouts and A/B experiments now that the SDK is embedded across all services.',
+      status: 'in_review',
+      priority: 'medium',
+      type: 'investigation',
+    },
+  ],
 }
 
 /* ============================================================
@@ -2561,6 +2954,56 @@ const energyConsumption: ProjectTemplate = {
       },
     },
   ],
+  tickets: [
+    {
+      title: 'Audit utility bills and BMS data to quantify energy use by building zone',
+      description:
+        'Analyze 24 months of utility bills alongside building management system logs to identify which zones and equipment categories account for the largest share of excess consumption.',
+      status: 'done',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Complete LED lighting retrofit across all remaining T8 fluorescent areas',
+      description:
+        'Replace the remaining 35% of T8 fluorescent fixtures with LED across all affected zones, targeting a 40% reduction in lighting energy draw.',
+      status: 'done',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Integrate occupancy sensors with BMS for automatic HVAC and lighting control',
+      description:
+        'Connect existing occupancy sensor data to the building management system to automatically reduce HVAC and lighting levels in unoccupied zones.',
+      status: 'in_progress',
+      priority: 'critical',
+      type: 'improvement',
+    },
+    {
+      title: 'Upgrade server room to hot aisle/cold aisle containment cooling',
+      description:
+        'Install hot aisle containment in the data center to reduce power usage effectiveness from the current 2.1 to the target of 1.4 or below.',
+      status: 'in_progress',
+      priority: 'high',
+      type: 'task',
+    },
+    {
+      title: 'Launch employee energy awareness campaign with floor-level dashboards',
+      description:
+        'Install energy consumption display screens on each floor and run a 90-day awareness campaign to reduce after-hours equipment usage by at least 20%.',
+      status: 'todo',
+      priority: 'medium',
+      type: 'task',
+    },
+    {
+      title: 'Evaluate east wing HVAC replacement with variable refrigerant flow system',
+      description:
+        'Obtain quotes for replacing the 14-year-old east wing HVAC units with high-efficiency VRF systems and build a capital ROI case for the next budget cycle.',
+      status: 'todo',
+      priority: 'medium',
+      type: 'investigation',
+    },
+  ],
 }
 
 /* ============================================================
@@ -2742,6 +3185,48 @@ const invoiceProcessing: ProjectTemplate = {
         rootCause:
           'The SAP AP automation modules are already licensed but were never implemented due to an untracked configuration project that stalled after a key employee departure. This represents an addressable gap — not a tooling gap.',
       },
+    },
+  ],
+  tickets: [
+    {
+      title: 'Quantify cost-per-invoice and identify top error sources',
+      description:
+        'Pull AP processing time logs and error reports from the ERP to calculate the exact cost per invoice and identify whether the highest error rates are in data entry, 3-way match failures, or approval routing.',
+      status: 'done',
+      priority: 'high',
+      type: 'investigation',
+    },
+    {
+      title: 'Assess current state of SAP AP automation module configuration',
+      description:
+        'Review the SAP system to determine exactly which automation modules are licensed, what was configured before the project stalled, and what remains to be completed.',
+      status: 'done',
+      priority: 'critical',
+      type: 'investigation',
+    },
+    {
+      title: 'Enforce PO-first procurement policy to reduce no-PO invoices',
+      description:
+        'Work with the Procurement Manager to mandate purchase orders before any goods or services are received, targeting a reduction of no-PO invoices from 42% to under 10%.',
+      status: 'todo',
+      priority: 'high',
+      type: 'improvement',
+    },
+    {
+      title: 'Complete SAP AP automation module configuration and OCR setup',
+      description:
+        'Re-engage the ERP administrator to resume and complete the SAP AP automation module configuration, including OCR invoice capture and automated 3-way match.',
+      status: 'backlog',
+      priority: 'critical',
+      type: 'task',
+    },
+    {
+      title: 'Clean vendor master data and remove duplicate or outdated records',
+      description:
+        'Audit the vendor master file to identify and merge the 18% of duplicate or outdated vendor records that are causing matching failures and manual intervention.',
+      status: 'backlog',
+      priority: 'medium',
+      type: 'task',
     },
   ],
 }
