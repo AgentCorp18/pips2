@@ -210,6 +210,7 @@ export const CriteriaMatrixForm = ({ projectId, initialData }: Props) => {
       title="Criteria Matrix"
       description="Score and rank solutions against weighted criteria to objectively select the best option."
       stepNumber={4}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >

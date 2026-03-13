@@ -227,7 +227,7 @@ const EmptyState = () => (
       <Button asChild variant="outline" className="gap-2" data-testid="empty-sample-project-link">
         <Link href="/dashboard">
           <Sparkles size={16} />
-          Explore the sample project
+          Create a sample project
         </Link>
       </Button>
     </div>

@@ -91,6 +91,7 @@ export const LessonsLearnedForm = ({ projectId, initialData }: Props) => {
       title="Lessons Learned"
       description="Document insights, successes, and areas for improvement from this project."
       stepNumber={6}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >

@@ -177,7 +177,24 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
       </div>
 
       {/* Board */}
-      <KanbanBoard initialTickets={boardTickets} />
+      {boardTickets.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] py-16">
+          <p className="mb-2 text-lg font-medium" style={{ color: 'var(--color-text-primary)' }}>
+            No tickets to display
+          </p>
+          <p className="mb-4 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            Create your first ticket to get started with the board view.
+          </p>
+          <Button asChild className="gap-2">
+            <Link href="/tickets/new">
+              <Plus size={16} />
+              Create Ticket
+            </Link>
+          </Button>
+        </div>
+      ) : (
+        <KanbanBoard initialTickets={boardTickets} />
+      )}
     </div>
   )
 }

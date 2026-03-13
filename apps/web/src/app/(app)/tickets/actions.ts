@@ -443,6 +443,7 @@ export const getTicketsForBoard = async (
     )
     .eq('org_id', orgId)
     .order('created_at', { ascending: false })
+    .limit(500)
 
   if (filters?.priority && filters.priority.length > 0) {
     query = query.in('priority', filters.priority)
@@ -519,9 +520,6 @@ export const bulkUpdateTickets = async (
   if (data.status) update.status = data.status
   if (data.priority) update.priority = data.priority
 
-  if (data.status === 'in_progress' || data.status === 'in_review') {
-    update.started_at = new Date().toISOString()
-  }
   if (data.status === 'done' || data.status === 'cancelled') {
     update.resolved_at = new Date().toISOString()
   }
@@ -536,6 +534,16 @@ export const bulkUpdateTickets = async (
     .update(update)
     .in('id', ticketIds)
     .eq('org_id', membership.org_id)
+
+  // Set started_at only on tickets that don't already have one
+  if (!updateError && (data.status === 'in_progress' || data.status === 'in_review')) {
+    await supabase
+      .from('tickets')
+      .update({ started_at: new Date().toISOString() })
+      .in('id', ticketIds)
+      .eq('org_id', membership.org_id)
+      .is('started_at', null)
+  }
 
   if (updateError) {
     console.error('Failed to bulk update tickets:', updateError.message)

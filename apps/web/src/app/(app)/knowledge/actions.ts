@@ -71,7 +71,6 @@ export const getContentBySlug = cache(
       .select('*')
       .eq('pillar', pillar)
       .eq('slug', slug)
-      .is('parent_id', null)
       .single()
 
     if (error) {

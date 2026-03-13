@@ -167,6 +167,7 @@ export const MilestoneTrackerForm = ({
       title="Milestone Tracker"
       description="Track progress against planned milestones and dates."
       stepNumber={5}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >
