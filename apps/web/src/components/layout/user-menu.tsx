@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
+import { User, Settings, LogOut, ChevronDown, ExternalLink } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,6 +120,16 @@ export const UserMenu = () => {
           <DropdownMenuItem className="cursor-pointer" onSelect={() => router.push('/settings')}>
             <Settings size={16} />
             Settings
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        {/* Marketing website */}
+        <DropdownMenuGroup>
+          <DropdownMenuItem className="cursor-pointer" onSelect={() => router.push('/')}>
+            <ExternalLink size={16} />
+            Visit Website
           </DropdownMenuItem>
         </DropdownMenuGroup>
 

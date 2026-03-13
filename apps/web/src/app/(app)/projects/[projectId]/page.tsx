@@ -88,7 +88,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
   const currentStepLabel = currentStepDef?.name ?? 'Unknown'
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[var(--content-max-width)] space-y-6">
       <ProjectOverviewClient
         projectId={project.id}
         currentStep={currentStepNum}

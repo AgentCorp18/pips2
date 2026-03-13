@@ -39,7 +39,7 @@ const CARDS: CardDef[] = [
     color: 'var(--color-step-2)',
     accentWhenPositive: '#EF4444',
     testId: 'stat-overdue',
-    href: '/tickets?status=overdue',
+    href: '/tickets?quick=overdue',
   },
   {
     key: 'completedThisMonth',
