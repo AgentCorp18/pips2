@@ -33,7 +33,7 @@ export const exportUserData = async (): Promise<DataExportResult> => {
         .from('project_forms')
         .select('id, step, form_type, title, data, created_at')
         .eq('created_by', user.id),
-      supabase.from('ticket_comments').select('id, content, created_at').eq('user_id', user.id),
+      supabase.from('comments').select('id, body, created_at').eq('author_id', user.id),
       supabase
         .from('notifications')
         .select('id, type, title, message, read, created_at')
