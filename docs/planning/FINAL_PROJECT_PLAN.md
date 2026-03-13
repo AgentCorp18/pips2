@@ -91,15 +91,15 @@
 **Entry:** At least 1 beta tester actively using the app
 **Exit Criteria:** 3+ active users, 10+ feedback items collected, NPS baseline established, no critical bugs unresolved for >48 hours
 
-| #   | Item                                 | Notes                                                                                                                    |
-| --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| 1   | **Instrument onboarding funnel**     | Track: signup → org creation → first project → first form → invite sent. Use existing `trackServerEvent` infrastructure. |
-| 2   | **Monitor Core Web Vitals**          | Vercel Speed Insights now unblocked by CSP fix. Watch CLS, LCP, INP weekly.                                              |
-| 3   | **Collect and triage user feedback** | Email or in-app. Create GitHub issues for each item. Classify as bug/feature/ux.                                         |
-| 4   | **Fix beta-reported issues**         | Aim for <48hr response on critical bugs, <1 week on UX issues.                                                           |
-| 5   | **Create incident response plan**    | Define severity levels, escalation path, communication template. Even a 1-page doc.                                      |
-| 6   | **Establish Lighthouse baselines**   | Run quarterly. Current estimates: Performance ~93, A11y ~90, SEO ~93, Best Practices ~90.                                |
-| 7   | **Add GDPR data export capability**  | Users must be able to download their data. Required before any EU marketing.                                             |
+| #   | Item                                 | Notes                                                                                                                                                      |
+| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Instrument onboarding funnel**     | Track: signup → org creation → first project → first form → invite sent. Use existing `trackServerEvent` infrastructure.                                   |
+| 2   | **Monitor Core Web Vitals**          | Vercel Speed Insights now unblocked by CSP fix. Watch CLS, LCP, INP weekly.                                                                                |
+| 3   | **Collect and triage user feedback** | Email or in-app. Create GitHub issues for each item. Classify as bug/feature/ux.                                                                           |
+| 4   | **Fix beta-reported issues**         | Aim for <48hr response on critical bugs, <1 week on UX issues.                                                                                             |
+| 5   | **Create incident response plan**    | Define severity levels, escalation path, communication template. Even a 1-page doc.                                                                        |
+| 6   | **Establish Lighthouse baselines**   | Run quarterly. Current estimates: Performance ~93, A11y ~90, SEO ~93, Best Practices ~90.                                                                  |
+| 7   | **Add GDPR data export capability**  | **COMPLETE** — "Download My Data" button on Settings > Security page. Exports JSON with profile, orgs, projects, tickets, forms, notifications, audit log. |
 
 ---
 
@@ -134,18 +134,18 @@
 
 ## Risk Register (Active)
 
-| #   | Risk                                                     | Severity | Mitigation                                            |
-| --- | -------------------------------------------------------- | -------- | ----------------------------------------------------- |
-| R1  | **No real users yet**                                    | HIGH     | P0: smoke test + beta tester onboarding               |
-| R2  | **Rate limiter ineffective — AI API cost exposure**      | HIGH     | P0: Anthropic cost cap. P1: Upstash Redis replacement |
-| R3  | **No billing** — no revenue path                         | MEDIUM   | Phase 9 after beta validation                         |
-| R4  | **GitHub PAT possibly leaked** (March 8)                 | CLOSED   | Old PAT revoked, verified clean                       |
-| R5  | **Documentation drift** — 15+ stale references           | CLOSED   | Doc refresh completed March 13 (PR #17)               |
-| R6  | **Legal exposure** — Privacy/Terms not attorney-reviewed | MEDIUM   | Phase 9: legal review                                 |
-| R7  | **E2E test reliability unknown**                         | MEDIUM   | P0: run full suite, document                          |
-| R8  | **No GDPR data export**                                  | MEDIUM   | Phase 8: build before EU marketing                    |
-| R9  | **Vercel Hobby limits** (45s serverless, bandwidth)      | LOW      | Monitor; upgrade to Pro when needed                   |
-| R10 | **jspdf v2 outdated** (v4 available)                     | LOW      | Defer until PDF issues reported                       |
+| #   | Risk                                                     | Severity | Mitigation                                                 |
+| --- | -------------------------------------------------------- | -------- | ---------------------------------------------------------- |
+| R1  | **No real users yet**                                    | HIGH     | P0: smoke test + beta tester onboarding                    |
+| R2  | **Rate limiter ineffective — AI API cost exposure**      | HIGH     | P0: Anthropic cost cap. P1: Upstash Redis replacement      |
+| R3  | **No billing** — no revenue path                         | MEDIUM   | Phase 9 after beta validation                              |
+| R4  | **GitHub PAT possibly leaked** (March 8)                 | CLOSED   | Old PAT revoked, verified clean                            |
+| R5  | **Documentation drift** — 15+ stale references           | CLOSED   | Doc refresh completed March 13 (PR #17)                    |
+| R6  | **Legal exposure** — Privacy/Terms not attorney-reviewed | MEDIUM   | Phase 9: legal review                                      |
+| R7  | **E2E test reliability unknown**                         | MEDIUM   | P0: run full suite, document                               |
+| R8  | **No GDPR data export**                                  | CLOSED   | Built: Settings > Security > Download My Data (2026-03-13) |
+| R9  | **Vercel Hobby limits** (45s serverless, bandwidth)      | LOW      | Monitor; upgrade to Pro when needed                        |
+| R10 | **jspdf v2 outdated** (v4 available)                     | LOW      | Defer until PDF issues reported                            |
 
 ---
 
