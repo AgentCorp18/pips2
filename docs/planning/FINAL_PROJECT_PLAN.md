@@ -73,7 +73,20 @@
 
 ---
 
-## Phase 8: Beta Monitoring (Beta + 30 days)
+## Phase 8a: UX & Methodology Clarity — COMPLETE (2026-03-13)
+
+**Implemented across PRs #14-#18:**
+
+| Sprint                        | Items                                                                                                                  | Status |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1. Make the Methodology Click | Step context banners, time estimates, form hierarchy, progress bar, start-here card, step warnings                     | DONE   |
+| 2. Content & Education        | 10 sample templates (56 forms, 57 tickets), common mistakes, facilitation guides, best practices, onboarding checklist | DONE   |
+| 3. Functionality Enhancements | Inter-form data flow, ticket creation from forms, template selector in project creation, sandbox import                | DONE   |
+| 4. Polish & Doc Refresh       | Completion celebrations, color audit, stepper progress, 4 docs refreshed                                               | DONE   |
+
+---
+
+## Phase 8b: Beta Monitoring (Beta + 30 days)
 
 **Entry:** At least 1 beta tester actively using the app
 **Exit Criteria:** 3+ active users, 10+ feedback items collected, NPS baseline established, no critical bugs unresolved for >48 hours
