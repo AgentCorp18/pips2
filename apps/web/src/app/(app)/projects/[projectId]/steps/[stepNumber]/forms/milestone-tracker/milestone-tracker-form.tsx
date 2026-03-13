@@ -23,6 +23,8 @@ import { cn } from '@/lib/utils'
 type Props = {
   projectId: string
   initialData: MilestoneTrackerData | null
+  /** Selected solution from Step 4 implementation plan, used as context */
+  selectedSolutionFromStep4?: string
 }
 
 type MilestoneStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
@@ -58,7 +60,11 @@ const statusConfig: Record<
   },
 }
 
-export const MilestoneTrackerForm = ({ projectId, initialData }: Props) => {
+export const MilestoneTrackerForm = ({
+  projectId,
+  initialData,
+  selectedSolutionFromStep4,
+}: Props) => {
   const [data, setData] = useState<MilestoneTrackerData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
 
@@ -164,6 +170,17 @@ export const MilestoneTrackerForm = ({ projectId, initialData }: Props) => {
       onSave={handleSave}
       isDirty={dirty}
     >
+      {selectedSolutionFromStep4 && (
+        <div
+          className="mb-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-3"
+          data-testid="step4-context-banner"
+        >
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-1">
+            Selected Solution (from Step 4)
+          </p>
+          <p className="text-sm text-[var(--color-text-secondary)]">{selectedSolutionFromStep4}</p>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Progress bar */}
         <div className="space-y-2">

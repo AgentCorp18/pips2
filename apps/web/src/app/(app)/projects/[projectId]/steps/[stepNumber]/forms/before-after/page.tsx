@@ -20,10 +20,21 @@ const BeforeAfterPage = async ({
 
   if (!user) redirect('/login')
 
-  const saved = await loadFormData(projectId, 6, 'before_after')
+  // Load before-after data + problem statement from Step 1 for context
+  const [saved, ps] = await Promise.all([
+    loadFormData(projectId, 6, 'before_after'),
+    loadFormData(projectId, 1, 'problem_statement'),
+  ])
   const initialData = (saved ?? null) as BeforeAfterData | null
+  const problemStatementFromStep1 = (ps?.problemStatement as string) ?? ''
 
-  return <BeforeAfterForm projectId={projectId} initialData={initialData} />
+  return (
+    <BeforeAfterForm
+      projectId={projectId}
+      initialData={initialData}
+      problemStatementFromStep1={problemStatementFromStep1}
+    />
+  )
 }
 
 export default BeforeAfterPage

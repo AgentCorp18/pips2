@@ -87,6 +87,8 @@ export const FormShell = (props: FormShellProps) => {
   })()
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+  // 4.1: Track whether this form has ever been saved in this session for first-save celebration
+  const hasBeenSavedRef = useRef(!!validatedInitialData)
   const [lastSaved, setLastSaved] = useState<string>(
     validatedInitialData ? JSON.stringify(validatedInitialData) : '',
   )
@@ -165,6 +167,15 @@ export const FormShell = (props: FormShellProps) => {
       if (result.success) {
         setSaveState('saved')
         setLastSaved(JSON.stringify(data))
+        // 4.1: First-save celebration for required forms
+        if (!hasBeenSavedRef.current && required) {
+          hasBeenSavedRef.current = true
+          const nextStepHint =
+            stepNumber < 6
+              ? ` Next up: continue with Step ${stepNumber} tools or advance to Step ${stepNumber + 1}.`
+              : ' You can now complete the evaluation.'
+          toast.success(`${title} saved!${nextStepHint}`, { duration: 5000 })
+        }
         onSaveSuccess?.()
         return true
       } else {

@@ -151,3 +151,48 @@ export const loadFormData = async (
 
   return (data?.data as Record<string, unknown>) ?? null
 }
+
+/**
+ * 3.1: Load related form data from prerequisite steps.
+ * Used for auto-populating fields (e.g., problem statement into fishbone).
+ */
+export const loadRelatedFormData = async (
+  projectId: string,
+  formType: string,
+): Promise<Record<string, unknown> | null> => {
+  // Define which forms pre-fill from which source
+  const PREFILL_MAP: Record<string, { step: number; sourceForm: string; fields: string[] }> = {
+    // Step 2 forms get problem statement from Step 1
+    fishbone: { step: 1, sourceForm: 'problem_statement', fields: ['problemStatement'] },
+    five_why: { step: 1, sourceForm: 'problem_statement', fields: ['problemStatement'] },
+    force_field: { step: 1, sourceForm: 'problem_statement', fields: ['problemStatement'] },
+    // Step 5 forms get selected solution from Step 4
+    milestone_tracker: {
+      step: 4,
+      sourceForm: 'implementation_plan',
+      fields: ['selectedSolution', 'tasks'],
+    },
+    // Step 6 forms get targets from Step 1
+    before_after: {
+      step: 1,
+      sourceForm: 'problem_statement',
+      fields: ['problemStatement', 'asIs', 'desired', 'gap'],
+    },
+  }
+
+  const mapping = PREFILL_MAP[formType]
+  if (!mapping) return null
+
+  const sourceData = await loadFormData(projectId, mapping.step, mapping.sourceForm)
+  if (!sourceData) return null
+
+  // Extract only the mapped fields
+  const result: Record<string, unknown> = {}
+  for (const field of mapping.fields) {
+    if (sourceData[field] !== undefined) {
+      result[field] = sourceData[field]
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : null
+}
