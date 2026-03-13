@@ -1,24 +1,17 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { PROJECT_TEMPLATES, getProjectTemplate } from '@pips/shared'
-import type { ProjectTemplate } from '@pips/shared'
+import { getProjectTemplate } from '@pips/shared'
 
 type SampleProjectResult = {
   projectId?: string
   error?: string
 }
 
-/** Create a pre-populated project from a template for new users to explore */
-export const createSampleProject = async (templateId?: string): Promise<SampleProjectResult> => {
-  const template: ProjectTemplate | undefined = templateId
-    ? getProjectTemplate(templateId)
-    : PROJECT_TEMPLATES[0]
-
-  if (!template) {
-    return { error: `Template "${templateId}" not found` }
-  }
-
+/** Create a pre-populated sample PIPS project for new users to explore */
+export const createSampleProject = async (
+  templateId: string = 'parking-lot-safety',
+): Promise<SampleProjectResult> => {
   const supabase = await createClient()
 
   const {
@@ -27,6 +20,11 @@ export const createSampleProject = async (templateId?: string): Promise<SamplePr
 
   if (!user) {
     return { error: 'You must be signed in' }
+  }
+
+  const template = getProjectTemplate(templateId)
+  if (!template) {
+    return { error: 'Template not found' }
   }
 
   // Get user's org
@@ -42,13 +40,13 @@ export const createSampleProject = async (templateId?: string): Promise<SamplePr
     return { error: 'You must belong to an organization' }
   }
 
-  // Create the project
+  // Create the sample project using the template data
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .insert({
       org_id: membership.org_id,
       title: template.name,
-      description: `Sample project: ${template.description}`,
+      description: template.description,
       owner_id: user.id,
       current_step: template.currentStep,
       status: 'active',
@@ -63,7 +61,7 @@ export const createSampleProject = async (templateId?: string): Promise<SamplePr
   const projectId = project.id
   const now = new Date().toISOString()
 
-  // Create project steps from template
+  // Create 6 project steps from the template step data
   const steps = template.steps.map((s) => ({
     project_id: projectId,
     step: s.step,
@@ -87,7 +85,7 @@ export const createSampleProject = async (templateId?: string): Promise<SamplePr
     role: 'lead',
   })
 
-  // Insert pre-filled forms from template
+  // Insert pre-filled forms from the template
   if (template.forms.length > 0) {
     const forms = template.forms.map((f) => ({
       project_id: projectId,
