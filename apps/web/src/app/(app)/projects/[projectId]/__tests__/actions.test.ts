@@ -74,6 +74,21 @@ describe('advanceStep', () => {
     fromResults = []
   })
 
+  it('returns error for invalid step number (too high)', async () => {
+    const result = await advanceStep('proj-1', 7)
+    expect(result).toEqual({ success: false, error: 'Invalid step number' })
+  })
+
+  it('returns error for invalid step number (too low)', async () => {
+    const result = await advanceStep('proj-1', 0)
+    expect(result).toEqual({ success: false, error: 'Invalid step number' })
+  })
+
+  it('returns error for non-integer step number', async () => {
+    const result = await advanceStep('proj-1', 2.5)
+    expect(result).toEqual({ success: false, error: 'Invalid step number' })
+  })
+
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
@@ -144,6 +159,22 @@ describe('advanceStep', () => {
     expect(result).toEqual({ success: true })
   })
 
+  it('returns error when advancing project current_step fails', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // from('projects').select().eq().single() -> project found
+      { data: { id: 'proj-1', org_id: 'org-1', current_step: 'identify' } },
+      // from('project_steps').update() -> step completed ok
+      { error: null },
+      // from('projects').update() -> fails to advance
+      { error: { message: 'DB error advancing' } },
+    ]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    const result = await advanceStep('proj-1', 1)
+    expect(result).toEqual({ success: false, error: 'Failed to advance to next step' })
+  })
+
   it('checks step.complete permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
@@ -164,6 +195,11 @@ describe('overrideStep', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+  })
+
+  it('returns error for invalid step number', async () => {
+    const result = await overrideStep('proj-1', 7)
+    expect(result).toEqual({ success: false, error: 'Invalid step number' })
   })
 
   it('returns error when user is not authenticated', async () => {
@@ -270,7 +306,7 @@ describe('updateProjectStatus', () => {
     fromResults = [{ data: { id: 'proj-1', org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
-    const result = await updateProjectStatus('proj-1', 'cancelled')
+    const result = await updateProjectStatus('proj-1', 'archived')
     expect(result).toEqual({
       success: false,
       error: 'Insufficient permissions to update project status',

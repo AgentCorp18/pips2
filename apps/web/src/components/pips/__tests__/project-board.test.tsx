@@ -78,7 +78,7 @@ describe('ProjectBoard', () => {
     expect(screen.getByTestId('project-board-column-active')).toBeInTheDocument()
     expect(screen.getByTestId('project-board-column-on_hold')).toBeInTheDocument()
     expect(screen.getByTestId('project-board-column-completed')).toBeInTheDocument()
-    expect(screen.getByTestId('project-board-column-cancelled')).toBeInTheDocument()
+    expect(screen.getByTestId('project-board-column-archived')).toBeInTheDocument()
   })
 
   it('renders column labels', () => {
@@ -86,7 +86,7 @@ describe('ProjectBoard', () => {
     expect(screen.getByText('Active')).toBeInTheDocument()
     expect(screen.getByText('On Hold')).toBeInTheDocument()
     expect(screen.getByText('Completed')).toBeInTheDocument()
-    expect(screen.getByText('Cancelled')).toBeInTheDocument()
+    expect(screen.getByText('Archived')).toBeInTheDocument()
   })
 
   it('shows correct count in column badges', () => {
@@ -94,7 +94,7 @@ describe('ProjectBoard', () => {
     expect(screen.getByTestId('project-board-count-active')).toHaveTextContent('1')
     expect(screen.getByTestId('project-board-count-on_hold')).toHaveTextContent('1')
     expect(screen.getByTestId('project-board-count-completed')).toHaveTextContent('1')
-    expect(screen.getByTestId('project-board-count-cancelled')).toHaveTextContent('0')
+    expect(screen.getByTestId('project-board-count-archived')).toHaveTextContent('0')
   })
 
   it('renders project names in the board', () => {

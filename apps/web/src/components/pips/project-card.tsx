@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<
   active: { label: 'Active', variant: 'default' },
   completed: { label: 'Completed', variant: 'outline' },
   on_hold: { label: 'On Hold', variant: 'secondary' },
-  cancelled: { label: 'Cancelled', variant: 'destructive' },
+  archived: { label: 'Archived', variant: 'destructive' },
 }
 
 export const ProjectCard = ({

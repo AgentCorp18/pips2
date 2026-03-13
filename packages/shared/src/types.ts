@@ -33,10 +33,17 @@ export type OrgRole = 'owner' | 'admin' | 'manager' | 'member' | 'viewer'
 export type PipsStep = 1 | 2 | 3 | 4 | 5 | 6
 
 /** Project status */
-export type ProjectStatus = 'active' | 'completed' | 'archived'
+export type ProjectStatus = 'draft' | 'active' | 'on_hold' | 'completed' | 'archived'
 
 /** Ticket priority */
-export type TicketPriority = 'low' | 'medium' | 'high' | 'critical'
+export type TicketPriority = 'none' | 'low' | 'medium' | 'high' | 'critical'
 
 /** Ticket status */
-export type TicketStatus = 'open' | 'in_progress' | 'review' | 'done' | 'blocked'
+export type TicketStatus =
+  | 'backlog'
+  | 'todo'
+  | 'in_progress'
+  | 'in_review'
+  | 'blocked'
+  | 'done'
+  | 'cancelled'

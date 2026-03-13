@@ -9,7 +9,7 @@ const STATUS_LABELS: Record<string, string> = {
   active: 'Active',
   completed: 'Completed',
   on_hold: 'On Hold',
-  cancelled: 'Cancelled',
+  archived: 'Archived',
 }
 
 const ProjectLayout = async ({

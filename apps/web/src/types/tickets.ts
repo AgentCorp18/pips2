@@ -25,7 +25,7 @@ export type PipsStepEnum =
   | 'identify'
   | 'analyze'
   | 'generate'
-  | 'select_and_plan'
+  | 'select_plan'
   | 'implement'
   | 'evaluate'
 
