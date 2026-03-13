@@ -21,7 +21,7 @@ const MilestoneTrackerPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 5, 'milestone_tracker')
-  const initialData = (saved?.data ?? null) as MilestoneTrackerData | null
+  const initialData = (saved ?? null) as MilestoneTrackerData | null
 
   return <MilestoneTrackerForm projectId={projectId} initialData={initialData} />
 }

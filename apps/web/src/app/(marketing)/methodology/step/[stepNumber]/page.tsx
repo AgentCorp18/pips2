@@ -1,8 +1,12 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, BookOpen } from 'lucide-react'
 import { PIPS_STEPS, STEP_CONTENT, type PipsStepNumber } from '@pips/shared'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 type StepPageProps = {
   params: Promise<{ stepNumber: string }>
@@ -74,6 +78,19 @@ const STEP_KEY_QUESTIONS: Record<number, string[]> = {
   ],
 }
 
+const renderInlineMarkdown = (text: string): ReactNode => {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i}>{part.slice(1, -1)}</em>
+    }
+    return part
+  })
+}
+
 export const generateMetadata = async ({ params }: StepPageProps): Promise<Metadata> => {
   const { stepNumber: raw } = await params
   const stepNumber = parseInt(raw, 10)
@@ -88,9 +105,13 @@ export const generateMetadata = async ({ params }: StepPageProps): Promise<Metad
   return {
     title,
     description,
+    alternates: {
+      canonical: `/methodology/step/${stepNumber}`,
+    },
     openGraph: {
       title: `PIPS ${title}`,
       description,
+      url: `${BASE_URL}/methodology/step/${stepNumber}`,
       type: 'article',
     },
     twitter: {
@@ -128,7 +149,7 @@ const StepPage = async ({ params }: StepPageProps) => {
   const richDescription = STEP_DESCRIPTIONS[stepNumber] ?? ''
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/methodology" className="hover:text-[var(--color-primary)]">
@@ -152,7 +173,9 @@ const StepPage = async ({ params }: StepPageProps) => {
           <h1 className="font-serif text-3xl font-bold text-[var(--color-text-primary)] md:text-4xl">
             Step {stepNumber}: {step.name}
           </h1>
-          <p className="mt-2 text-lg text-[var(--color-text-secondary)]">{content.objective}</p>
+          <p className="mt-2 text-lg text-[var(--color-text-secondary)]">
+            {renderInlineMarkdown(content.objective)}
+          </p>
         </div>
       </div>
 
@@ -197,7 +220,7 @@ const StepPage = async ({ params }: StepPageProps) => {
                 className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
                 style={{ backgroundColor: step.color }}
               />
-              {prompt}
+              {renderInlineMarkdown(prompt)}
             </li>
           ))}
         </ul>
@@ -239,7 +262,7 @@ const StepPage = async ({ params }: StepPageProps) => {
               className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
             >
               <span className="mt-1 text-[var(--color-primary)]">&#x2022;</span>
-              {tip}
+              {renderInlineMarkdown(tip)}
             </li>
           ))}
         </ul>
@@ -258,7 +281,7 @@ const StepPage = async ({ params }: StepPageProps) => {
               className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
             >
               <span className="mt-1 text-emerald-500">&#x2713;</span>
-              {bp}
+              {renderInlineMarkdown(bp)}
             </li>
           ))}
         </ul>
@@ -270,7 +293,7 @@ const StepPage = async ({ params }: StepPageProps) => {
           Facilitation Guide
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-          {content.methodology.facilitationGuide}
+          {renderInlineMarkdown(content.methodology.facilitationGuide)}
         </p>
       </section>
 
@@ -289,7 +312,7 @@ const StepPage = async ({ params }: StepPageProps) => {
               className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
             >
               <CheckCircle2 size={14} className="mt-0.5 shrink-0" style={{ color: step.color }} />
-              {criterion}
+              {renderInlineMarkdown(criterion)}
             </li>
           ))}
         </ul>
@@ -353,7 +376,7 @@ const StepPage = async ({ params }: StepPageProps) => {
           Try PIPS Free — Start With Step {stepNumber}
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

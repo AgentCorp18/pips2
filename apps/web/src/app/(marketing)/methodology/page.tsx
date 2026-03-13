@@ -30,7 +30,7 @@ const organizationJsonLd = {
 }
 
 export const metadata: Metadata = {
-  title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
+  title: 'The Methodology — 6 Steps to Continuous Process Improvement',
   description:
     'A principle-driven, 6-step framework for solving problems and driving continuous improvement. Identify problems, analyze root causes, generate solutions, and deliver measurable results.',
   alternates: {
@@ -40,6 +40,7 @@ export const metadata: Metadata = {
     title: 'The PIPS Methodology — 6 Steps to Continuous Process Improvement',
     description:
       'A principle-driven, 6-step framework for solving problems and driving continuous improvement in any team, any industry.',
+    url: `${BASE_URL}/methodology`,
     type: 'website',
   },
   twitter: {

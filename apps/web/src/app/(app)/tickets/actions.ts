@@ -78,6 +78,21 @@ export const createTicket = async (
     return { error: 'You do not have permission to create tickets' }
   }
 
+  // FIX 2: Validate assignee belongs to the same org
+  if (result.data.assignee_id) {
+    const { data: assigneeMembership } = await supabase
+      .from('org_members')
+      .select('user_id')
+      .eq('user_id', result.data.assignee_id)
+      .eq('org_id', membership.org_id)
+      .eq('status', 'active')
+      .maybeSingle()
+
+    if (!assigneeMembership) {
+      return { error: 'Assignee is not an active member of this organization' }
+    }
+  }
+
   const tagsArray = result.data.tags
     ? result.data.tags
         .split(',')
@@ -145,9 +160,10 @@ export const updateTicket = async (
   }
 
   // Verify ticket exists and user has access
+  // FIX 4: fetch started_at and status so we can avoid overwriting them
   const { data: ticket } = await supabase
     .from('tickets')
-    .select('org_id')
+    .select('org_id, started_at, status')
     .eq('id', ticketId)
     .single()
 
@@ -155,7 +171,27 @@ export const updateTicket = async (
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.update')
+  // FIX 1: wrap requirePermission in try/catch
+  try {
+    await requirePermission(ticket.org_id, 'ticket.update')
+  } catch {
+    return { error: 'You do not have permission to update tickets' }
+  }
+
+  // FIX 2: Validate assignee belongs to the same org
+  if (result.data.assignee_id) {
+    const { data: assigneeMembership } = await supabase
+      .from('org_members')
+      .select('user_id')
+      .eq('user_id', result.data.assignee_id)
+      .eq('org_id', ticket.org_id)
+      .eq('status', 'active')
+      .maybeSingle()
+
+    if (!assigneeMembership) {
+      return { error: 'Assignee is not an active member of this organization' }
+    }
+  }
 
   // Build update payload, strip empty strings to null
   const update: Record<string, unknown> = {}
@@ -170,12 +206,16 @@ export const updateTicket = async (
   if (d.due_date !== undefined) update.due_date = d.due_date || null
   if (d.tags !== undefined) update.tags = d.tags
 
-  // Track started_at / resolved_at
-  if (d.status === 'in_progress' || d.status === 'in_review') {
+  // FIX 4: Only set started_at if ticket doesn't already have one
+  if ((d.status === 'in_progress' || d.status === 'in_review') && !ticket.started_at) {
     update.started_at = new Date().toISOString()
   }
+  // FIX 4: Set resolved_at when transitioning TO done/cancelled, clear when transitioning AWAY
   if (d.status === 'done' || d.status === 'cancelled') {
     update.resolved_at = new Date().toISOString()
+  } else if (d.status !== undefined) {
+    // Transitioning away from done/cancelled — clear resolved_at
+    update.resolved_at = null
   }
 
   const { error: updateError } = await supabase.from('tickets').update(update).eq('id', ticketId)
@@ -225,7 +265,12 @@ export const deleteTicket = async (ticketId: string): Promise<TicketActionState>
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.delete')
+  // FIX 1: wrap requirePermission in try/catch
+  try {
+    await requirePermission(ticket.org_id, 'ticket.delete')
+  } catch {
+    return { error: 'You do not have permission to delete tickets' }
+  }
 
   const { error: deleteError } = await supabase.from('tickets').delete().eq('id', ticketId)
 
@@ -243,6 +288,12 @@ export const deleteTicket = async (ticketId: string): Promise<TicketActionState>
    ============================================================ */
 
 export const getTickets = async (orgId: string, rawFilters?: Record<string, unknown>) => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return { tickets: [], total: 0 }
+  }
+
   const filters = ticketFiltersSchema.parse(rawFilters ?? {})
 
   const supabase = await createClient()
@@ -290,9 +341,11 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
     query = query.ilike('title', `%${escaped}%`)
   }
 
-  // Sorting
+  // FIX 5: For priority sort, skip .order() in Supabase and sort in JS instead
   const ascending = filters.sort_order === 'asc'
-  query = query.order(filters.sort_by, { ascending })
+  if (filters.sort_by !== 'priority') {
+    query = query.order(filters.sort_by, { ascending })
+  }
 
   // Pagination
   const from = (filters.page - 1) * filters.per_page
@@ -306,7 +359,25 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
     return { tickets: [], total: 0 }
   }
 
-  return { tickets: data ?? [], total: count ?? 0 }
+  let tickets = data ?? []
+
+  // FIX 5: Sort by priority ordinal in JS
+  if (filters.sort_by === 'priority') {
+    const priorityOrder: Record<string, number> = {
+      critical: 0,
+      high: 1,
+      medium: 2,
+      low: 3,
+      none: 4,
+    }
+    tickets = [...tickets].sort((a, b) => {
+      const aOrd = priorityOrder[(a as Record<string, unknown>).priority as string] ?? 4
+      const bOrd = priorityOrder[(b as Record<string, unknown>).priority as string] ?? 4
+      return ascending ? aOrd - bOrd : bOrd - aOrd
+    })
+  }
+
+  return { tickets, total: count ?? 0 }
 }
 
 /* ============================================================
@@ -352,6 +423,12 @@ export const getTicketsForBoard = async (
     type?: string[]
   },
 ) => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return []
+  }
+
   const supabase = await createClient()
 
   let query = supabase
@@ -431,7 +508,12 @@ export const bulkUpdateTickets = async (
     return { error: 'You must belong to an organization' }
   }
 
-  await requirePermission(membership.org_id, 'ticket.update')
+  // FIX 1: wrap requirePermission in try/catch
+  try {
+    await requirePermission(membership.org_id, 'ticket.update')
+  } catch {
+    return { error: 'You do not have permission to update tickets' }
+  }
 
   const update: Record<string, unknown> = {}
   if (data.status) update.status = data.status
@@ -442,6 +524,11 @@ export const bulkUpdateTickets = async (
   }
   if (data.status === 'done' || data.status === 'cancelled') {
     update.resolved_at = new Date().toISOString()
+  }
+
+  // FIX 3: Guard against empty update
+  if (Object.keys(update).length === 0) {
+    return { error: 'No fields to update' }
   }
 
   const { error: updateError } = await supabase
@@ -554,7 +641,11 @@ export const setParentTicket = async (
     return { error: 'Tickets must belong to the same organization' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.update')
+  try {
+    await requirePermission(ticket.org_id, 'ticket.update')
+  } catch {
+    return { error: 'Insufficient permissions' }
+  }
 
   // Helper to fetch a ticket's parent_id (breaks TS circular inference)
   const fetchParentId = async (id: string): Promise<string | null> => {
@@ -636,7 +727,11 @@ export const removeParentTicket = async (ticketId: string): Promise<TicketAction
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.update')
+  try {
+    await requirePermission(ticket.org_id, 'ticket.update')
+  } catch {
+    return { error: 'Insufficient permissions' }
+  }
 
   const previousParentId = ticket.parent_id
 
@@ -688,7 +783,12 @@ export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActi
     return { error: 'You must belong to an organization' }
   }
 
-  await requirePermission(membership.org_id, 'ticket.delete')
+  // FIX 1: wrap requirePermission in try/catch
+  try {
+    await requirePermission(membership.org_id, 'ticket.delete')
+  } catch {
+    return { error: 'You do not have permission to delete tickets' }
+  }
 
   const { error: deleteError } = await supabase
     .from('tickets')

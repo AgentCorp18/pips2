@@ -57,6 +57,10 @@ vi.mock('@/lib/supabase/admin', () => ({
   })),
 }))
 
+vi.mock('@/lib/permissions', () => ({
+  requirePermission: vi.fn().mockResolvedValue(undefined),
+}))
+
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }))

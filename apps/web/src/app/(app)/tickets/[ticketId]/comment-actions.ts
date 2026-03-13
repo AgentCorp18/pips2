@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { createCommentSchema, updateCommentSchema } from '@/lib/validations'
+import { hasPermission } from '@pips/shared'
+import type { OrgRole } from '@pips/shared'
 
 /* ============================================================
    Types
@@ -115,7 +117,7 @@ export const updateComment = async (
   // Verify ownership
   const { data: comment } = await supabase
     .from('comments')
-    .select('author_id, ticket_id')
+    .select('author_id, ticket_id, org_id')
     .eq('id', commentId)
     .single()
 
@@ -124,7 +126,18 @@ export const updateComment = async (
   }
 
   if (comment.author_id !== user.id) {
-    return { error: 'You can only edit your own comments' }
+    // Allow admins and owners to edit any comment
+    const { data: membership } = await supabase
+      .from('org_members')
+      .select('role')
+      .eq('org_id', comment.org_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const role = membership?.role as OrgRole | undefined
+    if (!role || !hasPermission(role, 'ticket.delete')) {
+      return { error: 'You can only edit your own comments' }
+    }
   }
 
   const mentions = extractMentions(result.data.body)
@@ -165,7 +178,7 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
 
   const { data: comment } = await supabase
     .from('comments')
-    .select('author_id, ticket_id')
+    .select('author_id, ticket_id, org_id')
     .eq('id', commentId)
     .single()
 
@@ -174,7 +187,18 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
   }
 
   if (comment.author_id !== user.id) {
-    return { error: 'You can only delete your own comments' }
+    // Allow admins and owners to delete any comment
+    const { data: membership } = await supabase
+      .from('org_members')
+      .select('role')
+      .eq('org_id', comment.org_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const role = membership?.role as OrgRole | undefined
+    if (!role || !hasPermission(role, 'ticket.delete')) {
+      return { error: 'You can only delete your own comments' }
+    }
   }
 
   const { error: deleteError } = await supabase.from('comments').delete().eq('id', commentId)
@@ -196,6 +220,14 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
 
 export const getComments = async (ticketId: string) => {
   const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return []
+  }
 
   const { data, error } = await supabase
     .from('comments')

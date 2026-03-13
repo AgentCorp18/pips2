@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/layout/empty-state'
 import type { NotificationFilterKey } from './notification-filter-bar'
 
 export const metadata: Metadata = {
-  title: 'Notifications - PIPS',
+  title: 'Notifications',
   description: 'Your notifications and updates',
 }
 

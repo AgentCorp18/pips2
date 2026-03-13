@@ -42,9 +42,13 @@ export const generateMetadata = async ({ params }: ChapterPageProps): Promise<Me
   return {
     title,
     description,
+    alternates: {
+      canonical: `/book/${chapterSlug}`,
+    },
     openGraph: {
       title,
       description,
+      url: `${BASE_URL}/book/${chapterSlug}`,
       type: 'article',
     },
     twitter: {
@@ -114,7 +118,7 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
       <JsonLd data={articleJsonLd} />
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
@@ -133,7 +137,9 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
         <div>
           {index >= 2 && (
             <p className="text-sm font-medium text-[var(--color-text-tertiary)]">
-              Chapter {index - 1}
+              {chapter.chapter.startsWith('appendix')
+                ? `Appendix ${chapter.chapter.replace('appendix-', '').toUpperCase()}`
+                : `Chapter ${index - 1}`}
             </p>
           )}
           <h1 className="font-serif text-3xl font-bold text-[var(--color-text-primary)] md:text-4xl">
@@ -280,7 +286,7 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
           Back to Table of Contents
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

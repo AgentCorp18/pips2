@@ -1,12 +1,29 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { PIPS_STEPS, STEP_CONTENT } from '@pips/shared'
 import { TOOL_DETAILS } from './_tool-details'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 type ToolPageProps = {
   params: Promise<{ toolSlug: string }>
+}
+
+const renderInlineMarkdown = (text: string): ReactNode => {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i}>{part.slice(1, -1)}</em>
+    }
+    return part
+  })
 }
 
 /** Find a form definition by its slugified type */
@@ -31,20 +48,25 @@ export const generateMetadata = async ({ params }: ToolPageProps): Promise<Metad
   }
 
   const detail = TOOL_DETAILS[toolSlug]
-  const title = `${result.form.name} — PIPS Process Improvement Tool`
+  const pageTitle = `${result.form.name} — Process Improvement Tool`
+  const ogTitle = `${result.form.name} — PIPS Process Improvement Tool`
   const description = detail?.seoDescription ?? result.form.description
 
   return {
-    title,
+    title: pageTitle,
     description,
+    alternates: {
+      canonical: `/methodology/tools/${toolSlug}`,
+    },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
+      url: `${BASE_URL}/methodology/tools/${toolSlug}`,
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: ogTitle,
       description,
     },
   }
@@ -63,7 +85,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
   const detail = TOOL_DETAILS[toolSlug]
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/methodology" className="hover:text-[var(--color-primary)]">
@@ -123,7 +145,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
                 className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
               >
                 <span className="mt-1 text-[var(--color-primary)]">&#x2022;</span>
-                {item}
+                {renderInlineMarkdown(item)}
               </li>
             ))}
           </ul>
@@ -148,7 +170,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
                 <div>
                   <p className="text-sm font-medium text-[var(--color-text-primary)]">{s.title}</p>
                   <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">
-                    {s.description}
+                    {renderInlineMarkdown(s.description)}
                   </p>
                 </div>
               </li>
@@ -165,7 +187,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
             {detail.example.scenario}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-            {detail.example.walkthrough}
+            {renderInlineMarkdown(detail.example.walkthrough)}
           </p>
         </section>
       )}
@@ -184,7 +206,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
                 className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
               >
                 <span className="mt-1 text-emerald-500">&#x2713;</span>
-                {tip}
+                {renderInlineMarkdown(tip)}
               </li>
             ))}
           </ul>
@@ -197,7 +219,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
           Facilitation Guide
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-          {stepContent.methodology.facilitationGuide}
+          {renderInlineMarkdown(stepContent.methodology.facilitationGuide)}
         </p>
       </section>
 
@@ -254,7 +276,7 @@ const ToolPage = async ({ params }: ToolPageProps) => {
           Back to Step {stepNumber}: {stepContent.title}
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

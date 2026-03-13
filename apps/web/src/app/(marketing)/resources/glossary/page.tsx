@@ -2,21 +2,28 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { getGlossaryLetters, getTermsByLetter } from './_glossary-data'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'PIPS Glossary — Process Improvement Terms & Definitions',
+  title: 'Glossary — Process Improvement Terms & Definitions',
   description:
-    'A comprehensive glossary of process improvement and problem solving terms used in the PIPS methodology. Definitions, related tools, and step context for 35+ key concepts.',
+    'A comprehensive glossary of process improvement and problem solving terms used in the PIPS methodology. Definitions, related tools, and step context for 40+ key concepts.',
+  alternates: {
+    canonical: '/resources/glossary',
+  },
   openGraph: {
     title: 'PIPS Glossary — Process Improvement Terms & Definitions',
     description:
-      'Definitions, related tools, and step context for 35+ process improvement terms used in the PIPS methodology.',
+      'Definitions, related tools, and step context for 40+ process improvement terms used in the PIPS methodology.',
+    url: `${BASE_URL}/resources/glossary`,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'PIPS Glossary — Process Improvement Terms & Definitions',
-    description: 'Definitions, related tools, and step context for 35+ process improvement terms.',
+    description: 'Definitions, related tools, and step context for 40+ process improvement terms.',
   },
 }
 
@@ -41,7 +48,7 @@ const GlossaryPage = () => {
   const termsByLetter = getTermsByLetter()
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
       {/* Header */}
       <section className="text-center">
         <h1 className="font-serif text-4xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-5xl">
@@ -138,7 +145,7 @@ const GlossaryPage = () => {
           Get Started Free
         </Link>
       </section>
-    </div>
+    </main>
   )
 }
 

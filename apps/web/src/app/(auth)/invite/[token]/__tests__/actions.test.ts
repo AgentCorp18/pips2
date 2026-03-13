@@ -504,7 +504,9 @@ describe('acceptInvitation', () => {
           expires_at: futureDate(),
         },
       },
-      // from('org_members').select().eq().eq().single() -> no existing member
+      // from('org_members').select().eq(org_id).eq(user_id).single() -> no existing member in this org
+      { data: null },
+      // from('org_members').select().eq(user_id).limit(1).single() -> no membership in any org
       { data: null },
       // from('org_members').insert() -> success
       { data: null, error: null },
@@ -533,7 +535,9 @@ describe('acceptInvitation', () => {
           expires_at: futureDate(),
         },
       },
-      // no existing member
+      // no existing member in this org
+      { data: null },
+      // no membership in any org
       { data: null },
       // insert fails
       { error: { message: 'DB constraint violation' } },
@@ -544,6 +548,37 @@ describe('acceptInvitation', () => {
     expect(result).toEqual({
       success: false,
       error: 'Failed to join the organization. Please try again.',
+    })
+  })
+
+  it('returns error when user is already a member of another org', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'user@example.com' } },
+    })
+
+    adminResults = [
+      // invitation
+      {
+        data: {
+          id: 'inv-1',
+          org_id: 'org-2',
+          email: 'user@example.com',
+          role: 'member',
+          status: 'pending',
+          expires_at: futureDate(),
+        },
+      },
+      // not a member of org-2 specifically
+      { data: null },
+      // but IS a member of another org
+      { data: { id: 'other-membership-1' } },
+    ]
+
+    const result = await acceptInvitation('token-abc')
+
+    expect(result).toEqual({
+      success: false,
+      error: 'You are already a member of an organization. Multi-org support is coming soon.',
     })
   })
 })

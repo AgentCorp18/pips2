@@ -21,7 +21,7 @@ const LessonsLearnedPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 6, 'lessons_learned')
-  const initialData = (saved?.data ?? null) as LessonsLearnedData | null
+  const initialData = (saved ?? null) as LessonsLearnedData | null
 
   return <LessonsLearnedForm projectId={projectId} initialData={initialData} />
 }

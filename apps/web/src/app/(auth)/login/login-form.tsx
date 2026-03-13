@@ -21,7 +21,12 @@ const initialState: AuthActionState = {}
 export const LoginForm = () => {
   const [state, formAction, isPending] = useActionState(login, initialState)
   const searchParams = useSearchParams()
+  // `next` is set by middleware when redirecting unauthenticated users.
+  // `redirect` is set by invite links and other in-app redirects.
+  const nextParam = searchParams.get('next')
   const redirectParam = searchParams.get('redirect')
+  const errorParam = searchParams.get('error')
+  const isProtectedRedirect = !!nextParam
 
   return (
     <Card>
@@ -29,15 +34,33 @@ export const LoginForm = () => {
         <h1 className="sr-only">Sign In</h1>
         <CardTitle className="text-center text-xl">Welcome back</CardTitle>
         <CardDescription className="text-center">
-          Sign in to your account to continue
+          {isProtectedRedirect
+            ? 'Sign in to access that page'
+            : 'Sign in to your account to continue'}
         </CardDescription>
       </CardHeader>
 
       <CardContent>
         <form action={formAction} className="flex flex-col gap-4">
-          {redirectParam && <input type="hidden" name="redirect" value={redirectParam} />}
+          {nextParam && <input type="hidden" name="redirect" value={nextParam} />}
+          {!nextParam && redirectParam && (
+            <input type="hidden" name="redirect" value={redirectParam} />
+          )}
+          {errorParam && !state.error && (
+            <div
+              role="alert"
+              className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
+              style={{
+                backgroundColor: 'var(--color-error-subtle)',
+                color: 'var(--color-error)',
+              }}
+            >
+              Authentication failed. Please try signing in again.
+            </div>
+          )}
           {state.error && (
             <div
+              role="alert"
               className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
               style={{
                 backgroundColor: 'var(--color-error-subtle)',
@@ -58,6 +81,7 @@ export const LoginForm = () => {
               autoComplete="email"
               required
               disabled={isPending}
+              defaultValue={state.email ?? ''}
               aria-invalid={!!state.fieldErrors?.email}
               aria-describedby={state.fieldErrors?.email ? 'email-error' : undefined}
             />

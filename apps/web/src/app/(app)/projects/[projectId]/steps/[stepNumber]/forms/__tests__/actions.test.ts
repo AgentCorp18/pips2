@@ -79,13 +79,16 @@ describe('saveFormData', () => {
   it('returns success when upsert succeeds', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // Call 0: from('projects').select('org_id') -> project found
-      { data: { org_id: 'org-1' } },
+      // Call 0: from('projects').select('org_id, current_step') -> project found
+      { data: { org_id: 'org-1', current_step: 2 } },
       // Call 1: from('project_forms').upsert() -> success
       { error: null },
     ]
 
-    const result = await saveFormData(VALID_PROJECT_ID, 2, 'fishbone', { categories: [] })
+    const result = await saveFormData(VALID_PROJECT_ID, 2, 'fishbone', {
+      problemStatement: '',
+      categories: [],
+    })
     expect(result).toEqual({ success: true })
   })
 
@@ -103,8 +106,8 @@ describe('saveFormData', () => {
   it('returns generic error message when upsert fails (no internal details leaked)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // Call 0: from('projects').select('org_id') -> project found
-      { data: { org_id: 'org-1' } },
+      // Call 0: from('projects').select('org_id, current_step') -> project found
+      { data: { org_id: 'org-1', current_step: 1 } },
       // Call 1: from('project_forms').upsert() -> fails
       { error: { message: 'duplicate key violation' } },
     ]
@@ -116,26 +119,35 @@ describe('saveFormData', () => {
   it('can save different form types', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // Call 0: from('projects').select('org_id') -> project found
-      { data: { org_id: 'org-1' } },
+      // Call 0: from('projects').select('org_id, current_step') -> project found
+      { data: { org_id: 'org-1', current_step: 3 } },
       // Call 1: from('project_forms').upsert() -> success
       { error: null },
     ]
 
-    const result = await saveFormData(VALID_PROJECT_ID, 3, 'brainstorming', { ideas: ['idea1'] })
+    const result = await saveFormData(VALID_PROJECT_ID, 3, 'brainstorming', {
+      ideas: [],
+      selectedIdeas: [],
+      eliminatedIdeas: [],
+    })
     expect(result).toEqual({ success: true })
   })
 
   it('can save form data for step 6', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // Call 0: from('projects').select('org_id') -> project found
-      { data: { org_id: 'org-1' } },
+      // Call 0: from('projects').select('org_id, current_step') -> project found
+      { data: { org_id: 'org-1', current_step: 6 } },
       // Call 1: from('project_forms').upsert() -> success
       { error: null },
     ]
 
-    const result = await saveFormData(VALID_PROJECT_ID, 6, 'lessons_learned', { notes: 'good' })
+    const result = await saveFormData(VALID_PROJECT_ID, 6, 'lessons_learned', {
+      wentWell: [],
+      improvements: [],
+      actionItems: [],
+      keyTakeaways: '',
+    })
     expect(result).toEqual({ success: true })
   })
 
@@ -162,6 +174,72 @@ describe('saveFormData', () => {
       'not-an-object' as unknown as Record<string, unknown>,
     )
     expect(result).toEqual({ success: false, error: 'Invalid input' })
+  })
+
+  it('returns error when form data fails form-specific schema validation', async () => {
+    // lessons_learned requires wentWell, improvements, actionItems, keyTakeaways
+    const result = await saveFormData(VALID_PROJECT_ID, 6, 'lessons_learned', {
+      unexpectedField: true,
+    })
+    expect(result).toEqual({ success: false, error: 'Invalid form data' })
+  })
+
+  it('gracefully saves when form type has no schema entry (unknown known type)', async () => {
+    // root_cause is in the enum but not in FORM_SCHEMAS — should pass through
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1', current_step: 2 } }, { error: null }]
+
+    const result = await saveFormData(VALID_PROJECT_ID, 2, 'root_cause', { anything: 'goes' })
+    expect(result).toEqual({ success: true })
+  })
+
+  it('returns error when stepNumber is greater than project current_step', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // Project is only on step 1
+      { data: { org_id: 'org-1', current_step: 1 } },
+    ]
+
+    const result = await saveFormData(VALID_PROJECT_ID, 3, 'brainstorming', {
+      ideas: [],
+      selectedIdeas: [],
+      eliminatedIdeas: [],
+    })
+    expect(result).toEqual({ success: false, error: 'Cannot save form data for a future step' })
+  })
+
+  it('allows saving the current step', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1', current_step: 2 } }, { error: null }]
+
+    const result = await saveFormData(VALID_PROJECT_ID, 2, 'fishbone', {
+      problemStatement: '',
+      categories: [],
+    })
+    expect(result).toEqual({ success: true })
+  })
+
+  it('allows saving a previous step', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1', current_step: 3 } }, { error: null }]
+
+    const result = await saveFormData(VALID_PROJECT_ID, 1, 'problem_statement', {})
+    expect(result).toEqual({ success: true })
+  })
+
+  it('allows saving when project has no current_step (graceful degradation)', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // current_step is null/missing
+      { data: { org_id: 'org-1' } },
+      { error: null },
+    ]
+
+    const result = await saveFormData(VALID_PROJECT_ID, 2, 'fishbone', {
+      problemStatement: '',
+      categories: [],
+    })
+    expect(result).toEqual({ success: true })
   })
 })
 

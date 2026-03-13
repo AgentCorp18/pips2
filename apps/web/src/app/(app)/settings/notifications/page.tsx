@@ -4,7 +4,7 @@ import { getNotificationPreferences } from './actions'
 import { NotificationPreferencesForm } from './notification-preferences-form'
 
 export const metadata: Metadata = {
-  title: 'Notification Preferences - PIPS',
+  title: 'Notification Preferences',
   description: 'Manage which notifications you receive',
 }
 

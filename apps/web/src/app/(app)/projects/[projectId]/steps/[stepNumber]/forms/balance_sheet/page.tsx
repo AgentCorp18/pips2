@@ -21,7 +21,7 @@ const BalanceSheetPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 6, 'balance_sheet')
-  const initialData = (saved?.data ?? null) as BalanceSheetData | null
+  const initialData = (saved ?? null) as BalanceSheetData | null
 
   return <BalanceSheetForm projectId={projectId} initialData={initialData} />
 }

@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { PIPS_STEPS } from '@pips/shared'
 import { findTermBySlug, GLOSSARY_TERMS } from '../_glossary-data'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 type TermPageProps = {
   params: Promise<{ term: string }>
@@ -33,20 +36,25 @@ export const generateMetadata = async ({ params }: TermPageProps): Promise<Metad
     return { title: 'Term Not Found' }
   }
 
-  const title = `${glossaryTerm.term} — PIPS Glossary`
+  const pageTitle = `${glossaryTerm.term} — Glossary`
+  const ogTitle = `${glossaryTerm.term} — PIPS Glossary`
   const description = glossaryTerm.definition
 
   return {
-    title,
+    title: pageTitle,
     description,
+    alternates: {
+      canonical: `/resources/glossary/${slug}`,
+    },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
+      url: `${BASE_URL}/resources/glossary/${slug}`,
       type: 'article',
     },
     twitter: {
       card: 'summary',
-      title,
+      title: ogTitle,
       description,
     },
   }
@@ -71,7 +79,7 @@ const TermPage = async ({ params }: TermPageProps) => {
     .filter((t): t is NonNullable<typeof t> => t !== null)
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/resources" className="hover:text-[var(--color-primary)]">
@@ -220,7 +228,7 @@ const TermPage = async ({ params }: TermPageProps) => {
           Back to Glossary
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

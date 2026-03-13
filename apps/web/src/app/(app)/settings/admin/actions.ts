@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getUserOrg } from '@/lib/permissions'
+import { hasPermission } from '@pips/shared'
 import type { OrgRole } from '@pips/shared'
 
 export type AdminMember = {
@@ -45,7 +46,7 @@ export const getAdminData = async () => {
   if (!membership) return null
 
   const role = membership.role as OrgRole
-  if (role !== 'owner' && role !== 'admin') return null
+  if (!hasPermission(role, 'org.members.manage')) return null
 
   const orgId = membership.org_id as string
   const supabase = await createClient()

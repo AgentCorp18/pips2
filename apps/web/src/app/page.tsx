@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     title: 'PIPS — Transform How Your Team Solves Problems',
     description:
       'A 6-step methodology embedded in project management software. Guide your team from problem identification through measurable results.',
+    url: `${BASE_URL}/`,
     type: 'website',
   },
   twitter: {
@@ -64,17 +65,19 @@ const webApplicationJsonLd = {
 
 export const HomePage = () => {
   return (
-    <main id="main-content" className="min-h-screen">
-      <JsonLd data={webApplicationJsonLd} />
+    <>
       <LandingNav />
-      <HeroSection />
-      <ProblemSolutionSection />
-      <MethodologySection />
-      <FeaturesSection />
-      <TrustSection />
-      <CtaSection />
+      <main id="main-content" className="min-h-screen">
+        <JsonLd data={webApplicationJsonLd} />
+        <HeroSection />
+        <ProblemSolutionSection />
+        <MethodologySection />
+        <FeaturesSection />
+        <TrustSection />
+        <CtaSection />
+      </main>
       <LandingFooter />
-    </main>
+    </>
   )
 }
 

@@ -26,13 +26,13 @@ type Props = {
   initialData: BalanceSheetData | null
 }
 
-const defaultData: BalanceSheetData = {
+const createDefaultData = (): BalanceSheetData => ({
   gains: [{ id: crypto.randomUUID(), description: '', impact: 'medium', evidence: '' }],
   losses: [{ id: crypto.randomUUID(), description: '', impact: 'medium', mitigation: '' }],
   observations: [{ id: crypto.randomUUID(), description: '', category: '' }],
   summary: '',
   recommendation: '',
-}
+})
 
 const impactColors: Record<string, string> = {
   high: 'text-[var(--color-error)]',
@@ -47,14 +47,12 @@ const recommendationLabels: Record<string, string> = {
 }
 
 export const BalanceSheetForm = ({ projectId, initialData }: Props) => {
-  const [data, setData] = useState<BalanceSheetData>(initialData ?? defaultData)
+  const [data, setData] = useState<BalanceSheetData>(() => initialData ?? createDefaultData())
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
 
   const update = (next: BalanceSheetData) => {
     setData(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
@@ -145,7 +143,6 @@ export const BalanceSheetForm = ({ projectId, initialData }: Props) => {
       stepNumber={6}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <BalanceSheetFields
         data={data}

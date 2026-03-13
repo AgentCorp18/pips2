@@ -44,7 +44,7 @@ export const HeroSection = () => {
               >
                 {step.number}
               </div>
-              <span className="hidden text-xs font-medium text-white/60 md:block">{step.name}</span>
+              <span className="hidden text-xs font-medium text-white/80 md:block">{step.name}</span>
             </div>
           ))}
         </div>

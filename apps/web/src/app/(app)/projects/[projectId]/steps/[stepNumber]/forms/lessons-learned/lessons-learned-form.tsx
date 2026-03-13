@@ -36,13 +36,11 @@ const defaultData: LessonsLearnedData = {
 export const LessonsLearnedForm = ({ projectId, initialData }: Props) => {
   const [data, setData] = useState<LessonsLearnedData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
   const takeawaysRef = useRef<HTMLTextAreaElement>(null)
 
   const update = (next: LessonsLearnedData) => {
     setData(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
@@ -95,7 +93,6 @@ export const LessonsLearnedForm = ({ projectId, initialData }: Props) => {
       stepNumber={6}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <LessonsLearnedFields
         data={data}

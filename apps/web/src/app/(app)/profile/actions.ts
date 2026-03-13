@@ -83,6 +83,9 @@ export const updateAvatarUrl = async (avatarUrl: string): Promise<ProfileActionS
     if (parsed.hostname !== expected.hostname) {
       return { error: 'Avatar URL must be from the application storage' }
     }
+    if (!parsed.pathname.startsWith('/storage/v1/object/public/avatars/')) {
+      return { error: 'Invalid avatar URL path' }
+    }
   } catch {
     return { error: 'Invalid avatar URL' }
   }

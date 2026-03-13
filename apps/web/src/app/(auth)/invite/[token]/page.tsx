@@ -12,7 +12,7 @@ import { getInvitation } from './actions'
 import { InviteResponse } from './invite-response'
 
 export const metadata: Metadata = {
-  title: 'Accept Invitation - PIPS',
+  title: 'Accept Invitation',
   description: 'Accept an invitation to join an organization on PIPS',
 }
 

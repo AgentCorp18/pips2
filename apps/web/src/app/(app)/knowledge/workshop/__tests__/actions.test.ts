@@ -357,10 +357,35 @@ describe('setCurrentModule', () => {
   })
 
   it('advances to a specific module', async () => {
-    fromResults = [{ data: null, error: null }]
+    // First query: fetch session modules for bounds check
+    // Second query: update current_module_index
+    fromResults = [
+      { data: { modules: [{}, {}, {}, {}, {}] }, error: null },
+      { data: null, error: null },
+    ]
 
     const result = await setCurrentModule(VALID_UUID, 3)
     expect(result.success).toBe(true)
+  })
+
+  it('returns error when session is not found', async () => {
+    fromResults = [{ data: null, error: { message: 'Not found' } }]
+
+    const result = await setCurrentModule(VALID_UUID, 0)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toBe('Session not found')
+    }
+  })
+
+  it('returns error when moduleIndex is out of range', async () => {
+    fromResults = [{ data: { modules: [{}, {}] }, error: null }]
+
+    const result = await setCurrentModule(VALID_UUID, 5)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('out of range')
+    }
   })
 
   it('rejects invalid sessionId', async () => {

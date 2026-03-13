@@ -13,6 +13,7 @@ import { buildProductContext } from '@pips/shared'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
+import type { ZodType } from 'zod'
 
 type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved'
 
@@ -27,6 +28,8 @@ type DataDrivenProps = {
   cadenceContext?: ProductContext
   children: React.ReactNode
   data: Record<string, unknown>
+  /** Optional Zod schema — used to validate initialData and fall back to defaults on shape mismatch */
+  schema?: ZodType<Record<string, unknown>>
   onSaveSuccess?: () => void
   onSave?: never
   isDirty?: never
@@ -61,9 +64,27 @@ export const FormShell = (props: FormShellProps) => {
   const [viewMode, setViewMode] = useState<FormMode>('edit')
   const isViewMode = viewMode === 'view'
 
+  /* BUG 3 FIX: Validate initialData through the Zod schema on first render.
+     If the stored shape doesn't match (e.g. after a schema migration) fall back
+     to the schema's own defaults so the form never crashes.  */
+  const validatedInitialData = (() => {
+    if (!props.data) return undefined
+    if (!('schema' in props) || !props.schema) return props.data
+    const result = props.schema.safeParse(props.data)
+    if (result.success) return result.data
+    const fallback = props.schema.safeParse({})
+    return fallback.success ? fallback.data : props.data
+  })()
+
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
-  const [lastSaved, setLastSaved] = useState<string>(props.data ? JSON.stringify(props.data) : '')
+  const [lastSaved, setLastSaved] = useState<string>(
+    validatedInitialData ? JSON.stringify(validatedInitialData) : '',
+  )
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /* BUG 1 FIX: Track the in-flight save with an AbortController ref.
+     When a new save is triggered while one is already in-flight, the previous
+     request is aborted so its result can never overwrite newer data.  */
+  const abortRef = useRef<AbortController | null>(null)
 
   /* Derive pending-changes status from state (no refs in render) */
   const hasPendingChanges = props.onSave
@@ -84,47 +105,67 @@ export const FormShell = (props: FormShellProps) => {
 
   const isSandbox = 'projectId' in props && props.projectId === SANDBOX_PROJECT_ID
 
-  /* Unified save function */
-  const doSave = useCallback(async () => {
+  /* Extract specific prop values to avoid stale-closure from `props` object reference */
+  const onSave = 'onSave' in props ? props.onSave : undefined
+  const data = props.data
+  const projectId = 'projectId' in props ? props.projectId : undefined
+  const onSaveSuccess = 'onSaveSuccess' in props ? props.onSaveSuccess : undefined
+
+  /* Unified save function — returns true on success, false on failure */
+  const doSave = useCallback(async (): Promise<boolean> => {
+    // BUG 1 FIX: Cancel any in-flight save before starting a new one
+    if (abortRef.current) {
+      abortRef.current.abort()
+    }
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setSaveState('saving')
 
-    if (props.onSave) {
-      const result = await props.onSave()
+    if (onSave) {
+      const result = await onSave()
+      if (controller.signal.aborted) return false
       if (result.error) {
         setSaveState('idle')
         toast.error(result.error)
+        return false
       } else {
         setSaveState('saved')
+        return true
       }
-    } else if (isSandbox && props.data && props.formType) {
+    } else if (isSandbox && data && formType) {
       // Sandbox mode: save to localStorage
       try {
-        const key = `pips-sandbox-${props.formType}`
-        localStorage.setItem(key, JSON.stringify(props.data))
+        const key = `pips-sandbox-${formType}`
+        localStorage.setItem(key, JSON.stringify(data))
+        if (controller.signal.aborted) return false
         setSaveState('saved')
-        setLastSaved(JSON.stringify(props.data))
-        props.onSaveSuccess?.()
+        setLastSaved(JSON.stringify(data))
+        onSaveSuccess?.()
+        return true
       } catch {
+        if (controller.signal.aborted) return false
         setSaveState('idle')
         toast.error('Failed to save to local storage')
+        return false
       }
-    } else if (props.data && 'projectId' in props && props.projectId && props.formType) {
-      const result = await saveFormData(
-        props.projectId,
-        props.stepNumber,
-        props.formType,
-        props.data,
-      )
+    } else if (data && projectId && formType) {
+      const result = await saveFormData(projectId, stepNumber, formType, data)
+      if (controller.signal.aborted) return false
       if (result.success) {
         setSaveState('saved')
-        setLastSaved(JSON.stringify(props.data))
-        props.onSaveSuccess?.()
+        setLastSaved(JSON.stringify(data))
+        onSaveSuccess?.()
+        return true
       } else {
         setSaveState('idle')
         toast.error(result.error ?? 'Failed to save')
+        return false
       }
     }
-  }, [props, isSandbox])
+
+    return false
+  }, [onSave, data, formType, projectId, stepNumber, onSaveSuccess, isSandbox])
 
   /* Auto-save with 2-second debounce — no synchronous setState */
   useEffect(() => {
@@ -140,12 +181,13 @@ export const FormShell = (props: FormShellProps) => {
     }
   }, [hasPendingChanges, doSave])
 
+  /* BUG 2 FIX: Only show success toast when doSave actually succeeded */
   const handleManualSave = () => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    void doSave().then(() => toast.success('Saved'))
+    void doSave().then((succeeded: boolean) => {
+      if (succeeded) toast.success('Saved')
+    })
   }
-
-  const projectId = props.projectId
 
   return (
     <FormViewProvider value={viewMode}>

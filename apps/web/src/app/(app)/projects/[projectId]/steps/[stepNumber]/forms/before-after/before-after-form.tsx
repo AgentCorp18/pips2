@@ -43,12 +43,10 @@ const calcImprovement = (before: string, after: string, unit: string): string =>
 export const BeforeAfterForm = ({ projectId, initialData }: Props) => {
   const [data, setData] = useState<BeforeAfterData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
 
   const update = (next: BeforeAfterData) => {
     setData(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
@@ -111,7 +109,6 @@ export const BeforeAfterForm = ({ projectId, initialData }: Props) => {
       stepNumber={6}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <BeforeAfterFields
         data={data}

@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { TrainingExercise } from '../training-exercise'
 
 vi.mock('@/app/(app)/training/exercise-actions', () => ({
+  checkAnswer: vi.fn(),
   completeExercise: vi.fn(),
   completeModule: vi.fn(),
 }))

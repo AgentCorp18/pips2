@@ -31,7 +31,7 @@ export const CtaSection = () => {
           Ready to improve how your team improves?
         </h2>
 
-        <p className="mb-9 text-[1.0625rem] leading-relaxed text-white/60">
+        <p className="mb-9 text-[1.0625rem] leading-relaxed text-white/80">
           Start free — no credit card required. Explore the full 6-step methodology and see how PIPS
           can transform your improvement process.
         </p>

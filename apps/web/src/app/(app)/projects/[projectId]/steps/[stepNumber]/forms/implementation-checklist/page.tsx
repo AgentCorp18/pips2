@@ -21,7 +21,7 @@ const ImplementationChecklistPage = async ({
   if (!user) redirect('/login')
 
   const saved = await loadFormData(projectId, 5, 'implementation_checklist')
-  const initialData = (saved?.data ?? null) as ImplementationChecklistData | null
+  const initialData = (saved ?? null) as ImplementationChecklistData | null
 
   return <ImplementationChecklistForm projectId={projectId} initialData={initialData} />
 }

@@ -8,15 +8,22 @@ import {
   type TemplateCategory,
 } from './_template-data'
 import { TemplateCard } from './_template-card'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'Free PIPS Templates — Process Improvement Worksheets & Tools',
+  title: 'Free Templates — Process Improvement Worksheets & Tools',
   description:
     'Download free process improvement templates for every step of the PIPS methodology: Problem Statements, Fishbone Diagrams, RACI Charts, Criteria Matrices, and more.',
+  alternates: {
+    canonical: '/resources/templates',
+  },
   openGraph: {
     title: 'Free PIPS Templates — Process Improvement Worksheets & Tools',
     description:
       'Download free templates for the 6-step PIPS methodology. Problem Statements, Fishbone Diagrams, RACI Charts, and more.',
+    url: `${BASE_URL}/resources/templates`,
     type: 'website',
   },
   twitter: {
@@ -40,7 +47,7 @@ const TemplatesPage = () => {
   const grouped = getTemplatesByCategory()
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-5xl px-6 py-16">
       {/* Breadcrumbs */}
       <nav className="mb-8 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
         <Link href="/resources" className="hover:text-[var(--color-primary)]">
@@ -172,7 +179,7 @@ const TemplatesPage = () => {
           Back to Resources
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 

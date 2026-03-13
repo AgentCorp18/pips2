@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
+import { FORM_SCHEMAS } from '@/lib/form-schemas'
 
 export type FormActionResult = {
   success: boolean
@@ -50,6 +51,16 @@ export const saveFormData = async (
   if (!parsed.success) {
     return { success: false, error: 'Invalid input' }
   }
+
+  // FIX 1: Form-specific schema validation (graceful degradation for unknown types)
+  const formSchema = FORM_SCHEMAS[formType]
+  if (formSchema) {
+    const formResult = formSchema.safeParse(data)
+    if (!formResult.success) {
+      return { success: false, error: 'Invalid form data' }
+    }
+  }
+
   const supabase = await createClient()
 
   const {
@@ -63,12 +74,17 @@ export const saveFormData = async (
   // Verify project exists and user belongs to the project's org
   const { data: project } = await supabase
     .from('projects')
-    .select('org_id')
+    .select('org_id, current_step')
     .eq('id', projectId)
     .single()
 
   if (!project) {
     return { success: false, error: 'Project not found' }
+  }
+
+  // FIX 2: Step navigation access control — block writes to future steps
+  if (project.current_step != null && stepNumber > project.current_step) {
+    return { success: false, error: 'Cannot save form data for a future step' }
   }
 
   // Check permission — saving form data requires data.view (member+)

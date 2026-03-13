@@ -4,7 +4,7 @@ import { getProfile } from './actions'
 import { ProfileForm } from './profile-form'
 
 export const metadata: Metadata = {
-  title: 'Profile - PIPS',
+  title: 'Profile',
   description: 'Manage your user profile and avatar',
 }
 

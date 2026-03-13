@@ -4,7 +4,7 @@ import { getAdminData } from './actions'
 import { AdminDashboard } from './admin-dashboard'
 
 export const metadata: Metadata = {
-  title: 'Admin - PIPS',
+  title: 'Admin',
   description: 'Organization administration dashboard',
 }
 

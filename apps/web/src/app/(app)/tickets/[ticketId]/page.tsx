@@ -31,7 +31,7 @@ export const generateMetadata = async ({ params }: TicketDetailPageProps): Promi
   const ticket = await getTicket(ticketId)
 
   return {
-    title: ticket ? `${ticket.title} - PIPS` : 'Ticket Not Found',
+    title: ticket ? ticket.title : 'Ticket Not Found',
   }
 }
 

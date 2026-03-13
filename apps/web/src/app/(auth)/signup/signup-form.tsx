@@ -38,6 +38,7 @@ export const SignupForm = () => {
           {redirectParam && <input type="hidden" name="redirect" value={redirectParam} />}
           {state.error && (
             <div
+              role="alert"
               className="rounded-[var(--radius-md)] px-4 py-3 text-sm"
               style={{
                 backgroundColor: 'var(--color-error-subtle)',
@@ -136,6 +137,18 @@ export const SignupForm = () => {
           <Button type="submit" className="mt-2 w-full" disabled={isPending}>
             {isPending ? 'Creating account...' : 'Create account'}
           </Button>
+
+          <p className="text-center text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            By creating an account, you agree to our{' '}
+            <Link href="/terms" className="underline hover:no-underline">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="underline hover:no-underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </form>
       </CardContent>
 

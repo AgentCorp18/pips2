@@ -85,12 +85,10 @@ const genId = () => `opt_${Date.now()}_${nextId++}`
 export const PairedComparisonsForm = ({ projectId, initialData }: Props) => {
   const [data, setData] = useState<PairedComparisonsData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
 
   const update = useCallback((next: PairedComparisonsData) => {
     setData(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }, [])
 
   const handleSave = useCallback(async () => {
@@ -161,7 +159,6 @@ export const PairedComparisonsForm = ({ projectId, initialData }: Props) => {
       stepNumber={4}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <PairedComparisonsFields
         data={data}

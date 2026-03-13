@@ -418,6 +418,111 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     relatedTerms: ['root-cause-analysis', 'five-why-analysis', 'fishbone-diagram'],
     category: 'concept',
   },
+  {
+    term: 'Accountability',
+    slug: 'accountability',
+    definition: 'The obligation of an individual or team to own the outcome of a task or decision.',
+    longDescription:
+      'In PIPS, accountability is operationalized through the RACI Chart, where exactly one person is designated Accountable (A) for each task — meaning they own the outcome regardless of who does the work. Clear accountability eliminates the "I thought someone else was handling it" failure mode that undermines implementation. Without accountability, implementation plans become wish lists.',
+    relatedStep: 4,
+    relatedTools: ['raci'],
+    relatedTerms: ['raci-chart', 'implementation-plan'],
+    category: 'concept',
+  },
+  {
+    term: 'Change Management',
+    slug: 'change-management',
+    definition:
+      'The structured approach to transitioning individuals and teams from a current state to a desired future state.',
+    longDescription:
+      'Change management addresses the human side of process improvement — the resistance, uncertainty, and behavioral shifts required to make a new solution stick. In PIPS, Force Field Analysis surfaces the restraining forces that must be addressed for adoption to succeed. Without deliberate change management, technically correct solutions often fail because people revert to old habits.',
+    relatedStep: 5,
+    relatedTools: ['force-field', 'implementation-plan'],
+    relatedTerms: ['force-field-analysis', 'driving-forces', 'implementation-plan'],
+    category: 'concept',
+  },
+  {
+    term: 'Driving Forces',
+    slug: 'driving-forces',
+    definition: 'The forces pushing a system toward change or improvement.',
+    longDescription:
+      'Driving forces are one side of Force Field Analysis. They represent the pressures, motivations, and enablers that support moving from the current state to the desired state — such as leadership support, regulatory requirements, or customer complaints. Understanding driving forces helps a team leverage momentum and identify allies for the change effort.',
+    relatedStep: 2,
+    relatedTools: ['force-field'],
+    relatedTerms: ['force-field-analysis', 'change-management'],
+    category: 'concept',
+  },
+  {
+    term: 'List Reduction',
+    slug: 'list-reduction',
+    definition:
+      'A technique to narrow a large set of options to a manageable shortlist using rapid group filtering.',
+    longDescription:
+      'List reduction is used in Step 2 (Analyze) or Step 4 (Select & Plan) when a group has generated more options than can be evaluated in depth. Common approaches include multi-voting (dot voting), "must-have" filters, and paired elimination. The goal is not to select the winner but to remove clear non-starters so the team can focus analytical energy on the most promising options.',
+    relatedStep: 2,
+    relatedTools: ['weighted-voting'],
+    relatedTerms: ['dot-voting', 'weighted-voting', 'convergent-thinking'],
+    category: 'tool',
+  },
+  {
+    term: 'Return on Investment (ROI)',
+    slug: 'roi',
+    definition: 'A financial ratio comparing the net benefit of an improvement to its total cost.',
+    longDescription:
+      'ROI is calculated as (Net Benefit / Total Cost) × 100 and expressed as a percentage. In PIPS, Cost-Benefit Analysis produces the ROI figure that helps leaders justify resource allocation. A positive ROI means the improvement pays for itself; the payback period shows how quickly. ROI is the single most persuasive metric when presenting an improvement proposal to executive stakeholders.',
+    relatedStep: 4,
+    relatedTools: ['cost-benefit'],
+    relatedTerms: ['cost-benefit-analysis', 'implementation-plan'],
+    category: 'concept',
+  },
+  {
+    term: 'Silent Brainstorming',
+    slug: 'silent-brainstorming',
+    definition:
+      'An idea generation technique where participants write ideas independently before sharing, preventing groupthink.',
+    longDescription:
+      'Silent brainstorming separates the generation phase from the sharing phase. Each participant writes their ideas privately — on sticky notes, worksheets, or digital tools — before any discussion occurs. This prevents the anchoring and conformity effects of verbal brainstorming, where early ideas disproportionately shape what others contribute. Brainwriting 6-3-5 is the most structured form of silent brainstorming.',
+    relatedStep: 3,
+    relatedTools: ['brainwriting', 'brainstorming'],
+    relatedTerms: ['brainwriting', 'brainstorming', 'divergent-thinking'],
+    category: 'tool',
+  },
+  {
+    term: 'Six-M Categories',
+    slug: 'six-m-categories',
+    definition:
+      'The six cause categories of a Fishbone Diagram: Man, Machine, Method, Material, Measurement, Mother Nature.',
+    longDescription:
+      'The Six-M Categories provide a structured framework for organizing potential causes on a Fishbone Diagram. Man covers people and skills; Machine covers equipment and technology; Method covers processes and procedures; Material covers inputs and supplies; Measurement covers data collection and metrics; Mother Nature covers environmental factors. Using all six categories prevents teams from fixating on the most obvious cause type.',
+    relatedStep: 2,
+    relatedTools: ['fishbone'],
+    relatedTerms: ['fishbone-diagram', 'root-cause-analysis'],
+    category: 'concept',
+  },
+  {
+    term: 'Waste',
+    slug: 'waste',
+    definition:
+      'Any activity that consumes time, resources, or effort without creating value for the customer.',
+    longDescription:
+      'Waste is the central target of Lean methodology and a key concept in PIPS problem analysis. Common waste types include overproduction, waiting, unnecessary transport, over-processing, excess inventory, unnecessary motion, and defects. Identifying and eliminating waste is often the goal of a PIPS project in operational contexts. Waste analysis starts with mapping the current process and asking at each step: does this create value?',
+    relatedStep: 2,
+    relatedTools: ['fishbone', 'checksheet'],
+    relatedTerms: ['lean', 'root-cause-analysis', 'as-is-state'],
+    category: 'concept',
+  },
+  {
+    term: 'Weighted Voting',
+    slug: 'weighted-voting',
+    definition:
+      'A prioritization method where participants distribute a fixed number of votes across options to reveal group preferences.',
+    longDescription:
+      'Weighted voting (also called multi-voting or dot voting) is used in PIPS to narrow down long lists of potential causes or solution ideas. Each participant receives a set number of votes and can distribute them freely — including placing multiple votes on one option. Silent voting is critical to prevent anchoring. The items with the most votes rise to the top for deeper analysis or selection.',
+    relatedStep: 2,
+    relatedTools: ['weighted-voting'],
+    relatedTerms: ['dot-voting', 'list-reduction', 'convergent-thinking'],
+    category: 'tool',
+  },
 ]
 
 /** Get all unique first letters for the alphabetical index */

@@ -39,12 +39,10 @@ const ratingLabels: Record<number, string> = {
 export const EvaluationForm = ({ projectId, initialData }: Props) => {
   const [data, setData] = useState<EvaluationData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
-  const [saveVersion, setSaveVersion] = useState(0)
 
   const update = (next: EvaluationData) => {
     setData(next)
     setDirty(true)
-    setSaveVersion((v) => v + 1)
   }
 
   const handleSave = useCallback(async () => {
@@ -69,7 +67,6 @@ export const EvaluationForm = ({ projectId, initialData }: Props) => {
       stepNumber={6}
       onSave={handleSave}
       isDirty={dirty}
-      key={saveVersion}
     >
       <EvaluationFields data={data} update={update} />
     </FormShell>

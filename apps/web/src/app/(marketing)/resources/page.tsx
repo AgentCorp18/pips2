@@ -1,15 +1,22 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, BookText, Download, FileText, GraduationCap } from 'lucide-react'
+import { getBaseUrl } from '@/lib/base-url'
+
+const BASE_URL = getBaseUrl()
 
 export const metadata: Metadata = {
-  title: 'Resources — PIPS Process Improvement Learning Center',
+  title: 'Resources — Process Improvement Learning Center',
   description:
     'Free process improvement resources: the PIPS methodology book, glossary of terms, tool guides, and step-by-step methodology walkthroughs.',
+  alternates: {
+    canonical: '/resources',
+  },
   openGraph: {
     title: 'Resources — PIPS Process Improvement Learning Center',
     description:
       'Free process improvement resources: methodology book, glossary, tool guides, and walkthroughs.',
+    url: `${BASE_URL}/resources`,
     type: 'website',
   },
   twitter: {
@@ -42,10 +49,10 @@ const RESOURCES = [
   {
     title: 'PIPS Glossary',
     description:
-      'Definitions, context, and related tools for 35+ process improvement terms. Internal links connect related concepts so you can explore at your own pace.',
+      'Definitions, context, and related tools for 40+ process improvement terms. Internal links connect related concepts so you can explore at your own pace.',
     href: '/resources/glossary',
     icon: BookText,
-    badge: '35+ Terms',
+    badge: '40+ Terms',
     badgeColor: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
   },
   {
@@ -70,7 +77,7 @@ const RESOURCES = [
 
 const ResourcesPage = () => {
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
+    <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
       {/* Hero */}
       <section className="text-center">
         <h1 className="font-serif text-4xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-5xl">
@@ -163,7 +170,7 @@ const ResourcesPage = () => {
           Get Started Free
         </Link>
       </section>
-    </div>
+    </main>
   )
 }
 

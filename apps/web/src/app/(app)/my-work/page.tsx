@@ -8,7 +8,7 @@ import { getMyTickets } from './actions'
 import type { MyWorkTicket } from './actions'
 
 export const metadata: Metadata = {
-  title: 'My Work - PIPS',
+  title: 'My Work',
   description: 'Your assigned tickets and tasks',
 }
 
