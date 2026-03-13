@@ -1,7 +1,7 @@
 # PIPS 2.0 — Final Project Plan
 
-**Last Updated:** March 12, 2026 (late evening)
-**Status:** Beta-Ready — All P0 complete, all P1 security fixes complete, Sentry configured, docs updated
+**Last Updated:** March 13, 2026
+**Status:** Beta-Ready — All P0 complete, Phase 8 UX complete, 2,509 tests, docs refreshed
 **Live:** pips-app.vercel.app
 
 ---
@@ -10,12 +10,12 @@
 
 | Metric                         | Value                                             |
 | ------------------------------ | ------------------------------------------------- |
-| Unit tests                     | 2,406 passing (212 files)                         |
+| Unit tests                     | 2,509 passing (219 files)                         |
 | E2E tests                      | 68 passing, 64 skipped (auth-gated), 7 spec files |
 | Type errors                    | 0                                                 |
 | Lint errors                    | 0 (0 warnings)                                    |
-| PRs merged today               | #6, #7, #11, #12 (all merged)                     |
-| Phases complete                | MVP + 1.5 through 6                               |
+| PRs merged                     | #6-#18 (all merged)                               |
+| Phases complete                | MVP + 1.5 through 8                               |
 | Critical security issues fixed | 5 of 5                                            |
 | P1 security issues fixed       | 11 of 11                                          |
 
@@ -126,8 +126,8 @@
 | R1  | **No real users yet**                                    | HIGH     | P0: smoke test + beta tester onboarding               |
 | R2  | **Rate limiter ineffective — AI API cost exposure**      | HIGH     | P0: Anthropic cost cap. P1: Upstash Redis replacement |
 | R3  | **No billing** — no revenue path                         | MEDIUM   | Phase 9 after beta validation                         |
-| R4  | **GitHub PAT possibly leaked** (March 8)                 | HIGH     | P0: verify rotation                                   |
-| R5  | **Documentation drift** — 15+ stale references           | MEDIUM   | Doc debt sprint during beta week                      |
+| R4  | **GitHub PAT possibly leaked** (March 8)                 | CLOSED   | Old PAT revoked, verified clean                       |
+| R5  | **Documentation drift** — 15+ stale references           | CLOSED   | Doc refresh completed March 13 (PR #17)               |
 | R6  | **Legal exposure** — Privacy/Terms not attorney-reviewed | MEDIUM   | Phase 9: legal review                                 |
 | R7  | **E2E test reliability unknown**                         | MEDIUM   | P0: run full suite, document                          |
 | R8  | **No GDPR data export**                                  | MEDIUM   | Phase 8: build before EU marketing                    |
@@ -142,7 +142,7 @@ All changes must pass before merge:
 
 1. `pnpm tsc --noEmit` — zero type errors
 2. `pnpm lint` — zero lint errors
-3. `pnpm test` — all 2,400+ tests pass
+3. `pnpm test` — all 2,509+ tests pass
 4. `pnpm build` — production build succeeds
 5. PR review (agent or human)
 
