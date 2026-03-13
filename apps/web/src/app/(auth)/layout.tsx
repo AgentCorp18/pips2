@@ -1,5 +1,7 @@
+import Link from 'next/link'
+
 const PipDotsLogo = () => (
-  <a href="/" className="flex items-center gap-3 no-underline">
+  <Link href="/" className="flex items-center gap-3 no-underline">
     <div className="flex items-center gap-1.5">
       <span className="step-1 pip-dot" />
       <span className="step-2 pip-dot" />
@@ -14,7 +16,7 @@ const PipDotsLogo = () => (
     >
       PIPS
     </span>
-  </a>
+  </Link>
 )
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
