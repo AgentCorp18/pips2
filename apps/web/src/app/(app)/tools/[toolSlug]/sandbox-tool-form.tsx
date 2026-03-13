@@ -123,7 +123,6 @@ export const SandboxToolForm = ({ formType, stepNumber }: SandboxToolFormProps) 
     } catch {
       // Ignore parse errors
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating from localStorage on mount
     setLoaded(true)
   }, [formType])
 

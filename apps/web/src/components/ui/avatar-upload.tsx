@@ -100,6 +100,7 @@ export const AvatarUpload = ({
         aria-label="Change profile photo"
       >
         {displayUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- blob URL preview, not a static asset
           <img src={displayUrl} alt="Profile avatar" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-[var(--color-primary)] text-2xl font-semibold text-white">
