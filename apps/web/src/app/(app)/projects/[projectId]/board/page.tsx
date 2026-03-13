@@ -69,7 +69,7 @@ const ProjectBoardPage = async ({ params }: { params: Promise<{ projectId: strin
   })
 
   return (
-    <div>
+    <div className="max-w-full px-4">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-sm text-[var(--color-text-secondary)]">

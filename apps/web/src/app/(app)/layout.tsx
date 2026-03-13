@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import {
   Search,
   LayoutDashboard,
@@ -115,16 +116,22 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Logo area */}
         <div className="flex h-[var(--topbar-height)] items-center justify-between gap-2 px-6">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5" aria-hidden="true">
-              {/* Step dot pips — decorative */}
-              <span className="step-1 pip-dot pip-dot--sm" />
-              <span className="step-2 pip-dot pip-dot--sm" />
-              <span className="step-3 pip-dot pip-dot--sm" />
-              <span className="step-4 pip-dot pip-dot--sm" />
-              <span className="step-5 pip-dot pip-dot--sm" />
-              <span className="step-6 pip-dot pip-dot--sm" />
-            </div>
-            <span className="text-lg font-bold tracking-wide">PIPS</span>
+            <Link
+              href="/"
+              aria-label="Visit PIPS marketing website"
+              className="flex items-center gap-2 rounded-[var(--radius-md)] opacity-90 transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-ring)]"
+            >
+              <div className="flex items-center gap-1.5" aria-hidden="true">
+                {/* Step dot pips — decorative */}
+                <span className="step-1 pip-dot pip-dot--sm" />
+                <span className="step-2 pip-dot pip-dot--sm" />
+                <span className="step-3 pip-dot pip-dot--sm" />
+                <span className="step-4 pip-dot pip-dot--sm" />
+                <span className="step-5 pip-dot pip-dot--sm" />
+                <span className="step-6 pip-dot pip-dot--sm" />
+              </div>
+              <span className="text-lg font-bold tracking-wide">PIPS</span>
+            </Link>
           </div>
           {mounted && isMobile && (
             <button

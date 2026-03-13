@@ -69,7 +69,7 @@ const ProjectFormsPage = async ({ params }: { params: Promise<{ projectId: strin
   )
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[var(--content-max-width)] space-y-6">
       {STEP_NUMBERS.map((stepNum) => {
         const content = STEP_CONTENT[stepNum]
         const filledCount = content.forms.filter((f) =>

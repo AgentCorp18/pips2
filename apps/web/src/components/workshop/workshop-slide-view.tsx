@@ -41,7 +41,7 @@ export const WorkshopSlideView = ({ initialSession }: SlideViewProps) => {
   const isCompleted = session.status === 'completed'
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--color-deep,#1B1340)] p-4 sm:p-8 text-white">
+    <div className="flex min-h-full flex-col items-center justify-center bg-[var(--color-deep,#1B1340)] p-4 sm:p-8 text-white">
       {/* Progress indicator */}
       <div className="absolute left-0 top-0 h-1 w-full bg-white/10">
         <div

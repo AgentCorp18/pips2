@@ -56,40 +56,42 @@ const ProjectLayout = async ({
   const statusLabel = STATUS_LABELS[project.status ?? 'active'] ?? 'Active'
 
   return (
-    <div className="mx-auto max-w-[var(--content-max-width)]">
+    <div>
       {/* Project header */}
-      <div className="mb-6">
-        <Link
-          href="/projects"
-          className="mb-3 inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
-        >
-          <ArrowLeft size={14} />
-          Back to Projects
-        </Link>
+      <div className="mx-auto max-w-[var(--content-max-width)]">
+        <div className="mb-6">
+          <Link
+            href="/projects"
+            className="mb-3 inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
+          >
+            <ArrowLeft size={14} />
+            Back to Projects
+          </Link>
 
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {project.title}
-          </h1>
-          <Badge variant="outline">{statusLabel}</Badge>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              {project.title}
+            </h1>
+            <Badge variant="outline">{statusLabel}</Badge>
+          </div>
+
+          {ownerProfile && (
+            <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Owned by {ownerProfile.display_name}
+            </p>
+          )}
         </div>
 
-        {ownerProfile && (
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Owned by {ownerProfile.display_name}
-          </p>
-        )}
+        {/* Step stripe */}
+        <div className="step-gradient-stripe mb-6 rounded-full" />
+
+        {/* Tab navigation */}
+        <div className="mb-6">
+          <ProjectTabs projectId={projectId} />
+        </div>
       </div>
 
-      {/* Step stripe */}
-      <div className="step-gradient-stripe mb-6 rounded-full" />
-
-      {/* Tab navigation */}
-      <div className="mb-6">
-        <ProjectTabs projectId={projectId} />
-      </div>
-
-      {/* Page content */}
+      {/* Page content — full width available for board views */}
       {children}
     </div>
   )

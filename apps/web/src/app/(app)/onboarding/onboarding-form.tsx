@@ -57,7 +57,7 @@ export const OnboardingForm = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-full items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Step indicator */}
         <div className="mb-8 flex items-center justify-center gap-1.5" aria-hidden="true">
