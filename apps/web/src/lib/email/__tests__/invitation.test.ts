@@ -50,4 +50,18 @@ describe('invitationTemplate', () => {
     const result = invitationTemplate(defaultParams)
     expect(result).toContain('invited you to join')
   })
+
+  it('escapes HTML in user-controlled fields to prevent XSS', () => {
+    const result = invitationTemplate({
+      ...defaultParams,
+      inviterName: '<script>alert("xss")</script>',
+      orgName: 'Evil & Co <img src=x>',
+      role: '"admin"',
+      recipientEmail: 'user+<tag>@test.com',
+    })
+    expect(result).not.toContain('<script>')
+    expect(result).not.toContain('<img src=x>')
+    expect(result).toContain('&lt;script&gt;')
+    expect(result).toContain('Evil &amp; Co')
+  })
 })

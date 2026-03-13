@@ -51,6 +51,23 @@ describe('ctaButton', () => {
     const result = ctaButton('Test', 'https://test.com')
     expect(result).toContain('#4F46E5')
   })
+
+  it('escapes HTML in label', () => {
+    const result = ctaButton('<img src=x onerror=alert(1)>', 'https://test.com')
+    expect(result).not.toContain('<img')
+    expect(result).toContain('&lt;img')
+  })
+
+  it('rejects javascript: URLs', () => {
+    const result = ctaButton('Click', 'javascript:alert(1)')
+    expect(result).not.toContain('javascript:')
+    expect(result).toContain('href="#"')
+  })
+
+  it('allows https URLs', () => {
+    const result = ctaButton('Click', 'https://pips.com/dashboard')
+    expect(result).toContain('https://pips.com/dashboard')
+  })
 })
 
 describe('baseTemplate', () => {

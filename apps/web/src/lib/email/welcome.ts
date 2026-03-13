@@ -2,7 +2,7 @@
  * "Welcome to PIPS" email template with a getting-started guide.
  */
 
-import { baseTemplate, ctaButton } from './base-template'
+import { baseTemplate, ctaButton, escapeHtml } from './base-template'
 
 export type WelcomeParams = {
   recipientName: string
@@ -10,6 +10,7 @@ export type WelcomeParams = {
 }
 
 export const welcomeTemplate = ({ recipientName, dashboardUrl }: WelcomeParams): string => {
+  const safeName = escapeHtml(recipientName)
   const stepRow = (number: string, color: string, title: string, description: string): string => `
     <tr>
       <td style="padding:8px 0;vertical-align:top;width:36px;">
@@ -28,7 +29,7 @@ export const welcomeTemplate = ({ recipientName, dashboardUrl }: WelcomeParams):
 
   const body = `
     <p style="margin:0 0 16px;font-size:20px;font-weight:700;color:#1B1340;">
-      Welcome to PIPS, ${recipientName}!
+      Welcome to PIPS, ${safeName}!
     </p>
 
     <p style="margin:0 0 24px;">
