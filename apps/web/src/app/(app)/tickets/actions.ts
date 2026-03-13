@@ -78,7 +78,21 @@ export const createTicket = async (
     return { error: 'You do not have permission to create tickets' }
   }
 
-  // FIX 2: Validate assignee belongs to the same org
+  // Validate project belongs to the same org
+  if (result.data.project_id) {
+    const { data: projectCheck } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('id', result.data.project_id)
+      .eq('org_id', membership.org_id)
+      .maybeSingle()
+
+    if (!projectCheck) {
+      return { error: 'Project not found in this organization' }
+    }
+  }
+
+  // Validate assignee belongs to the same org
   if (result.data.assignee_id) {
     const { data: assigneeMembership } = await supabase
       .from('org_members')
@@ -171,14 +185,27 @@ export const updateTicket = async (
     return { error: 'Ticket not found' }
   }
 
-  // FIX 1: wrap requirePermission in try/catch
   try {
     await requirePermission(ticket.org_id, 'ticket.update')
   } catch {
     return { error: 'You do not have permission to update tickets' }
   }
 
-  // FIX 2: Validate assignee belongs to the same org
+  // Validate project belongs to the same org
+  if (result.data.project_id) {
+    const { data: projectCheck } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('id', result.data.project_id)
+      .eq('org_id', ticket.org_id)
+      .maybeSingle()
+
+    if (!projectCheck) {
+      return { error: 'Project not found in this organization' }
+    }
+  }
+
+  // Validate assignee belongs to the same org
   if (result.data.assignee_id) {
     const { data: assigneeMembership } = await supabase
       .from('org_members')
@@ -387,6 +414,11 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
 export const getTicket = async (ticketId: string) => {
   const supabase = await createClient()
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
   const { data, error } = await supabase
     .from('tickets')
     .select(
@@ -401,6 +433,13 @@ export const getTicket = async (ticketId: string) => {
     .single()
 
   if (error || !data) {
+    return null
+  }
+
+  // Defense-in-depth: verify user has access to this ticket's org
+  try {
+    await requirePermission(data.org_id, 'data.view')
+  } catch {
     return null
   }
 
@@ -561,6 +600,26 @@ export const bulkUpdateTickets = async (
 export const getChildTickets = async (ticketId: string) => {
   const supabase = await createClient()
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
+  // Verify the parent ticket exists and user has org access
+  const { data: parent } = await supabase
+    .from('tickets')
+    .select('org_id')
+    .eq('id', ticketId)
+    .single()
+
+  if (!parent) return []
+
+  try {
+    await requirePermission(parent.org_id, 'data.view')
+  } catch {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('tickets')
     .select(
@@ -590,6 +649,11 @@ export const getChildTickets = async (ticketId: string) => {
 export const getParentTicket = async (parentId: string) => {
   const supabase = await createClient()
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
   const { data, error } = await supabase
     .from('tickets')
     .select('id, title, sequence_number, org_id')
@@ -597,6 +661,13 @@ export const getParentTicket = async (parentId: string) => {
     .single()
 
   if (error || !data) {
+    return null
+  }
+
+  // Defense-in-depth: verify user has access to this ticket's org
+  try {
+    await requirePermission(data.org_id, 'data.view')
+  } catch {
     return null
   }
 

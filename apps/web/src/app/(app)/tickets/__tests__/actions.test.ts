@@ -198,6 +198,8 @@ describe('createTicket', () => {
     fromResults = [
       // from('org_members') -> membership
       { data: { org_id: 'org-1' } },
+      // from('projects') -> project found in same org
+      { data: { id: 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e' } },
       // from('org_members') -> assignee found
       { data: { user_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d' } },
       // from('tickets').insert() -> success
@@ -563,10 +565,12 @@ describe('getTicket', () => {
   })
 
   it('returns ticket when found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     const ticketData = {
       id: 'tkt-1',
       title: 'Login bug',
       status: 'todo',
+      org_id: 'org-1',
       assignee: { id: 'u-1', display_name: 'Alice', avatar_url: null },
       reporter: { id: 'u-2', display_name: 'Bob', avatar_url: null },
       project: { id: 'proj-1', name: 'Auth' },
@@ -578,6 +582,7 @@ describe('getTicket', () => {
   })
 
   it('returns null when ticket is not found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: null, error: { message: 'not found' } }]
 
     const result = await getTicket('non-existent')
@@ -585,7 +590,15 @@ describe('getTicket', () => {
   })
 
   it('returns null on query error', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: null, error: { message: 'DB error' } }]
+
+    const result = await getTicket('tkt-1')
+    expect(result).toBeNull()
+  })
+
+  it('returns null when user is not signed in', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
 
     const result = await getTicket('tkt-1')
     expect(result).toBeNull()
@@ -807,6 +820,7 @@ describe('getChildTickets', () => {
   })
 
   it('returns child tickets', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     const children = [
       { id: 'child-1', title: 'Sub-task 1', status: 'todo', priority: 'medium', assignee: null },
       {
@@ -817,28 +831,51 @@ describe('getChildTickets', () => {
         assignee: { id: 'u-1', display_name: 'Alice', avatar_url: null },
       },
     ]
-    fromResults = [{ data: children, error: null }]
+    fromResults = [
+      // from('tickets').select('org_id').eq('id', ticketId) -> parent found
+      { data: { org_id: 'org-1' } },
+      // from('tickets').select(...children...) -> children
+      { data: children, error: null },
+    ]
 
     const result = await getChildTickets('parent-1')
     expect(result).toEqual(children)
   })
 
   it('returns empty array when no children exist', async () => {
-    fromResults = [{ data: [], error: null }]
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: [], error: null }]
 
     const result = await getChildTickets('parent-1')
     expect(result).toEqual([])
   })
 
   it('returns empty array on error', async () => {
-    fromResults = [{ data: null, error: { message: 'DB error' } }]
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: null, error: { message: 'DB error' } }]
 
     const result = await getChildTickets('parent-1')
     expect(result).toEqual([])
   })
 
   it('returns empty array when data is null', async () => {
-    fromResults = [{ data: null, error: null }]
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: null, error: null }]
+
+    const result = await getChildTickets('parent-1')
+    expect(result).toEqual([])
+  })
+
+  it('returns empty array when user is not signed in', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const result = await getChildTickets('parent-1')
+    expect(result).toEqual([])
+  })
+
+  it('returns empty array when parent ticket is not found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: null }]
 
     const result = await getChildTickets('parent-1')
     expect(result).toEqual([])
@@ -857,6 +894,7 @@ describe('getParentTicket', () => {
   })
 
   it('returns parent ticket when found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     const parent = { id: 'parent-1', title: 'Epic ticket', sequence_number: 1, org_id: 'org-1' }
     fromResults = [{ data: parent, error: null }]
 
@@ -865,6 +903,7 @@ describe('getParentTicket', () => {
   })
 
   it('returns null when parent ticket is not found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: null, error: { message: 'not found' } }]
 
     const result = await getParentTicket('non-existent')
@@ -872,7 +911,15 @@ describe('getParentTicket', () => {
   })
 
   it('returns null on query error', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: null, error: { message: 'DB error' } }]
+
+    const result = await getParentTicket('parent-1')
+    expect(result).toBeNull()
+  })
+
+  it('returns null when user is not signed in', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
 
     const result = await getParentTicket('parent-1')
     expect(result).toBeNull()
