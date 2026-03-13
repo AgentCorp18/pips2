@@ -144,6 +144,20 @@ describe('updateProfile', () => {
     expect(result).toEqual({ error: 'Display name cannot be empty or whitespace only' })
   })
 
+  it('returns error when display_name is a single character', async () => {
+    const fd = makeFormData({ display_name: 'A' })
+    const result = await updateProfile(emptyState, fd)
+    expect(result).toEqual({ error: 'Display name must be at least 2 characters' })
+  })
+
+  it('accepts display_name with exactly 2 characters', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ error: null }]
+    const fd = makeFormData({ display_name: 'Jo' })
+    const result = await updateProfile(emptyState, fd)
+    expect(result).toEqual({ success: 'Profile updated successfully' })
+  })
+
   it('returns error when display_name is too long', async () => {
     const fd = makeFormData({ display_name: 'x'.repeat(101) })
     const result = await updateProfile(emptyState, fd)

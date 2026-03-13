@@ -1,9 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { checkRateLimit } from '../rate-limit'
 
 describe('checkRateLimit', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllEnvs()
   })
 
   it('allows requests within the limit', () => {
@@ -54,5 +59,31 @@ describe('checkRateLimit', () => {
     const now = Date.now()
     const result = checkRateLimit('user-6', 5, 60_000)
     expect(result.resetAt).toBeGreaterThanOrEqual(now + 60_000)
+  })
+
+  it('logs a warning when UPSTASH_REDIS_REST_URL is set but migration is incomplete', () => {
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', 'https://redis.upstash.io')
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    checkRateLimit('user-upstash', 5, 60_000)
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'UPSTASH_REDIS_REST_URL is set but Upstash integration is not yet active',
+      ),
+    )
+
+    warnSpy.mockRestore()
+  })
+
+  it('does not warn when UPSTASH_REDIS_REST_URL is not set', () => {
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', '')
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    checkRateLimit('user-no-upstash', 5, 60_000)
+
+    expect(warnSpy).not.toHaveBeenCalled()
+
+    warnSpy.mockRestore()
   })
 })

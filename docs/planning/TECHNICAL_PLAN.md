@@ -33,7 +33,7 @@ Throughout this document, section headers and descriptions include a status mark
 ## Current Build Status
 
 > **MVP:** Live at https://pips-app.vercel.app since March 3, 2026
-> **Unit tests:** 2,339+ passing (208+ files)
+> **Unit tests:** 2,400+ passing (212+ files)
 > **E2E tests:** 230+ test cases (25 spec files)
 > **Type errors:** 0
 > **Lint errors:** 0
@@ -240,7 +240,7 @@ While Marc's CLAUDE.md specifies `React Native StyleSheet (no Tailwind/NativeWin
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                 TRAINING MODE (5) [SCAFFOLDED]                   │
+│                 TRAINING MODE (5) [BUILT]                        │
 │                                                                   │
 │  training_paths ── Global catalog (no RLS), 4 paths seeded      │
 │       └── training_modules (27 seeded)                           │
@@ -250,7 +250,7 @@ While Marc's CLAUDE.md specifies `React Native StyleSheet (no Tailwind/NativeWin
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                 WORKSHOP (1) [SCAFFOLDED]                         │
+│                 WORKSHOP (1) [BUILT]                              │
 │                                                                   │
 │  workshop_sessions (org-scoped RLS)                              │
 └─────────────────────────────────────────────────────────────────┘
@@ -258,16 +258,16 @@ While Marc's CLAUDE.md specifies `React Native StyleSheet (no Tailwind/NativeWin
 
 ### 3.1.1 Table Summary
 
-| Group         | Tables                                                                                                                                                     | Count  | Status           |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------- |
-| Core          | profiles, organizations, org_members, org_invitations, org_settings, teams, team_members, projects, project_members, project_steps, project_forms, tickets | 12     | **[BUILT]**      |
-| Ticket System | ticket_relations, ticket_transitions, comments                                                                                                             | 3      | **[BUILT]**      |
-| Cross-Cutting | file_attachments, notifications, audit_log, integration_connections, org_api_keys                                                                          | 5      | **[BUILT]**      |
-| Webhooks      | webhook_subscriptions, webhook_deliveries                                                                                                                  | 2      | **[PLANNED]**    |
-| Knowledge Hub | content_nodes, reading_sessions, content_bookmarks, content_read_history                                                                                   | 4      | **[BUILT]**      |
-| Training      | training_paths, training_modules, training_exercises, training_progress, training_exercise_data                                                            | 5      | **[SCAFFOLDED]** |
-| Workshop      | workshop_sessions                                                                                                                                          | 1      | **[SCAFFOLDED]** |
-| **Total**     |                                                                                                                                                            | **33** |                  |
+| Group         | Tables                                                                                                                                                     | Count  | Status        |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------- |
+| Core          | profiles, organizations, org_members, org_invitations, org_settings, teams, team_members, projects, project_members, project_steps, project_forms, tickets | 12     | **[BUILT]**   |
+| Ticket System | ticket_relations, ticket_transitions, comments                                                                                                             | 3      | **[BUILT]**   |
+| Cross-Cutting | file_attachments, notifications, audit_log, integration_connections, org_api_keys                                                                          | 5      | **[BUILT]**   |
+| Webhooks      | webhook_subscriptions, webhook_deliveries                                                                                                                  | 2      | **[PLANNED]** |
+| Knowledge Hub | content_nodes, reading_sessions, content_bookmarks, content_read_history                                                                                   | 4      | **[BUILT]**   |
+| Training      | training_paths, training_modules, training_exercises, training_progress, training_exercise_data                                                            | 5      | **[BUILT]**   |
+| Workshop      | workshop_sessions                                                                                                                                          | 1      | **[BUILT]**   |
+| **Total**     |                                                                                                                                                            | **33** |               |
 
 ### 3.1.2 Key Data Design Decisions
 
@@ -2442,7 +2442,7 @@ pips2/
 │       │   ├── dashboard/            # [BUILT] StatCards, ProjectsByStepChart, RecentActivity
 │       │   ├── knowledge/            # [BUILT] ContentReader, BookmarkButton, MarkdownContent
 │       │   ├── knowledge-cadence/    # [BUILT] KnowledgeCadenceBar (contextual content)
-│       │   ├── training/             # [SCAFFOLDED] TrainingLanding, ProgressRing, ExerciseComponents
+│       │   ├── training/             # [BUILT] TrainingLanding, ProgressRing, ExerciseComponents
 │       │   ├── seo/                  # [BUILT] JSON-LD structured data component
 │       │   ├── landing/              # [BUILT] HeroSection, FeaturesSection, MethodologySection
 │       │   └── shared/               # [BUILT] Avatar, Badge, EmptyState, LoadingSkeleton
@@ -2777,7 +2777,7 @@ Full-text search across all content nodes using Postgres `tsvector` + `ts_rank`.
 
 ---
 
-## 12. Training Mode Architecture [SCAFFOLDED]
+## 12. Training Mode Architecture [BUILT]
 
 ### 12.1 Overview
 
@@ -2812,7 +2812,7 @@ training_exercise_data — Per-user, per-exercise submissions (user-scoped RLS)
 | `scenario-practice` | Real-world scenario simulation | `{ scenarioData, expectedOutcomes }`   |
 | `fill-form`         | Practice filling a PIPS form   | `{ formType, sampleData }`             |
 
-### 12.4 Pages [SCAFFOLDED]
+### 12.4 Pages [BUILT]
 
 - `/training` — Landing page with path cards and progress rings
 - `/training/path/[pathSlug]` — Path detail with module list

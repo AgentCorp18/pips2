@@ -10,7 +10,7 @@
 >
 > **v1.2 changes (2026-03-12):**
 >
-> - Updated test counts: 2,339+ unit tests (210+ files), up from 896 (56 files)
+> - Updated test counts: 2,400+ unit tests (212+ files), up from 896 (56 files)
 > - Updated migration count: 13 migrations, up from 11
 > - Updated repository visibility: public (was private)
 > - Updated lint warnings: 30 (was 20)
@@ -43,8 +43,8 @@ Throughout this document, section headers and descriptions include a status mark
 
 > **Production URL:** https://pips-app.vercel.app (live since March 3, 2026)
 > **Supabase:** Project `cmrribhjgfybbxhrsxqi` (us-east-2)
-> **Unit tests:** 2,339+ passing (210+ files)
-> **E2E tests:** 230+ test cases (25 spec files)
+> **Unit tests:** 2,400+ passing (212+ files)
+> **E2E tests:** 41+ test cases (7 spec files)
 > **Type errors:** 0
 > **Lint errors:** 0 (30 warnings, acceptable)
 > **DB migrations:** 13 applied to production

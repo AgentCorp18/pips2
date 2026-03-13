@@ -1,10 +1,10 @@
 # PIPS 2.0 — Product Requirements Document
 
-**Version:** 1.1
+**Version:** 1.2
 **Date:** 2026-03-02
 **Author:** Marc Albers
-**Status:** Active — MVP Complete, Post-MVP In Progress
-**Last Updated:** March 3, 2026 (Product Manager Agent — reflects MVP live, Knowledge Hub/Training/Workshop requirements added, Customer Insights friction risks incorporated)
+**Status:** Active — All Phases 0-6 Complete, Phase 7 Beta Launch In Progress
+**Last Updated:** March 12, 2026 (Documentation drift sprint — updated implementation status, test counts, added undocumented features)
 
 ---
 
@@ -28,11 +28,21 @@
 > - Search (Cmd/Ctrl+K command palette, full-text, results by type) — SRCH-01 through SRCH-04, SRCH-10
 > - CSV/PDF export, dark mode, Sentry, Vercel Analytics, audit logging
 > - Knowledge Hub foundation: 205 book content nodes, FTS, reading experience, Cadence Bar, bookmarks
-> - Training Mode: DB tables + seed data (4 paths, 27 modules, 59 exercises), pages scaffolded
-> - Workshop: DB tables created, UI scaffolded
-> - Marketing: 83+ SEO pages (6 step, 22 tool, 20 book preview, 35 glossary)
+> - Training Mode: fully built — 4 paths, 27 modules, 59 exercises, all pages functional, exercise components complete
+> - Workshop: fully built — session CRUD, timer with pause/resume, Supabase Realtime sync, facilitator guide, scenarios
+> - Marketing: 83+ SEO pages (6 step, 22 tool, 20 book preview, 35 glossary, 17 templates)
+> - Admin Dashboard (/settings/admin): org-level admin stats, user/project/ticket counts
+> - Tools Sandbox (/tools): standalone methodology tools (Fishbone, Brainstorming, etc.) with localStorage — no project required
+> - Ticket Change Log: audit trail for ticket field changes with before/after values
+> - Security Settings: password change form in user profile/settings
+> - Swim Lane Board: projects grouped by PIPS step with drag-and-drop
+> - Forms View/Edit Toggle: read-only view mode vs edit mode on all 18 PIPS forms
+> - Privacy Policy (/privacy) and Terms of Service (/terms) pages — live and linked
+> - Fishbone Diagram upgrade: enhanced with improved category layout and drag interaction
+> - Glossary enhancements: full 35-term glossary with category filtering and search
+> - PDF quality upgrades: improved layout and content fidelity for exported reports
 >
-> **878 unit tests, 160 E2E tests, 0 type errors**
+> **2,400+ unit tests, 41+ E2E tests, 0 type errors, 0 lint errors**
 >
 > **Not yet built:** Stripe billing, SSO/SAML, integrations (Jira/ADO/AHA!), white-label UI, custom form builder, MFA, API keys, webhooks, real-time collaborative editing, survey builder
 
@@ -2690,6 +2700,73 @@ X-RateLimit-Reset: 1709400000
 - Real-time collaborative editing
 - Custom roles
 - Sprint/iteration support
+
+---
+
+## Appendix D: Features Built in Post-MVP Phases (Previously Undocumented)
+
+These features were built during Phases 1.5-6 and are now fully deployed at pips-app.vercel.app. They were not in the original MVP scope or the core requirements sections above.
+
+### Admin Dashboard [BUILT]
+
+- **Route:** `/settings/admin`
+- **Access:** Admin role only
+- **Description:** Org-level admin statistics panel showing total users, projects, tickets, and system health overview.
+- **Status:** Live in production.
+
+### Tools Sandbox [BUILT]
+
+- **Route:** `/tools`
+- **Access:** All authenticated users
+- **Description:** Standalone methodology tools (Fishbone Diagram, Brainstorming workspace, etc.) that run with localStorage persistence — no PIPS project required. Useful for quick analysis outside a formal project context.
+- **Status:** Live in production.
+
+### Ticket Change Log [BUILT]
+
+- **Route:** Embedded in ticket detail view
+- **Description:** Audit trail for ticket field changes, storing before/after values with timestamps and actor. Supplements the general `audit_log` table with ticket-specific diffs.
+- **Status:** Live in production.
+
+### Security Settings (Password Change) [BUILT]
+
+- **Route:** `/settings/security` or within user profile
+- **Description:** Password change form allowing authenticated users to update their password. Validates current password before accepting the new one.
+- **Status:** Live in production.
+
+### Swim Lane Board [BUILT]
+
+- **Route:** Available within project views
+- **Description:** Projects or tickets grouped into lanes by PIPS step (Identify, Analyze, Generate, Select & Plan, Implement, Evaluate). Supports drag-and-drop to change step assignment.
+- **Status:** Live in production.
+
+### Forms View/Edit Toggle [BUILT]
+
+- **Description:** All 18 PIPS methodology forms support two display modes — a read-only view mode (for reviewing completed forms) and an edit mode (for active data entry). Toggling between modes preserves form data.
+- **Status:** Live in production, present on all 18 PIPS step forms.
+
+### Privacy Policy and Terms of Service Pages [BUILT]
+
+- **Routes:** `/privacy`, `/terms`
+- **Description:** Legal pages displayed in the app footer and linked from the signup flow. Required before public marketing or EU expansion.
+- **Note:** These pages have not been reviewed by an attorney. Legal review is a Phase 9 task before public launch.
+- **Status:** Live in production.
+
+### Fishbone Diagram Upgrade [BUILT]
+
+- **Route:** Step 2 (Analyze) — Fishbone form
+- **Description:** The Fishbone (Ishikawa) Diagram form was upgraded with improved category layout, better drag-and-drop interaction, and clearer cause labeling. Replaces the original scaffolded version from the MVP.
+- **Status:** Live in production.
+
+### Glossary Enhancements [BUILT]
+
+- **Route:** `/resources/glossary`
+- **Description:** The marketing glossary was expanded to 35 terms, with category filtering and a search function. Each term links to relevant methodology content in the Knowledge Hub.
+- **Status:** Live in production.
+
+### PDF Quality Upgrades [BUILT]
+
+- **Description:** PDF export quality was improved across project one-pager exports and report exports. Improvements include better typography rendering, consistent margins, and more complete data inclusion.
+- **Status:** Live in production. Note: jspdf v2 is still in use (v4 available) — a future upgrade may be needed if PDF issues are reported.
 
 ---
 

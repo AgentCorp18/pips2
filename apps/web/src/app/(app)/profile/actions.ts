@@ -40,6 +40,9 @@ export const updateProfile = async (
   if (trimmed.length === 0) {
     return { error: 'Display name cannot be empty or whitespace only' }
   }
+  if (trimmed.length < 2) {
+    return { error: 'Display name must be at least 2 characters' }
+  }
   if (trimmed.length > 100) {
     return { error: 'Display name must be 100 characters or fewer' }
   }

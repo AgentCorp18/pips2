@@ -10,13 +10,16 @@
 
 ## Recent Completions (March 12, 2026)
 
-| Agent              | Task                                 | PR      | Result                                      |
-| ------------------ | ------------------------------------ | ------- | ------------------------------------------- |
-| Lighthouse Auditor | WP-6.8 Performance audit             | #7      | 13 fixes (SEO, a11y, CSP, caching)          |
-| Critical Reviewer  | Full codebase security/quality audit | #7      | 26 findings (5 critical, 7 high)            |
-| Planning Reviewer  | Plan-vs-reality audit                | #7      | 15+ outdated refs, 14 undocumented features |
-| Security Fixer     | Fix 5 critical + 3 high issues       | #7      | All critical issues resolved                |
-| Doc Updaters (x5)  | Update 10 stale planning docs        | Pending | In progress                                 |
+| Agent              | Task                                   | PR/Branch              | Result                                             |
+| ------------------ | -------------------------------------- | ---------------------- | -------------------------------------------------- |
+| Lighthouse Auditor | WP-6.8 Performance audit               | #7                     | 13 fixes (SEO, a11y, CSP, caching)                 |
+| Critical Reviewer  | Full codebase security/quality audit   | #7                     | 26 findings (5 critical, 7 high)                   |
+| Planning Reviewer  | Plan-vs-reality audit                  | #7                     | 15+ outdated refs, 14 undocumented features        |
+| Security Fixer     | Fix 5 critical + 3 high issues         | #7                     | All critical issues resolved                       |
+| Doc Drift Agent    | Update 10 stale planning docs          | fix/p1-security-issues | 10 docs, 530 insertions, INCIDENT_RESPONSE created |
+| Security Auditor   | Verify 11 P1 security/validation items | fix/p1-security-issues | 9 already fixed, 2 confirmed (tests added)         |
+| Smoke Tester       | Production smoke test (15 pages)       | —                      | All pages pass via Playwright MCP                  |
+| E2E Fixer          | Fix stale landing.spec.ts selectors    | fix/p1-security-issues | 3 tests updated, all pass                          |
 
 ## Merge Queue
 
