@@ -9,6 +9,7 @@ import {
   getProjectMembers,
   getProjectActivity,
   getStepSummaries,
+  getProjectProgress,
 } from './overview-actions'
 import { OverviewStats } from './overview-stats'
 import { ActivityFeed } from './activity-feed'
@@ -17,6 +18,7 @@ import { ExportPDFButton } from '@/components/export-pdf-button'
 import { ExportOnePagerButton } from '@/components/pips/export-one-pager-button'
 import { StepSummaryCard } from '@/components/pips/step-summary-card'
 import { Calendar, User, BarChart3 } from 'lucide-react'
+import { StartHereCard } from '@/components/pips/start-here-card'
 
 const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params
@@ -68,11 +70,12 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     step_number: stepEnumToNumber(s.step),
   }))
 
-  const [stats, members, activity, stepSummaries] = await Promise.all([
+  const [stats, members, activity, stepSummaries, progress] = await Promise.all([
     getProjectStats(projectId),
     getProjectMembers(projectId),
     getProjectActivity(projectId),
     getStepSummaries(projectId),
+    getProjectProgress(projectId),
   ])
 
   const profilesRaw = project.profiles as unknown
@@ -89,12 +92,30 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       <ProjectOverviewClient
         projectId={project.id}
         currentStep={currentStepNum}
-        steps={steps.map((s) => ({
-          step_number: s.step_number,
-          status: s.status as 'not_started' | 'in_progress' | 'completed' | 'skipped',
-        }))}
+        steps={steps.map((s) => {
+          const fc = progress.stepFormCounts.find((c) => c.stepNumber === s.step_number)
+          return {
+            step_number: s.step_number,
+            status: s.status as 'not_started' | 'in_progress' | 'completed' | 'skipped',
+            formsStarted: fc?.formsStarted,
+            formsTotal: fc?.formsTotal,
+          }
+        })}
         orgRole={membership?.role ?? null}
       />
+
+      {/* 1.4: Project Progress Bar */}
+      <ProjectProgressBar
+        percentage={progress.percentage}
+        stepsCompleted={progress.stepsCompleted}
+        formsStarted={progress.formsStarted}
+        totalForms={progress.totalForms}
+      />
+
+      {/* 1.5: Start Here Card — only for new projects at Step 1 with no forms */}
+      {currentStepNum === 1 && progress.formsStarted === 0 && (
+        <StartHereCard projectId={projectId} />
+      )}
 
       <div className="flex items-center justify-end gap-2">
         <ExportOnePagerButton projectId={project.id} projectName={project.title as string} />
@@ -201,6 +222,43 @@ const MetaRow = ({ label, children }: { label: string; children: React.ReactNode
     <span className="text-[var(--color-text-tertiary)]">{label}</span>
     <span className="text-[var(--color-text-primary)]">{children}</span>
   </div>
+)
+
+/** 1.4: Visual progress bar with percentage */
+const ProjectProgressBar = ({
+  percentage,
+  stepsCompleted,
+  formsStarted,
+  totalForms,
+}: {
+  percentage: number
+  stepsCompleted: number
+  formsStarted: number
+  totalForms: number
+}) => (
+  <Card data-testid="project-progress-bar">
+    <CardContent className="py-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-[var(--color-text-primary)]">
+          Project Progress
+        </span>
+        <span className="text-sm font-bold text-[var(--color-primary)]">{percentage}%</span>
+      </div>
+      <div className="h-2.5 w-full rounded-full bg-[var(--color-surface-secondary)]">
+        <div
+          className="h-2.5 rounded-full bg-[var(--color-primary)] transition-all duration-500"
+          style={{ width: `${percentage}%` }}
+          data-testid="progress-bar-fill"
+        />
+      </div>
+      <div className="mt-2 flex items-center gap-4 text-xs text-[var(--color-text-tertiary)]">
+        <span>{stepsCompleted} of 6 steps completed</span>
+        <span>
+          {formsStarted} of {totalForms} forms started
+        </span>
+      </div>
+    </CardContent>
+  </Card>
 )
 
 export default ProjectDetailPage

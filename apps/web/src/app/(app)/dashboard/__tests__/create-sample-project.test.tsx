@@ -18,12 +18,14 @@ describe('CreateSampleProject', () => {
 
   it('renders description', () => {
     render(<CreateSampleProject />)
-    expect(screen.getByText(/Parking Lot Safety Improvement/)).toBeTruthy()
+    expect(screen.getByText(/pre-filled projects/)).toBeTruthy()
   })
 
-  it('renders Try a Sample Project button', () => {
+  it('renders the first 3 templates by default', () => {
     render(<CreateSampleProject />)
-    expect(screen.getByText('Try a Sample Project')).toBeTruthy()
+    expect(screen.getByTestId('sample-project-parking-lot-safety')).toBeTruthy()
+    expect(screen.getByTestId('sample-project-customer-onboarding')).toBeTruthy()
+    expect(screen.getByTestId('sample-project-manufacturing-defect')).toBeTruthy()
   })
 
   it('renders heading as h3', () => {
@@ -36,5 +38,12 @@ describe('CreateSampleProject', () => {
     const { container } = render(<CreateSampleProject />)
     const wrapper = container.firstElementChild as HTMLElement
     expect(wrapper.className).toContain('border-dashed')
+  })
+
+  it('shows step count for each visible template', () => {
+    render(<CreateSampleProject />)
+    // Each template card shows "X/6 steps"
+    const stepLabels = screen.getAllByText(/\/6 steps/)
+    expect(stepLabels.length).toBeGreaterThanOrEqual(3)
   })
 })

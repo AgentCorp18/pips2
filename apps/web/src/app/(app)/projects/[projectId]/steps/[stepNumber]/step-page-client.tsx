@@ -76,6 +76,7 @@ export const StepPageClient = ({
       onAdvance={handleAdvance}
       onOverride={handleOverride}
       isPending={isPending}
+      currentProjectStep={currentStep as PipsStepNumber}
     />
   )
 }

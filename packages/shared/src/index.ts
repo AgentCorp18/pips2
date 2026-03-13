@@ -34,6 +34,9 @@ export type { Permission } from './permissions'
 export { STEP_CONTENT, getStepForms, getRequiredForms, ALL_FORM_TYPES } from './step-content'
 export type { StepFormDef, StepContent, StepMethodology } from './step-content'
 
+export { PROJECT_TEMPLATES, getProjectTemplate } from './project-templates'
+export type { ProjectTemplate, ProjectTemplateForm, ProjectTemplateStep } from './project-templates'
+
 export {
   BOOK_CHAPTER_MAP,
   CONTENT_PILLARS,

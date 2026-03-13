@@ -20,10 +20,21 @@ const MilestoneTrackerPage = async ({
 
   if (!user) redirect('/login')
 
-  const saved = await loadFormData(projectId, 5, 'milestone_tracker')
+  // Load milestone tracker data + implementation plan from Step 4 for context
+  const [saved, ip] = await Promise.all([
+    loadFormData(projectId, 5, 'milestone_tracker'),
+    loadFormData(projectId, 4, 'implementation_plan'),
+  ])
   const initialData = (saved ?? null) as MilestoneTrackerData | null
+  const selectedSolutionFromStep4 = (ip?.selectedSolution as string) ?? ''
 
-  return <MilestoneTrackerForm projectId={projectId} initialData={initialData} />
+  return (
+    <MilestoneTrackerForm
+      projectId={projectId}
+      initialData={initialData}
+      selectedSolutionFromStep4={selectedSolutionFromStep4}
+    />
+  )
 }
 
 export default MilestoneTrackerPage

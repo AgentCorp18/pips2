@@ -1,7 +1,12 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { stepEnumToNumber, type PipsStepEnum } from '@pips/shared'
+import {
+  stepEnumToNumber,
+  STEP_CONTENT,
+  type PipsStepEnum,
+  type PipsStepNumber,
+} from '@pips/shared'
 import type {
   ProblemStatementData,
   FishboneData,
@@ -184,6 +189,67 @@ export const getProjectActivity = async (
       userName,
     }
   })
+}
+
+/* ============================================================
+   getProjectProgress
+   ============================================================ */
+
+export type StepFormCount = {
+  stepNumber: number
+  formsStarted: number
+  formsTotal: number
+}
+
+export type ProjectProgress = {
+  stepsCompleted: number
+  totalSteps: number
+  formsStarted: number
+  totalForms: number
+  percentage: number
+  stepFormCounts: StepFormCount[]
+}
+
+export const getProjectProgress = async (projectId: string): Promise<ProjectProgress> => {
+  const supabase = await createClient()
+
+  const [stepsRes, formsRes] = await Promise.all([
+    supabase.from('project_steps').select('step, status').eq('project_id', projectId),
+    supabase.from('project_forms').select('step, form_type').eq('project_id', projectId),
+  ])
+
+  const steps = stepsRes.data ?? []
+  const forms = formsRes.data ?? []
+
+  const stepsCompleted = steps.filter(
+    (s) => s.status === 'completed' || s.status === 'skipped',
+  ).length
+  const totalSteps = 6
+  const formsStarted = forms.length
+  // Total possible forms across all 6 steps
+  const totalForms = Object.values(STEP_CONTENT).reduce((sum, s) => sum + s.forms.length, 0)
+
+  // Per-step form counts for stepper progress indicators
+  const stepFormCounts: StepFormCount[] = ([1, 2, 3, 4, 5, 6] as PipsStepNumber[]).map(
+    (stepNum) => {
+      const stepContent = STEP_CONTENT[stepNum]
+      const formsForStep = forms.filter(
+        (f) => stepEnumToNumber(f.step as PipsStepEnum) === stepNum,
+      ).length
+      return {
+        stepNumber: stepNum,
+        formsStarted: formsForStep,
+        formsTotal: stepContent.forms.length,
+      }
+    },
+  )
+
+  // Weight: 70% from steps, 30% from forms
+  const stepPct = (stepsCompleted / totalSteps) * 70
+  const formPct = totalForms > 0 ? (Math.min(formsStarted, totalForms) / totalForms) * 30 : 0
+  const percentage = Math.round(stepPct + formPct)
+
+  return { stepsCompleted, totalSteps, formsStarted, totalForms, percentage, stepFormCounts }
 }
 
 /* ============================================================

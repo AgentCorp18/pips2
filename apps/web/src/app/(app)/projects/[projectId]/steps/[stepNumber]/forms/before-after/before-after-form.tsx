@@ -23,6 +23,8 @@ import type { BeforeAfterData } from '@/lib/form-schemas'
 type Props = {
   projectId: string
   initialData: BeforeAfterData | null
+  /** Problem statement from Step 1, used as context for before/after comparison */
+  problemStatementFromStep1?: string
 }
 
 const defaultData: BeforeAfterData = {
@@ -40,7 +42,7 @@ const calcImprovement = (before: string, after: string, unit: string): string =>
   return `${sign}${diff}${unit ? ` ${unit}` : ''} (${sign}${pct}%)`
 }
 
-export const BeforeAfterForm = ({ projectId, initialData }: Props) => {
+export const BeforeAfterForm = ({ projectId, initialData, problemStatementFromStep1 }: Props) => {
   const [data, setData] = useState<BeforeAfterData>(initialData ?? defaultData)
   const [dirty, setDirty] = useState(false)
 
@@ -110,6 +112,17 @@ export const BeforeAfterForm = ({ projectId, initialData }: Props) => {
       onSave={handleSave}
       isDirty={dirty}
     >
+      {problemStatementFromStep1 && (
+        <div
+          className="mb-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-3"
+          data-testid="step1-context-banner"
+        >
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-1">
+            Problem Statement (from Step 1)
+          </p>
+          <p className="text-sm text-[var(--color-text-secondary)]">{problemStatementFromStep1}</p>
+        </div>
+      )}
       <BeforeAfterFields
         data={data}
         update={update}
