@@ -1,9 +1,9 @@
 # PIPS 2.0 — Project Planning Index
 
-> **Version:** 1.2 — Updated 2026-03-12
+> **Version:** 1.3 — Updated 2026-03-12
 > **Created:** March 3, 2026
 > **Owner:** Project Manager Agent (Control Tower)
-> **Status:** MVP Complete — All Post-MVP Phases (1.5-6) COMPLETE, Beta Launch Ready
+> **Status:** All Phases 0-6 COMPLETE — Phase 7 (Beta Launch) IN PROGRESS
 > **Product Name:** PIPS (Process Improvement and Problem Solving)
 > **Owner (Human):** Marc Albers (GitHub: AgentCorp18)
 > **Production URL:** https://pips-app.vercel.app
@@ -24,33 +24,34 @@ Tech Stack: Next.js 16 + TypeScript (strict) + Supabase + Vercel + Tailwind v4 +
 
 ## Current Build Status
 
-| Metric          | Value                                                     |
-| --------------- | --------------------------------------------------------- |
-| Unit tests      | 2,339+ passing (210+ files)                               |
-| E2E tests       | 230+ test cases, 25 spec files (in `apps/web/tests/e2e/`) |
-| Type errors     | 0                                                         |
-| Lint errors     | 0                                                         |
-| PIPS forms      | 18 interactive methodology forms                          |
-| DB migrations   | 13 applied to production                                  |
-| Content nodes   | 205 seeded (FTS active)                                   |
-| Training data   | 4 paths, 27 modules, 59 exercises                         |
-| Marketing pages | 83+ SEO pages                                             |
-| Production      | Live since March 3, 2026                                  |
+| Metric          | Value                                                   |
+| --------------- | ------------------------------------------------------- |
+| Unit tests      | 2,400+ passing (212+ files)                             |
+| E2E tests       | 41+ test cases, 7 spec files (in `apps/web/tests/e2e/`) |
+| Type errors     | 0                                                       |
+| Lint errors     | 0                                                       |
+| PIPS forms      | 18 interactive methodology forms                        |
+| DB migrations   | 13 applied to production                                |
+| Content nodes   | 205 seeded (FTS active)                                 |
+| Training data   | 4 paths, 27 modules, 59 exercises                       |
+| Marketing pages | 83+ SEO pages                                           |
+| Production      | Live since March 3, 2026                                |
 
 ### Phase Completion
 
-| Phase                               | Status   | Commit                                  |
-| ----------------------------------- | -------- | --------------------------------------- |
-| Phase 0 (Foundation)                | COMPLETE | MVP sprints                             |
-| Phase 1 (MVP)                       | COMPLETE | Live since 2026-03-03                   |
-| Phase 1.5 (Stabilization)           | COMPLETE | `85506c3`                               |
-| Phase 2A (Knowledge Hub Foundation) | COMPLETE | `8c3b012`                               |
-| Phase 2B (Reading Experience)       | COMPLETE | `7ec1a48`                               |
-| Phase 2C (Cadence Bar)              | COMPLETE | `0358558`                               |
-| Phase 3 (Training Mode)             | COMPLETE | `ca51d93`, `64b2a03`, `6851176`         |
-| Phase 4 (Marketing Content + SEO)   | COMPLETE | `f493409`, `79acef7`                    |
-| Phase 5 (Workshop Facilitation)     | COMPLETE | `f910c5b`, `29d9bcf`, `2cf29ec`         |
-| Phase 6 (Polish & Quality)          | COMPLETE | ~98% — only WP-6.9 (Final Gate) remains |
+| Phase                               | Status      | Commit                                                  |
+| ----------------------------------- | ----------- | ------------------------------------------------------- |
+| Phase 0 (Foundation)                | COMPLETE    | MVP sprints                                             |
+| Phase 1 (MVP)                       | COMPLETE    | Live since 2026-03-03                                   |
+| Phase 1.5 (Stabilization)           | COMPLETE    | `85506c3`                                               |
+| Phase 2A (Knowledge Hub Foundation) | COMPLETE    | `8c3b012`                                               |
+| Phase 2B (Reading Experience)       | COMPLETE    | `7ec1a48`                                               |
+| Phase 2C (Cadence Bar)              | COMPLETE    | `0358558`                                               |
+| Phase 3 (Training Mode)             | COMPLETE    | `ca51d93`, `64b2a03`, `6851176`                         |
+| Phase 4 (Marketing Content + SEO)   | COMPLETE    | `f493409`, `79acef7`                                    |
+| Phase 5 (Workshop Facilitation)     | COMPLETE    | `f910c5b`, `29d9bcf`, `2cf29ec`                         |
+| Phase 6 (Polish & Quality)          | COMPLETE    | All WPs complete — Lighthouse + Final Gate done (PR #7) |
+| Phase 7 (Beta Launch)               | IN PROGRESS | P0 items 1-4 complete, smoke test + Sentry pending      |
 
 ---
 
@@ -140,8 +141,10 @@ All planning documents in `docs/planning/`, organized by domain with version, ow
 | Document                   | Version | Owner                  | Lines  | Description                                                                          |
 | -------------------------- | ------- | ---------------------- | ------ | ------------------------------------------------------------------------------------ |
 | `FULL_PROJECT_PLAN.md`     | v1.1    | Project Manager Agent  | ~900   | Master execution plan, phase status, critical path, risk register, agent assignments |
-| `DEVELOPMENT_TASK_LIST.md` | v1.2    | Development Lead Agent | ~1,600 | Tactical task list with 59 work packages, status tracking, parallelization map       |
-| `PROJECT_INDEX.md`         | v1.2    | Project Manager Agent  | ~280   | This document — system navigation guide and planning document registry               |
+| `FINAL_PROJECT_PLAN.md`    | v1.0    | Project Manager Agent  | ~160   | Active plan: Phase 7 Beta Launch + P0/P1 items, Phase 8-10 roadmap                   |
+| `DEVELOPMENT_TASK_LIST.md` | v1.3    | Development Lead Agent | ~1,600 | Tactical task list with 59 work packages (all complete), parallelization map         |
+| `INCIDENT_RESPONSE.md`     | v1.0    | DevOps Agent           | ~180   | Incident severity levels, system status checks, common fixes, rollback procedure     |
+| `PROJECT_INDEX.md`         | v1.3    | Project Manager Agent  | ~300   | This document — system navigation guide and planning document registry               |
 
 ### Coordination Documents
 
@@ -213,8 +216,8 @@ Intelligence (Supporting)
 ```bash
 pnpm typecheck        # tsc --noEmit
 pnpm lint             # ESLint
-pnpm test             # Vitest (2,339+ tests)
-pnpm test:e2e         # Playwright (25 spec files)
+pnpm test             # Vitest (2,400+ tests)
+pnpm test:e2e         # Playwright (7 spec files, 41+ tests)
 pnpm build            # Next.js production build
 ```
 
@@ -237,16 +240,17 @@ pnpm training:seed    # Seed training paths, modules, exercises
 | `docs/planning/`      | Planning documents (this directory) |
 | `docs/AGENTS/`        | Agent seed documents                |
 | `docs/work-log/`      | Daily work logs                     |
-| `apps/web/tests/e2e/` | E2E test specs (25 spec files)      |
+| `apps/web/tests/e2e/` | E2E test specs (7 spec files)       |
 
 ---
 
 ## What to Read Next
 
-- **Starting a new work session?** Read `FULL_PROJECT_PLAN.md` for current priorities (beta launch readiness)
+- **Starting a new work session?** Read `FINAL_PROJECT_PLAN.md` for current priorities (Phase 7 Beta Launch)
+- **Active phase?** Phase 7 Beta Launch — P0 items 1-4 complete, P0 items 5-6 (smoke test, Sentry) pending
 - **Security review findings?** Read `docs/reviews/2026-03-12-critical-review.md` for 26 findings (5 critical fixed)
-- **Planning health check?** Read `docs/planning/2026-03-12-plan-review.md` for plan-vs-reality audit
-- **Need task details?** Read `DEVELOPMENT_TASK_LIST.md` for work packages
+- **Incident occurring?** Read `INCIDENT_RESPONSE.md` for diagnosis and rollback procedures
+- **Need task details?** Read `DEVELOPMENT_TASK_LIST.md` for work packages (all 59 complete)
 - **Building a feature?** Read `TECHNICAL_PLAN.md` for architecture and `CLAUDE.md` for conventions
 - **Testing?** Read `TEST_STRATEGY.md` for testing approach
 - **Deploying?** Read `DEVOPS_RUNBOOK.md` for procedures

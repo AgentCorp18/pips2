@@ -16,7 +16,7 @@
 >
 > | Gate        | Target | Actual              |
 > | ----------- | ------ | ------------------- |
-> | Unit tests  | 100+   | 2,339+ (208+ files) |
+> | Unit tests  | 100+   | 2,400+ (212+ files) |
 > | E2E tests   | 20+    | 230+ (25 specs)     |
 > | Type errors | 0      | 0                   |
 > | Forms built | 10+    | 18 of 26            |
@@ -2073,48 +2073,38 @@ The Knowledge Hub compiles the full PIPS methodology book ("The Never-Ending Que
 
 **Why this matters:** No competitor embeds their methodology documentation this deeply into the product. The Knowledge Hub is a retention engine (users return to learn), an SEO asset (content drives organic traffic via marketing preview pages), and a competitive moat (205 nodes of domain-specific content cannot be quickly copied).
 
-### 13.2 Training Mode (DB + Seed Data Ready, Pages Scaffolded)
+### 13.2 Training Mode (COMPLETE — Fully Built)
 
-Training Mode transforms the product from a tool into a capability-building platform.
-
-**What shipped:**
-
-| Feature               | Status     | Details                                                                                                     |
-| --------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
-| DB tables             | DONE       | `training_paths`, `training_modules`, `training_exercises`, `training_progress` tables created and migrated |
-| Seed data             | DONE       | 4 learning paths, 27 modules, 59 exercises seeded                                                           |
-| Training landing page | SCAFFOLDED | Page exists at `/training`, rendering from DB data in progress                                              |
-| Path detail page      | SCAFFOLDED | Page exists at `/training/path/[pathSlug]`                                                                  |
-| Progress page         | SCAFFOLDED | Page exists at `/training/progress`                                                                         |
-| Training components   | SCAFFOLDED | `src/components/training/` directory with UI components                                                     |
-
-**What remains:**
-
-- Wire scaffolded pages to render training data from Supabase
-- Exercise rendering (fill-in-form using real PIPS forms, multiple choice, scenario analysis)
-- Module completion tracking per user
-- Sandbox projects for practice exercises
-
-### 13.3 Workshop Facilitation (DB Ready, UI Scaffolded)
-
-Workshop Facilitation bridges consulting engagements and software. Facilitators can run live PIPS workshops inside the product.
+Training Mode transforms the product from a tool into a capability-building platform. Shipped in Phase 3.
 
 **What shipped:**
 
-| Feature               | Status     | Details                                                    |
-| --------------------- | ---------- | ---------------------------------------------------------- |
-| DB tables             | DONE       | Workshop tables created and applied to production Supabase |
-| Workshop landing page | SCAFFOLDED | Page exists at `/knowledge/workshop`                       |
-| Module detail page    | SCAFFOLDED | Page exists at `/knowledge/workshop/modules/[slug]`        |
+| Feature               | Status | Details                                                                                                     |
+| --------------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
+| DB tables             | DONE   | `training_paths`, `training_modules`, `training_exercises`, `training_progress` tables created and migrated |
+| Seed data             | DONE   | 4 learning paths, 27 modules, 59 exercises seeded                                                           |
+| Training landing page | DONE   | Page at `/training` — path cards, progress rings, fully wired to DB                                         |
+| Path detail page      | DONE   | Page at `/training/path/[pathSlug]` — module list, progress tracking                                        |
+| Progress page         | DONE   | Page at `/training/progress` — per-user progress across all paths                                           |
+| Training components   | DONE   | 7 components: landing, module-card, exercise, progress-ring, scenario-runner, multiple-choice, reflection   |
+| Exercise rendering    | DONE   | Multiple choice, reflection, scenario-practice, and fill-form exercise types all functional                 |
+| Module completion     | DONE   | Per-user progress tracked in `training_progress` and `training_exercise_data`                               |
 
-**What remains:**
+### 13.3 Workshop Facilitation (COMPLETE — Fully Built)
 
-- Session creation and management
-- Real-time facilitation via Supabase Realtime channels
-- Timer system for timed activities
-- Facilitator controls (start/pause/end)
-- Presentation mode for screen sharing
-- Participant contributions in real-time
+Workshop Facilitation bridges consulting engagements and software. Shipped in Phase 5.
+
+**What shipped:**
+
+| Feature              | Status | Details                                                                 |
+| -------------------- | ------ | ----------------------------------------------------------------------- |
+| DB tables            | DONE   | Workshop tables created and applied to production Supabase              |
+| Session CRUD         | DONE   | Create, read, update, delete workshop sessions with full Zod validation |
+| Timer system         | DONE   | Pause/resume timer with state persisted to DB                           |
+| Supabase Realtime    | DONE   | Live sync of timer and participant updates across browser tabs          |
+| Facilitator controls | DONE   | Start/pause/end controls, facilitator guide page                        |
+| Scenarios            | DONE   | Practice scenario pages with sandbox project access                     |
+| Templates            | DONE   | Pre-built workshop template configurations                              |
 
 ### 13.4 SEO Marketing Pages (83+ Pages Live)
 

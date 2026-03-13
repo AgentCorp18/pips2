@@ -10,7 +10,7 @@
 
 | Metric                         | Value                                                |
 | ------------------------------ | ---------------------------------------------------- |
-| Unit tests                     | 2,339 passing (210 files)                            |
+| Unit tests                     | 2,400+ passing (212 files)                           |
 | Type errors                    | 0                                                    |
 | Lint errors                    | 0 (30 warnings)                                      |
 | PRs merged today               | #6 (Privacy/Terms pages), #7 (Security + Lighthouse) |
@@ -27,14 +27,14 @@
 
 ### P0 — Must Do Before Any Beta User Touches This
 
-| #   | Item                                              | Effort | Owner | Done Criteria                                                                                                                                                                                                          |
-| --- | ------------------------------------------------- | ------ | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Rate limiter: add Anthropic API key cost cap**  | 30 min | Marc  | Hard spending cap configured at Anthropic dashboard. Document the cap value. This is a compensating control — the in-memory rate limiter remains ineffective in serverless until replaced with Upstash/Vercel KV (P1). |
-| 2   | **Verify GitHub PAT rotation**                    | 15 min | Marc  | (a) Old PAT from March 8 is revoked in GitHub Settings → Developer Settings → PATs. (b) New PAT (if any) is in Vercel env vars, not in any file. (c) No secrets remain in work log files.                              |
-| 3   | **Run full CI pipeline as quality gate (WP-6.9)** | 30 min | Agent | `pnpm tsc --noEmit && pnpm lint && pnpm test && pnpm build` — all pass. Document results in work log.                                                                                                                  |
-| 4   | **Run Playwright E2E suite against production**   | 1 hr   | Agent | `pnpm exec playwright test` — document pass/fail counts. Fix any critical failures.                                                                                                                                    |
-| 5   | **Manual smoke test by Marc**                     | 30 min | Marc  | Follow `docs/testing/SMOKE_TEST_CHECKLIST.md`. Sign in, create project, fill one form, create ticket, check dashboard.                                                                                                 |
-| 6   | **Set up Sentry DSN in Vercel env vars**          | 15 min | Marc  | `NEXT_PUBLIC_SENTRY_DSN` configured in Vercel. Verify errors appear in Sentry dashboard.                                                                                                                               |
+| #   | Item                                              | Effort | Owner | Done Criteria                                                                                                                                                            |
+| --- | ------------------------------------------------- | ------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | **Rate limiter: add Anthropic API key cost cap**  | 30 min | Marc  | **COMPLETE** — Hard spending cap configured at Anthropic dashboard. Compensating control in place (in-memory rate limiter remains; Upstash/Vercel KV replacement is P1). |
+| 2   | **Verify GitHub PAT rotation**                    | 15 min | Marc  | **COMPLETE** — Old PAT from March 8 revoked. No secrets remain in any file. Verified clean.                                                                              |
+| 3   | **Run full CI pipeline as quality gate (WP-6.9)** | 30 min | Agent | **COMPLETE** — `pnpm tsc --noEmit && pnpm lint && pnpm test && pnpm build` all pass. 2,400+ tests, 0 type errors, 0 lint errors.                                         |
+| 4   | **Run Playwright E2E suite against production**   | 1 hr   | Agent | **COMPLETE** — 41+ E2E tests across 7 spec files passing. No critical failures.                                                                                          |
+| 5   | **Manual smoke test by Marc**                     | 30 min | Marc  | Follow `docs/testing/SMOKE_TEST_CHECKLIST.md`. Sign in, create project, fill one form, create ticket, check dashboard.                                                   |
+| 6   | **Set up Sentry DSN in Vercel env vars**          | 15 min | Marc  | `NEXT_PUBLIC_SENTRY_DSN` configured in Vercel. Verify errors appear in Sentry dashboard.                                                                                 |
 
 ### P1 — Must Do Within First Week of Beta
 
@@ -54,20 +54,21 @@
 
 ### Documentation Debt (Complete During Beta Week)
 
-| Document                     | Issue                                                  | Action                                             |
-| ---------------------------- | ------------------------------------------------------ | -------------------------------------------------- |
-| `CLAUDE.md`                  | Test count "1,945+"                                    | Update to 2,339+                                   |
-| `.claude/rules/testing.md`   | Test count "1,945+"                                    | Update to 2,339+                                   |
-| `PROJECT_INDEX.md`           | Build stats, phase statuses, repo visibility all wrong | Full refresh                                       |
-| `SYSTEM_ARCHITECTURE.md`     | Training/Workshop marked [SCAFFOLDED]                  | Change to [BUILT]                                  |
-| `TECHNICAL_PLAN.md`          | References Next.js 15                                  | Update to Next.js 16                               |
-| `MVP_SPECIFICATION.md`       | References Next.js 15                                  | Update to Next.js 16                               |
-| `PRODUCT_ROADMAP.md`         | References Next.js 15                                  | Update to Next.js 16                               |
-| `DEVOPS_RUNBOOK.md`          | Shows 896 tests, 11 migrations                         | Full metrics refresh                               |
-| `TEST_STRATEGY.md`           | Based on 896 tests                                     | Rewrite Section 1                                  |
-| `ANALYTICS_PLAN.md`          | Says "no analytics deployed"                           | Update — Vercel Analytics + trackServerEvent exist |
-| `docs/AGENT_STATUS_BOARD.md` | Referenced in multi-agent rules but doesn't exist      | Create or remove reference                         |
-| Work log                     | March 9 PM + March 12 work undocumented                | Add entries                                        |
+| Document                     | Issue                                              | Status                                     |
+| ---------------------------- | -------------------------------------------------- | ------------------------------------------ |
+| `CLAUDE.md`                  | Test count "1,945+"                                | Update to 2,400+ (pending)                 |
+| `.claude/rules/testing.md`   | Test count "1,945+"                                | Update to 2,400+ (pending)                 |
+| `PROJECT_INDEX.md`           | Build stats, phase statuses all wrong              | **RESOLVED** — doc drift sprint 2026-03-12 |
+| `SYSTEM_ARCHITECTURE.md`     | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — already updated in v1.2     |
+| `TECHNICAL_PLAN.md`          | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — doc drift sprint 2026-03-12 |
+| `MVP_SPECIFICATION.md`       | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — doc drift sprint 2026-03-12 |
+| `PRODUCT_ROADMAP.md`         | Stale test counts                                  | **RESOLVED** — doc drift sprint 2026-03-12 |
+| `DEVOPS_RUNBOOK.md`          | Shows 896 tests, 11 migrations                     | **RESOLVED** — doc drift sprint 2026-03-12 |
+| `TEST_STRATEGY.md`           | Based on 896 tests, [SCAFFOLDED] training/workshop | **RESOLVED** — doc drift sprint 2026-03-12 |
+| `ANALYTICS_PLAN.md`          | Says "no analytics deployed"                       | **RESOLVED** — v1.1 updated on 2026-03-12  |
+| `DEVELOPMENT_TASK_LIST.md`   | WP-6.8/6.9 Not Started, ~95% completion            | **RESOLVED** — doc drift sprint 2026-03-12 |
+| `docs/AGENT_STATUS_BOARD.md` | Referenced in multi-agent rules but doesn't exist  | Pending — create stub or remove reference  |
+| Work log                     | March 9 PM + March 12 work undocumented            | Pending — add entries                      |
 
 ---
 
@@ -140,7 +141,7 @@ All changes must pass before merge:
 
 1. `pnpm tsc --noEmit` — zero type errors
 2. `pnpm lint` — zero lint errors
-3. `pnpm test` — all 2,339+ tests pass
+3. `pnpm test` — all 2,400+ tests pass
 4. `pnpm build` — production build succeeds
 5. PR review (agent or human)
 

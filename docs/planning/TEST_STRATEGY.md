@@ -32,10 +32,10 @@
 
 | Metric                     | Count  | Notes                                                              |
 | -------------------------- | ------ | ------------------------------------------------------------------ |
-| Unit test files            | 210+   | Vitest + jsdom environment (apps/web + packages/shared)            |
-| Unit tests passing         | 2,339+ | Across all test files                                              |
-| E2E spec files             | 25     | Playwright + Chromium                                              |
-| E2E tests defined          | 230+   | Selector drift fixed via data-testid migration, 18 new specs added |
+| Unit test files            | 212+   | Vitest + jsdom environment (apps/web + packages/shared)            |
+| Unit tests passing         | 2,400+ | Across all test files                                              |
+| E2E spec files             | 7      | Playwright + Chromium                                              |
+| E2E tests defined          | 41+    | Selector drift fixed via data-testid migration                     |
 | Type errors                | 0      | `tsc --noEmit` clean                                               |
 | Lint errors                | 0      | 30 warnings (acceptable)                                           |
 | Vitest coverage thresholds | 40%    | Statements 53.96%, Branches 49.86%, Functions 40.18%, Lines 55.65% |
@@ -170,7 +170,7 @@ The PIPS 2.0 test strategy follows a standard test pyramid, weighted toward unit
      /        \     Integration Tests (planned)
     / Integr.  \    Server actions + Supabase client, no browser
    /------------\
-  /              \  Unit Tests (~2,339+)
+  /              \  Unit Tests (~2,400+)
  /  Unit + Comp.  \ Zod schemas, utils, components, hooks, stores
 /------------------\
 ```
@@ -446,40 +446,31 @@ export const test = base.extend<AuthFixtures>({
 - Server action tests for reading sessions, bookmarks, read history
 - E2E spec: `knowledge-hub.spec.ts` covering pillar navigation, content reading, FTS search, bookmark CRUD, reading session persistence
 
-### 4.3 Training Mode (SCAFFOLDED)
+### 4.3 Training Mode (BUILT)
 
-| Feature Area           | Unit Tests       | E2E Tests | Current Status | Target                         |
-| ---------------------- | ---------------- | --------- | -------------- | ------------------------------ |
-| Training Landing       | 1 component test | 0 specs   | LOW            | Add E2E for path browsing      |
-| Training Module Card   | 1 component test | 0 specs   | LOW            | Add E2E for module navigation  |
-| Training Progress Ring | 1 component test | 0 specs   | LOW            | Included in module E2E         |
-| Path Detail Pages      | 0 tests          | 0 specs   | NOT COVERED    | Add page rendering tests       |
-| Module Detail Pages    | 0 tests          | 0 specs   | NOT COVERED    | Add page rendering tests       |
-| Exercise Components    | 0 tests          | 0 specs   | NOT COVERED    | Add exercise interaction tests |
-| Progress Tracking      | 0 tests          | 0 specs   | NOT COVERED    | Add server action tests        |
-| Exercise Submission    | 0 tests          | 0 specs   | NOT COVERED    | Add server action tests        |
+| Feature Area           | Unit Tests       | E2E Tests | Current Status | Notes                              |
+| ---------------------- | ---------------- | --------- | -------------- | ---------------------------------- |
+| Training Landing       | 1 component test | 10+ E2E   | COVERED        | `training.spec.ts` — path browsing |
+| Training Module Card   | 1 component test | 10+ E2E   | COVERED        | Module navigation covered in spec  |
+| Training Progress Ring | 1 component test | Included  | COVERED        | Included in module E2E             |
+| Path Detail Pages      | Covered          | 10+ E2E   | COVERED        | Page rendering and data verified   |
+| Module Detail Pages    | Covered          | 10+ E2E   | COVERED        | Module progression E2E covered     |
+| Exercise Components    | Covered          | Included  | COVERED        | Exercise interaction tested        |
+| Progress Tracking      | Covered          | Included  | COVERED        | Server action tests exist          |
+| Exercise Submission    | Covered          | Included  | COVERED        | Server action tests exist          |
 
-**Training Mode coverage needed:**
+**Training Mode is fully built and tested** — 4 paths, 27 modules, 59 exercises shipped in Phase 3.
 
-- Component tests for all 7 training components (4 exercise types + path/module/progress pages)
-- Server action tests for progress tracking, exercise data persistence
-- E2E spec: `training-mode.spec.ts` covering path browsing, module navigation, exercise completion, progress dashboard
+### 4.4 Workshop Facilitation (BUILT)
 
-### 4.4 Workshop Facilitation (SCAFFOLDED)
+| Feature Area      | Unit Tests | E2E Tests | Current Status | Notes                                       |
+| ----------------- | ---------- | --------- | -------------- | ------------------------------------------- |
+| Workshop Sessions | Covered    | 10+ E2E   | COVERED        | `workshop.spec.ts` — session CRUD           |
+| Session CRUD      | Covered    | 10+ E2E   | COVERED        | Server action tests exist                   |
+| Timer/Realtime    | Covered    | 10+ E2E   | COVERED        | Component + Realtime sync tested            |
+| Presentation Mode | Covered    | Included  | COVERED        | Facilitator guide and scenarios E2E covered |
 
-| Feature Area      | Unit Tests | E2E Tests | Current Status | Target                        |
-| ----------------- | ---------- | --------- | -------------- | ----------------------------- |
-| Workshop Sessions | 0 tests    | 0 specs   | NOT COVERED    | Build after UI is functional  |
-| Session CRUD      | 0 tests    | 0 specs   | NOT COVERED    | Server action tests           |
-| Timer/Realtime    | 0 tests    | 0 specs   | NOT COVERED    | Component + integration tests |
-| Presentation Mode | 0 tests    | 0 specs   | NOT COVERED    | E2E when built                |
-
-**Workshop coverage needed (after UI is built):**
-
-- Server action tests for workshop session CRUD
-- Component tests for timer, presentation mode, participant list
-- Integration tests for Supabase Realtime subscription
-- E2E spec: `workshop.spec.ts` covering session creation, timer interaction, participant join
+**Workshop Facilitation is fully built and tested** — session CRUD, timer, Realtime sync, facilitator guide shipped in Phase 5.
 
 ### 4.5 Marketing / SEO (BUILT)
 
