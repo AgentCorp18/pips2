@@ -259,7 +259,12 @@ describe('loadFormData', () => {
 
   it('returns the form data when found', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { data: { summary: 'Problem is...', gap: '20%' } } }]
+    fromResults = [
+      // from('projects').select('org_id') -> project found
+      { data: { org_id: 'org-1' } },
+      // from('project_forms').select('data') -> form data found
+      { data: { data: { summary: 'Problem is...', gap: '20%' } } },
+    ]
 
     const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
     expect(result).toEqual({ summary: 'Problem is...', gap: '20%' })
@@ -267,7 +272,7 @@ describe('loadFormData', () => {
 
   it('returns null when no form data exists', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null }]
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: null }]
 
     const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
     expect(result).toBeNull()
@@ -275,7 +280,7 @@ describe('loadFormData', () => {
 
   it('returns null when data property is null', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { data: null } }]
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: { data: null } }]
 
     const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
     expect(result).toBeNull()
@@ -289,7 +294,7 @@ describe('loadFormData', () => {
         { name: 'Process', causes: ['No SOP'] },
       ],
     }
-    fromResults = [{ data: { data: complexData } }]
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: { data: complexData } }]
 
     const result = await loadFormData(VALID_PROJECT_ID, 2, 'fishbone')
     expect(result).toEqual(complexData)
@@ -298,9 +303,17 @@ describe('loadFormData', () => {
   it('returns array form data', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     const arrayData = { ideas: ['idea1', 'idea2', 'idea3'] }
-    fromResults = [{ data: { data: arrayData } }]
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: { data: arrayData } }]
 
     const result = await loadFormData(VALID_PROJECT_ID, 3, 'brainstorming')
     expect(result).toEqual(arrayData)
+  })
+
+  it('returns null when project is not found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: null }]
+
+    const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
+    expect(result).toBeNull()
   })
 })

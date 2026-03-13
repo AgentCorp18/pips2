@@ -144,6 +144,21 @@ export const loadFormData = async (
     return null
   }
 
+  // Defense-in-depth: verify user has access to the project's org
+  const { data: project } = await supabase
+    .from('projects')
+    .select('org_id')
+    .eq('id', projectId)
+    .single()
+
+  if (!project) return null
+
+  try {
+    await requirePermission(project.org_id, 'data.view')
+  } catch {
+    return null
+  }
+
   const stepEnum = stepNumberToEnum(stepNumber)
   const { data } = await supabase
     .from('project_forms')
