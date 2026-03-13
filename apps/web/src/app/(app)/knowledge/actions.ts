@@ -71,7 +71,6 @@ export const getContentBySlug = cache(
       .select('*')
       .eq('pillar', pillar)
       .eq('slug', slug)
-      .is('parent_id', null)
       .single()
 
     if (error) {
@@ -136,16 +135,14 @@ export const getContentForContext = async (
 ): Promise<ContentNodeRow[]> => {
   const supabase = await createClient()
 
-  // Use Postgres JSONB containment to match tags
-  // Match nodes where tags->'steps' overlaps with our steps OR tags->'tools' overlaps with our tools
-  // For simplicity, fetch all and filter client-side
+  // Fetch all top-level nodes and filter client-side by tag overlap.
+  // No limit here — we need to search across all pillars to find matches.
   // (Postgres JSONB array overlap queries are complex in PostgREST)
   const { data, error } = await supabase
     .from('content_nodes')
     .select('*')
     .is('parent_id', null)
     .order('sort_order')
-    .limit(20)
   if (error) {
     console.error('getContentForContext error:', error)
     return []

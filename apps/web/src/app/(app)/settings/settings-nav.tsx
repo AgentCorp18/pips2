@@ -4,22 +4,28 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Building2, Users, Bell, ScrollText, Shield, Crown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { OrgRole } from '@/stores/org-store'
 
 const SETTINGS_NAV_ITEMS = [
-  { label: 'General', href: '/settings', icon: Building2 },
-  { label: 'Members', href: '/settings/members', icon: Users },
-  { label: 'Notifications', href: '/settings/notifications', icon: Bell },
-  { label: 'Security', href: '/settings/security', icon: Shield },
-  { label: 'Audit Log', href: '/settings/audit-log', icon: ScrollText },
-  { label: 'Admin', href: '/settings/admin', icon: Crown },
+  { label: 'General', href: '/settings', icon: Building2, adminOnly: false },
+  { label: 'Members', href: '/settings/members', icon: Users, adminOnly: false },
+  { label: 'Notifications', href: '/settings/notifications', icon: Bell, adminOnly: false },
+  { label: 'Security', href: '/settings/security', icon: Shield, adminOnly: false },
+  { label: 'Audit Log', href: '/settings/audit-log', icon: ScrollText, adminOnly: true },
+  { label: 'Admin', href: '/settings/admin', icon: Crown, adminOnly: true },
 ]
 
-export const SettingsNav = () => {
+type SettingsNavProps = {
+  role?: OrgRole
+}
+
+export const SettingsNav = ({ role }: SettingsNavProps) => {
+  const isAdmin = role === 'owner' || role === 'admin'
   const pathname = usePathname()
 
   return (
     <nav className="mb-6 flex gap-1 border-b border-[var(--color-border)]">
-      {SETTINGS_NAV_ITEMS.map((item) => {
+      {SETTINGS_NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
         const Icon = item.icon
         const isActive =
           item.href === '/settings' ? pathname === '/settings' : pathname.startsWith(item.href)

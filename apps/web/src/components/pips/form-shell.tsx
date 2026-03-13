@@ -186,7 +186,7 @@ export const FormShell = (props: FormShellProps) => {
           hasBeenSavedRef.current = true
           const nextStepHint =
             stepNumber < 6
-              ? ` Next up: continue with Step ${stepNumber} tools or advance to Step ${stepNumber + 1}.`
+              ? ` Great progress! Next up: advance to Step ${stepNumber + 1} when you're ready.`
               : ' You can now complete the evaluation.'
           toast.success(`${title} saved!${nextStepHint}`, { duration: 5000 })
         }

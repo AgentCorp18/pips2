@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { toast } from 'sonner'
@@ -26,6 +26,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  SortableHeader,
+  nextSortState,
+  sortRows,
+  type SortDirection,
+} from '@/components/ui/sortable-header'
 import type { TeamMember } from '../actions'
 import { removeTeamMember } from '../actions'
 import { AddMemberDialog } from './add-member-dialog'
@@ -51,6 +57,36 @@ export const TeamMembersList = ({
 }: TeamMembersListProps) => {
   const router = useRouter()
   const [removingUserId, setRemovingUserId] = useState<string | null>(null)
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null)
+
+  const handleSort = (key: string) => {
+    const next = nextSortState(sortKey, sortDirection, key)
+    setSortKey(next.sortKey)
+    setSortDirection(next.direction)
+  }
+
+  const sortableRows = useMemo(
+    () =>
+      members.map((m) => ({
+        name: m.profiles?.display_name ?? m.profiles?.full_name ?? 'Unknown',
+        email: m.profiles?.email ?? '',
+        role: m.role,
+        joined_at: m.joined_at,
+        _original: m,
+      })),
+    [members],
+  )
+
+  const sortedRows = useMemo(
+    () =>
+      sortRows(
+        sortableRows as unknown as Record<string, unknown>[],
+        sortKey,
+        sortDirection,
+      ) as typeof sortableRows,
+    [sortableRows, sortKey, sortDirection],
+  )
 
   const memberToRemove = members.find((m) => m.user_id === removingUserId)
 
@@ -85,15 +121,40 @@ export const TeamMembersList = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Joined</TableHead>
+              <SortableHeader
+                label="Name"
+                sortKey="name"
+                currentSort={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Email"
+                sortKey="email"
+                currentSort={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Role"
+                sortKey="role"
+                currentSort={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Joined"
+                sortKey="joined_at"
+                currentSort={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
               {canManage && <TableHead className="w-12" />}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {members.map((member) => {
+            {sortedRows.map((row) => {
+              const member = row._original
               const displayName =
                 member.profiles?.display_name ?? member.profiles?.full_name ?? 'Unknown'
               const email = member.profiles?.email ?? '--'

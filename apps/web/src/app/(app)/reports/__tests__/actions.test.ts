@@ -76,10 +76,16 @@ describe('getReportsHubStats', () => {
     vi.mocked(requirePermission).mockResolvedValue('admin')
   })
 
-  it('throws when caller is not a member of the org', async () => {
+  it('returns empty stats when caller lacks permission', async () => {
     vi.mocked(requirePermission).mockRejectedValue(new Error('Not a member of this organization'))
 
-    await expect(getReportsHubStats('org-1')).rejects.toThrow('Not a member of this organization')
+    const result = await getReportsHubStats('org-1')
+    expect(result).toEqual({
+      activeProjects: 0,
+      openTickets: 0,
+      totalMembers: 0,
+      formsCompleted: 0,
+    })
     expect(requirePermission).toHaveBeenCalledWith('org-1', 'data.view')
   })
 

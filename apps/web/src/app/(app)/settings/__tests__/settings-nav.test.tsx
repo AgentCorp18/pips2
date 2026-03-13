@@ -36,8 +36,13 @@ describe('SettingsNav', () => {
     expect(screen.getByText('Notifications')).toBeTruthy()
   })
 
-  it('renders Audit Log link', () => {
+  it('hides Audit Log link for non-admin', () => {
     render(<SettingsNav />)
+    expect(screen.queryByText('Audit Log')).toBeNull()
+  })
+
+  it('renders Audit Log link for admin', () => {
+    render(<SettingsNav role="admin" />)
     expect(screen.getByText('Audit Log')).toBeTruthy()
   })
 
@@ -47,7 +52,7 @@ describe('SettingsNav', () => {
   })
 
   it('links to correct paths', () => {
-    render(<SettingsNav />)
+    render(<SettingsNav role="owner" />)
     expect(screen.getByText('General').closest('a')?.getAttribute('href')).toBe('/settings')
     expect(screen.getByText('Members').closest('a')?.getAttribute('href')).toBe('/settings/members')
     expect(screen.getByText('Notifications').closest('a')?.getAttribute('href')).toBe(
@@ -72,15 +77,20 @@ describe('SettingsNav', () => {
     expect(membersLink?.className).toContain('border-[var(--color-primary)]')
   })
 
-  it('renders Admin link', () => {
+  it('hides Admin link for non-admin', () => {
     render(<SettingsNav />)
+    expect(screen.queryByText('Admin')).toBeNull()
+  })
+
+  it('renders Admin link for owner', () => {
+    render(<SettingsNav role="owner" />)
     expect(screen.getByText('Admin')).toBeTruthy()
     expect(screen.getByText('Admin').closest('a')?.getAttribute('href')).toBe('/settings/admin')
   })
 
   it('highlights active Admin tab', () => {
     mockPathname = '/settings/admin'
-    render(<SettingsNav />)
+    render(<SettingsNav role="admin" />)
     const adminLink = screen.getByText('Admin').closest('a')
     expect(adminLink?.className).toContain('border-[var(--color-primary)]')
   })

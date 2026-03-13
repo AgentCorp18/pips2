@@ -3,18 +3,11 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { KpiCard } from '@/components/reports/kpi-card'
 import { FormCompletionChart } from '@/components/reports/form-completion-chart'
 import { StepDurationChart } from '@/components/reports/step-duration-chart'
 import { ToolPopularityChart } from '@/components/reports/tool-popularity-chart'
+import { StepBreakdownTable } from '@/components/reports/step-breakdown-table'
 import { BookOpen, Clock, Wrench, TrendingUp, ArrowLeft } from 'lucide-react'
 import {
   getMethodologyKpis,
@@ -136,55 +129,7 @@ const MethodologyInsightsPage = async () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Step</TableHead>
-                <TableHead>Avg Duration</TableHead>
-                <TableHead>Forms Completed</TableHead>
-                <TableHead>Completion Rate</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {stepRows.map((row) => (
-                <TableRow key={row.stepName}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: row.color }}
-                      />
-                      <span className="font-medium">{row.stepName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {row.avgDuration > 0 ? (
-                      <span>{row.avgDuration} days</span>
-                    ) : (
-                      <span style={{ color: 'var(--color-text-tertiary)' }}>--</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{row.formsCompleted}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-12 overflow-hidden rounded-full bg-[var(--color-surface-secondary)]">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{
-                            width: `${row.completionRate}%`,
-                            backgroundColor: row.color,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                        {row.completionRate}%
-                      </span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <StepBreakdownTable rows={stepRows} />
         </CardContent>
       </Card>
     </div>

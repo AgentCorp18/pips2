@@ -120,10 +120,7 @@ const BookPage = async () => {
           <div className="rounded-lg border border-dashed border-[var(--color-border)] px-6 py-12 text-center">
             <BookOpen size={32} className="mx-auto text-[var(--color-text-tertiary)]" />
             <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
-              No book content available yet. Run the content compiler to populate.
-            </p>
-            <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
-              pnpm content:compile && pnpm content:seed
+              Book content is being prepared. Check back soon!
             </p>
           </div>
         )}

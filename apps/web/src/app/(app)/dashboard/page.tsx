@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { Badge } from '@/components/ui/badge'
 import { StatCards } from '@/components/dashboard/stat-cards'
 import { ProjectsByStepChart } from '@/components/dashboard/projects-by-step-chart'
@@ -29,30 +30,22 @@ const DashboardPage = async () => {
     redirect('/login')
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id, role')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     redirect('/onboarding')
   }
 
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('name, slug, plan')
-    .eq('id', membership.org_id)
-    .single()
+  const { orgId, orgName, role } = currentOrg
+
+  // Fetch org plan separately — getCurrentOrg only returns id/name/role
+  const { data: org } = await supabase.from('organizations').select('plan').eq('id', orgId).single()
 
   if (!org) {
     redirect('/onboarding')
   }
 
-  const orgId = membership.org_id
-  const roleLabel = membership.role as string
+  const roleLabel = role as string
 
   const [stats, stepData, activity] = await Promise.all([
     getDashboardStats(orgId),
@@ -78,7 +71,7 @@ const DashboardPage = async () => {
             style={{ color: 'var(--color-text-primary)' }}
             data-testid="dashboard-heading"
           >
-            {org.name}
+            {orgName}
           </h1>
           <Badge variant="secondary" data-testid="dashboard-role-badge">
             {roleLabel.charAt(0).toUpperCase() + roleLabel.slice(1)}

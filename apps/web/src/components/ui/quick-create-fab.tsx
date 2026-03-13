@@ -14,7 +14,7 @@ export const QuickCreateFab = () => {
     >
       {open && (
         <div
-          className="flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-2 shadow-lg"
+          className="flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-lg"
           data-testid="fab-menu"
         >
           <Link
@@ -44,7 +44,7 @@ export const QuickCreateFab = () => {
         aria-label={open ? 'Close quick create menu' : 'Open quick create menu'}
         onClick={() => setOpen((prev) => !prev)}
         className="flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110"
-        style={{ backgroundColor: '#4F46E5' }}
+        style={{ backgroundColor: 'var(--color-primary)' }}
       >
         {open ? <X size={24} /> : <Plus size={24} />}
       </button>

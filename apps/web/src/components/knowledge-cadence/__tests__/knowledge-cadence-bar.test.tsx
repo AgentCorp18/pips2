@@ -89,15 +89,15 @@ describe('KnowledgeCadenceBar', () => {
     })
   })
 
-  it('renders "No match" for pillars without content', async () => {
+  it('renders "Coming soon" for pillars without content', async () => {
     mockGetContentForContext.mockResolvedValue([
       { id: 'n1', pillar: 'book', title: 'Chapter 1', slug: 'ch1', sort_order: 0 },
     ])
     render(<KnowledgeCadenceBar context={CONTEXT} />)
 
     await waitFor(() => {
-      const noMatches = screen.getAllByText('No match')
-      expect(noMatches.length).toBe(3) // guide, workbook, workshop
+      const comingSoon = screen.getAllByText('Coming soon')
+      expect(comingSoon.length).toBe(3) // guide, workbook, workshop
     })
   })
 

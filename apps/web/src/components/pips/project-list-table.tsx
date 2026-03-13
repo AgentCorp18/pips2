@@ -2,16 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { PIPS_STEPS } from '@pips/shared'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { FormattedDate } from '@/components/ui/formatted-date'
+import { SortableHeader } from '@/components/ui/sortable-header'
+import { useSortable } from '@/hooks/use-sortable'
 
 /* ============================================================
    Types
@@ -51,6 +46,7 @@ const STATUS_CONFIG: Record<
 
 export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
   const router = useRouter()
+  const { sortedData, sortKey, sortDirection, handleSort } = useSortable(projects)
 
   return (
     <div
@@ -60,16 +56,52 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Current Step</TableHead>
-            <TableHead>Steps Completed</TableHead>
-            <TableHead>Owner</TableHead>
-            <TableHead>Target Date</TableHead>
+            <SortableHeader
+              label="Name"
+              sortKey="name"
+              currentSort={sortKey}
+              currentDirection={sortDirection}
+              onSort={handleSort}
+            />
+            <SortableHeader
+              label="Status"
+              sortKey="status"
+              currentSort={sortKey}
+              currentDirection={sortDirection}
+              onSort={handleSort}
+            />
+            <SortableHeader
+              label="Current Step"
+              sortKey="currentStep"
+              currentSort={sortKey}
+              currentDirection={sortDirection}
+              onSort={handleSort}
+            />
+            <SortableHeader
+              label="Steps Completed"
+              sortKey="stepsCompleted"
+              currentSort={sortKey}
+              currentDirection={sortDirection}
+              onSort={handleSort}
+            />
+            <SortableHeader
+              label="Owner"
+              sortKey="ownerName"
+              currentSort={sortKey}
+              currentDirection={sortDirection}
+              onSort={handleSort}
+            />
+            <SortableHeader
+              label="Target Date"
+              sortKey="targetDate"
+              currentSort={sortKey}
+              currentDirection={sortDirection}
+              onSort={handleSort}
+            />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {projects.map((project) => {
+          {sortedData.map((project) => {
             const fallback = { label: 'Active', variant: 'default' as const }
             const statusConfig = STATUS_CONFIG[project.status] ?? fallback
             const currentPipsStep = PIPS_STEPS.find((s) => s.number === project.currentStep)

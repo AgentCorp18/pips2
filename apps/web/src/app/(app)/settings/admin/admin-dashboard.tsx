@@ -5,15 +5,10 @@ import { Users, FolderKanban, UsersRound, Ticket, FileText, Activity } from 'luc
 import { ROLE_LABELS, type OrgRole } from '@pips/shared'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table'
 import { FormattedDate } from '@/components/ui/formatted-date'
+import { SortableHeader } from '@/components/ui/sortable-header'
+import { useSortable } from '@/hooks/use-sortable'
 import type { AdminStats, AdminMember, AdminTeam, AdminProject } from './actions'
 
 type AdminDashboardProps = {
@@ -42,6 +37,27 @@ const roleBadgeVariant = (role: OrgRole) => {
 }
 
 export const AdminDashboard = ({ stats, members, teams, projects }: AdminDashboardProps) => {
+  const {
+    sortedData: sortedMembers,
+    sortKey: memberSortKey,
+    sortDirection: memberSortDir,
+    handleSort: handleMemberSort,
+  } = useSortable(members)
+
+  const {
+    sortedData: sortedTeams,
+    sortKey: teamSortKey,
+    sortDirection: teamSortDir,
+    handleSort: handleTeamSort,
+  } = useSortable(teams)
+
+  const {
+    sortedData: sortedProjects,
+    sortKey: projectSortKey,
+    sortDirection: projectSortDir,
+    handleSort: handleProjectSort,
+  } = useSortable(projects)
+
   return (
     <div className="space-y-8">
       {/* Stat cards */}
@@ -77,16 +93,54 @@ export const AdminDashboard = ({ stats, members, teams, projects }: AdminDashboa
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="text-center">Teams</TableHead>
-                <TableHead className="text-center">Projects</TableHead>
-                <TableHead>Joined</TableHead>
+                <SortableHeader
+                  label="Name"
+                  sortKey="full_name"
+                  currentSort={memberSortKey}
+                  currentDirection={memberSortDir}
+                  onSort={handleMemberSort}
+                />
+                <SortableHeader
+                  label="Email"
+                  sortKey="email"
+                  currentSort={memberSortKey}
+                  currentDirection={memberSortDir}
+                  onSort={handleMemberSort}
+                />
+                <SortableHeader
+                  label="Role"
+                  sortKey="role"
+                  currentSort={memberSortKey}
+                  currentDirection={memberSortDir}
+                  onSort={handleMemberSort}
+                />
+                <SortableHeader
+                  label="Teams"
+                  sortKey="team_count"
+                  currentSort={memberSortKey}
+                  currentDirection={memberSortDir}
+                  onSort={handleMemberSort}
+                  className="text-center"
+                />
+                <SortableHeader
+                  label="Projects"
+                  sortKey="project_count"
+                  currentSort={memberSortKey}
+                  currentDirection={memberSortDir}
+                  onSort={handleMemberSort}
+                  className="text-center"
+                />
+                <SortableHeader
+                  label="Joined"
+                  sortKey="joined_at"
+                  currentSort={memberSortKey}
+                  currentDirection={memberSortDir}
+                  onSort={handleMemberSort}
+                />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {members.map((member) => (
+              {sortedMembers.map((member) => (
                 <TableRow key={member.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
@@ -150,12 +204,25 @@ export const AdminDashboard = ({ stats, members, teams, projects }: AdminDashboa
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Team</TableHead>
-                    <TableHead className="text-center">Members</TableHead>
+                    <SortableHeader
+                      label="Team"
+                      sortKey="name"
+                      currentSort={teamSortKey}
+                      currentDirection={teamSortDir}
+                      onSort={handleTeamSort}
+                    />
+                    <SortableHeader
+                      label="Members"
+                      sortKey="member_count"
+                      currentSort={teamSortKey}
+                      currentDirection={teamSortDir}
+                      onSort={handleTeamSort}
+                      className="text-center"
+                    />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {teams.map((team) => (
+                  {sortedTeams.map((team) => (
                     <TableRow key={team.id}>
                       <TableCell className="font-medium">
                         <Link
@@ -201,14 +268,39 @@ export const AdminDashboard = ({ stats, members, teams, projects }: AdminDashboa
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Project</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead className="text-center">Members</TableHead>
+                    <SortableHeader
+                      label="Project"
+                      sortKey="title"
+                      currentSort={projectSortKey}
+                      currentDirection={projectSortDir}
+                      onSort={handleProjectSort}
+                    />
+                    <SortableHeader
+                      label="Status"
+                      sortKey="status"
+                      currentSort={projectSortKey}
+                      currentDirection={projectSortDir}
+                      onSort={handleProjectSort}
+                    />
+                    <SortableHeader
+                      label="Owner"
+                      sortKey="owner_name"
+                      currentSort={projectSortKey}
+                      currentDirection={projectSortDir}
+                      onSort={handleProjectSort}
+                    />
+                    <SortableHeader
+                      label="Members"
+                      sortKey="member_count"
+                      currentSort={projectSortKey}
+                      currentDirection={projectSortDir}
+                      onSort={handleProjectSort}
+                      className="text-center"
+                    />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {projects.map((project) => (
+                  {sortedProjects.map((project) => (
                     <TableRow key={project.id}>
                       <TableCell className="max-w-[180px] truncate font-medium">
                         <Link

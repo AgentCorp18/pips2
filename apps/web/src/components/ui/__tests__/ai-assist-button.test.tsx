@@ -36,6 +36,21 @@ const TestWrapper = ({
   )
 }
 
+const createStreamResponse = (text: string) => ({
+  ok: true,
+  body: {
+    getReader: () => ({
+      read: vi
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(text),
+        })
+        .mockResolvedValueOnce({ done: true, value: undefined }),
+    }),
+  },
+})
+
 /* ============================================================
    Tests
    ============================================================ */
@@ -61,8 +76,16 @@ describe('AiAssistButton', () => {
     const user = userEvent.setup()
     render(<TestWrapper />)
     await user.click(screen.getByTestId('ai-assist-button'))
-    expect(screen.getByRole('button', { name: /generate/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /improve existing/i })).toBeInTheDocument()
+    expect(screen.getByTestId('ai-generate-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('ai-improve-btn')).toBeInTheDocument()
+  })
+
+  it('shows tone selector', async () => {
+    const user = userEvent.setup()
+    render(<TestWrapper />)
+    await user.click(screen.getByTestId('ai-assist-button'))
+    expect(screen.getByTestId('tone-selector')).toBeInTheDocument()
+    expect(screen.getByText('Professional')).toBeInTheDocument()
   })
 
   it('shows Cancel and Accept buttons in the dialog', async () => {
@@ -70,21 +93,21 @@ describe('AiAssistButton', () => {
     render(<TestWrapper />)
     await user.click(screen.getByTestId('ai-assist-button'))
     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /accept/i })).toBeInTheDocument()
+    expect(screen.getByTestId('ai-accept-btn')).toBeInTheDocument()
   })
 
   it('disables Accept button when there is no completion', async () => {
     const user = userEvent.setup()
     render(<TestWrapper />)
     await user.click(screen.getByTestId('ai-assist-button'))
-    expect(screen.getByRole('button', { name: /accept/i })).toBeDisabled()
+    expect(screen.getByTestId('ai-accept-btn')).toBeDisabled()
   })
 
   it('disables Improve button when textarea is empty', async () => {
     const user = userEvent.setup()
     render(<TestWrapper value="" />)
     await user.click(screen.getByTestId('ai-assist-button'))
-    expect(screen.getByRole('button', { name: /improve existing/i })).toBeDisabled()
+    expect(screen.getByTestId('ai-improve-btn')).toBeDisabled()
   })
 
   it('shows current text label when textarea has content', async () => {
@@ -95,33 +118,20 @@ describe('AiAssistButton', () => {
     expect(screen.getByText('Current text')).toBeInTheDocument()
   })
 
-  it('calls fetch with correct endpoint when Generate is clicked', async () => {
+  it('calls fetch with correct endpoint and tone when Generate is clicked', async () => {
     const user = userEvent.setup()
-    mockFetch.mockResolvedValue({
-      ok: true,
-      body: {
-        getReader: () => ({
-          read: vi
-            .fn()
-            .mockResolvedValueOnce({
-              done: false,
-              value: new TextEncoder().encode('AI response'),
-            })
-            .mockResolvedValueOnce({ done: true, value: undefined }),
-        }),
-      },
-    })
+    mockFetch.mockResolvedValue(createStreamResponse('AI response'))
 
     render(<TestWrapper />)
     await user.click(screen.getByTestId('ai-assist-button'))
-    await user.click(screen.getByRole('button', { name: /generate/i }))
+    await user.click(screen.getByTestId('ai-generate-btn'))
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         '/api/ai/assist',
         expect.objectContaining({
           method: 'POST',
-          body: expect.stringContaining('"fieldType":"general"'),
+          body: expect.stringContaining('"tone":"professional"'),
         }),
       )
     })
@@ -136,7 +146,7 @@ describe('AiAssistButton', () => {
 
     render(<TestWrapper />)
     await user.click(screen.getByTestId('ai-assist-button'))
-    await user.click(screen.getByRole('button', { name: /generate/i }))
+    await user.click(screen.getByTestId('ai-generate-btn'))
 
     await waitFor(() => {
       expect(screen.getByText('API key not configured')).toBeInTheDocument()
@@ -154,33 +164,93 @@ describe('AiAssistButton', () => {
     })
   })
 
-  it('calls onAccept with completion text and closes dialog', async () => {
+  it('shows editable textarea after generation', async () => {
+    const user = userEvent.setup()
+    mockFetch.mockResolvedValue(createStreamResponse('Generated content'))
+
+    render(<TestWrapper />)
+    await user.click(screen.getByTestId('ai-assist-button'))
+    await user.click(screen.getByTestId('ai-generate-btn'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-output-editor')).toBeInTheDocument()
+    })
+  })
+
+  it('shows regenerate button after generation', async () => {
+    const user = userEvent.setup()
+    mockFetch.mockResolvedValue(createStreamResponse('Generated content'))
+
+    render(<TestWrapper />)
+    await user.click(screen.getByTestId('ai-assist-button'))
+    await user.click(screen.getByTestId('ai-generate-btn'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-regenerate-btn')).toBeInTheDocument()
+    })
+  })
+
+  it('shows refine input after generation', async () => {
+    const user = userEvent.setup()
+    mockFetch.mockResolvedValue(createStreamResponse('Generated content'))
+
+    render(<TestWrapper />)
+    await user.click(screen.getByTestId('ai-assist-button'))
+    await user.click(screen.getByTestId('ai-generate-btn'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-refine-input')).toBeInTheDocument()
+    })
+  })
+
+  it('calls onAccept with edited text and closes dialog', async () => {
     const user = userEvent.setup()
     const onAccept = vi.fn()
-    mockFetch.mockResolvedValue({
-      ok: true,
-      body: {
-        getReader: () => ({
-          read: vi
-            .fn()
-            .mockResolvedValueOnce({
-              done: false,
-              value: new TextEncoder().encode('Generated content'),
-            })
-            .mockResolvedValueOnce({ done: true, value: undefined }),
-        }),
-      },
-    })
+    mockFetch.mockResolvedValue(createStreamResponse('Generated content'))
 
     render(<TestWrapper onAccept={onAccept} />)
     await user.click(screen.getByTestId('ai-assist-button'))
-    await user.click(screen.getByRole('button', { name: /generate/i }))
+    await user.click(screen.getByTestId('ai-generate-btn'))
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /accept/i })).not.toBeDisabled()
+      expect(screen.getByTestId('ai-accept-btn')).not.toBeDisabled()
     })
 
-    await user.click(screen.getByRole('button', { name: /accept/i }))
-    expect(onAccept).toHaveBeenCalledWith('Generated content')
+    // Edit the output
+    const editor = screen.getByTestId('ai-output-editor')
+    await user.clear(editor)
+    await user.type(editor, 'Edited content')
+
+    await user.click(screen.getByTestId('ai-accept-btn'))
+    expect(onAccept).toHaveBeenCalledWith('Edited content')
+  })
+
+  it('sends refine request with user feedback', async () => {
+    const user = userEvent.setup()
+    mockFetch
+      .mockResolvedValueOnce(createStreamResponse('First draft'))
+      .mockResolvedValueOnce(createStreamResponse('Refined version'))
+
+    render(<TestWrapper />)
+    await user.click(screen.getByTestId('ai-assist-button'))
+    await user.click(screen.getByTestId('ai-generate-btn'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-refine-input')).toBeInTheDocument()
+    })
+
+    const refineInput = screen.getByTestId('ai-refine-input')
+    await user.type(refineInput, 'Make it shorter')
+    await user.click(screen.getByTestId('ai-refine-btn'))
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+      expect(mockFetch).toHaveBeenLastCalledWith(
+        '/api/ai/assist',
+        expect.objectContaining({
+          body: expect.stringContaining('Make it shorter'),
+        }),
+      )
+    })
   })
 })

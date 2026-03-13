@@ -20,10 +20,10 @@ export const ProjectTabs = ({ projectId }: ProjectTabsProps) => {
   const basePath = `/projects/${projectId}`
 
   const activeTab = (() => {
-    if (pathname === basePath || pathname === `${basePath}/`) return 'overview'
     if (pathname.startsWith(`${basePath}/board`)) return 'board'
     if (pathname.startsWith(`${basePath}/forms`)) return 'forms'
-    return null
+    // Steps and overview are all part of the Overview tab
+    return 'overview'
   })()
 
   return (

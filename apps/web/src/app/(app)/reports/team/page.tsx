@@ -3,18 +3,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { KpiCard } from '@/components/reports/kpi-card'
 import { TeamContributionsChart } from '@/components/reports/team-contributions-chart'
 import { ActivityTimelineChart } from '@/components/reports/activity-timeline-chart'
+import { TeamMembersTable } from '@/components/reports/team-members-table'
 import { Users, UserCheck, TicketCheck, Clock, ArrowLeft } from 'lucide-react'
 import {
   getTeamActivityKpis,
@@ -128,47 +120,7 @@ const TeamActivityPage = async () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {memberRows.length === 0 ? (
-            <div
-              className="flex h-32 items-center justify-center text-sm"
-              style={{ color: 'var(--color-text-tertiary)' }}
-            >
-              No team members yet. Invite members to see activity data.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Assigned</TableHead>
-                  <TableHead>Completed</TableHead>
-                  <TableHead>Last Active</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {memberRows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="font-medium">{row.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{row.role}</Badge>
-                    </TableCell>
-                    <TableCell>{row.ticketsAssigned}</TableCell>
-                    <TableCell>{row.ticketsCompleted}</TableCell>
-                    <TableCell>
-                      {row.lastActive ? (
-                        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                          {new Date(row.lastActive).toLocaleDateString()}
-                        </span>
-                      ) : (
-                        <span style={{ color: 'var(--color-text-tertiary)' }}>--</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <TeamMembersTable rows={memberRows} />
         </CardContent>
       </Card>
     </div>
