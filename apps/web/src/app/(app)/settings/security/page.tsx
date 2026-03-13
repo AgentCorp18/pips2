@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChangePasswordForm } from './change-password-form'
+import { ExportDataButton } from './export-data-button'
 
 export const metadata: Metadata = {
   title: 'Security',
@@ -23,6 +25,20 @@ const SecuritySettingsPage = () => {
       </div>
 
       <ChangePasswordForm />
+
+      <div className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Data Export</CardTitle>
+            <CardDescription>
+              Download a copy of all your personal data stored in PIPS.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExportDataButton />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
