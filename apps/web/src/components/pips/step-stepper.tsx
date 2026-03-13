@@ -9,6 +9,10 @@ type StepStatus = 'not_started' | 'in_progress' | 'completed' | 'skipped'
 export type StepData = {
   step_number: number
   status: StepStatus
+  /** Number of forms started for this step */
+  formsStarted?: number
+  /** Total forms available for this step */
+  formsTotal?: number
 }
 
 type StepStepperProps = {
@@ -38,6 +42,8 @@ export const StepStepper = ({ steps, currentStep, onStepClick }: StepStepperProp
           const isCurrent = pipStep.number === currentStep
           const clickable = isClickable(pipStep.number)
 
+          const stepData = steps.find((s) => s.step_number === pipStep.number)
+
           return (
             <div key={pipStep.number} className="flex flex-1 items-center">
               <StepItem
@@ -48,6 +54,8 @@ export const StepStepper = ({ steps, currentStep, onStepClick }: StepStepperProp
                 isCurrent={isCurrent}
                 clickable={clickable}
                 onClick={() => clickable && onStepClick?.(pipStep.number)}
+                formsStarted={stepData?.formsStarted}
+                formsTotal={stepData?.formsTotal}
               />
               {index < PIPS_STEPS.length - 1 && (
                 <StepConnector completed={status === 'completed' || status === 'skipped'} />
@@ -91,6 +99,8 @@ type StepItemProps = {
   isCurrent: boolean
   clickable: boolean
   onClick: () => void
+  formsStarted?: number
+  formsTotal?: number
 }
 
 const StepItem = ({
@@ -101,8 +111,12 @@ const StepItem = ({
   isCurrent,
   clickable,
   onClick,
+  formsStarted,
+  formsTotal,
 }: StepItemProps) => {
   const isComplete = status === 'completed' || status === 'skipped'
+  const showFormProgress =
+    formsTotal !== undefined && formsTotal > 0 && !isComplete && status !== 'not_started'
 
   return (
     <button
@@ -140,7 +154,16 @@ const StepItem = ({
         >
           {name}
         </span>
-        {isCurrent && (
+        {/* 4.3: Form progress indicator */}
+        {showFormProgress && (
+          <span
+            className="mt-0.5 text-[10px] text-[var(--color-text-tertiary)]"
+            data-testid={`step-form-progress-${number}`}
+          >
+            {formsStarted ?? 0}/{formsTotal} forms
+          </span>
+        )}
+        {isCurrent && !showFormProgress && (
           <span className="mt-0.5 max-w-[120px] text-center text-[10px] leading-tight text-[var(--color-text-tertiary)]">
             {description}
           </span>

@@ -92,10 +92,15 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       <ProjectOverviewClient
         projectId={project.id}
         currentStep={currentStepNum}
-        steps={steps.map((s) => ({
-          step_number: s.step_number,
-          status: s.status as 'not_started' | 'in_progress' | 'completed' | 'skipped',
-        }))}
+        steps={steps.map((s) => {
+          const fc = progress.stepFormCounts.find((c) => c.stepNumber === s.step_number)
+          return {
+            step_number: s.step_number,
+            status: s.status as 'not_started' | 'in_progress' | 'completed' | 'skipped',
+            formsStarted: fc?.formsStarted,
+            formsTotal: fc?.formsTotal,
+          }
+        })}
         orgRole={membership?.role ?? null}
       />
 

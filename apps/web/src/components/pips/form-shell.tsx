@@ -186,7 +186,7 @@ export const FormShell = (props: FormShellProps) => {
     }
 
     return false
-  }, [onSave, data, formType, projectId, stepNumber, onSaveSuccess, isSandbox])
+  }, [onSave, data, formType, projectId, stepNumber, onSaveSuccess, isSandbox, required, title])
 
   /* Auto-save with 2-second debounce — no synchronous setState */
   useEffect(() => {
