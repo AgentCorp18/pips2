@@ -55,21 +55,21 @@
 
 ### Documentation Debt (Complete During Beta Week)
 
-| Document                     | Issue                                              | Status                                         |
-| ---------------------------- | -------------------------------------------------- | ---------------------------------------------- |
-| `CLAUDE.md`                  | Test count "1,945+"                                | **RESOLVED** — updated to 2,339+ on 2026-03-12 |
-| `.claude/rules/testing.md`   | Test count "1,945+"                                | **RESOLVED** — updated to 2,339+ on 2026-03-12 |
-| `PROJECT_INDEX.md`           | Build stats, phase statuses all wrong              | **RESOLVED** — doc drift sprint 2026-03-12     |
-| `SYSTEM_ARCHITECTURE.md`     | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — already updated in v1.2         |
-| `TECHNICAL_PLAN.md`          | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — doc drift sprint 2026-03-12     |
-| `MVP_SPECIFICATION.md`       | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — doc drift sprint 2026-03-12     |
-| `PRODUCT_ROADMAP.md`         | Stale test counts                                  | **RESOLVED** — doc drift sprint 2026-03-12     |
-| `DEVOPS_RUNBOOK.md`          | Shows 896 tests, 11 migrations                     | **RESOLVED** — doc drift sprint 2026-03-12     |
-| `TEST_STRATEGY.md`           | Based on 896 tests, [SCAFFOLDED] training/workshop | **RESOLVED** — doc drift sprint 2026-03-12     |
-| `ANALYTICS_PLAN.md`          | Says "no analytics deployed"                       | **RESOLVED** — v1.1 updated on 2026-03-12      |
-| `DEVELOPMENT_TASK_LIST.md`   | WP-6.8/6.9 Not Started, ~95% completion            | **RESOLVED** — doc drift sprint 2026-03-12     |
-| `docs/AGENT_STATUS_BOARD.md` | Referenced in multi-agent rules but doesn't exist  | Pending — create stub or remove reference      |
-| Work log                     | March 9 PM + March 12 work undocumented            | Pending — add entries                          |
+| Document                     | Issue                                              | Status                                            |
+| ---------------------------- | -------------------------------------------------- | ------------------------------------------------- |
+| `CLAUDE.md`                  | Test count "1,945+"                                | **RESOLVED** — updated to 2,339+ on 2026-03-12    |
+| `.claude/rules/testing.md`   | Test count "1,945+"                                | **RESOLVED** — updated to 2,339+ on 2026-03-12    |
+| `PROJECT_INDEX.md`           | Build stats, phase statuses all wrong              | **RESOLVED** — doc drift sprint 2026-03-12        |
+| `SYSTEM_ARCHITECTURE.md`     | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — already updated in v1.2            |
+| `TECHNICAL_PLAN.md`          | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — doc drift sprint 2026-03-12        |
+| `MVP_SPECIFICATION.md`       | Training/Workshop marked [SCAFFOLDED]              | **RESOLVED** — doc drift sprint 2026-03-12        |
+| `PRODUCT_ROADMAP.md`         | Stale test counts                                  | **RESOLVED** — doc drift sprint 2026-03-12        |
+| `DEVOPS_RUNBOOK.md`          | Shows 896 tests, 11 migrations                     | **RESOLVED** — doc drift sprint 2026-03-12        |
+| `TEST_STRATEGY.md`           | Based on 896 tests, [SCAFFOLDED] training/workshop | **RESOLVED** — doc drift sprint 2026-03-12        |
+| `ANALYTICS_PLAN.md`          | Says "no analytics deployed"                       | **RESOLVED** — v1.1 updated on 2026-03-12         |
+| `DEVELOPMENT_TASK_LIST.md`   | WP-6.8/6.9 Not Started, ~95% completion            | **RESOLVED** — doc drift sprint 2026-03-12        |
+| `docs/AGENT_STATUS_BOARD.md` | Referenced in multi-agent rules but doesn't exist  | **RESOLVED** — file exists and updated 2026-03-12 |
+| Work log                     | March 9 PM + March 12 work undocumented            | **RESOLVED** — 2026-03-12-session2.md created     |
 
 ---
 
