@@ -184,8 +184,8 @@ describe('saveFormData', () => {
     expect(result).toEqual({ success: false, error: 'Invalid form data' })
   })
 
-  it('gracefully saves when form type has no schema entry (unknown known type)', async () => {
-    // root_cause is in the enum but not in FORM_SCHEMAS — should pass through
+  it('saves root_cause form with flexible schema', async () => {
+    // root_cause uses z.record(z.string(), z.unknown()) — accepts any shape
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: { org_id: 'org-1', current_step: 2 } }, { error: null }]
 
