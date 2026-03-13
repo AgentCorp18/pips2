@@ -137,7 +137,9 @@ const ChapterPage = async ({ params }: ChapterPageProps) => {
         <div>
           {index >= 2 && (
             <p className="text-sm font-medium text-[var(--color-text-tertiary)]">
-              Chapter {index - 1}
+              {chapter.chapter.startsWith('appendix')
+                ? `Appendix ${chapter.chapter.replace('appendix-', '').toUpperCase()}`
+                : `Chapter ${index - 1}`}
             </p>
           )}
           <h1 className="font-serif text-3xl font-bold text-[var(--color-text-primary)] md:text-4xl">
