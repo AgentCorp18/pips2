@@ -14,6 +14,10 @@ vi.mock('../actions', () => ({
   createProject: vi.fn(),
 }))
 
+vi.mock('../../../dashboard/sample-project-action', () => ({
+  createSampleProject: vi.fn().mockResolvedValue({ projectId: 'test-123' }),
+}))
+
 vi.mock('@/components/ui/date-picker', () => ({
   DatePicker: (props: Record<string, unknown>) => <input type="date" {...props} />,
 }))
@@ -122,5 +126,40 @@ describe('ProjectForm', () => {
     fireEvent.click(screen.getByTestId('step-next-button'))
     fireEvent.click(screen.getByTestId('step-back-button'))
     expect(screen.getByText('Target completion date')).toBeTruthy()
+  })
+
+  it('renders mode toggle with blank and template options', () => {
+    render(<ProjectForm />)
+    expect(screen.getByTestId('create-mode-toggle')).toBeTruthy()
+    expect(screen.getByTestId('mode-blank')).toBeTruthy()
+    expect(screen.getByTestId('mode-template')).toBeTruthy()
+  })
+
+  it('defaults to blank mode with stepper visible', () => {
+    render(<ProjectForm />)
+    expect(screen.getByTestId('stepper')).toBeTruthy()
+    expect(screen.queryByTestId('template-picker')).toBeNull()
+  })
+
+  it('switches to template mode when template toggle is clicked', () => {
+    render(<ProjectForm />)
+    fireEvent.click(screen.getByTestId('mode-template'))
+    expect(screen.getByTestId('template-picker')).toBeTruthy()
+    expect(screen.queryByTestId('stepper')).toBeNull()
+  })
+
+  it('shows template cards in template mode', () => {
+    render(<ProjectForm />)
+    fireEvent.click(screen.getByTestId('mode-template'))
+    expect(screen.getByTestId('template-parking-lot-safety')).toBeTruthy()
+  })
+
+  it('switches back to blank mode', () => {
+    render(<ProjectForm />)
+    fireEvent.click(screen.getByTestId('mode-template'))
+    expect(screen.getByTestId('template-picker')).toBeTruthy()
+    fireEvent.click(screen.getByTestId('mode-blank'))
+    expect(screen.getByTestId('stepper')).toBeTruthy()
+    expect(screen.queryByTestId('template-picker')).toBeNull()
   })
 })

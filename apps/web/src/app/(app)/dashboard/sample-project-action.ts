@@ -103,5 +103,40 @@ export const createSampleProject = async (
     }
   }
 
+  // Insert sample tickets from the template
+  if (template.tickets.length > 0) {
+    // Get org settings for sequence numbering
+    const { data: orgSettings } = await supabase
+      .from('org_settings')
+      .select('ticket_counter')
+      .eq('org_id', membership.org_id)
+      .single()
+
+    const startSeq = (orgSettings?.ticket_counter ?? 0) + 1
+
+    const tickets = template.tickets.map((t, i) => ({
+      org_id: membership.org_id,
+      project_id: projectId,
+      title: t.title,
+      description: t.description,
+      status: t.status,
+      priority: t.priority,
+      type: t.type,
+      reporter_id: user.id,
+      assignee_id: user.id,
+      sequence_number: startSeq + i,
+      started_at: ['in_progress', 'in_review', 'done'].includes(t.status) ? now : null,
+      completed_at: t.status === 'done' ? now : null,
+    }))
+
+    await supabase.from('tickets').insert(tickets)
+
+    // Update org ticket counter
+    await supabase
+      .from('org_settings')
+      .update({ ticket_counter: startSeq + template.tickets.length - 1 })
+      .eq('org_id', membership.org_id)
+  }
+
   return { projectId }
 }
