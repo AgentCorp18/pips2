@@ -36,21 +36,27 @@ const BRAND = {
    CTA button helper
    ============================================================ */
 
-export const ctaButton = (label: string, href: string): string => `
+export const ctaButton = (label: string, href: string): string => {
+  // Sanitize href: only allow http/https URLs to prevent javascript: XSS
+  const safeHref = /^https?:\/\//i.test(href) ? escapeHtml(href) : '#'
+  const safeLabel = escapeHtml(label)
+
+  return `
   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;">
     <tr>
       <td style="border-radius:10px;background-color:${BRAND.primary};">
-        <a href="${href}"
+        <a href="${safeHref}"
            target="_blank"
            style="display:inline-block;padding:12px 28px;font-family:${BRAND.fontFamily};
                   font-size:15px;font-weight:600;color:${BRAND.white};
                   text-decoration:none;border-radius:10px;">
-          ${label}
+          ${safeLabel}
         </a>
       </td>
     </tr>
   </table>
 `
+}
 
 /* ============================================================
    Base email shell

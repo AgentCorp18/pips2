@@ -44,4 +44,13 @@ describe('welcomeTemplate', () => {
     expect(result).toContain('Create a project')
     expect(result).toContain('Invite your team')
   })
+
+  it('escapes HTML in recipient name to prevent XSS', () => {
+    const result = welcomeTemplate({
+      ...defaultParams,
+      recipientName: '<script>alert("xss")</script>',
+    })
+    expect(result).not.toContain('<script>')
+    expect(result).toContain('&lt;script&gt;')
+  })
 })

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/permissions'
 
 export type MyWorkTicket = {
   id: string
@@ -27,6 +28,13 @@ export const getMyTickets = async (orgId: string): Promise<GroupedTickets> => {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    return { overdue: [], dueToday: [], thisWeek: [], later: [] }
+  }
+
+  // Verify user has access to this org
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
     return { overdue: [], dueToday: [], thisWeek: [], later: [] }
   }
 

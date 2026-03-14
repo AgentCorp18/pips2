@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/permissions'
 import { trackServerEvent } from '@/lib/analytics'
 
 type CreateTicketInput = {
@@ -45,6 +46,24 @@ export const createTicketFromFormContext = async (
 
   if (!membership) {
     return { error: 'You must belong to an organization' }
+  }
+
+  try {
+    await requirePermission(membership.org_id, 'ticket.create')
+  } catch {
+    return { error: 'You do not have permission to create tickets' }
+  }
+
+  // Verify project belongs to user's org
+  const { data: projectCheck } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('id', projectId)
+    .eq('org_id', membership.org_id)
+    .maybeSingle()
+
+  if (!projectCheck) {
+    return { error: 'Project not found in this organization' }
   }
 
   const { error: insertError } = await supabase.from('tickets').insert({

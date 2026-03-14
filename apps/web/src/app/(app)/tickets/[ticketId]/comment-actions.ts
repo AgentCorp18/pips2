@@ -64,7 +64,11 @@ export const addComment = async (ticketId: string, body: string): Promise<Commen
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.comment')
+  try {
+    await requirePermission(ticket.org_id, 'ticket.comment')
+  } catch {
+    return { error: 'You do not have permission to comment on tickets' }
+  }
 
   const mentions = extractMentions(result.data.body)
 
@@ -226,6 +230,21 @@ export const getComments = async (ticketId: string) => {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    return []
+  }
+
+  // Defense-in-depth: verify user has access to the ticket's org
+  const { data: ticket } = await supabase
+    .from('tickets')
+    .select('org_id')
+    .eq('id', ticketId)
+    .single()
+
+  if (!ticket) return []
+
+  try {
+    await requirePermission(ticket.org_id, 'data.view')
+  } catch {
     return []
   }
 
