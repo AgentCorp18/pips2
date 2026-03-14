@@ -40,7 +40,7 @@ const GuidePage = () => {
       <section
         data-testid="guide-hero"
         className="-mx-4 -mt-4 mb-12 px-6 py-16 text-center text-white md:-mx-8 md:px-10 md:py-20"
-        style={{ backgroundColor: '#1B1340' }}
+        style={{ backgroundColor: 'var(--color-pips-deep)' }}
       >
         <h1
           className="text-3xl font-bold tracking-tight md:text-5xl"
@@ -85,7 +85,7 @@ const GuidePage = () => {
                   <CardContent className="space-y-3 p-5">
                     <div
                       className="flex h-10 w-10 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)' }}
+                      style={{ backgroundColor: 'var(--color-primary-subtle)' }}
                     >
                       <Icon size={20} className="text-[var(--color-primary)]" />
                     </div>
@@ -238,7 +238,7 @@ const GuidePage = () => {
                 <CardContent className="space-y-2 p-5">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)' }}
+                    style={{ backgroundColor: 'var(--color-primary-subtle)' }}
                   >
                     <Wrench size={20} className="text-[var(--color-primary)]" />
                   </div>
@@ -256,7 +256,7 @@ const GuidePage = () => {
                 <CardContent className="space-y-2 p-5">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)' }}
+                    style={{ backgroundColor: 'var(--color-primary-subtle)' }}
                   >
                     <Users size={20} className="text-[var(--color-primary)]" />
                   </div>
@@ -274,7 +274,7 @@ const GuidePage = () => {
                 <CardContent className="space-y-2 p-5">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)' }}
+                    style={{ backgroundColor: 'var(--color-primary-subtle)' }}
                   >
                     <Rocket size={20} className="text-[var(--color-primary)]" />
                   </div>

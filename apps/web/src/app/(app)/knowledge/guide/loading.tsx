@@ -17,7 +17,7 @@ const GuideLoading = () => {
       </div>
 
       {/* Hero placeholder */}
-      <div className="mb-8 rounded-[var(--radius-md)] bg-[var(--color-deep,#1B1340)] p-8 text-center">
+      <div className="mb-8 rounded-[var(--radius-md)] bg-[var(--color-pips-deep)] p-8 text-center">
         <Skeleton className="mx-auto h-10 w-72 bg-white/10" />
         <Skeleton className="mx-auto mt-4 h-5 w-96 bg-white/10" />
         <Skeleton className="mx-auto mt-8 h-48 w-48 rounded-full bg-white/10" />

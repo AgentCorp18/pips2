@@ -37,7 +37,7 @@ describe('StatCards', () => {
   it('shows overdue count in red when greater than 0', () => {
     render(<StatCards stats={defaultStats} />)
     const overdueValue = screen.getByText('3')
-    expect(overdueValue).toHaveStyle({ color: '#EF4444' })
+    expect(overdueValue).toHaveStyle({ color: 'var(--color-signal-red)' })
   })
 
   it('does not apply red color when overdue is 0', () => {
@@ -49,7 +49,7 @@ describe('StatCards', () => {
     // Find the overdue card's value (the 0 inside stat-overdue)
     const overdueCard = screen.getByTestId('stat-overdue')
     const overdueValue = overdueCard.querySelector('.text-2xl')
-    expect(overdueValue).not.toHaveStyle({ color: '#EF4444' })
+    expect(overdueValue).not.toHaveStyle({ color: 'var(--color-signal-red)' })
   })
 
   it('shows zero state correctly', () => {

@@ -70,9 +70,9 @@ const PresentationsPage = () => {
       <div className="flex items-center gap-3">
         <div
           className="flex h-10 w-10 items-center justify-center rounded-lg"
-          style={{ backgroundColor: 'rgba(67, 56, 202, 0.08)' }}
+          style={{ backgroundColor: 'var(--color-step-4-subtle)' }}
         >
-          <Presentation size={20} className="text-[#4338CA]" />
+          <Presentation size={20} className="text-[var(--color-step-4)]" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
@@ -99,8 +99,8 @@ const PresentationsPage = () => {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-3">
                 <div
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-[#4338CA]"
-                  style={{ backgroundColor: 'rgba(67, 56, 202, 0.08)' }}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-step-4)]"
+                  style={{ backgroundColor: 'var(--color-step-4-subtle)' }}
                 >
                   {p.icon}
                 </div>
@@ -121,8 +121,8 @@ const PresentationsPage = () => {
         <CardHeader className="pb-2">
           <div className="flex items-center gap-3">
             <div
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[#4338CA]"
-              style={{ backgroundColor: 'rgba(67, 56, 202, 0.08)' }}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-step-4)]"
+              style={{ backgroundColor: 'var(--color-step-4-subtle)' }}
             >
               <CalendarCheck size={20} />
             </div>
@@ -148,7 +148,7 @@ const PresentationsPage = () => {
               >
                 <span
                   className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold text-white"
-                  style={{ backgroundColor: '#4338CA' }}
+                  style={{ backgroundColor: 'var(--color-step-4)' }}
                 >
                   {i + 1}
                 </span>

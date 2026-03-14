@@ -37,7 +37,7 @@ const CARDS: CardDef[] = [
     title: 'Overdue',
     icon: AlertTriangle,
     color: 'var(--color-step-2)',
-    accentWhenPositive: '#EF4444',
+    accentWhenPositive: 'var(--color-signal-red)',
     testId: 'stat-overdue',
     href: '/tickets?quick=overdue',
   },
@@ -82,7 +82,9 @@ export const StatCards = ({ stats }: StatCardsProps) => {
               <div
                 className="text-2xl font-bold"
                 style={{
-                  color: isOverduePositive ? '#EF4444' : 'var(--color-text-primary)',
+                  color: isOverduePositive
+                    ? 'var(--color-signal-red)'
+                    : 'var(--color-text-primary)',
                 }}
               >
                 {value}
