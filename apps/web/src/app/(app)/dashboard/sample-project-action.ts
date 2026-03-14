@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { getProjectTemplate } from '@pips/shared'
 
 type SampleProjectResult = {
@@ -27,16 +28,10 @@ export const createSampleProject = async (
     return { error: 'Template not found' }
   }
 
-  // Get user's org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     return { error: 'You must belong to an organization' }
   }
 
@@ -44,7 +39,7 @@ export const createSampleProject = async (
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .insert({
-      org_id: membership.org_id,
+      org_id: currentOrg.orgId,
       title: template.name,
       description: template.description,
       owner_id: user.id,
@@ -109,13 +104,13 @@ export const createSampleProject = async (
     const { data: orgSettings } = await supabase
       .from('org_settings')
       .select('ticket_counter')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', currentOrg.orgId)
       .single()
 
     const startSeq = (orgSettings?.ticket_counter ?? 0) + 1
 
     const tickets = template.tickets.map((t, i) => ({
-      org_id: membership.org_id,
+      org_id: currentOrg.orgId,
       project_id: projectId,
       title: t.title,
       description: t.description,
@@ -135,7 +130,7 @@ export const createSampleProject = async (
     await supabase
       .from('org_settings')
       .update({ ticket_counter: startSeq + template.tickets.length - 1 })
-      .eq('org_id', membership.org_id)
+      .eq('org_id', currentOrg.orgId)
   }
 
   return { projectId }

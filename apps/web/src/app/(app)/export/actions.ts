@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { generateCSV } from '@/lib/csv'
 
 /* ============================================================
@@ -20,15 +21,10 @@ const getUserOrg = async () => {
 
   if (!user) return { supabase, orgId: null as string | null }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Respect the org switcher cookie
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  return { supabase, orgId: membership?.org_id ?? null }
+  return { supabase, orgId: currentOrg?.orgId ?? null }
 }
 
 /* ============================================================

@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { stepEnumToNumber, PIPS_STEPS } from '@pips/shared'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -50,13 +51,8 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     notFound()
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
   const stepsRaw = (project.project_steps ?? []) as Array<{
     id: string
@@ -101,7 +97,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
             formsTotal: fc?.formsTotal,
           }
         })}
-        orgRole={membership?.role ?? null}
+        orgRole={currentOrg?.role ?? null}
       />
 
       {/* 1.4: Project Progress Bar */}

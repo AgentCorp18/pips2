@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -41,19 +42,14 @@ const ProjectHealthPage = async () => {
     redirect('/login')
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     redirect('/onboarding')
   }
 
-  const orgId = membership.org_id
+  const orgId = currentOrg.orgId
 
   const [kpis, stepData, velocityData, funnelData, projectRows] = await Promise.all([
     getProjectHealthKpis(orgId),

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getTicketsForBoard } from '@/app/(app)/tickets/actions'
@@ -23,27 +24,22 @@ const ProjectBoardPage = async ({ params }: { params: Promise<{ projectId: strin
     redirect('/login')
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     redirect('/onboarding')
   }
 
   const { data: orgSettings } = await supabase
     .from('org_settings')
     .select('ticket_prefix')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
     .single()
 
   const prefix = orgSettings?.ticket_prefix ?? 'TKT'
 
-  const tickets = await getTicketsForBoard(membership.org_id, {
+  const tickets = await getTicketsForBoard(currentOrg.orgId, {
     project_id: projectId,
   })
 

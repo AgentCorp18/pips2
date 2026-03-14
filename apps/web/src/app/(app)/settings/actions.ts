@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { updateOrgSettingsSchema } from '@/lib/validations'
 import { hasPermission } from '@pips/shared'
 import type { OrgRole } from '@pips/shared'
@@ -21,20 +22,15 @@ export const getOrgWithSettings = async () => {
 
   if (!user) return null
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id, role')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) return null
+  if (!currentOrg) return null
 
   const { data: org } = await supabase
     .from('organizations')
     .select('id, name, slug, logo_url, plan')
-    .eq('id', membership.org_id)
+    .eq('id', currentOrg.orgId)
     .single()
 
   if (!org) return null
@@ -47,7 +43,7 @@ export const getOrgWithSettings = async () => {
 
   return {
     org,
-    role: membership.role as string,
+    role: currentOrg.role as string,
     settings: settings ?? {
       timezone: 'America/Chicago',
       date_format: 'MM/dd/yyyy',
@@ -95,20 +91,14 @@ export const updateOrgSettings = async (
     return { error: 'You must be signed in to update settings' }
   }
 
-  // Get user's org membership — must be owner or admin
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id, role')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie) — must be owner or admin
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     return { error: 'You are not a member of any organization' }
   }
 
-  if (!hasPermission(membership.role as OrgRole, 'org.members.manage')) {
+  if (!hasPermission(currentOrg.role as OrgRole, 'org.members.manage')) {
     return { error: 'Only owners and admins can update organization settings' }
   }
 
@@ -116,7 +106,7 @@ export const updateOrgSettings = async (
   const { error: orgError } = await supabase
     .from('organizations')
     .update({ name: result.data.name, updated_at: new Date().toISOString() })
-    .eq('id', membership.org_id)
+    .eq('id', currentOrg.orgId)
 
   if (orgError) {
     return { error: 'Failed to update organization name' }
@@ -133,7 +123,7 @@ export const updateOrgSettings = async (
       ticket_prefix: result.data.ticket_prefix,
       updated_at: new Date().toISOString(),
     })
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
 
   if (settingsError) {
     return { error: 'Failed to update organization settings' }

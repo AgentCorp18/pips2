@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { TicketCreateForm } from '@/components/tickets/ticket-create-form'
 import { getParentTicket } from '../actions'
@@ -26,15 +27,10 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
     redirect('/login')
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     redirect('/onboarding')
   }
 
@@ -65,7 +61,7 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
   const { data: membersRaw } = await supabase
     .from('org_members')
     .select('user_id, profiles!org_members_user_id_fkey ( full_name, display_name )')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
 
   const members = (membersRaw ?? []).map((m) => {
     const profile = m.profiles as unknown as {
@@ -82,7 +78,7 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
   const { data: projectsRaw } = await supabase
     .from('projects')
     .select('id, title')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
     .neq('status', 'archived')
     .order('title')
 

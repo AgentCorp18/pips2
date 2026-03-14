@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { trackServerEvent } from '@/lib/analytics'
 import type { SearchResult, SearchResultGroup, GlobalSearchResponse } from '@/types/search'
 
@@ -16,6 +17,7 @@ const PIPS_STEP_LABELS: Record<number, string> = {
 
 /**
  * Resolve the current user's org ID from their membership.
+ * Respects the org switcher cookie.
  * Returns null if not authenticated or not a member.
  */
 const resolveOrgId = async (): Promise<string | null> => {
@@ -25,15 +27,9 @@ const resolveOrgId = async (): Promise<string | null> => {
   } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  return membership?.org_id ?? null
+  return currentOrg?.orgId ?? null
 }
 
 /**

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { requirePermission } from '@/lib/permissions'
 import { createTicketSchema, updateTicketSchema, ticketFiltersSchema } from '@/lib/validations'
 import { trackServerEvent } from '@/lib/analytics'
@@ -60,20 +61,15 @@ export const createTicket = async (
     return { error: 'You must be signed in to create a ticket' }
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     return { error: 'You must belong to an organization' }
   }
 
   try {
-    await requirePermission(membership.org_id, 'ticket.create')
+    await requirePermission(currentOrg.orgId, 'ticket.create')
   } catch {
     return { error: 'You do not have permission to create tickets' }
   }
@@ -84,7 +80,7 @@ export const createTicket = async (
       .from('org_members')
       .select('user_id')
       .eq('user_id', result.data.assignee_id)
-      .eq('org_id', membership.org_id)
+      .eq('org_id', currentOrg.orgId)
       .eq('status', 'active')
       .maybeSingle()
 
@@ -101,7 +97,7 @@ export const createTicket = async (
     : []
 
   const { error: insertError } = await supabase.from('tickets').insert({
-    org_id: membership.org_id,
+    org_id: currentOrg.orgId,
     title: result.data.title,
     description: result.data.description || null,
     type: result.data.type,
@@ -497,21 +493,16 @@ export const bulkUpdateTickets = async (
     return { error: 'You must be signed in' }
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     return { error: 'You must belong to an organization' }
   }
 
   // FIX 1: wrap requirePermission in try/catch
   try {
-    await requirePermission(membership.org_id, 'ticket.update')
+    await requirePermission(currentOrg.orgId, 'ticket.update')
   } catch {
     return { error: 'You do not have permission to update tickets' }
   }
@@ -533,7 +524,7 @@ export const bulkUpdateTickets = async (
     .from('tickets')
     .update(update)
     .in('id', ticketIds)
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
 
   // Set started_at only on tickets that don't already have one
   if (!updateError && (data.status === 'in_progress' || data.status === 'in_review')) {
@@ -541,7 +532,7 @@ export const bulkUpdateTickets = async (
       .from('tickets')
       .update({ started_at: new Date().toISOString() })
       .in('id', ticketIds)
-      .eq('org_id', membership.org_id)
+      .eq('org_id', currentOrg.orgId)
       .is('started_at', null)
   }
 
@@ -779,21 +770,16 @@ export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActi
     return { error: 'You must be signed in' }
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     return { error: 'You must belong to an organization' }
   }
 
   // FIX 1: wrap requirePermission in try/catch
   try {
-    await requirePermission(membership.org_id, 'ticket.delete')
+    await requirePermission(currentOrg.orgId, 'ticket.delete')
   } catch {
     return { error: 'You do not have permission to delete tickets' }
   }
@@ -802,7 +788,7 @@ export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActi
     .from('tickets')
     .delete()
     .in('id', ticketIds)
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
 
   if (deleteError) {
     console.error('Failed to bulk delete tickets:', deleteError.message)

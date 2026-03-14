@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 
 type ChecklistItem = {
   text: string
@@ -32,16 +33,10 @@ export const createTicketsFromChecklist = async (
     return { created: 0, error: 'You must be signed in' }
   }
 
-  // Get user's org membership
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     return { created: 0, error: 'You must belong to an organization' }
   }
 
@@ -56,7 +51,7 @@ export const createTicketsFromChecklist = async (
   const { data: orgMembers } = await supabase
     .from('org_members')
     .select('user_id, profiles!org_members_user_id_fkey(full_name, display_name)')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
 
   const memberMap = new Map<string, string>()
   if (orgMembers) {
@@ -78,7 +73,7 @@ export const createTicketsFromChecklist = async (
     const assigneeId = assigneeName ? (memberMap.get(assigneeName) ?? null) : null
 
     return {
-      org_id: membership.org_id,
+      org_id: currentOrg.orgId,
       project_id: projectId,
       title: item.text.trim(),
       type: 'task' as const,

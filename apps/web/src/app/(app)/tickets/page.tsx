@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { Button } from '@/components/ui/button'
 import { TicketCard } from '@/components/tickets/ticket-card'
 import { TicketListTable } from '@/components/tickets/ticket-list-table'
@@ -47,16 +48,10 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
     redirect('/login')
   }
 
-  // Get user's org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     redirect('/onboarding')
   }
 
@@ -64,7 +59,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
   const { data: orgSettings } = await supabase
     .from('org_settings')
     .select('ticket_prefix')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
     .single()
 
   const prefix = orgSettings?.ticket_prefix ?? 'TKT'
@@ -138,7 +133,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
     if (typeof filters.due_date_before === 'string')
       boardFilters.due_date_before = filters.due_date_before
 
-    const rawBoardTickets = await getTicketsForBoard(membership.org_id, boardFilters)
+    const rawBoardTickets = await getTicketsForBoard(currentOrg.orgId, boardFilters)
     total = rawBoardTickets.length
 
     boardTickets = rawBoardTickets.map((ticket) => {
@@ -161,7 +156,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       }
     })
   } else {
-    const result = await getTickets(membership.org_id, filters)
+    const result = await getTickets(currentOrg.orgId, filters)
     tickets = result.tickets
     total = result.total
   }
@@ -170,7 +165,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
   const { data: membersRaw } = await supabase
     .from('org_members')
     .select('user_id, profiles!org_members_user_id_fkey ( full_name, display_name )')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
 
   const members = (membersRaw ?? []).map((m) => {
     const profile = m.profiles as unknown as {
@@ -187,7 +182,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
   const { data: projectsRaw } = await supabase
     .from('projects')
     .select('id, title')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
     .order('title')
 
   const projects = (projectsRaw ?? []).map((p) => ({ id: p.id, name: p.title as string }))

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { createProjectSchema } from '@/lib/validations'
 import { trackServerEvent } from '@/lib/analytics'
 import { requirePermission } from '@/lib/permissions'
@@ -46,21 +47,15 @@ export const createProject = async (
     return { error: 'You must be signed in to create a project' }
   }
 
-  // Get user's org membership
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     return { error: 'You must belong to an organization to create a project' }
   }
 
   try {
-    await requirePermission(membership.org_id, 'project.create')
+    await requirePermission(currentOrg.orgId, 'project.create')
   } catch {
     return { error: 'Insufficient permissions' }
   }
@@ -69,7 +64,7 @@ export const createProject = async (
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .insert({
-      org_id: membership.org_id,
+      org_id: currentOrg.orgId,
       title: result.data.name,
       description: result.data.description || null,
       owner_id: user.id,
@@ -126,7 +121,7 @@ export const createProject = async (
     const { data: channel } = await admin
       .from('chat_channels')
       .insert({
-        org_id: membership.org_id,
+        org_id: currentOrg.orgId,
         type: 'project',
         name: result.data.name,
         entity_id: project.id,

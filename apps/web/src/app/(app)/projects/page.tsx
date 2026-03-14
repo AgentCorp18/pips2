@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { stepEnumToNumber } from '@pips/shared'
 import { Button } from '@/components/ui/button'
 import { ProjectCard } from '@/components/pips/project-card'
@@ -36,16 +37,10 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
     redirect('/login')
   }
 
-  // Get user's org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id, role')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     redirect('/onboarding')
   }
 
@@ -65,7 +60,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       project_steps ( step, status )
     `,
     )
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
     .neq('status', 'archived')
     .order('created_at', { ascending: false })
 

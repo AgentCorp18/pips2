@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getTicketsForBoard } from '../actions'
@@ -37,16 +38,10 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
     redirect('/login')
   }
 
-  // Get user's org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's active org (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  if (!membership) {
+  if (!currentOrg) {
     redirect('/onboarding')
   }
 
@@ -54,7 +49,7 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   const { data: orgSettings } = await supabase
     .from('org_settings')
     .select('ticket_prefix')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
     .single()
 
   const prefix = orgSettings?.ticket_prefix ?? 'TKT'
@@ -89,7 +84,7 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   if (resolved.unassigned) filters.unassigned = true
   if (resolved.due_date_before) filters.due_date_before = resolved.due_date_before
 
-  const tickets = await getTicketsForBoard(membership.org_id, filters)
+  const tickets = await getTicketsForBoard(currentOrg.orgId, filters)
 
   // Map to board ticket shape
   const boardTickets: BoardTicket[] = tickets.map((ticket) => {
@@ -116,7 +111,7 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   const { data: membersRaw } = await supabase
     .from('org_members')
     .select('user_id, profiles!org_members_user_id_fkey ( full_name, display_name )')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
 
   const members = (membersRaw ?? []).map((m) => {
     const profile = m.profiles as unknown as {
@@ -133,7 +128,7 @@ const BoardPage = async ({ searchParams }: BoardPageProps) => {
   const { data: projectsRaw } = await supabase
     .from('projects')
     .select('id, title')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', currentOrg.orgId)
     .order('title')
 
   const projects = (projectsRaw ?? []).map((p) => ({ id: p.id, name: p.title as string }))

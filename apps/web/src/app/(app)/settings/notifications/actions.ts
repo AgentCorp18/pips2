@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 
 /* ============================================================
    Types
@@ -43,20 +44,14 @@ export const getNotificationPreferences =
       return { error: 'You must be signed in' }
     }
 
-    // Get user's org membership
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .order('joined_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
+    // Get user's active org (respects org switcher cookie)
+    const currentOrg = await getCurrentOrg(supabase, user.id)
 
-    if (!membership) {
+    if (!currentOrg) {
       return { error: 'You are not a member of any organization' }
     }
 
-    const orgId = membership.org_id as string
+    const orgId = currentOrg.orgId
 
     // Try to fetch existing preferences
     const { data: existing } = await supabase

@@ -45,6 +45,7 @@ pnpm-debug.log*
 
 # Claude Code
 .claude/
+.claire/
 
 # Playwright MCP
 .playwright-mcp/

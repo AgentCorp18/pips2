@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { stepNumberToEnum, stepEnumToNumber } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { StepPageClient } from './step-page-client'
@@ -66,16 +67,10 @@ const StepDetailPage = async ({
     started: Object.keys(f.data as Record<string, unknown>).length > 0,
   }))
 
-  // Get user's org role for permission checks
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // Get user's org role for permission checks (respects org switcher cookie)
+  const currentOrg = await getCurrentOrg(supabase, user.id)
 
-  const orgRole = (membership?.role as string) ?? null
+  const orgRole = currentOrg?.role ?? null
 
   // Fetch linked tickets for Step 5 (Implement)
   type LinkedTicket = {
