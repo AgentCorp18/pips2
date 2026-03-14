@@ -286,7 +286,7 @@ const CommentItem = ({
         {isOwner && !isEditing && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-xs">
+              <Button variant="ghost" size="icon-xs" aria-label="Comment actions">
                 <MoreHorizontal size={14} />
               </Button>
             </DropdownMenuTrigger>

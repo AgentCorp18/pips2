@@ -216,6 +216,19 @@ export const FormShell = (props: FormShellProps) => {
     }
   }, [hasPendingChanges, doSave])
 
+  /* beforeunload warning — prompt when navigating away with unsaved changes */
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasPendingChanges) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [hasPendingChanges])
+
   /* BUG 2 FIX: Only show success toast when doSave actually succeeded */
   const handleManualSave = () => {
     if (timerRef.current) clearTimeout(timerRef.current)
