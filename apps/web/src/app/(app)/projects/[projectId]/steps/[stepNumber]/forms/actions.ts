@@ -31,11 +31,13 @@ const saveFormDataSchema = z.object({
     'implementation_checklist',
     'implementation_plan',
     'lessons_learned',
+    'list_reduction',
     'milestone_tracker',
     'paired_comparisons',
     'problem_statement',
     'raci',
     'root_cause',
+    'weighted_voting',
   ]),
   data: z.record(z.string(), z.unknown()),
 })

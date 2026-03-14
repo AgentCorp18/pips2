@@ -41,6 +41,7 @@ export const WORKSHOP_MODULE_DATA: Record<string, WorkshopModuleData> = {
       'Keep the overview high-level. The goal is awareness, not mastery. Participants will go deep in step-specific modules.',
       'Use the "raise your hand if" technique to gauge experience levels and adjust pacing.',
       'End with a quick round-robin: each person shares one workplace problem they would like to apply PIPS to.',
+      'Note: On larger teams, a separate Facilitator role (focused on group dynamics) may complement the Process Guide (focused on methodology). See the Interactive Guide for details on all six roles.',
     ],
     agenda: [
       {
@@ -96,6 +97,8 @@ export const WORKSHOP_MODULE_DATA: Record<string, WorkshopModuleData> = {
       'Impact Assessment template',
       'Sticky notes and markers for group brainstorming',
       'Sample data sets for quantifying the gap',
+      'List Reduction voting cards for narrowing multiple problem candidates',
+      'Weighted Voting template for prioritizing by impact and feasibility',
     ],
     facilitatorNotes: [
       'The most common mistake is jumping to solutions. Redirect the team to describing the problem, not fixing it.',
@@ -288,6 +291,8 @@ export const WORKSHOP_MODULE_DATA: Record<string, WorkshopModuleData> = {
       'Implementation Plan template',
       'Shortlisted ideas from Step 3',
       'Calendar for timeline planning',
+      'Balance Sheet template for pros/cons analysis of top candidates',
+      'Cost-Benefit Analysis template for quantifying solution value vs. effort',
     ],
     facilitatorNotes: [
       'Weight criteria BEFORE scoring solutions. This prevents bias toward a pre-selected favorite.',
@@ -361,6 +366,7 @@ export const WORKSHOP_MODULE_DATA: Record<string, WorkshopModuleData> = {
       'Use role-play exercises for resistance scenarios — assign someone to be the "resistor" and practice redirection techniques.',
       'Cover both Step 5 (Implement) and Step 6 (Evaluate) since they form the "close the loop" pair.',
       'Emphasize that evaluation is not about blame — it is about learning and improving the process itself.',
+      'Review the four outcome paths with the team: Standardize (solution worked — embed it as the new standard), Iterate (partial success — refine and try again), New Cycle (root cause not addressed — restart with new learning), and New Problems Created (the solution introduced unintended consequences requiring a separate PIPS cycle).',
       'Share war stories: real examples of PIPS cycles that hit obstacles and how facilitators navigated them.',
     ],
     agenda: [

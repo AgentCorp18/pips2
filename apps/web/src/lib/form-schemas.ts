@@ -46,12 +46,12 @@ const fishboneCategorySchema = z.object({
 export const fishboneSchema = z.object({
   problemStatement: z.string().default(''),
   categories: z.array(fishboneCategorySchema).default([
-    { name: 'People', causes: [] },
-    { name: 'Process', causes: [] },
-    { name: 'Equipment', causes: [] },
-    { name: 'Materials', causes: [] },
-    { name: 'Environment', causes: [] },
-    { name: 'Management', causes: [] },
+    { name: 'Man (People)', causes: [] },
+    { name: 'Machine (Equipment)', causes: [] },
+    { name: 'Method (Process)', causes: [] },
+    { name: 'Material (Inputs)', causes: [] },
+    { name: 'Measurement (Metrics)', causes: [] },
+    { name: 'Mother Nature (Environment)', causes: [] },
   ]),
 })
 
@@ -342,6 +342,153 @@ export const balanceSheetSchema = z.object({
 export type BalanceSheetData = z.infer<typeof balanceSheetSchema>
 
 /* ============================================================
+   New Optional Forms — Step 1, 2, 3, 4
+   ============================================================ */
+
+// List Reduction (Step 1)
+export const listReductionSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        id: z.string(),
+        text: z.string().default(''),
+        kept: z.boolean().default(true),
+        reason: z.string().default(''),
+      }),
+    )
+    .default([]),
+  criteria: z.string().default(''),
+  finalList: z.array(z.string()).default([]),
+})
+export type ListReductionData = z.infer<typeof listReductionSchema>
+
+// Weighted Voting (Step 1)
+export const weightedVotingSchema = z.object({
+  options: z
+    .array(
+      z.object({
+        id: z.string(),
+        text: z.string().default(''),
+        votes: z.number().default(0),
+      }),
+    )
+    .default([]),
+  totalVotesPerPerson: z.number().default(5),
+  voters: z
+    .array(
+      z.object({
+        name: z.string().default(''),
+        allocations: z.record(z.string(), z.number()).default({}),
+      }),
+    )
+    .default([]),
+})
+export type WeightedVotingData = z.infer<typeof weightedVotingSchema>
+
+// Pareto Analysis (Step 2)
+export const paretoSchema = z.object({
+  title: z.string().default(''),
+  categories: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string().default(''),
+        count: z.number().default(0),
+        percentage: z.number().default(0),
+        cumulative: z.number().default(0),
+      }),
+    )
+    .default([]),
+  eightyTwentyLine: z.string().default(''),
+  notes: z.string().default(''),
+})
+export type ParetoData = z.infer<typeof paretoSchema>
+
+// Interviewing (Step 3)
+export const interviewingSchema = z.object({
+  interviews: z
+    .array(
+      z.object({
+        id: z.string(),
+        interviewee: z.string().default(''),
+        role: z.string().default(''),
+        date: z.string().default(''),
+        questions: z
+          .array(
+            z.object({
+              id: z.string(),
+              question: z.string().default(''),
+              response: z.string().default(''),
+            }),
+          )
+          .default([]),
+        keyInsights: z.string().default(''),
+      }),
+    )
+    .default([]),
+  summary: z.string().default(''),
+})
+export type InterviewingData = z.infer<typeof interviewingSchema>
+
+// Surveying (Step 3)
+export const surveyingSchema = z.object({
+  title: z.string().default(''),
+  targetAudience: z.string().default(''),
+  questions: z
+    .array(
+      z.object({
+        id: z.string(),
+        text: z.string().default(''),
+        type: z.enum(['open_ended', 'rating', 'multiple_choice']).default('open_ended'),
+        options: z.array(z.string()).default([]),
+      }),
+    )
+    .default([]),
+  respondents: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string().default(''),
+        answers: z.record(z.string(), z.string()).default({}),
+      }),
+    )
+    .default([]),
+  summary: z.string().default(''),
+})
+export type SurveyingData = z.infer<typeof surveyingSchema>
+
+// Cost-Benefit Analysis (Step 4)
+export const costBenefitSchema = z.object({
+  solutionName: z.string().default(''),
+  costs: z
+    .array(
+      z.object({
+        id: z.string(),
+        description: z.string().default(''),
+        amount: z.number().default(0),
+        frequency: z.enum(['one_time', 'monthly', 'annual']).default('one_time'),
+        category: z.string().default(''),
+      }),
+    )
+    .default([]),
+  benefits: z
+    .array(
+      z.object({
+        id: z.string(),
+        description: z.string().default(''),
+        amount: z.number().default(0),
+        frequency: z.enum(['one_time', 'monthly', 'annual']).default('one_time'),
+        category: z.string().default(''),
+      }),
+    )
+    .default([]),
+  netBenefit: z.number().default(0),
+  paybackPeriod: z.string().default(''),
+  recommendation: z.string().default(''),
+})
+export type CostBenefitData = z.infer<typeof costBenefitSchema>
+
+/* ============================================================
    Step 2 — Root Cause (flexible form — captures analyst notes)
    ============================================================ */
 
@@ -356,21 +503,27 @@ export type RootCauseData = z.infer<typeof rootCauseSchema>
 export const FORM_SCHEMAS: Record<string, z.ZodType> = {
   problem_statement: problemStatementSchema,
   impact_assessment: impactAssessmentSchema,
+  list_reduction: listReductionSchema,
+  weighted_voting: weightedVotingSchema,
   fishbone: fishboneSchema,
   five_why: fiveWhySchema,
   force_field: forceFieldSchema,
   checksheet: checksheetSchema,
+  pareto: paretoSchema,
   brainstorming: brainstormingSchema,
   brainwriting: brainwritingSchema,
+  interviewing: interviewingSchema,
+  surveying: surveyingSchema,
   paired_comparisons: pairedComparisonsSchema,
   criteria_matrix: criteriaMatrixSchema,
   implementation_plan: implementationPlanSchema,
   raci: raciSchema,
+  balance_sheet: balanceSheetSchema,
+  cost_benefit: costBenefitSchema,
   milestone_tracker: milestoneTrackerSchema,
   implementation_checklist: implementationChecklistSchema,
   before_after: beforeAfterSchema,
   evaluation: evaluationSchema,
   lessons_learned: lessonsLearnedSchema,
-  balance_sheet: balanceSheetSchema,
   root_cause: rootCauseSchema,
 }

@@ -48,8 +48,8 @@ describe('FORM_SCHEMAS', () => {
     'root_cause',
   ]
 
-  it('has entries for all 19 form types', () => {
-    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(19)
+  it('has entries for all 25 form types', () => {
+    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(25)
   })
 
   it('contains every expected form type key', () => {
@@ -174,12 +174,12 @@ describe('fishboneSchema', () => {
     if (result.success) {
       expect(result.data.categories).toHaveLength(6)
       const names = result.data.categories.map((c) => c.name)
-      expect(names).toContain('People')
-      expect(names).toContain('Process')
-      expect(names).toContain('Equipment')
-      expect(names).toContain('Materials')
-      expect(names).toContain('Environment')
-      expect(names).toContain('Management')
+      expect(names).toContain('Man (People)')
+      expect(names).toContain('Machine (Equipment)')
+      expect(names).toContain('Method (Process)')
+      expect(names).toContain('Material (Inputs)')
+      expect(names).toContain('Measurement (Metrics)')
+      expect(names).toContain('Mother Nature (Environment)')
     }
   })
 })
