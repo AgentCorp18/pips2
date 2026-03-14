@@ -65,8 +65,9 @@ vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }))
 
-vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({ get: vi.fn().mockReturnValue(undefined) })),
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 /* ============================================================
@@ -74,6 +75,7 @@ vi.mock('next/headers', () => ({
    ============================================================ */
 
 import { createProject } from '../actions'
+import { getCurrentOrg } from '@/lib/get-current-org'
 
 /* ============================================================
    Helpers
@@ -136,8 +138,7 @@ describe('createProject', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // from('org_members').select().eq().limit().single() -> null
-    fromResults = [{ data: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const fd = makeFormData({ name: 'My Project', description: '', target_completion_date: '' })
     const result = await createProject(emptyState, fd)
@@ -149,8 +150,6 @@ describe('createProject', () => {
   it('returns error when project insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('projects').insert().select().single() -> error
       { data: null, error: { message: 'DB error' } },
     ]
@@ -163,8 +162,6 @@ describe('createProject', () => {
   it('returns error and cleans up when steps creation fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('projects').insert().select().single() -> success
       { data: { id: 'proj-new' } },
       // from('project_steps').insert() -> error
@@ -183,8 +180,6 @@ describe('createProject', () => {
   it('returns success with projectId on success', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('projects').insert().select().single() -> success
       { data: { id: 'proj-new' } },
       // from('project_steps').insert() -> success
@@ -201,8 +196,6 @@ describe('createProject', () => {
   it('returns error and cleans up when project member insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('projects').insert().select().single() -> success
       { data: { id: 'proj-new' } },
       // from('project_steps').insert() -> success
@@ -224,7 +217,7 @@ describe('createProject', () => {
 
   it('accepts valid optional description and target date', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { data: { id: 'proj-new' } }, { error: null }]
+    fromResults = [{ data: { id: 'proj-new' } }, { error: null }]
     // admin client: from('project_members').insert() -> success
     adminFromResults = [{ error: null }]
 

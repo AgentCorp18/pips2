@@ -64,8 +64,9 @@ vi.mock('@/lib/csv', () => ({
   generateCSV: vi.fn(() => 'mock-csv-content'),
 }))
 
-vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({ get: vi.fn().mockReturnValue(undefined) })),
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 /* ============================================================
@@ -74,6 +75,7 @@ vi.mock('next/headers', () => ({
 
 import { exportProjectsCSV, exportTicketsCSV } from '../actions'
 import { generateCSV } from '@/lib/csv'
+import { getCurrentOrg } from '@/lib/get-current-org'
 
 /* ============================================================
    exportProjectsCSV
@@ -91,9 +93,7 @@ describe('exportProjectsCSV', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
     fromResults = [
-      // Call 0: from('org_members').select(...).eq(...).order(...).limit(...).maybeSingle()
-      { data: { org_id: 'org-1' } },
-      // Call 1: from('projects').select(...).eq(...).is(...).order(...)
+      // Call 0: from('projects').select(...).eq(...).is(...).order(...)
       {
         data: [
           {
@@ -128,11 +128,7 @@ describe('exportProjectsCSV', () => {
 
   it('returns error when user has no org membership', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-
-    fromResults = [
-      // org_members lookup returns null
-      { data: null },
-    ]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const result = await exportProjectsCSV()
     expect(result).toEqual({ error: 'You must be signed in to an organization' })
@@ -142,8 +138,6 @@ describe('exportProjectsCSV', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
     fromResults = [
-      // org_members lookup
-      { data: { org_id: 'org-1' } },
       // projects query fails
       { data: null, error: { message: 'connection refused' } },
     ]
@@ -168,9 +162,7 @@ describe('exportTicketsCSV', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
     fromResults = [
-      // Call 0: from('org_members') — getUserOrg
-      { data: { org_id: 'org-1' } },
-      // Call 1: from('tickets').select(...).eq(...).order(...)
+      // Call 0: from('tickets').select(...).eq(...).order(...)
       {
         data: [
           {
@@ -226,9 +218,7 @@ describe('exportTicketsCSV', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
     fromResults = [
-      // Call 0: from('org_members')
-      { data: { org_id: 'org-1' } },
-      // Call 1: from('tickets') — with projectId filter
+      // Call 0: from('tickets') — with projectId filter
       {
         data: [
           {
@@ -277,8 +267,6 @@ describe('exportTicketsCSV', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
     fromResults = [
-      // org_members lookup
-      { data: { org_id: 'org-1' } },
       // tickets query fails
       { data: null, error: { message: 'timeout' } },
     ]

@@ -56,8 +56,9 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
-vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({ get: vi.fn().mockReturnValue(undefined) })),
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 vi.mock('next/navigation', () => ({
@@ -85,6 +86,7 @@ import {
 } from '../actions'
 import { requirePermission } from '@/lib/permissions'
 import { revalidatePath } from 'next/cache'
+import { getCurrentOrg } from '@/lib/get-current-org'
 
 /* ============================================================
    Helpers
@@ -145,8 +147,7 @@ describe('createTicket', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // from('org_members').select().eq().limit().single() -> null
-    fromResults = [{ data: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const fd = makeFormData(validTicketFields)
     const result = await createTicket({}, fd)
@@ -156,8 +157,6 @@ describe('createTicket', () => {
   it('checks ticket.create permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('tickets').insert() -> success
       { error: null },
     ]
@@ -171,7 +170,6 @@ describe('createTicket', () => {
 
   it('returns error when permission is denied', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const fd = makeFormData(validTicketFields)
@@ -182,8 +180,6 @@ describe('createTicket', () => {
   it('returns error when assignee is not in same org', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('org_members') -> assignee not found
       { data: null },
     ]
@@ -200,8 +196,6 @@ describe('createTicket', () => {
   it('creates ticket successfully with all fields', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('org_members') -> assignee found
       { data: { user_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d' } },
       // from('tickets').insert() -> success
@@ -229,7 +223,7 @@ describe('createTicket', () => {
 
   it('creates ticket successfully with optional fields empty', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: null }]
+    fromResults = [{ error: null }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const fd = makeFormData({
@@ -251,7 +245,7 @@ describe('createTicket', () => {
 
   it('returns error when insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: { message: 'DB constraint violation' } }]
+    fromResults = [{ error: { message: 'DB constraint violation' } }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const fd = makeFormData(validTicketFields)
@@ -686,7 +680,7 @@ describe('bulkUpdateTickets', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const result = await bulkUpdateTickets(['tkt-1'], { status: 'done' })
     expect(result).toEqual({ error: 'You must belong to an organization' })
@@ -694,7 +688,6 @@ describe('bulkUpdateTickets', () => {
 
   it('returns error when permission is denied', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const result = await bulkUpdateTickets(['tkt-1'], { status: 'done' })
@@ -703,7 +696,6 @@ describe('bulkUpdateTickets', () => {
 
   it('returns error when no fields to update', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await bulkUpdateTickets(['tkt-1'], {})
@@ -713,8 +705,6 @@ describe('bulkUpdateTickets', () => {
   it('bulk updates tickets successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('tickets').update().in().eq() -> success
       { error: null },
     ]
@@ -727,7 +717,7 @@ describe('bulkUpdateTickets', () => {
 
   it('returns error when bulk update fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: { message: 'DB error' } }]
+    fromResults = [{ error: { message: 'DB error' } }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await bulkUpdateTickets(['tkt-1'], { priority: 'low' })
@@ -759,7 +749,7 @@ describe('bulkDeleteTickets', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const result = await bulkDeleteTickets(['tkt-1'])
     expect(result).toEqual({ error: 'You must belong to an organization' })
@@ -767,7 +757,6 @@ describe('bulkDeleteTickets', () => {
 
   it('returns error when permission is denied', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }]
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const result = await bulkDeleteTickets(['tkt-1'])
@@ -777,8 +766,6 @@ describe('bulkDeleteTickets', () => {
   it('deletes tickets successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1' } },
       // from('tickets').delete().in().eq() -> success
       { error: null },
     ]
@@ -791,7 +778,7 @@ describe('bulkDeleteTickets', () => {
 
   it('returns error when bulk delete fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }, { error: { message: 'FK constraint' } }]
+    fromResults = [{ error: { message: 'FK constraint' } }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await bulkDeleteTickets(['tkt-1'])

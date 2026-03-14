@@ -45,8 +45,9 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
-vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({ get: vi.fn().mockReturnValue(undefined) })),
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 /* ============================================================
@@ -54,6 +55,7 @@ vi.mock('next/headers', () => ({
    ============================================================ */
 
 import { getOrgWithSettings, updateOrgSettings } from '../actions'
+import { getCurrentOrg } from '@/lib/get-current-org'
 
 /* ============================================================
    Helpers
@@ -98,8 +100,7 @@ describe('getOrgWithSettings', () => {
 
   it('returns null when user has no org membership', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // from('org_members').select().eq().limit().maybeSingle() -> null
-    fromResults = [{ data: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const result = await getOrgWithSettings()
     expect(result).toBeNull()
@@ -108,8 +109,6 @@ describe('getOrgWithSettings', () => {
   it('returns null when organization is not found', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // from('org_members') -> membership
-      { data: { org_id: 'org-1', role: 'admin' } },
       // from('organizations') -> null
       { data: null },
     ]
@@ -137,11 +136,7 @@ describe('getOrgWithSettings', () => {
       branding: {},
     }
 
-    fromResults = [
-      { data: { org_id: 'org-1', role: 'owner' } },
-      { data: orgData },
-      { data: settingsData },
-    ]
+    fromResults = [{ data: orgData }, { data: settingsData }]
 
     const result = await getOrgWithSettings()
     expect(result).toEqual({
@@ -161,7 +156,7 @@ describe('getOrgWithSettings', () => {
       plan: 'free',
     }
 
-    fromResults = [{ data: { org_id: 'org-1', role: 'admin' } }, { data: orgData }, { data: null }]
+    fromResults = [{ data: orgData }, { data: null }]
 
     const result = await getOrgWithSettings()
     expect(result).not.toBeNull()
@@ -236,7 +231,7 @@ describe('updateOrgSettings', () => {
 
   it('returns error when user has no org membership', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const fd = makeFormData(validSettingsFields)
     const result = await updateOrgSettings(emptyState, fd)
@@ -245,7 +240,11 @@ describe('updateOrgSettings', () => {
 
   it('returns error when user is not owner or admin', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', role: 'member' } }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce({
+      orgId: 'org-1',
+      orgName: 'Test Org',
+      role: 'member',
+    })
 
     const fd = makeFormData(validSettingsFields)
     const result = await updateOrgSettings(emptyState, fd)
@@ -257,7 +256,6 @@ describe('updateOrgSettings', () => {
   it('returns error when org name update fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      { data: { org_id: 'org-1', role: 'owner' } },
       // from('organizations').update().eq() -> error
       { error: { message: 'DB error' } },
     ]
@@ -270,7 +268,6 @@ describe('updateOrgSettings', () => {
   it('returns error when settings update fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      { data: { org_id: 'org-1', role: 'admin' } },
       // from('organizations').update().eq() -> success
       { error: null },
       // from('org_settings').update().eq() -> error
@@ -286,7 +283,7 @@ describe('updateOrgSettings', () => {
 
   it('returns success when settings are updated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', role: 'owner' } }, { error: null }, { error: null }]
+    fromResults = [{ error: null }, { error: null }]
 
     const fd = makeFormData(validSettingsFields)
     const result = await updateOrgSettings(emptyState, fd)
@@ -295,7 +292,12 @@ describe('updateOrgSettings', () => {
 
   it('allows admin role to update settings', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', role: 'admin' } }, { error: null }, { error: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce({
+      orgId: 'org-1',
+      orgName: 'Test Org',
+      role: 'admin',
+    })
+    fromResults = [{ error: null }, { error: null }]
 
     const fd = makeFormData(validSettingsFields)
     const result = await updateOrgSettings(emptyState, fd)

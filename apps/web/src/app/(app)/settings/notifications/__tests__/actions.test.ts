@@ -41,8 +41,9 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({ get: vi.fn().mockReturnValue(undefined) })),
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 /* ============================================================
@@ -50,6 +51,7 @@ vi.mock('next/headers', () => ({
    ============================================================ */
 
 import { getNotificationPreferences, updateNotificationPreferences } from '../actions'
+import { getCurrentOrg } from '@/lib/get-current-org'
 
 /* ============================================================
    getNotificationPreferences
@@ -71,8 +73,7 @@ describe('getNotificationPreferences', () => {
 
   it('returns error when user has no org membership', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // from('org_members').select().eq().limit().maybeSingle() -> null
-    fromResults = [{ data: null }]
+    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
 
     const result = await getNotificationPreferences()
     expect(result).toEqual({ error: 'You are not a member of any organization' })
@@ -94,8 +95,6 @@ describe('getNotificationPreferences', () => {
       updated_at: '2026-01-01',
     }
     fromResults = [
-      // org_members -> membership
-      { data: { org_id: 'org-1' } },
       // notification_preferences -> existing
       { data: prefsData },
     ]
@@ -120,8 +119,6 @@ describe('getNotificationPreferences', () => {
       updated_at: '2026-03-01',
     }
     fromResults = [
-      // org_members -> membership
-      { data: { org_id: 'org-1' } },
       // notification_preferences -> not found
       { data: null },
       // notification_preferences insert -> created
@@ -134,11 +131,7 @@ describe('getNotificationPreferences', () => {
 
   it('returns error when creating default preferences fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [
-      { data: { org_id: 'org-1' } },
-      { data: null },
-      { data: null, error: { message: 'Insert error' } },
-    ]
+    fromResults = [{ data: null }, { data: null, error: { message: 'Insert error' } }]
 
     const result = await getNotificationPreferences()
     expect(result).toEqual({ error: 'Failed to create notification preferences' })
