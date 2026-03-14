@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Command } from 'cmdk'
-import { Search, FolderKanban, Ticket, Plus, LayoutDashboard, FileText } from 'lucide-react'
+import { Search, FolderKanban, Ticket, Plus, LayoutDashboard, FileText, Target } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
 import type { SearchResultGroup } from '@/types/search'
@@ -16,6 +16,12 @@ const QUICK_ACTIONS = [
     label: 'Create Project',
     icon: Plus,
     href: '/projects/new',
+  },
+  {
+    id: 'create-initiative',
+    label: 'Create Initiative',
+    icon: Target,
+    href: '/initiatives/new',
   },
   {
     id: 'create-ticket',
