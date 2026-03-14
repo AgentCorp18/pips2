@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { TableRow, TableCell } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Bug, CheckSquare, CircleDot, Lightbulb, FolderKanban, User } from 'lucide-react'
+import { Bug, CheckSquare, CircleDot, Crown, Lightbulb, FolderKanban, User } from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import { STATUS_CONFIG, PRIORITY_CONFIG, TYPE_CONFIG } from './ticket-config'
 import type { TicketRow } from './ticket-list-table'
@@ -20,6 +20,7 @@ const TYPE_ICONS: Record<TicketType, React.ReactNode> = {
   feature: <Lightbulb size={14} />,
   general: <CircleDot size={14} />,
   pips_project: <FolderKanban size={14} />,
+  ceo_request: <Crown size={14} />,
 }
 
 /* ============================================================

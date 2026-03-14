@@ -207,6 +207,97 @@ export const ticketFiltersSchema = z.object({
 })
 
 /* ============================================================
+   Initiative Schemas
+   ============================================================ */
+
+const initiativeStatuses = ['draft', 'active', 'on_hold', 'completed', 'archived'] as const
+
+export const createInitiativeSchema = z.object({
+  title: z
+    .string()
+    .min(3, 'Title must be at least 3 characters')
+    .max(200, 'Title must be less than 200 characters'),
+  description: z
+    .string()
+    .max(5000, 'Description must be less than 5,000 characters')
+    .optional()
+    .or(z.literal('')),
+  objective: z
+    .string()
+    .max(2000, 'Objective must be less than 2,000 characters')
+    .optional()
+    .or(z.literal('')),
+  target_metric: z
+    .string()
+    .max(500, 'Target metric must be less than 500 characters')
+    .optional()
+    .or(z.literal('')),
+  baseline_value: z.string().max(200).optional().or(z.literal('')),
+  target_value: z.string().max(200).optional().or(z.literal('')),
+  target_start: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine(
+      (val) => {
+        if (!val) return true
+        return !isNaN(new Date(val).getTime())
+      },
+      { message: 'Invalid date format' },
+    ),
+  target_end: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine(
+      (val) => {
+        if (!val) return true
+        return !isNaN(new Date(val).getTime())
+      },
+      { message: 'Invalid date format' },
+    ),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color')
+    .default('#4F46E5'),
+  tags: z.string().optional().or(z.literal('')),
+})
+
+export const updateInitiativeSchema = z.object({
+  title: z
+    .string()
+    .min(3, 'Title must be at least 3 characters')
+    .max(200, 'Title must be less than 200 characters')
+    .optional(),
+  description: z
+    .string()
+    .max(5000, 'Description must be less than 5,000 characters')
+    .optional()
+    .or(z.literal('')),
+  status: z.enum(initiativeStatuses).optional(),
+  objective: z.string().max(2000).optional().or(z.literal('')),
+  target_metric: z.string().max(500).optional().or(z.literal('')),
+  baseline_value: z.string().max(200).optional().or(z.literal('')),
+  target_value: z.string().max(200).optional().or(z.literal('')),
+  current_value: z.string().max(200).optional().or(z.literal('')),
+  target_start: z.string().optional().or(z.literal('')).or(z.null()),
+  target_end: z.string().optional().or(z.literal('')).or(z.null()),
+  actual_start: z.string().optional().or(z.literal('')).or(z.null()),
+  actual_end: z.string().optional().or(z.literal('')).or(z.null()),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color')
+    .optional(),
+  tags: z.array(z.string()).optional(),
+})
+
+export const addProjectToInitiativeSchema = z.object({
+  initiative_id: z.string().uuid('Invalid initiative ID'),
+  project_id: z.string().uuid('Invalid project ID'),
+  notes: z.string().max(1000).optional().or(z.literal('')),
+})
+
+/* ============================================================
    Comment Schemas
    ============================================================ */
 
@@ -239,5 +330,8 @@ export type CreateProjectInput = z.infer<typeof createProjectSchema>
 export type CreateTicketInput = z.infer<typeof createTicketSchema>
 export type UpdateTicketInput = z.infer<typeof updateTicketSchema>
 export type TicketFiltersInput = z.infer<typeof ticketFiltersSchema>
+export type CreateInitiativeInput = z.infer<typeof createInitiativeSchema>
+export type UpdateInitiativeInput = z.infer<typeof updateInitiativeSchema>
+export type AddProjectToInitiativeInput = z.infer<typeof addProjectToInitiativeSchema>
 export type CreateCommentInput = z.infer<typeof createCommentSchema>
 export type UpdateCommentInput = z.infer<typeof updateCommentSchema>

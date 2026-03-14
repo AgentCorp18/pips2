@@ -17,6 +17,7 @@ import {
   BarChart3,
   Wrench,
   MessageSquare,
+  Target,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
@@ -28,6 +29,7 @@ import type { UserOrg } from '@/app/(app)/actions'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Initiatives', href: '/initiatives', icon: Target },
   { label: 'Projects', href: '/projects', icon: FolderKanban },
   { label: 'Tickets', href: '/tickets', icon: Ticket },
   { label: 'Knowledge', href: '/knowledge', icon: BookOpen },

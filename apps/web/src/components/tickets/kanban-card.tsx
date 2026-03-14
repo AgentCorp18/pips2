@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Bug, CheckSquare, CircleDot, Lightbulb, FolderKanban, Calendar } from 'lucide-react'
+import { Bug, CheckSquare, CircleDot, Crown, Lightbulb, FolderKanban, Calendar } from 'lucide-react'
 import { useMounted } from '@/hooks/use-mounted'
 import type { TicketPriority, TicketType } from '@/types/tickets'
 
@@ -23,6 +23,7 @@ const TYPE_ICONS: Record<TicketType, React.ReactNode> = {
   feature: <Lightbulb size={12} />,
   general: <CircleDot size={12} />,
   pips_project: <FolderKanban size={12} />,
+  ceo_request: <Crown size={12} />,
 }
 
 /* ============================================================
