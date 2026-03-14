@@ -55,6 +55,15 @@ IMPORTANT: After every change, run in this order:
 - Don't skip type checking — 2,339+ unit tests must continue passing
 - Don't use default exports — named exports only
 
+## Work Tracking
+
+Agents track all work inside the PIPS app itself (pips-app.vercel.app). Full instructions are in `.claude/rules/multi-agent.md`.
+
+- Create a PIPS project for each sprint or initiative; use the 6-step methodology to frame complex problems
+- Every work item gets a ticket; use sub-tickets for subtasks and "Assigned To" to route work to the right agent
+- Use PIPS chat channels for handoffs and coordination — project channel for sprint-level updates, ticket channel for scoped discussion
+- When you find a bug or have an improvement idea mid-task, create a ticket immediately so it is not lost
+
 ## Gotchas
 
 - Supabase client uses .trim() on env vars to prevent \n corruption
