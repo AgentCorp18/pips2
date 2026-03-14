@@ -165,12 +165,13 @@ export const TicketDetailClient = ({
                   }
                 }}
               />
-              <Button size="icon-sm" variant="ghost" onClick={saveTitle}>
+              <Button size="icon-sm" variant="ghost" onClick={saveTitle} aria-label="Save title">
                 <Check size={16} />
               </Button>
               <Button
                 size="icon-sm"
                 variant="ghost"
+                aria-label="Cancel editing title"
                 onClick={() => {
                   setTitleDraft(ticket.title)
                   setEditingTitle(false)

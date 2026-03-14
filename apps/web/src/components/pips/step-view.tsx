@@ -19,7 +19,10 @@ import {
   AlertTriangle,
   Info,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Users,
+  Home,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
@@ -85,6 +88,18 @@ export const StepView = ({
 
   return (
     <div className="space-y-6">
+      {/* Back to Project link */}
+      <div className="flex items-center">
+        <Link
+          href={`/projects/${projectId}`}
+          className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+          data-testid="back-to-project-link"
+        >
+          <Home size={14} />
+          Back to Project
+        </Link>
+      </div>
+
       {/* 1.6: Step Dependency Warning */}
       {showDependencyWarning && (
         <div
@@ -306,9 +321,61 @@ export const StepView = ({
           )}
         </div>
       )}
+
+      {/* Step-to-step navigation */}
+      <StepNavigation projectId={projectId} stepNumber={stepNumber} />
     </div>
   )
 }
+
+/* ---- Step navigation ---- */
+
+const STEP_NAMES: Record<number, string> = {
+  1: 'Identify',
+  2: 'Analyze',
+  3: 'Ideate',
+  4: 'Plan',
+  5: 'Implement',
+  6: 'Evaluate',
+}
+
+const StepNavigation = ({
+  projectId,
+  stepNumber,
+}: {
+  projectId: string
+  stepNumber: PipsStepNumber
+}) => (
+  <div
+    className="flex items-center justify-between border-t border-[var(--color-border)] pt-4"
+    data-testid="step-navigation"
+  >
+    {stepNumber > 1 ? (
+      <Link
+        href={`/projects/${projectId}/steps/${stepNumber - 1}`}
+        className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+        data-testid="prev-step-link"
+      >
+        <ChevronLeft size={16} />
+        Step {stepNumber - 1}: {STEP_NAMES[stepNumber - 1]}
+      </Link>
+    ) : (
+      <div />
+    )}
+    {stepNumber < 6 ? (
+      <Link
+        href={`/projects/${projectId}/steps/${stepNumber + 1}`}
+        className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+        data-testid="next-step-link"
+      >
+        Step {stepNumber + 1}: {STEP_NAMES[stepNumber + 1]}
+        <ChevronRight size={16} />
+      </Link>
+    ) : (
+      <div />
+    )}
+  </div>
+)
 
 /* ---- Sub-components ---- */
 
