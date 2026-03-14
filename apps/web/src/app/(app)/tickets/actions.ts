@@ -96,13 +96,18 @@ export const createTicket = async (
         .filter(Boolean)
     : []
 
+  // CEO Requests auto-escalate: always critical priority, always todo status
+  const isCeoRequest = result.data.type === 'ceo_request'
+  const effectivePriority = isCeoRequest ? 'critical' : result.data.priority
+  const effectiveStatus = isCeoRequest ? 'todo' : result.data.status
+
   const { error: insertError } = await supabase.from('tickets').insert({
     org_id: currentOrg.orgId,
     title: result.data.title,
     description: result.data.description || null,
     type: result.data.type,
-    status: result.data.status,
-    priority: result.data.priority,
+    status: effectiveStatus,
+    priority: effectivePriority,
     assignee_id: result.data.assignee_id || null,
     project_id: result.data.project_id || null,
     parent_id: result.data.parent_id || null,
@@ -197,6 +202,11 @@ export const updateTicket = async (
   if (d.type !== undefined) update.type = d.type
   if (d.status !== undefined) update.status = d.status
   if (d.priority !== undefined) update.priority = d.priority
+
+  // CEO Request auto-escalation: if type changes to ceo_request, force critical priority
+  if (d.type === 'ceo_request') {
+    update.priority = 'critical'
+  }
   if (d.assignee_id !== undefined) update.assignee_id = d.assignee_id || null
   if (d.project_id !== undefined) update.project_id = d.project_id || null
   if (d.due_date !== undefined) update.due_date = d.due_date || null
