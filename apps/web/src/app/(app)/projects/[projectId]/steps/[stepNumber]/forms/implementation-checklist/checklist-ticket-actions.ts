@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/permissions'
 
 type ChecklistItem = {
   text: string
@@ -43,6 +44,24 @@ export const createTicketsFromChecklist = async (
 
   if (!membership) {
     return { created: 0, error: 'You must belong to an organization' }
+  }
+
+  try {
+    await requirePermission(membership.org_id, 'ticket.create')
+  } catch {
+    return { created: 0, error: 'You do not have permission to create tickets' }
+  }
+
+  // Verify project belongs to user's org
+  const { data: projectCheck } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('id', projectId)
+    .eq('org_id', membership.org_id)
+    .maybeSingle()
+
+  if (!projectCheck) {
+    return { created: 0, error: 'Project not found in this organization' }
   }
 
   // Filter to incomplete items with text
