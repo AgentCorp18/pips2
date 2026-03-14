@@ -14,13 +14,12 @@ import {
 } from '@/components/ui/select'
 import { FormShell } from '@/components/pips/form-shell'
 import { useFormViewMode } from '@/components/pips/form-view-context'
-import { saveFormData } from '../actions'
 import type { CostBenefitData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
 
 type Props = {
   projectId: string
+  stepNumber: number
   initialData: CostBenefitData | null
 }
 
@@ -60,7 +59,7 @@ const formatCurrency = (n: number): string =>
     maximumFractionDigits: 0,
   }).format(n)
 
-export const CostBenefitForm = ({ projectId, initialData }: Props) => {
+export const CostBenefitForm = ({ projectId, stepNumber, initialData }: Props) => {
   const [data, setData] = useState<CostBenefitData>(() => {
     const d = initialData ?? createDefaultData()
     return {
@@ -68,7 +67,6 @@ export const CostBenefitForm = ({ projectId, initialData }: Props) => {
       netBenefit: sumAnnual(d.benefits) - sumAnnual(d.costs),
     }
   })
-  const [dirty, setDirty] = useState(false)
 
   const update = useCallback((next: CostBenefitData) => {
     const withNet = {
@@ -76,23 +74,7 @@ export const CostBenefitForm = ({ projectId, initialData }: Props) => {
       netBenefit: sumAnnual(next.benefits) - sumAnnual(next.costs),
     }
     setData(withNet)
-    setDirty(true)
   }, [])
-
-  const handleSave = useCallback(async () => {
-    const result = await saveFormData(
-      projectId,
-      4,
-      'cost_benefit',
-      data as unknown as Record<string, unknown>,
-    )
-    if (result.error) {
-      toast.error(result.error)
-      return { error: result.error }
-    }
-    setDirty(false)
-    return { success: true }
-  }, [projectId, data])
 
   /* ---- Cost helpers ---- */
   const addCost = () =>
@@ -146,11 +128,12 @@ export const CostBenefitForm = ({ projectId, initialData }: Props) => {
 
   return (
     <FormShell
+      projectId={projectId}
+      stepNumber={stepNumber}
+      formType="cost_benefit"
       title="Cost-Benefit Analysis"
       description="Compare the total costs and benefits of a proposed solution to determine financial viability."
-      stepNumber={4}
-      onSave={handleSave}
-      isDirty={dirty}
+      data={data as unknown as Record<string, unknown>}
     >
       <CostBenefitFields
         data={data}
@@ -471,7 +454,7 @@ const LineItemRow = ({ item, onUpdate, onRemove, canRemove }: LineItemRowProps) 
       </div>
     </div>
     {canRemove && (
-      <Button variant="ghost" size="icon-xs" onClick={onRemove}>
+      <Button variant="ghost" size="icon-xs" onClick={onRemove} aria-label="Remove item">
         <Trash2 className="size-3 text-muted-foreground" />
       </Button>
     )}

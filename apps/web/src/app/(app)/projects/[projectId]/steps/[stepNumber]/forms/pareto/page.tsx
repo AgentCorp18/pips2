@@ -9,9 +9,10 @@ const ParetoPage = async ({
 }: {
   params: Promise<{ projectId: string; stepNumber: string }>
 }) => {
-  const { projectId, stepNumber } = await params
+  const { projectId, stepNumber: stepStr } = await params
+  const stepNumber = parseInt(stepStr, 10)
 
-  if (stepNumber !== '2') notFound()
+  if (stepNumber !== 2) notFound()
 
   const supabase = await createClient()
   const {
@@ -23,7 +24,7 @@ const ParetoPage = async ({
   const saved = await loadFormData(projectId, 2, 'pareto')
   const initialData = (saved ?? null) as ParetoData | null
 
-  return <ParetoForm projectId={projectId} initialData={initialData} />
+  return <ParetoForm projectId={projectId} stepNumber={stepNumber} initialData={initialData} />
 }
 
 export default ParetoPage

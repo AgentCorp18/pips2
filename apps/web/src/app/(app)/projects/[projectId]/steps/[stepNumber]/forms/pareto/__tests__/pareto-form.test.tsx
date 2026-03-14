@@ -20,43 +20,39 @@ vi.mock('@/components/pips/form-shell', () => ({
   ),
 }))
 
-vi.mock('../actions', () => ({
-  saveFormData: vi.fn().mockResolvedValue({ success: true }),
-}))
-
 describe('ParetoForm', () => {
   it('renders without crashing', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(document.body).toBeTruthy()
   })
 
   it('renders Pareto Analysis title', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(screen.getByText('Pareto Analysis')).toBeTruthy()
   })
 
   it('renders description', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(screen.getByText(/80\/20 principle/)).toBeTruthy()
   })
 
   it('renders Analysis Title field', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(screen.getByText('Analysis Title')).toBeTruthy()
   })
 
   it('renders Categories section', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(screen.getByText('Categories')).toBeTruthy()
   })
 
   it('renders Add Category button', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(screen.getByText('Add Category')).toBeTruthy()
   })
 
   it('renders Notes field', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(screen.getByText('Notes')).toBeTruthy()
   })
 
@@ -71,12 +67,12 @@ describe('ParetoForm', () => {
       eightyTwentyLine: '',
       notes: 'Focus on top 2 categories',
     }
-    render(<ParetoForm projectId="p-1" initialData={initialData} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={initialData} />)
     expect(screen.getByText('Pareto Analysis')).toBeTruthy()
   })
 
   it('shows column headers for count, percentage, and cumulative', () => {
-    render(<ParetoForm projectId="p-1" initialData={null} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={null} />)
     expect(screen.getByText('Count')).toBeTruthy()
     expect(screen.getByText('%')).toBeTruthy()
     expect(screen.getByText('Cumulative')).toBeTruthy()
@@ -92,7 +88,7 @@ describe('ParetoForm', () => {
       eightyTwentyLine: '',
       notes: '',
     }
-    render(<ParetoForm projectId="p-1" initialData={initialData} />)
+    render(<ParetoForm projectId="p-1" stepNumber={2} initialData={initialData} />)
     expect(screen.getByText('Vital Few — 80% Rule')).toBeTruthy()
   })
 })

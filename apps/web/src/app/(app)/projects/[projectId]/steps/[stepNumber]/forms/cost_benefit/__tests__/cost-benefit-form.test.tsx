@@ -20,61 +20,57 @@ vi.mock('@/components/pips/form-shell', () => ({
   ),
 }))
 
-vi.mock('../actions', () => ({
-  saveFormData: vi.fn().mockResolvedValue({ success: true }),
-}))
-
 describe('CostBenefitForm', () => {
   it('renders without crashing', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(document.body).toBeTruthy()
   })
 
   it('renders Cost-Benefit Analysis title', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Cost-Benefit Analysis')).toBeTruthy()
   })
 
   it('renders description', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText(/Compare the total costs and benefits/)).toBeTruthy()
   })
 
   it('renders Costs section', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Costs')).toBeTruthy()
     expect(screen.getByText(/All costs associated/)).toBeTruthy()
   })
 
   it('renders Benefits section', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Benefits')).toBeTruthy()
     expect(screen.getByText(/All quantifiable benefits/)).toBeTruthy()
   })
 
   it('renders add cost and add benefit buttons', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Add Cost')).toBeTruthy()
     expect(screen.getByText('Add Benefit')).toBeTruthy()
   })
 
   it('renders Net Annual Benefit display', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Net Annual Benefit')).toBeTruthy()
   })
 
   it('renders Solution Name field', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Solution Name')).toBeTruthy()
   })
 
   it('renders Payback Period field', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Payback Period')).toBeTruthy()
   })
 
   it('renders Recommendation field', () => {
-    render(<CostBenefitForm projectId="p-1" initialData={null} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={null} />)
     expect(screen.getByText('Recommendation')).toBeTruthy()
   })
 
@@ -103,7 +99,7 @@ describe('CostBenefitForm', () => {
       paybackPeriod: '3 months',
       recommendation: 'Proceed with implementation',
     }
-    render(<CostBenefitForm projectId="p-1" initialData={initialData} />)
+    render(<CostBenefitForm projectId="p-1" stepNumber={4} initialData={initialData} />)
     expect(screen.getByText('Cost-Benefit Analysis')).toBeTruthy()
   })
 })

@@ -7,13 +7,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormShell } from '@/components/pips/form-shell'
 import { useFormViewMode } from '@/components/pips/form-view-context'
-import { saveFormData } from '../actions'
 import type { ParetoData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
 
 type Props = {
   projectId: string
+  stepNumber: number
   initialData: ParetoData | null
 }
 
@@ -51,32 +50,15 @@ const getEightyPercentCategories = (categories: Category[]): string[] => {
   return results
 }
 
-export const ParetoForm = ({ projectId, initialData }: Props) => {
+export const ParetoForm = ({ projectId, stepNumber, initialData }: Props) => {
   const [data, setData] = useState<ParetoData>(() => {
     const d = initialData ?? createDefaultData()
     return { ...d, categories: recalculate(d.categories) }
   })
-  const [dirty, setDirty] = useState(false)
 
   const update = useCallback((next: ParetoData) => {
     setData({ ...next, categories: recalculate(next.categories) })
-    setDirty(true)
   }, [])
-
-  const handleSave = useCallback(async () => {
-    const result = await saveFormData(
-      projectId,
-      2,
-      'pareto',
-      data as unknown as Record<string, unknown>,
-    )
-    if (result.error) {
-      toast.error(result.error)
-      return { error: result.error }
-    }
-    setDirty(false)
-    return { success: true }
-  }, [projectId, data])
 
   const addCategory = () =>
     update({
@@ -102,11 +84,12 @@ export const ParetoForm = ({ projectId, initialData }: Props) => {
 
   return (
     <FormShell
+      projectId={projectId}
+      stepNumber={stepNumber}
+      formType="pareto"
       title="Pareto Analysis"
       description="Identify the vital few causes that account for the majority of problems using the 80/20 principle."
-      stepNumber={2}
-      onSave={handleSave}
-      isDirty={dirty}
+      data={data as unknown as Record<string, unknown>}
     >
       <ParetoFields
         data={data}
