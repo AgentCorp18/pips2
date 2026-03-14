@@ -217,6 +217,7 @@ export const TicketCreateForm = ({
                   <SelectItem value="bug">Bug</SelectItem>
                   <SelectItem value="feature">Feature</SelectItem>
                   <SelectItem value="pips_project">PIPS Project</SelectItem>
+                  <SelectItem value="ceo_request">CEO Request</SelectItem>
                 </SelectContent>
               </Select>
             </div>

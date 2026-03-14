@@ -140,7 +140,7 @@ const ticketStatuses = [
 
 const ticketPriorities = ['critical', 'high', 'medium', 'low', 'none'] as const
 
-const ticketTypes = ['pips_project', 'task', 'bug', 'feature', 'general'] as const
+const ticketTypes = ['pips_project', 'task', 'bug', 'feature', 'general', 'ceo_request'] as const
 
 export const createTicketSchema = z.object({
   title: z.string().min(1, 'Title is required').max(500, 'Title must be less than 500 characters'),

@@ -49,6 +49,7 @@ export const TYPE_CONFIG: Record<TicketType, TypeConfig> = {
   feature: { label: 'Feature' },
   general: { label: 'General' },
   pips_project: { label: 'PIPS Project' },
+  ceo_request: { label: 'CEO Request' },
 }
 
 /* ============================================================

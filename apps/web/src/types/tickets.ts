@@ -19,7 +19,7 @@ export type TicketStatus =
 
 export type TicketPriority = 'critical' | 'high' | 'medium' | 'low' | 'none'
 
-export type TicketType = 'pips_project' | 'task' | 'bug' | 'feature' | 'general'
+export type TicketType = 'pips_project' | 'task' | 'bug' | 'feature' | 'general' | 'ceo_request'
 
 export type PipsStepEnum =
   | 'identify'
