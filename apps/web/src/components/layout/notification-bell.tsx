@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell, CheckCheck, Ticket, FolderKanban, AtSign, Info } from 'lucide-react'
+import { Bell, CheckCheck, Ticket, FolderKanban, AtSign, Info, MessageSquare } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import {
   DropdownMenu,
@@ -36,6 +36,8 @@ const NOTIFICATION_ICONS: Record<NotificationType, typeof Bell> = {
   mention: AtSign,
   invitation: Info,
   system: Info,
+  chat_message: MessageSquare,
+  chat_mention: MessageSquare,
 }
 
 /* ============================================================
@@ -52,6 +54,8 @@ const getEntityUrl = (notification: Notification): string => {
       return `/tickets/${notification.entity_id}`
     case 'project':
       return `/projects/${notification.entity_id}`
+    case 'chat_channel':
+      return `/chat/${notification.entity_id}`
     default:
       return '/dashboard'
   }

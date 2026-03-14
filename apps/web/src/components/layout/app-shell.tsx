@@ -16,6 +16,7 @@ import {
   GraduationCap,
   BarChart3,
   Wrench,
+  MessageSquare,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { label: 'Knowledge', href: '/knowledge', icon: BookOpen },
   { label: 'Training', href: '/training', icon: GraduationCap },
   { label: 'Tools', href: '/tools', icon: Wrench },
+  { label: 'Chat', href: '/chat', icon: MessageSquare },
   { label: 'Reports', href: '/reports', icon: BarChart3 },
   { label: 'Teams', href: '/teams', icon: Users },
   { label: 'Settings', href: '/settings', icon: Settings },

@@ -50,6 +50,13 @@ export const TOOL_META: Record<string, ToolMeta> = {
     difficulty: 'Beginner',
     formType: 'checksheet',
   },
+  pareto: {
+    name: 'Pareto Analysis',
+    description: 'Rank causes by frequency or impact to find the vital few (80/20)',
+    estimatedMin: 15,
+    difficulty: 'Intermediate',
+    formType: 'pareto',
+  },
   brainstorming: {
     name: 'Brainstorming',
     description: 'Free-form idea generation with the team',
@@ -70,6 +77,20 @@ export const TOOL_META: Record<string, ToolMeta> = {
     estimatedMin: 10,
     difficulty: 'Beginner',
     formType: 'list_reduction',
+  },
+  interviewing: {
+    name: 'Interviewing',
+    description: 'Structured interviews to gather insights from stakeholders and experts',
+    estimatedMin: 20,
+    difficulty: 'Beginner',
+    formType: 'interviewing',
+  },
+  surveying: {
+    name: 'Surveying',
+    description: 'Design and distribute surveys to crowdsource ideas from larger groups',
+    estimatedMin: 15,
+    difficulty: 'Beginner',
+    formType: 'surveying',
   },
   'weighted-voting': {
     name: 'Weighted Voting',

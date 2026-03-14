@@ -213,8 +213,8 @@ describe('getRequiredForms', () => {
 })
 
 describe('ALL_FORM_TYPES', () => {
-  it('contains all 18 form types', () => {
-    expect(ALL_FORM_TYPES).toHaveLength(18)
+  it('contains all 25 form types', () => {
+    expect(ALL_FORM_TYPES).toHaveLength(25)
   })
 
   it('includes form types from all steps', () => {

@@ -148,7 +148,7 @@ const FISHBONE_CATEGORIES = [
   { label: 'Environment', x: 420, top: false, boneEnd: 448, icon: 'environment' as const },
 ]
 
-const BRANCH_COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#6366F1', '#CA8A04', '#0891B2']
+const BRANCH_COLORS = ['#2563eb', '#d97706', '#059669', '#4338ca', '#ca8a04', '#0891b2']
 
 /** Tiny SVG icon paths for each category (rendered inside 16x16 viewBox) */
 const CategoryIcon = ({ type, x, y }: { type: string; x: number; y: number }) => {

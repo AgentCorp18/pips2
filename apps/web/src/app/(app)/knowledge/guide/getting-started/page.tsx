@@ -21,9 +21,9 @@ const GettingStartedPage = () => {
       <div className="flex items-center gap-3">
         <div
           className="flex h-10 w-10 items-center justify-center rounded-lg"
-          style={{ backgroundColor: 'rgba(5, 150, 105, 0.08)' }}
+          style={{ backgroundColor: 'var(--color-step-3-subtle)' }}
         >
-          <Rocket size={20} className="text-[#059669]" />
+          <Rocket size={20} className="text-[var(--color-step-3)]" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">

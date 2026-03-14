@@ -150,9 +150,9 @@ const GlossaryPage = () => {
       <div className="flex items-center gap-3">
         <div
           className="flex h-10 w-10 items-center justify-center rounded-lg"
-          style={{ backgroundColor: 'rgba(217, 119, 6, 0.08)' }}
+          style={{ backgroundColor: 'var(--color-step-2-subtle)' }}
         >
-          <BookOpen size={20} className="text-[#D97706]" />
+          <BookOpen size={20} className="text-[var(--color-step-2)]" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">PIPS Glossary</h1>

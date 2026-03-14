@@ -16,6 +16,8 @@ export type NotificationType =
   | 'mention'
   | 'invitation'
   | 'system'
+  | 'chat_message'
+  | 'chat_mention'
 
 /* ============================================================
    Core Notification

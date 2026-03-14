@@ -99,6 +99,7 @@ export const CHAPTER_PREVIEWS: Record<string, ChapterPreview> = {
       'Never include a solution in the problem statement',
       'Quantify the gap with data — percentages, dollars, time, error counts',
       'Team agreement on the problem statement prevents scope creep and misaligned effort',
+      'Use List Reduction and Weighted Voting to narrow multiple problem candidates to the one the team will tackle',
     ],
   },
   ch05: {
@@ -110,6 +111,7 @@ export const CHAPTER_PREVIEWS: Record<string, ChapterPreview> = {
     ],
     keyTakeaways: [
       'Start broad with the Fishbone Diagram, then drill deep with the 5-Why technique',
+      'The Fishbone uses 6M categories: Man (People), Machine (Equipment), Method (Process), Material (Inputs), Measurement (Metrics), Mother Nature (Environment)',
       'Involve the people closest to the work — they see causes that data and leadership miss',
       'Validate suspected root causes with data before moving to solutions',
       'A problem with multiple root causes may need multiple improvement cycles',
@@ -138,6 +140,7 @@ export const CHAPTER_PREVIEWS: Record<string, ChapterPreview> = {
     ],
     keyTakeaways: [
       'Set evaluation criteria and weights before scoring solutions to prevent bias',
+      'Use a Balance Sheet (pros/cons) and Cost-Benefit Analysis to pressure-test top candidates before scoring',
       'Every task in the implementation plan needs exactly one Accountable person (RACI)',
       'Build the plan backward from the target date to surface unrealistic timelines',
       'Include risk mitigation and a rollback plan — hope is not a strategy',
@@ -167,7 +170,7 @@ export const CHAPTER_PREVIEWS: Record<string, ChapterPreview> = {
     keyTakeaways: [
       'Compare the same metrics you defined in Step 1 — never move the goalposts',
       'Run a structured retrospective while memories are fresh',
-      'Decide explicitly: standardize, iterate, or start a new cycle',
+      'Decide explicitly which outcome path applies: Standardize (it worked), Iterate (partial success), New Cycle (new learning), or New Problems Created (the solution introduced unintended consequences requiring their own PIPS cycle)',
       'Share lessons learned with the broader organization — improvement compounds across teams',
     ],
   },

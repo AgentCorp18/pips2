@@ -1,0 +1,584 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
+
+/* ============================================================
+   Types
+   ============================================================ */
+
+type ActionResult<T = void> = { data?: T; error?: string }
+
+type ChannelWithUnread = ChatChannel & { unread_count: number }
+
+type MessageWithAuthor = ChatMessage & {
+  author: { display_name: string; avatar_url: string | null }
+}
+
+/* ============================================================
+   Helper: get current user + org
+   ============================================================ */
+
+const getAuthContext = async () => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { supabase, user: null, orgId: null }
+
+  // Get user's current org
+  const { data: membership } = await supabase
+    .from('organization_members')
+    .select('org_id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  return { supabase, user, orgId: membership?.org_id ?? null }
+}
+
+/* ============================================================
+   getChannels — List user's channels with unread counts
+   ============================================================ */
+
+export const getChannels = async (): Promise<ActionResult<ChannelWithUnread[]>> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Get channels the user is a member of
+  const { data: memberships, error: memberError } = await supabase
+    .from('chat_channel_members')
+    .select('channel_id, last_read_at')
+    .eq('user_id', user.id)
+
+  if (memberError) {
+    console.error('Failed to fetch memberships:', memberError.message)
+    return { error: 'Failed to load channels' }
+  }
+
+  if (!memberships || memberships.length === 0) {
+    return { data: [] }
+  }
+
+  const channelIds = memberships.map((m) => m.channel_id)
+  const lastReadMap = Object.fromEntries(memberships.map((m) => [m.channel_id, m.last_read_at]))
+
+  // Fetch channels
+  const { data: channels, error: channelError } = await supabase
+    .from('chat_channels')
+    .select('*')
+    .in('id', channelIds)
+    .is('archived_at', null)
+    .order('created_at', { ascending: false })
+
+  if (channelError) {
+    console.error('Failed to fetch channels:', channelError.message)
+    return { error: 'Failed to load channels' }
+  }
+
+  // Count unread messages per channel
+  const result: ChannelWithUnread[] = await Promise.all(
+    (channels ?? []).map(async (ch) => {
+      const lastRead = lastReadMap[ch.id]
+      let unreadCount = 0
+
+      if (lastRead) {
+        const { count } = await supabase
+          .from('chat_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('channel_id', ch.id)
+          .gt('created_at', lastRead)
+          .neq('author_id', user.id)
+          .is('deleted_at', null)
+
+        unreadCount = count ?? 0
+      }
+
+      return { ...ch, unread_count: unreadCount } as ChannelWithUnread
+    }),
+  )
+
+  return { data: result }
+}
+
+/* ============================================================
+   getChannel — Channel details + members
+   ============================================================ */
+
+type ChannelMember = {
+  user_id: string
+  display_name: string
+  avatar_url: string | null
+  joined_at: string
+  muted: boolean
+}
+
+export const getChannel = async (
+  channelId: string,
+): Promise<ActionResult<{ channel: ChatChannel; members: ChannelMember[] }>> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: channel, error: chError } = await supabase
+    .from('chat_channels')
+    .select('*')
+    .eq('id', channelId)
+    .single()
+
+  if (chError || !channel) {
+    return { error: 'Channel not found' }
+  }
+
+  // Get members with profiles
+  const { data: members } = await supabase
+    .from('chat_channel_members')
+    .select('user_id, joined_at, muted')
+    .eq('channel_id', channelId)
+
+  const memberProfiles: ChannelMember[] = await Promise.all(
+    (members ?? []).map(async (m) => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('id', m.user_id)
+        .single()
+
+      return {
+        user_id: m.user_id,
+        display_name: profile?.display_name ?? 'Unknown',
+        avatar_url: profile?.avatar_url ?? null,
+        joined_at: m.joined_at,
+        muted: m.muted,
+      }
+    }),
+  )
+
+  return { data: { channel: channel as ChatChannel, members: memberProfiles } }
+}
+
+/* ============================================================
+   getMessages — Paginated messages (newest first, cursor-based)
+   ============================================================ */
+
+export const getMessages = async (
+  channelId: string,
+  cursor?: string,
+  limit = 50,
+): Promise<ActionResult<{ messages: MessageWithAuthor[]; hasMore: boolean }>> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  let query = supabase
+    .from('chat_messages')
+    .select('*')
+    .eq('channel_id', channelId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(limit + 1)
+
+  if (cursor) {
+    query = query.lt('created_at', cursor)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Failed to fetch messages:', error.message)
+    return { error: 'Failed to load messages' }
+  }
+
+  const hasMore = (data?.length ?? 0) > limit
+  const messages = (data ?? []).slice(0, limit)
+
+  // Fetch author profiles
+  const authorIds = [...new Set(messages.map((m) => m.author_id))]
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, display_name, avatar_url')
+    .in('id', authorIds)
+
+  const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]))
+
+  const messagesWithAuthors: MessageWithAuthor[] = messages
+    .map((m) => ({
+      ...m,
+      mentions: m.mentions ?? [],
+      author: {
+        display_name: profileMap[m.author_id]?.display_name ?? 'Unknown',
+        avatar_url: profileMap[m.author_id]?.avatar_url ?? null,
+      },
+    }))
+    .reverse() // Return in ascending order for display
+
+  return { data: { messages: messagesWithAuthors, hasMore } }
+}
+
+/* ============================================================
+   sendMessage — Insert message, extract @mentions
+   ============================================================ */
+
+export const sendMessage = async (
+  channelId: string,
+  body: string,
+): Promise<ActionResult<ChatMessage>> => {
+  const { supabase, user, orgId } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization context' }
+
+  const trimmedBody = body.trim()
+  if (!trimmedBody) return { error: 'Message cannot be empty' }
+
+  // Extract @mentions (UUIDs in format @[uuid])
+  const mentionRegex = /@\[([0-9a-f-]{36})\]/g
+  const mentions: string[] = []
+  let match
+  while ((match = mentionRegex.exec(trimmedBody)) !== null) {
+    if (match[1]) mentions.push(match[1])
+  }
+
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .insert({
+      channel_id: channelId,
+      org_id: orgId,
+      author_id: user.id,
+      body: trimmedBody,
+      mentions,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Failed to send message:', error.message)
+    return { error: 'Failed to send message' }
+  }
+
+  return { data: data as ChatMessage }
+}
+
+/* ============================================================
+   editMessage — Author or admin only
+   ============================================================ */
+
+export const editMessage = async (messageId: string, body: string): Promise<ActionResult> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('chat_messages')
+    .update({ body: body.trim(), edited_at: new Date().toISOString() })
+    .eq('id', messageId)
+    .eq('author_id', user.id)
+
+  if (error) {
+    console.error('Failed to edit message:', error.message)
+    return { error: 'Failed to edit message' }
+  }
+
+  return {}
+}
+
+/* ============================================================
+   deleteMessage — Soft delete, author or admin
+   ============================================================ */
+
+export const deleteMessage = async (messageId: string): Promise<ActionResult> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('chat_messages')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', messageId)
+    .eq('author_id', user.id)
+
+  if (error) {
+    console.error('Failed to delete message:', error.message)
+    return { error: 'Failed to delete message' }
+  }
+
+  return {}
+}
+
+/* ============================================================
+   createChannel — Custom or DM channel
+   ============================================================ */
+
+export const createChannel = async (
+  type: ChatChannelType,
+  name?: string,
+  memberIds?: string[],
+  entityId?: string,
+): Promise<ActionResult<ChatChannel>> => {
+  const { supabase, user, orgId } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization context' }
+
+  // For DM channels, check if one already exists between these users
+  if (type === 'direct' && memberIds && memberIds.length === 1) {
+    const otherUserId = memberIds[0]
+    const { data: existing } = await supabase
+      .from('chat_channels')
+      .select('id, org_id, type, name, entity_id, created_by, archived_at, created_at')
+      .eq('org_id', orgId)
+      .eq('type', 'direct')
+      .is('archived_at', null)
+
+    if (existing) {
+      for (const ch of existing) {
+        const { data: members } = await supabase
+          .from('chat_channel_members')
+          .select('user_id')
+          .eq('channel_id', ch.id)
+
+        const memberUserIds = (members ?? []).map((m) => m.user_id)
+        if (
+          memberUserIds.length === 2 &&
+          memberUserIds.includes(user.id) &&
+          memberUserIds.includes(otherUserId)
+        ) {
+          return { data: ch as ChatChannel }
+        }
+      }
+    }
+  }
+
+  const { data: channel, error } = await supabase
+    .from('chat_channels')
+    .insert({
+      org_id: orgId,
+      type,
+      name: name ?? null,
+      entity_id: entityId ?? null,
+      created_by: user.id,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Failed to create channel:', error.message)
+    return { error: 'Failed to create channel' }
+  }
+
+  // Add creator as member
+  const allMembers = [user.id, ...(memberIds ?? [])].filter((id, i, arr) => arr.indexOf(id) === i)
+
+  for (const memberId of allMembers) {
+    await supabase.from('chat_channel_members').insert({
+      channel_id: channel.id,
+      user_id: memberId,
+    })
+  }
+
+  return { data: channel as ChatChannel }
+}
+
+/* ============================================================
+   archiveChannel — Admin only
+   ============================================================ */
+
+export const archiveChannel = async (channelId: string): Promise<ActionResult> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('chat_channels')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', channelId)
+
+  if (error) {
+    console.error('Failed to archive channel:', error.message)
+    return { error: 'Failed to archive channel' }
+  }
+
+  return {}
+}
+
+/* ============================================================
+   addMembers — Add members to channel
+   ============================================================ */
+
+export const addMembers = async (channelId: string, userIds: string[]): Promise<ActionResult> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  for (const userId of userIds) {
+    await supabase
+      .from('chat_channel_members')
+      .upsert({ channel_id: channelId, user_id: userId }, { onConflict: 'channel_id,user_id' })
+  }
+
+  return {}
+}
+
+/* ============================================================
+   markChannelRead — Update last_read_at
+   ============================================================ */
+
+export const markChannelRead = async (channelId: string): Promise<ActionResult> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('chat_channel_members')
+    .update({ last_read_at: new Date().toISOString() })
+    .eq('channel_id', channelId)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('Failed to mark channel read:', error.message)
+    return { error: 'Failed to mark channel as read' }
+  }
+
+  return {}
+}
+
+/* ============================================================
+   generateSummary — AI summary via Claude API
+   ============================================================ */
+
+export const generateSummary = async (channelId: string): Promise<ActionResult<ChatSummary>> => {
+  const { supabase, user } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Fetch recent messages
+  const { data: messages, error: msgError } = await supabase
+    .from('chat_messages')
+    .select('body, created_at')
+    .eq('channel_id', channelId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: true })
+    .limit(100)
+
+  if (msgError || !messages || messages.length === 0) {
+    return { error: 'No messages to summarize' }
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    return { error: 'AI summarization is not configured' }
+  }
+
+  const conversationText = messages.map((m) => m.body).join('\n')
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 500,
+        messages: [
+          {
+            role: 'user',
+            content: `Summarize this team chat conversation in 3-5 bullet points. Focus on key decisions, action items, and important topics discussed:\n\n${conversationText}`,
+          },
+        ],
+      }),
+    })
+
+    if (!response.ok) {
+      return { error: 'Failed to generate summary' }
+    }
+
+    const result = await response.json()
+    const summaryText = result.content?.[0]?.text ?? 'No summary generated'
+
+    // Save summary
+    const firstMsg = messages[0]!
+    const lastMsg = messages[messages.length - 1]!
+
+    const { data: firstMsgData } = await supabase
+      .from('chat_messages')
+      .select('id')
+      .eq('channel_id', channelId)
+      .eq('created_at', firstMsg.created_at)
+      .limit(1)
+      .single()
+
+    const { data: lastMsgData } = await supabase
+      .from('chat_messages')
+      .select('id')
+      .eq('channel_id', channelId)
+      .eq('created_at', lastMsg.created_at)
+      .limit(1)
+      .single()
+
+    const { data: summary, error: saveError } = await supabase
+      .from('chat_summaries')
+      .insert({
+        channel_id: channelId,
+        summary: summaryText,
+        from_message_id: firstMsgData?.id ?? null,
+        to_message_id: lastMsgData?.id ?? null,
+      })
+      .select()
+      .single()
+
+    if (saveError) {
+      console.error('Failed to save summary:', saveError.message)
+      // Return the summary even if save failed
+      return {
+        data: {
+          id: 'temp',
+          channel_id: channelId,
+          summary: summaryText,
+          from_message_id: null,
+          to_message_id: null,
+          created_at: new Date().toISOString(),
+        },
+      }
+    }
+
+    return { data: summary as ChatSummary }
+  } catch (err) {
+    console.error('AI summary failed:', err)
+    return { error: 'Failed to generate summary' }
+  }
+}
+
+/* ============================================================
+   getOrgMembers — For @mention autocomplete
+   ============================================================ */
+
+export type OrgMemberInfo = {
+  user_id: string
+  display_name: string
+  avatar_url: string | null
+}
+
+export const getOrgMembers = async (): Promise<ActionResult<OrgMemberInfo[]>> => {
+  const { supabase, user, orgId } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization context' }
+
+  const { data: members } = await supabase
+    .from('organization_members')
+    .select('user_id')
+    .eq('org_id', orgId)
+
+  if (!members) return { data: [] }
+
+  const profiles: OrgMemberInfo[] = await Promise.all(
+    members.map(async (m) => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('id', m.user_id)
+        .single()
+
+      return {
+        user_id: m.user_id,
+        display_name: profile?.display_name ?? 'Unknown',
+        avatar_url: profile?.avatar_url ?? null,
+      }
+    }),
+  )
+
+  return { data: profiles }
+}

@@ -121,6 +121,30 @@ export const createProject = async (
     return { error: 'Failed to add you as project lead. Please try again.' }
   }
 
+  // Auto-create a chat channel for the project (best-effort)
+  try {
+    const { data: channel } = await admin
+      .from('chat_channels')
+      .insert({
+        org_id: membership.org_id,
+        type: 'project',
+        name: result.data.name,
+        entity_id: project.id,
+        created_by: user.id,
+      })
+      .select('id')
+      .single()
+
+    if (channel) {
+      await admin.from('chat_channel_members').insert({
+        channel_id: channel.id,
+        user_id: user.id,
+      })
+    }
+  } catch {
+    // Non-critical — project was created successfully
+  }
+
   trackServerEvent('project.created', { project_id: project.id })
 
   return { success: true, projectId: project.id }

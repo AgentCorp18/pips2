@@ -54,12 +54,12 @@ describe('FishboneForm', () => {
         problemStatementFromStep1=""
       />,
     )
-    expect(screen.getByText('People')).toBeTruthy()
-    expect(screen.getByText('Process')).toBeTruthy()
-    expect(screen.getByText('Equipment')).toBeTruthy()
-    expect(screen.getByText('Materials')).toBeTruthy()
-    expect(screen.getByText('Environment')).toBeTruthy()
-    expect(screen.getByText('Management')).toBeTruthy()
+    expect(screen.getByText('Man (People)')).toBeTruthy()
+    expect(screen.getByText('Machine (Equipment)')).toBeTruthy()
+    expect(screen.getByText('Method (Process)')).toBeTruthy()
+    expect(screen.getByText('Material (Inputs)')).toBeTruthy()
+    expect(screen.getByText('Measurement (Metrics)')).toBeTruthy()
+    expect(screen.getByText('Mother Nature (Environment)')).toBeTruthy()
   })
 
   it('renders Add Cause buttons for each category', () => {

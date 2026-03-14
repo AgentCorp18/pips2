@@ -12,9 +12,9 @@ import type { ContentNodeRow } from '../actions'
 
 const PILLAR_CONFIG: Record<string, { label: string; icon: typeof BookOpen; color: string }> = {
   book: { label: 'Book', icon: BookOpen, color: 'var(--color-primary)' },
-  guide: { label: 'Guide', icon: Compass, color: 'var(--color-step-3, #059669)' },
-  workbook: { label: 'Workbook', icon: ClipboardList, color: 'var(--color-step-2, #D97706)' },
-  workshop: { label: 'Workshop', icon: Users, color: 'var(--color-step-6, #0891B2)' },
+  guide: { label: 'Guide', icon: Compass, color: 'var(--color-step-3)' },
+  workbook: { label: 'Workbook', icon: ClipboardList, color: 'var(--color-step-2)' },
+  workshop: { label: 'Workshop', icon: Users, color: 'var(--color-step-6)' },
 }
 
 const ACCESS_LABEL: Record<string, { text: string; variant: 'default' | 'secondary' | 'outline' }> =

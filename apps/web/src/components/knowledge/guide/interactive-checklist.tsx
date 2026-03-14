@@ -96,7 +96,7 @@ export const InteractiveChecklist = ({
                   className={cn(
                     'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors',
                     checked
-                      ? 'border-[var(--color-primary,#4F46E5)] bg-[var(--color-primary,#4F46E5)] text-white'
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white'
                       : 'border-gray-300 dark:border-gray-600',
                   )}
                 >

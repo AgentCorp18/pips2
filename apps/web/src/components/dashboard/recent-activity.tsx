@@ -17,7 +17,7 @@ const ACTION_ICONS: Record<string, typeof Activity> = {
 const ACTION_COLORS: Record<string, string> = {
   insert: 'var(--color-step-3)',
   update: 'var(--color-step-1)',
-  delete: '#EF4444',
+  delete: 'var(--color-signal-red)',
 }
 
 export const RecentActivity = ({ items }: RecentActivityProps) => {

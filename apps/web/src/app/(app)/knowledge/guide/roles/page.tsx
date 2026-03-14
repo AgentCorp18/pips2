@@ -13,12 +13,21 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  Leader: '#3B82F6',
-  'Process Guide': '#F59E0B',
-  Scribe: '#10B981',
-  Timekeeper: '#6366F1',
-  Presenter: '#CA8A04',
-  Facilitator: '#0891B2',
+  Leader: 'var(--color-step-1)',
+  'Process Guide': 'var(--color-step-2)',
+  Scribe: 'var(--color-step-3)',
+  Timekeeper: 'var(--color-step-4)',
+  Presenter: 'var(--color-step-5)',
+  Facilitator: 'var(--color-step-6)',
+}
+
+const ROLE_COLORS_SUBTLE: Record<string, string> = {
+  Leader: 'var(--color-step-1-subtle)',
+  'Process Guide': 'var(--color-step-2-subtle)',
+  Scribe: 'var(--color-step-3-subtle)',
+  Timekeeper: 'var(--color-step-4-subtle)',
+  Presenter: 'var(--color-step-5-subtle)',
+  Facilitator: 'var(--color-step-6-subtle)',
 }
 
 const RolesPage = () => {
@@ -62,7 +71,8 @@ const RolesPage = () => {
       {/* Role Cards Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {GUIDE_ROLES.map((role, index) => {
-          const roleColor = ROLE_COLORS[role.title] ?? '#4F46E5'
+          const roleColor = ROLE_COLORS[role.title] ?? 'var(--color-primary)'
+          const roleColorSubtle = ROLE_COLORS_SUBTLE[role.title] ?? 'var(--color-primary-subtle)'
           return (
             <Card key={role.title} data-testid={`role-card-${index}`} className="overflow-hidden">
               <div className="h-1.5" style={{ backgroundColor: roleColor }} />
@@ -70,7 +80,7 @@ const RolesPage = () => {
                 <div className="flex items-center gap-3">
                   <div
                     className="flex h-12 w-12 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: `${roleColor}14`, color: roleColor }}
+                    style={{ backgroundColor: roleColorSubtle, color: roleColor }}
                   >
                     {ROLE_ICONS[role.icon] ?? <Users size={24} />}
                   </div>

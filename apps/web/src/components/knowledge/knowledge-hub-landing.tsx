@@ -31,7 +31,7 @@ const PILLAR_CARDS = [
     icon: BookOpen,
     href: '/knowledge/book',
     color: 'var(--color-primary)',
-    bgColor: 'var(--color-primary-subtle, rgba(79, 70, 229, 0.08))',
+    bgColor: 'var(--color-primary-subtle)',
   },
   {
     pillar: 'guide' as const,
@@ -40,8 +40,8 @@ const PILLAR_CARDS = [
       'Step-by-step methodology — distilled tools, roles, and processes for each PIPS step',
     icon: Compass,
     href: '/knowledge/guide',
-    color: 'var(--color-step-3, #059669)',
-    bgColor: 'rgba(5, 150, 105, 0.08)',
+    color: 'var(--color-step-3)',
+    bgColor: 'var(--color-step-3-subtle)',
   },
   {
     pillar: 'workbook' as const,
@@ -50,8 +50,8 @@ const PILLAR_CARDS = [
       'Hands-on practice — exercises, templates, and form-based activities for learning by doing',
     icon: ClipboardList,
     href: '/knowledge/workbook',
-    color: 'var(--color-step-2, #D97706)',
-    bgColor: 'rgba(217, 119, 6, 0.08)',
+    color: 'var(--color-step-2)',
+    bgColor: 'var(--color-step-2-subtle)',
   },
   {
     pillar: 'workshop' as const,
@@ -59,16 +59,16 @@ const PILLAR_CARDS = [
     description: 'Facilitation in action — timed sessions, team scenarios, and facilitator guides',
     icon: Users,
     href: '/knowledge/workshop',
-    color: 'var(--color-step-6, #0891B2)',
-    bgColor: 'rgba(8, 145, 178, 0.08)',
+    color: 'var(--color-step-6)',
+    bgColor: 'var(--color-step-6-subtle)',
   },
 ]
 
 const PILLAR_CONFIG: Record<string, { label: string; color: string }> = {
   book: { label: 'Book', color: 'var(--color-primary)' },
-  guide: { label: 'Guide', color: 'var(--color-step-3, #059669)' },
-  workbook: { label: 'Workbook', color: 'var(--color-step-2, #D97706)' },
-  workshop: { label: 'Workshop', color: 'var(--color-step-6, #0891B2)' },
+  guide: { label: 'Guide', color: 'var(--color-step-3)' },
+  workbook: { label: 'Workbook', color: 'var(--color-step-2)' },
+  workshop: { label: 'Workshop', color: 'var(--color-step-6)' },
 }
 
 type KnowledgeHubLandingProps = {
