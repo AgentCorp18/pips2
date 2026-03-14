@@ -90,13 +90,13 @@ describe('PRIORITY_CONFIG', () => {
    ============================================================ */
 
 describe('TYPE_CONFIG', () => {
-  it('contains all 5 types', () => {
+  it('contains all 6 types', () => {
     const keys = Object.keys(TYPE_CONFIG)
-    expect(keys).toHaveLength(5)
+    expect(keys).toHaveLength(6)
   })
 
   it('maps all expected types', () => {
-    const expected = ['task', 'bug', 'feature', 'general', 'pips_project']
+    const expected = ['task', 'bug', 'feature', 'general', 'pips_project', 'ceo_request']
     expected.forEach((type) => {
       expect(TYPE_CONFIG).toHaveProperty(type)
     })

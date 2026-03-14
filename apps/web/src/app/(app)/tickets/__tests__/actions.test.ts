@@ -56,6 +56,10 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(async () => ({ get: vi.fn().mockReturnValue(undefined) })),
+}))
+
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }))

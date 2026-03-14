@@ -64,6 +64,10 @@ vi.mock('@/lib/csv', () => ({
   generateCSV: vi.fn(() => 'mock-csv-content'),
 }))
 
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(async () => ({ get: vi.fn().mockReturnValue(undefined) })),
+}))
+
 /* ============================================================
    Import after mocks
    ============================================================ */
