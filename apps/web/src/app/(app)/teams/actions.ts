@@ -82,12 +82,16 @@ export const createTeam = async (name: string, description?: string): Promise<Ac
     const trimmedName = name.trim()
     if (!trimmedName) return { success: false, error: 'Team name is required' }
 
-    const { error } = await supabase.from('teams').insert({
-      org_id: orgId,
-      name: trimmedName,
-      description: description?.trim() || null,
-      created_by: user.id,
-    })
+    const { data: team, error } = await supabase
+      .from('teams')
+      .insert({
+        org_id: orgId,
+        name: trimmedName,
+        description: description?.trim() || null,
+        created_by: user.id,
+      })
+      .select('id')
+      .single()
 
     if (error) {
       if (error.code === '23505') {
@@ -95,6 +99,32 @@ export const createTeam = async (name: string, description?: string): Promise<Ac
       }
       console.error('Failed to create team:', error.message)
       return { success: false, error: 'Failed to create team. Please try again.' }
+    }
+
+    // Auto-create a chat channel for the team (best-effort)
+    if (team) {
+      try {
+        const { data: channel } = await supabase
+          .from('chat_channels')
+          .insert({
+            org_id: orgId,
+            type: 'team',
+            name: trimmedName,
+            entity_id: team.id,
+            created_by: user.id,
+          })
+          .select('id')
+          .single()
+
+        if (channel) {
+          await supabase.from('chat_channel_members').insert({
+            channel_id: channel.id,
+            user_id: user.id,
+          })
+        }
+      } catch {
+        // Non-critical — team was created successfully
+      }
     }
 
     revalidatePath('/teams')
