@@ -118,7 +118,8 @@ describe('CommandPalette', () => {
 
   it('shows quick actions when no search query is entered', () => {
     render(<CommandPalette {...defaultProps} />)
-    expect(screen.getByText('Quick Actions')).toBeInTheDocument()
+    expect(screen.getByText('Create')).toBeInTheDocument()
+    expect(screen.getByText('Navigate')).toBeInTheDocument()
     expect(screen.getByText('Create Project')).toBeInTheDocument()
     expect(screen.getByText('Create Ticket')).toBeInTheDocument()
     expect(screen.getByText('Go to Dashboard')).toBeInTheDocument()

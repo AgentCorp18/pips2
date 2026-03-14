@@ -3,7 +3,20 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Command } from 'cmdk'
-import { Search, FolderKanban, Ticket, Plus, LayoutDashboard, FileText, Target } from 'lucide-react'
+import {
+  Search,
+  FolderKanban,
+  Ticket,
+  Plus,
+  LayoutDashboard,
+  FileText,
+  Target,
+  BookOpen,
+  BarChart3,
+  Users,
+  MessageSquare,
+  Settings,
+} from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
 import type { SearchResultGroup } from '@/types/search'
@@ -16,24 +29,84 @@ const QUICK_ACTIONS = [
     label: 'Create Project',
     icon: Plus,
     href: '/projects/new',
+    group: 'Create',
   },
   {
     id: 'create-initiative',
     label: 'Create Initiative',
     icon: Target,
     href: '/initiatives/new',
+    group: 'Create',
   },
   {
     id: 'create-ticket',
     label: 'Create Ticket',
     icon: FileText,
     href: '/tickets/new',
+    group: 'Create',
   },
   {
     id: 'go-dashboard',
     label: 'Go to Dashboard',
     icon: LayoutDashboard,
     href: '/dashboard',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-projects',
+    label: 'Go to Projects',
+    icon: FolderKanban,
+    href: '/projects',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-initiatives',
+    label: 'Go to Initiatives',
+    icon: Target,
+    href: '/initiatives',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-tickets',
+    label: 'Go to Tickets',
+    icon: Ticket,
+    href: '/tickets',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-teams',
+    label: 'Go to Teams',
+    icon: Users,
+    href: '/teams',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-chat',
+    label: 'Go to Chat',
+    icon: MessageSquare,
+    href: '/chat',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-reports',
+    label: 'Go to Reports',
+    icon: BarChart3,
+    href: '/reports',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-knowledge',
+    label: 'Go to Knowledge Hub',
+    icon: BookOpen,
+    href: '/knowledge',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-settings',
+    label: 'Go to Settings',
+    icon: Settings,
+    href: '/settings',
+    group: 'Navigate',
   },
 ]
 
@@ -176,25 +249,30 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
 
             {/* Quick actions (shown when no search query) */}
             {!hasQuery && (
-              <Command.Group
-                heading="Quick Actions"
-                className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--color-text-tertiary)]"
-              >
-                {QUICK_ACTIONS.map((action) => {
-                  const Icon = action.icon
-                  return (
-                    <Command.Item
-                      key={action.id}
-                      value={action.id}
-                      onSelect={() => handleSelect(action.href)}
-                      className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 text-sm aria-selected:bg-[var(--color-primary-subtle)] [&[aria-selected]]:text-[var(--color-text-primary)]"
-                    >
-                      <Icon size={16} className="shrink-0 text-[var(--color-text-tertiary)]" />
-                      <span className="text-[var(--color-text-primary)]">{action.label}</span>
-                    </Command.Item>
-                  )
-                })}
-              </Command.Group>
+              <>
+                {(['Create', 'Navigate'] as const).map((group) => (
+                  <Command.Group
+                    key={group}
+                    heading={group}
+                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--color-text-tertiary)]"
+                  >
+                    {QUICK_ACTIONS.filter((a) => a.group === group).map((action) => {
+                      const Icon = action.icon
+                      return (
+                        <Command.Item
+                          key={action.id}
+                          value={action.id}
+                          onSelect={() => handleSelect(action.href)}
+                          className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 text-sm aria-selected:bg-[var(--color-primary-subtle)] [&[aria-selected]]:text-[var(--color-text-primary)]"
+                        >
+                          <Icon size={16} className="shrink-0 text-[var(--color-text-tertiary)]" />
+                          <span className="text-[var(--color-text-primary)]">{action.label}</span>
+                        </Command.Item>
+                      )
+                    })}
+                  </Command.Group>
+                ))}
+              </>
             )}
           </Command.List>
 

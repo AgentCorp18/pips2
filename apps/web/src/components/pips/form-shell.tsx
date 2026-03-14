@@ -11,6 +11,7 @@ import {
   Loader2,
   Clock,
   ChevronDown,
+  ChevronRight,
   Lightbulb,
   X,
 } from 'lucide-react'
@@ -240,7 +241,7 @@ export const FormShell = (props: FormShellProps) => {
   return (
     <FormViewProvider value={viewMode}>
       <div className="space-y-4">
-        {/* Back link + save status bar */}
+        {/* Breadcrumb + save status bar */}
         <div className="flex items-center justify-between">
           {isSandbox ? (
             <Link
@@ -252,14 +253,50 @@ export const FormShell = (props: FormShellProps) => {
               Back to tools
             </Link>
           ) : projectId ? (
-            <Link
-              href={`/projects/${projectId}/steps/${stepNumber}`}
-              className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-              data-testid="back-to-step-link"
-            >
-              <ArrowLeft size={14} />
-              Back to step
-            </Link>
+            <nav aria-label="Breadcrumb" data-testid="form-breadcrumb">
+              <ol className="flex items-center gap-1 text-sm">
+                <li>
+                  <Link
+                    href="/projects"
+                    className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                  >
+                    Projects
+                  </Link>
+                </li>
+                <li>
+                  <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
+                </li>
+                <li>
+                  <Link
+                    href={`/projects/${projectId}`}
+                    className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                  >
+                    Project
+                  </Link>
+                </li>
+                <li>
+                  <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
+                </li>
+                <li>
+                  <Link
+                    href={`/projects/${projectId}/steps/${stepNumber}`}
+                    className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                  >
+                    Step {stepNumber}
+                    {stepContent ? `: ${stepContent.title}` : ''}
+                  </Link>
+                </li>
+                <li>
+                  <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
+                </li>
+                <li
+                  aria-current="page"
+                  className="font-medium text-[var(--color-text-primary)] truncate max-w-[200px]"
+                >
+                  {title}
+                </li>
+              </ol>
+            </nav>
           ) : (
             <div />
           )}

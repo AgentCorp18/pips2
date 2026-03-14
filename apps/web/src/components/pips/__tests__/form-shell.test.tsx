@@ -73,7 +73,9 @@ describe('FormShell', () => {
 
   it('renders the form title', () => {
     render(<FormShell {...dataDrivenProps} />)
-    expect(screen.getByText('Root Cause Analysis')).toBeInTheDocument()
+    // Title appears in both breadcrumb and card header
+    const matches = screen.getAllByText('Root Cause Analysis')
+    expect(matches.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders the form description', () => {
@@ -86,15 +88,17 @@ describe('FormShell', () => {
     expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
   })
 
-  it('renders Back to step link when projectId is provided', () => {
+  it('renders breadcrumb navigation when projectId is provided', () => {
     render(<FormShell {...dataDrivenProps} />)
-    const link = screen.getByText('Back to step')
-    expect(link.closest('a')).toHaveAttribute('href', '/projects/proj-1/steps/2')
+    const breadcrumb = screen.getByTestId('form-breadcrumb')
+    expect(breadcrumb).toBeInTheDocument()
+    const stepLink = screen.getByText(/Step 2/i)
+    expect(stepLink.closest('a')).toHaveAttribute('href', '/projects/proj-1/steps/2')
   })
 
-  it('does not render Back link when projectId is not provided', () => {
+  it('does not render breadcrumb when projectId is not provided', () => {
     render(<FormShell {...callbackProps} />)
-    expect(screen.queryByText('Back to step')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('form-breadcrumb')).not.toBeInTheDocument()
   })
 
   it('renders Required badge when required is true', () => {
