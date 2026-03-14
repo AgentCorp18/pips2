@@ -377,6 +377,7 @@ export const weightedVotingSchema = z.object({
   voters: z
     .array(
       z.object({
+        id: z.string(),
         name: z.string().default(''),
         allocations: z.record(z.string(), z.number()).default({}),
       }),

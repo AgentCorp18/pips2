@@ -11,12 +11,12 @@ import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import type { FishboneData } from '@/lib/form-schemas'
 
 const DEFAULT_CATEGORIES = [
-  { name: 'People', causes: [] },
-  { name: 'Process', causes: [] },
-  { name: 'Equipment', causes: [] },
-  { name: 'Materials', causes: [] },
-  { name: 'Environment', causes: [] },
-  { name: 'Management', causes: [] },
+  { name: 'Man (People)', causes: [] },
+  { name: 'Machine (Equipment)', causes: [] },
+  { name: 'Method (Process)', causes: [] },
+  { name: 'Material (Inputs)', causes: [] },
+  { name: 'Measurement (Metrics)', causes: [] },
+  { name: 'Mother Nature (Environment)', causes: [] },
 ]
 
 const DEFAULTS: FishboneData = {

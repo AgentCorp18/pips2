@@ -57,16 +57,16 @@ export const WeightedVotingForm = ({ projectId, stepNumber, initialData }: Props
       }
       return {
         ...prev,
-        voters: [...prev.voters, { name, allocations }],
+        voters: [...prev.voters, { id: crypto.randomUUID(), name, allocations }],
       }
     })
     setNewVoter('')
   }, [newVoter])
 
-  const updateAllocation = useCallback((voterIndex: number, optionId: string, votes: number) => {
+  const updateAllocation = useCallback((voterId: string, optionId: string, votes: number) => {
     setData((prev) => {
-      const updatedVoters = prev.voters.map((voter, idx) =>
-        idx === voterIndex
+      const updatedVoters = prev.voters.map((voter) =>
+        voter.id === voterId
           ? {
               ...voter,
               allocations: { ...voter.allocations, [optionId]: Math.max(0, votes) },
@@ -128,7 +128,7 @@ type WeightedVotingFieldsProps = {
   setNewVoter: (v: string) => void
   addOption: () => void
   addVoter: () => void
-  updateAllocation: (voterIndex: number, optionId: string, votes: number) => void
+  updateAllocation: (voterId: string, optionId: string, votes: number) => void
   updateTotalVotes: (value: number) => void
 }
 
@@ -168,9 +168,9 @@ const WeightedVotingFields = ({
                     <th className="pb-2 text-left text-xs font-medium text-[var(--color-text-tertiary)]">
                       Option
                     </th>
-                    {data.voters.map((voter, idx) => (
+                    {data.voters.map((voter) => (
                       <th
-                        key={idx}
+                        key={voter.id}
                         className="pb-2 text-center text-xs font-medium text-[var(--color-text-tertiary)]"
                       >
                         {voter.name}
@@ -188,9 +188,9 @@ const WeightedVotingFields = ({
                       className={`border-b border-[var(--color-border)] ${idx === 0 ? 'bg-[var(--color-success-subtle)]' : ''}`}
                     >
                       <td className="py-2 pr-4 text-[var(--color-text-primary)]">{option.text}</td>
-                      {data.voters.map((voter, voterIdx) => (
+                      {data.voters.map((voter) => (
                         <td
-                          key={voterIdx}
+                          key={voter.id}
                           className="py-2 text-center text-[var(--color-text-secondary)]"
                         >
                           {voter.allocations[option.id] ?? 0}
@@ -297,12 +297,12 @@ const WeightedVotingFields = ({
           <span className="text-sm font-medium text-[var(--color-text-primary)]">
             Vote Allocations
           </span>
-          {data.voters.map((voter, voterIndex) => {
+          {data.voters.map((voter) => {
             const voterTotal = Object.values(voter.allocations).reduce((sum, v) => sum + v, 0)
             const isOverBudget = voterTotal > data.totalVotesPerPerson
             return (
               <div
-                key={voterIndex}
+                key={voter.id}
                 className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4"
               >
                 <div className="mb-3 flex items-center justify-between">
@@ -328,7 +328,7 @@ const WeightedVotingFields = ({
                         max={data.totalVotesPerPerson}
                         value={voter.allocations[opt.id] ?? 0}
                         onChange={(e) =>
-                          updateAllocation(voterIndex, opt.id, parseInt(e.target.value, 10) || 0)
+                          updateAllocation(voter.id, opt.id, parseInt(e.target.value, 10) || 0)
                         }
                         className="w-20 text-center"
                       />

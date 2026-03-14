@@ -67,6 +67,7 @@ describe('WeightedVotingForm', () => {
       ],
       voters: [
         {
+          id: 'voter-1',
           name: 'Alice',
           allocations: { 'opt-1': 3, 'opt-2': 2 },
         },
