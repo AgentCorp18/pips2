@@ -258,11 +258,11 @@ const InterviewingFields = ({
                 Questions &amp; Responses
               </p>
 
-              {interview.questions.length === 0 && isView && (
+              {(interview.questions?.length ?? 0) === 0 && isView && (
                 <p className="text-sm text-[var(--color-text-tertiary)]">No questions recorded.</p>
               )}
 
-              {interview.questions.map(
+              {(interview.questions ?? []).map(
                 (qa: { id: string; question: string; response: string }, qaIndex: number) => (
                   <div
                     key={qa.id}
@@ -330,7 +330,7 @@ const InterviewingFields = ({
               placeholder="Summarize the most important takeaways from this interview..."
               rows={3}
               aiFieldType="generate"
-              aiContext={`Interview with ${interview.interviewee || 'interviewee'} (${interview.role || 'unknown role'}). Q&A: ${interview.questions.map((qa) => `Q: ${qa.question} A: ${qa.response}`).join('; ')}`}
+              aiContext={`Interview with ${interview.interviewee || 'interviewee'} (${interview.role || 'unknown role'}). Q&A: ${(interview.questions ?? []).map((qa) => `Q: ${qa.question} A: ${qa.response}`).join('; ')}`}
             />
           </CardContent>
         </Card>

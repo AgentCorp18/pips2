@@ -343,7 +343,8 @@ const CostBenefitFields = ({
       <div className="space-y-1.5">
         <Label htmlFor="paybackPeriod">Payback Period</Label>
         <p className="text-xs text-muted-foreground">
-          How long until benefits exceed costs? (e.g. "14 months", "2 years")
+          How long until benefits exceed costs? (e.g. &ldquo;14 months&rdquo;, &ldquo;2
+          years&rdquo;)
         </p>
         <Input
           id="paybackPeriod"
