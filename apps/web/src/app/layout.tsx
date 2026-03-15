@@ -100,8 +100,9 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster />
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+        {/* Analytics only runs on Vercel — avoids /_vercel/insights 404s in local dev */}
+        {process.env.NEXT_PUBLIC_VERCEL_ENV && <Analytics />}
+        {process.env.NEXT_PUBLIC_VERCEL_ENV && <SpeedInsights />}
       </body>
     </html>
   )

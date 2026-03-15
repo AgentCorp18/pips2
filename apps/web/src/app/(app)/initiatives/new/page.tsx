@@ -5,7 +5,7 @@ import { CreateInitiativeForm } from '@/components/initiatives/create-initiative
 import { Target } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'New Initiative | PIPS',
+  title: 'New Initiative',
 }
 
 const NewInitiativePage = async () => {

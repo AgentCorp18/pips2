@@ -28,17 +28,25 @@ const createChainForIndex = (idx: number) => {
 }
 
 const mockGetUser = vi.fn()
+const mockSupabase = {
+  auth: {
+    getUser: () => mockGetUser(),
+  },
+  from: () => {
+    const idx = fromCallIndex++
+    return createChainForIndex(idx)
+  },
+}
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
-    auth: {
-      getUser: () => mockGetUser(),
-    },
-    from: () => {
-      const idx = fromCallIndex++
-      return createChainForIndex(idx)
-    },
-  })),
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => {
+    const result = await mockGetUser()
+    return {
+      supabase: mockSupabase,
+      user: result?.data?.user ?? null,
+      orgId: null,
+    }
+  }),
 }))
 
 vi.mock('next/cache', () => ({
@@ -80,7 +88,7 @@ describe('saveFormData', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // Call 0: from('projects').select('org_id, current_step') -> project found
-      { data: { org_id: 'org-1', current_step: 2 } },
+      { data: { org_id: 'org-1', current_step: 'analyze' } },
       // Call 1: from('project_forms').upsert() -> success
       { error: null },
     ]
@@ -107,7 +115,7 @@ describe('saveFormData', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // Call 0: from('projects').select('org_id, current_step') -> project found
-      { data: { org_id: 'org-1', current_step: 1 } },
+      { data: { org_id: 'org-1', current_step: 'identify' } },
       // Call 1: from('project_forms').upsert() -> fails
       { error: { message: 'duplicate key violation' } },
     ]
@@ -120,7 +128,7 @@ describe('saveFormData', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // Call 0: from('projects').select('org_id, current_step') -> project found
-      { data: { org_id: 'org-1', current_step: 3 } },
+      { data: { org_id: 'org-1', current_step: 'generate' } },
       // Call 1: from('project_forms').upsert() -> success
       { error: null },
     ]
@@ -137,7 +145,7 @@ describe('saveFormData', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // Call 0: from('projects').select('org_id, current_step') -> project found
-      { data: { org_id: 'org-1', current_step: 6 } },
+      { data: { org_id: 'org-1', current_step: 'evaluate' } },
       // Call 1: from('project_forms').upsert() -> success
       { error: null },
     ]
@@ -187,7 +195,7 @@ describe('saveFormData', () => {
   it('saves root_cause form with flexible schema', async () => {
     // root_cause uses z.record(z.string(), z.unknown()) — accepts any shape
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', current_step: 2 } }, { error: null }]
+    fromResults = [{ data: { org_id: 'org-1', current_step: 'analyze' } }, { error: null }]
 
     const result = await saveFormData(VALID_PROJECT_ID, 2, 'root_cause', { anything: 'goes' })
     expect(result).toEqual({ success: true })
@@ -196,8 +204,8 @@ describe('saveFormData', () => {
   it('returns error when stepNumber is greater than project current_step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // Project is only on step 1
-      { data: { org_id: 'org-1', current_step: 1 } },
+      // Project is only on step 1 — current_step is a pips_step enum string from the DB
+      { data: { org_id: 'org-1', current_step: 'identify' } },
     ]
 
     const result = await saveFormData(VALID_PROJECT_ID, 3, 'brainstorming', {
@@ -210,7 +218,7 @@ describe('saveFormData', () => {
 
   it('allows saving the current step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', current_step: 2 } }, { error: null }]
+    fromResults = [{ data: { org_id: 'org-1', current_step: 'analyze' } }, { error: null }]
 
     const result = await saveFormData(VALID_PROJECT_ID, 2, 'fishbone', {
       problemStatement: '',
@@ -221,7 +229,7 @@ describe('saveFormData', () => {
 
   it('allows saving a previous step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', current_step: 3 } }, { error: null }]
+    fromResults = [{ data: { org_id: 'org-1', current_step: 'generate' } }, { error: null }]
 
     const result = await saveFormData(VALID_PROJECT_ID, 1, 'problem_statement', {})
     expect(result).toEqual({ success: true })

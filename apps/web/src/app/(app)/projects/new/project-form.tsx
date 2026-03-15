@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useActionState, useEffect, useRef } from 'react'
+import { useState, useActionState, useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -228,16 +228,20 @@ export const ProjectForm = () => {
   const router = useRouter()
   const hasRedirected = useRef(false)
   const [state, formAction, isPending] = useActionState(createProject, initialState)
+  const [isNavigating, startTransition] = useTransition()
   const [mode, setMode] = useState<CreateMode>('blank')
   const [currentStep, setCurrentStep] = useState(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [targetDate, setTargetDate] = useState('')
 
   useEffect(() => {
     if (state.success && state.projectId && !hasRedirected.current) {
       hasRedirected.current = true
       toast.success('Project created')
-      router.push(`/projects/${state.projectId}`)
+      startTransition(() => {
+        router.push(`/projects/${state.projectId}`)
+      })
     }
   }, [state, router])
 
@@ -308,6 +312,7 @@ export const ProjectForm = () => {
               {/* Hidden inputs so form always has data */}
               <input type="hidden" name="name" value={name} />
               <input type="hidden" name="description" value={description} />
+              <input type="hidden" name="target_completion_date" value={targetDate} />
 
               {/* Step 1: Name & Description */}
               {currentStep === 1 && (
@@ -372,6 +377,8 @@ export const ProjectForm = () => {
                   <DatePicker
                     id="target_completion_date"
                     name="target_completion_date"
+                    value={targetDate}
+                    onChange={setTargetDate}
                     disabled={isPending}
                     aria-describedby={
                       state.fieldErrors?.target_completion_date ? 'target-date-error' : undefined
@@ -424,6 +431,23 @@ export const ProjectForm = () => {
                       </p>
                     </div>
                   )}
+                  {targetDate && (
+                    <div>
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: 'var(--color-text-tertiary)' }}
+                      >
+                        Target date
+                      </p>
+                      <p
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                        data-testid="review-target-date"
+                      >
+                        {targetDate}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -452,8 +476,16 @@ export const ProjectForm = () => {
                     Next
                   </Button>
                 ) : (
-                  <Button type="submit" disabled={isPending} data-testid="create-project-button">
-                    {isPending ? 'Creating project...' : 'Create project'}
+                  <Button
+                    type="submit"
+                    disabled={isPending || isNavigating}
+                    data-testid="create-project-button"
+                  >
+                    {isPending
+                      ? 'Creating project...'
+                      : isNavigating
+                        ? 'Redirecting...'
+                        : 'Create project'}
                   </Button>
                 )}
               </div>

@@ -1,8 +1,8 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getAuthContext } from '@/lib/auth-context'
 import { createOrgSchema } from '@/lib/validations'
 import { trackServerEvent } from '@/lib/analytics'
 
@@ -15,10 +15,7 @@ export const checkSlugAvailability = async (
   slug: string,
 ): Promise<{ available: boolean; error?: string }> => {
   // Require authenticated user — prevents unauthenticated slug enumeration
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user } = await getAuthContext()
 
   if (!user) {
     return { available: false, error: 'Unauthorized' }
@@ -62,12 +59,7 @@ export const createOrganization = async (
     return { fieldErrors }
   }
 
-  const supabase = await createClient()
-
-  // Verify user is authenticated
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in to create an organization' }

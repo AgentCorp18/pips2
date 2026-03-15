@@ -1,8 +1,7 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { getAuthContext } from '@/lib/auth-context'
 import { requirePermission } from '@/lib/permissions'
 import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
 
@@ -16,22 +15,6 @@ type ChannelWithUnread = ChatChannel & { unread_count: number }
 
 type MessageWithAuthor = ChatMessage & {
   author: { display_name: string; avatar_url: string | null }
-}
-
-/* ============================================================
-   Helper: get current user + org
-   ============================================================ */
-
-const getAuthContext = async () => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return { supabase, user: null, orgId: null }
-
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  return { supabase, user, orgId: currentOrg?.orgId ?? null }
 }
 
 /* ============================================================
@@ -539,8 +522,25 @@ export const markChannelRead = async (channelId: string): Promise<ActionResult> 
    ============================================================ */
 
 export const generateSummary = async (channelId: string): Promise<ActionResult<ChatSummary>> => {
-  const { supabase, user } = await getAuthContext()
+  const { supabase, user, orgId } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization context' }
+
+  // Verify channel belongs to caller's org
+  const { data: channel } = await supabase
+    .from('chat_channels')
+    .select('org_id')
+    .eq('id', channelId)
+    .eq('org_id', orgId)
+    .single()
+
+  if (!channel) return { error: 'Channel not found' }
+
+  try {
+    await requirePermission(orgId, 'chat.send')
+  } catch {
+    return { error: 'Insufficient permissions' }
+  }
 
   // Fetch recent messages
   const { data: messages, error: msgError } = await supabase

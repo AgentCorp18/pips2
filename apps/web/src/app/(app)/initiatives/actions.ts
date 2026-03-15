@@ -1,8 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getAuthContext } from '@/lib/auth-context'
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentOrg } from '@/lib/get-current-org'
 import { requirePermission } from '@/lib/permissions'
 import {
   createInitiativeSchema,
@@ -56,22 +56,18 @@ export const createInitiative = async (
     return { fieldErrors }
   }
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in' }
   }
 
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  if (!currentOrg) {
+  if (!orgId) {
     return { error: 'You must belong to an organization' }
   }
 
   try {
-    await requirePermission(currentOrg.orgId, 'initiative.create')
+    await requirePermission(orgId, 'initiative.create')
   } catch {
     return { error: 'You do not have permission to create initiatives' }
   }
@@ -86,7 +82,7 @@ export const createInitiative = async (
   const { data: initiative, error: insertError } = await supabase
     .from('initiatives')
     .insert({
-      org_id: currentOrg.orgId,
+      org_id: orgId,
       title: result.data.title,
       description: result.data.description || null,
       objective: result.data.objective || null,
@@ -123,15 +119,11 @@ export const getInitiatives = async (): Promise<{
   })[]
   error?: string
 }> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) return { initiatives: [], error: 'Not authenticated' }
 
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  if (!currentOrg) return { initiatives: [], error: 'No organization' }
+  if (!orgId) return { initiatives: [], error: 'No organization' }
 
   const { data, error } = await supabase
     .from('initiatives')
@@ -142,7 +134,7 @@ export const getInitiatives = async (): Promise<{
       initiative_projects ( id )
     `,
     )
-    .eq('org_id', currentOrg.orgId)
+    .eq('org_id', orgId)
     .is('archived_at', null)
     .order('created_at', { ascending: false })
 
@@ -164,10 +156,7 @@ export const getInitiatives = async (): Promise<{
 export const getInitiativeDetail = async (
   initiativeId: string,
 ): Promise<{ initiative: InitiativeWithRelations | null; error?: string }> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) return { initiative: null, error: 'Not authenticated' }
 
@@ -304,18 +293,14 @@ export const updateInitiative = async (
     return { error: result.error.issues[0]?.message ?? 'Invalid data' }
   }
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) return { error: 'Not authenticated' }
 
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  if (!currentOrg) return { error: 'No organization' }
+  if (!orgId) return { error: 'No organization' }
 
   try {
-    await requirePermission(currentOrg.orgId, 'initiative.update')
+    await requirePermission(orgId, 'initiative.update')
   } catch {
     return { error: 'Insufficient permissions' }
   }
@@ -324,7 +309,7 @@ export const updateInitiative = async (
     .from('initiatives')
     .update(result.data)
     .eq('id', initiativeId)
-    .eq('org_id', currentOrg.orgId)
+    .eq('org_id', orgId)
 
   if (error) return { error: error.message }
 
@@ -338,18 +323,14 @@ export const updateInitiative = async (
    ============================================================ */
 
 export const archiveInitiative = async (initiativeId: string): Promise<{ error?: string }> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) return { error: 'Not authenticated' }
 
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  if (!currentOrg) return { error: 'No organization' }
+  if (!orgId) return { error: 'No organization' }
 
   try {
-    await requirePermission(currentOrg.orgId, 'initiative.delete')
+    await requirePermission(orgId, 'initiative.delete')
   } catch {
     return { error: 'Insufficient permissions' }
   }
@@ -358,7 +339,7 @@ export const archiveInitiative = async (initiativeId: string): Promise<{ error?:
     .from('initiatives')
     .update({ archived_at: new Date().toISOString(), status: 'archived' })
     .eq('id', initiativeId)
-    .eq('org_id', currentOrg.orgId)
+    .eq('org_id', orgId)
 
   if (error) return { error: error.message }
 
@@ -384,18 +365,14 @@ export const addProjectToInitiative = async (
     return { error: result.error.issues[0]?.message ?? 'Invalid data' }
   }
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) return { error: 'Not authenticated' }
 
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  if (!currentOrg) return { error: 'No organization' }
+  if (!orgId) return { error: 'No organization' }
 
   try {
-    await requirePermission(currentOrg.orgId, 'initiative.update')
+    await requirePermission(orgId, 'initiative.update')
   } catch {
     return { error: 'Insufficient permissions' }
   }
@@ -422,18 +399,14 @@ export const removeProjectFromInitiative = async (
   initiativeId: string,
   projectId: string,
 ): Promise<{ error?: string }> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) return { error: 'Not authenticated' }
 
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  if (!currentOrg) return { error: 'No organization' }
+  if (!orgId) return { error: 'No organization' }
 
   try {
-    await requirePermission(currentOrg.orgId, 'initiative.update')
+    await requirePermission(orgId, 'initiative.update')
   } catch {
     return { error: 'Insufficient permissions' }
   }

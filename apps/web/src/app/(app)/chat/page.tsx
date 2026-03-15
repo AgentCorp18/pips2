@@ -3,7 +3,7 @@ import { ChatPageClient } from './chat-page-client'
 import { getChannels } from './actions'
 
 export const metadata = {
-  title: 'Chat — PIPS',
+  title: 'Chat',
 }
 
 export default async function ChatPage() {

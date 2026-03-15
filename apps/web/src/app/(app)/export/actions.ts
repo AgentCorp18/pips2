@@ -1,7 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { getAuthContext } from '@/lib/auth-context'
 import { generateCSV } from '@/lib/csv'
 
 /* ============================================================
@@ -13,26 +12,12 @@ type ExportResult = {
   error?: string
 }
 
-const getUserOrg = async () => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return { supabase, orgId: null as string | null }
-
-  // Respect the org switcher cookie
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-
-  return { supabase, orgId: currentOrg?.orgId ?? null }
-}
-
 /* ============================================================
    exportProjectsCSV
    ============================================================ */
 
 export const exportProjectsCSV = async (): Promise<ExportResult> => {
-  const { supabase, orgId } = await getUserOrg()
+  const { supabase, orgId } = await getAuthContext()
 
   if (!orgId) {
     return { error: 'You must be signed in to an organization' }
@@ -87,7 +72,7 @@ export const exportProjectsCSV = async (): Promise<ExportResult> => {
    ============================================================ */
 
 export const exportTicketsCSV = async (projectId?: string): Promise<ExportResult> => {
-  const { supabase, orgId } = await getUserOrg()
+  const { supabase, orgId } = await getAuthContext()
 
   if (!orgId) {
     return { error: 'You must be signed in to an organization' }

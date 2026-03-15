@@ -34,16 +34,37 @@ const createChainForIndex = (idx: number) => {
 
 const mockGetUser = vi.fn()
 
+const { mockGetCurrentOrg } = vi.hoisted(() => ({
+  mockGetCurrentOrg: vi
+    .fn()
+    .mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+}))
+
+const mockSupabase = {
+  auth: {
+    getUser: () => mockGetUser(),
+  },
+  from: () => {
+    const idx = fromCallIndex++
+    return createChainForIndex(idx)
+  },
+}
+
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
-    auth: {
-      getUser: () => mockGetUser(),
-    },
-    from: () => {
-      const idx = fromCallIndex++
-      return createChainForIndex(idx)
-    },
-  })),
+  createClient: vi.fn(async () => mockSupabase),
+}))
+
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => {
+    const result = await mockGetUser()
+    const user = result?.data?.user ?? null
+    const org = user ? await mockGetCurrentOrg() : null
+    return {
+      supabase: mockSupabase,
+      user,
+      orgId: org?.orgId ?? null,
+    }
+  }),
 }))
 
 vi.mock('@/lib/permissions', () => ({
@@ -55,7 +76,7 @@ vi.mock('next/cache', () => ({
 }))
 
 vi.mock('@/lib/get-current-org', () => ({
-  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  getCurrentOrg: mockGetCurrentOrg,
   ORG_COOKIE_NAME: 'pips-org-id',
 }))
 

@@ -118,6 +118,7 @@ export const TicketCard = ({
               <span
                 className="inline-block h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: priorityConfig.color }}
+                aria-label={`Priority: ${priorityConfig.label}`}
                 title={priorityConfig.label}
               />
             </div>

@@ -54,7 +54,7 @@ const WorkbookPage = () => {
                   {content.forms.map((form) => (
                     <Link
                       key={form.type}
-                      href={`/knowledge/workbook/${step.number}/${form.type}`}
+                      href={`/knowledge/workbook/${step.number}`}
                       className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 transition-colors hover:bg-[var(--color-surface-secondary)]"
                     >
                       <div>

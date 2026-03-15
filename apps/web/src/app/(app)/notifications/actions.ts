@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getAuthContext } from '@/lib/auth-context'
 import type {
   Notification,
   NotificationQueryOptions,
@@ -20,10 +20,7 @@ export const getNotifications = async (
   const offset = options?.offset ?? 0
   const unreadOnly = options?.unread_only ?? false
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { notifications: [], total: 0 }
@@ -60,10 +57,7 @@ export const getNotifications = async (
    ============================================================ */
 
 export const markAsRead = async (notificationId: string): Promise<NotificationActionResult> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in' }
@@ -89,10 +83,7 @@ export const markAsRead = async (notificationId: string): Promise<NotificationAc
    ============================================================ */
 
 export const markAllAsRead = async (): Promise<NotificationActionResult> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in' }
@@ -118,10 +109,7 @@ export const markAllAsRead = async (): Promise<NotificationActionResult> => {
    ============================================================ */
 
 export const getUnreadCount = async (): Promise<number> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return 0

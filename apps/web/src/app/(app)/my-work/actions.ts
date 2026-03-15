@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getAuthContext } from '@/lib/auth-context'
 
 export type MyWorkTicket = {
   id: string
@@ -20,11 +20,7 @@ export type GroupedTickets = {
 }
 
 export const getMyTickets = async (orgId: string): Promise<GroupedTickets> => {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { overdue: [], dueToday: [], thisWeek: [], later: [] }

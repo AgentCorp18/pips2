@@ -140,7 +140,7 @@ const WorkbookStepPage = async ({ params }: WorkbookStepPageProps) => {
                     </div>
                     <div className="flex shrink-0 flex-col gap-1.5">
                       <Link
-                        href={`/knowledge/workbook/${stepNum}/${meta.formType}`}
+                        href={`/tools/${toolSlug}`}
                         className="flex items-center gap-1 rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                       >
                         <BookOpen size={12} />

@@ -2,9 +2,9 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthContext } from '@/lib/auth-context'
 import { requirePermission } from '@/lib/permissions'
-import { stepNumberToEnum } from '@pips/shared'
+import { stepNumberToEnum, stepEnumToNumber } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
 import { FORM_SCHEMAS } from '@/lib/form-schemas'
 
@@ -72,11 +72,7 @@ export const saveFormData = async (
     }
   }
 
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { success: false, error: 'Not authenticated' }
@@ -94,8 +90,12 @@ export const saveFormData = async (
   }
 
   // FIX 2: Step navigation access control — block writes to future steps
-  if (project.current_step != null && stepNumber > project.current_step) {
-    return { success: false, error: 'Cannot save form data for a future step' }
+  // current_step is a pips_step enum string (e.g. 'identify'), convert to number for comparison
+  if (project.current_step != null) {
+    const currentStepNumber = stepEnumToNumber(project.current_step)
+    if (stepNumber > currentStepNumber) {
+      return { success: false, error: 'Cannot save form data for a future step' }
+    }
   }
 
   // Check permission — saving form data requires data.view (member+)
@@ -141,11 +141,7 @@ export const loadFormData = async (
   stepNumber: number,
   formType: string,
 ): Promise<Record<string, unknown> | null> => {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return null

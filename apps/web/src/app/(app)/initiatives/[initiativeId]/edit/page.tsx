@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const metadata: Metadata = {
-  title: 'Edit Initiative | PIPS',
+  title: 'Edit Initiative',
 }
 
 const EditInitiativePage = async ({ params }: Props) => {

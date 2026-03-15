@@ -1,7 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { getAuthContext } from '@/lib/auth-context'
 
 /* ============================================================
    Types
@@ -34,24 +33,15 @@ export type NotificationPreferencesActionResult = {
 
 export const getNotificationPreferences =
   async (): Promise<NotificationPreferencesActionResult> => {
-    const supabase = await createClient()
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { supabase, user, orgId } = await getAuthContext()
 
     if (!user) {
       return { error: 'You must be signed in' }
     }
 
-    // Get user's active org (respects org switcher cookie)
-    const currentOrg = await getCurrentOrg(supabase, user.id)
-
-    if (!currentOrg) {
+    if (!orgId) {
       return { error: 'You are not a member of any organization' }
     }
-
-    const orgId = currentOrg.orgId
 
     // Try to fetch existing preferences
     const { data: existing } = await supabase
@@ -120,11 +110,7 @@ export const updateNotificationPreferences = async (
     return { error: 'Invalid preference key' }
   }
 
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in' }
