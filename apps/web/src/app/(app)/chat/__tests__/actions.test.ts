@@ -265,8 +265,8 @@ describe('getChannel', () => {
       { data: channel, error: null },
       // chat_channel_members
       { data: [{ user_id: 'user-2', joined_at: '2026-01-02', muted: false }], error: null },
-      // profiles for user-2
-      { data: { display_name: 'Alice', avatar_url: null }, error: null },
+      // profiles batch lookup via .in('id', memberIds)
+      { data: [{ id: 'user-2', display_name: 'Alice', avatar_url: null }], error: null },
     ]
 
     const result = await getChannel('ch-1')
@@ -296,8 +296,8 @@ describe('getChannel', () => {
       { data: channel, error: null },
       // chat_channel_members
       { data: [{ user_id: 'user-99', joined_at: '2026-01-02', muted: false }], error: null },
-      // profiles — not found
-      { data: null, error: { message: 'not found' } },
+      // profiles batch lookup — empty result (no matching profile)
+      { data: [], error: null },
     ]
 
     const result = await getChannel('ch-1')
@@ -1021,10 +1021,14 @@ describe('getOrgMembers', () => {
     fromResults = [
       // org_members for getOrgMembers
       { data: [{ user_id: 'user-2' }, { user_id: 'user-3' }], error: null },
-      // profiles for user-2
-      { data: { display_name: 'Alice', avatar_url: 'https://example.com/alice.png' }, error: null },
-      // profiles for user-3
-      { data: { display_name: 'Bob', avatar_url: null }, error: null },
+      // profiles batch lookup via .in('id', memberIds)
+      {
+        data: [
+          { id: 'user-2', display_name: 'Alice', avatar_url: 'https://example.com/alice.png' },
+          { id: 'user-3', display_name: 'Bob', avatar_url: null },
+        ],
+        error: null,
+      },
     ]
 
     const result = await getOrgMembers()
@@ -1046,8 +1050,8 @@ describe('getOrgMembers', () => {
     fromResults = [
       // org_members for getOrgMembers
       { data: [{ user_id: 'ghost-user' }], error: null },
-      // profiles — not found
-      { data: null, error: { message: 'not found' } },
+      // profiles batch lookup — empty result (no matching profile)
+      { data: [], error: null },
     ]
 
     const result = await getOrgMembers()

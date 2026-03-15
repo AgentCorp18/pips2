@@ -6,8 +6,10 @@ import { createClient } from '@/lib/supabase/server'
 import { getTicket, getChildTickets, getParentTicket } from '../actions'
 import { getComments } from './comment-actions'
 import { getTicketAuditLog } from './audit-log-actions'
+import { getAttachments } from './attachment-actions'
 import { TicketDetailClient } from '@/components/tickets/ticket-detail-client'
 import { CommentSection } from '@/components/tickets/comment-section'
+import { TicketAttachments } from '@/components/tickets/ticket-attachments'
 import { ParentTicketLink } from '@/components/tickets/parent-ticket-link'
 import { SubTickets } from '@/components/tickets/sub-tickets'
 import { TicketChangeLog } from '@/components/tickets/ticket-change-log'
@@ -100,10 +102,11 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
     parentSequenceId = `${parentPrefix}-${parentData.sequence_number}`
   }
 
-  // Fetch comments and audit log in parallel
-  const [commentsRaw, auditEntries] = await Promise.all([
+  // Fetch comments, audit log, and attachments in parallel
+  const [commentsRaw, auditEntries, attachmentsRaw] = await Promise.all([
     getComments(ticketId),
     getTicketAuditLog(ticketId),
+    getAttachments(ticketId),
   ])
   const comments = commentsRaw.map((c) => {
     const author = c.author as unknown as {
@@ -237,6 +240,26 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
           <KnowledgeCadenceBar context={cadenceContext} defaultCollapsed />
         </div>
       )}
+
+      <Separator className="my-8" />
+
+      <TicketAttachments
+        ticketId={ticketId}
+        attachments={attachmentsRaw.map((a) => ({
+          id: a.id,
+          file_name: a.file_name,
+          file_size: a.file_size,
+          mime_type: a.mime_type,
+          uploaded_by: a.uploaded_by,
+          created_at: a.created_at,
+          uploader: a.uploader as {
+            id: string
+            display_name: string
+            avatar_url: string | null
+          } | null,
+        }))}
+        currentUserId={user.id}
+      />
 
       <Separator className="my-8" />
 
