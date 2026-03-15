@@ -25,7 +25,11 @@ vi.mock('@ai-sdk/anthropic', () => ({
 }))
 
 vi.mock('@/lib/rate-limit', () => ({
-  checkRateLimit: vi.fn(() => ({ allowed: true, remaining: 9, resetAt: Date.now() + 60_000 })),
+  checkRateLimit: vi.fn(async () => ({
+    allowed: true,
+    remaining: 9,
+    resetAt: Date.now() + 60_000,
+  })),
 }))
 
 /* ============================================================
@@ -175,7 +179,7 @@ describe('POST /api/ai/assist', () => {
   })
 
   it('returns 429 when rate limit is exceeded', async () => {
-    vi.mocked(checkRateLimit).mockReturnValueOnce({
+    vi.mocked(checkRateLimit).mockResolvedValueOnce({
       allowed: false,
       remaining: 0,
       resetAt: Date.now() + 30_000,

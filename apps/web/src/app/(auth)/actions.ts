@@ -41,7 +41,7 @@ export const login = async (
   }
 
   // Rate limit: 10 login attempts per minute per email
-  const loginRateLimit = checkRateLimit(`login:${result.data.email}`, 10, 60_000)
+  const loginRateLimit = await checkRateLimit(`login:${result.data.email}`, 10, 60_000)
   if (!loginRateLimit.allowed) {
     return {
       error: 'Too many login attempts. Please wait a moment before trying again.',
@@ -99,7 +99,7 @@ export const signup = async (
   }
 
   // Rate limit: 5 signup attempts per 15 minutes per email
-  const signupRateLimit = checkRateLimit(`signup:${result.data.email}`, 5, 15 * 60_000)
+  const signupRateLimit = await checkRateLimit(`signup:${result.data.email}`, 5, 15 * 60_000)
   if (!signupRateLimit.allowed) {
     return { error: 'Too many signup attempts. Please wait before trying again.' }
   }
@@ -155,7 +155,7 @@ export const forgotPassword = async (
   }
 
   // Rate limit: 3 password reset requests per 15 minutes per email
-  const forgotPasswordRateLimit = checkRateLimit(
+  const forgotPasswordRateLimit = await checkRateLimit(
     `forgot-password:${result.data.email}`,
     3,
     15 * 60_000,

@@ -84,7 +84,7 @@ export const POST = async (request: Request) => {
   }
 
   // Rate limit: 10 requests per minute per user
-  const { allowed, resetAt } = checkRateLimit(`ai-assist:${user.id}`, 10, 60_000)
+  const { allowed, resetAt } = await checkRateLimit(`ai-assist:${user.id}`, 10, 60_000)
 
   if (!allowed) {
     return new Response(

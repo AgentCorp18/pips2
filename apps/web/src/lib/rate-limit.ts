@@ -1,36 +1,30 @@
-// WARNING: This in-memory rate limiter is ineffective in serverless/multi-instance
-// deployments (e.g., Vercel). Each cold start creates a fresh Map, resetting counters.
-//
-// TODO: Replace with Upstash Redis once credentials are provisioned.
-//
-// Migration plan:
-//   1. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel env vars
-//   2. Install @upstash/ratelimit and @upstash/redis packages
-//   3. The checkRateLimit function below will automatically switch to Upstash
-//      when UPSTASH_REDIS_REST_URL is detected at runtime
-//
-// Example Upstash implementation (uncomment when credentials are ready):
-//
-//   import { Ratelimit } from '@upstash/ratelimit'
-//   import { Redis } from '@upstash/redis'
-//
-//   const redis = new Redis({
-//     url: process.env.UPSTASH_REDIS_REST_URL!,
-//     token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-//   })
-//
-//   const ratelimit = new Ratelimit({
-//     redis,
-//     limiter: Ratelimit.slidingWindow(limit, `${windowMs}ms`),
-//   })
-
 /**
- * Simple in-memory rate limiter for API routes.
- * Resets on deploy/restart — sufficient for beta.
+ * Rate limiter with Upstash Redis backend (production) and in-memory fallback (local dev).
  *
- * When UPSTASH_REDIS_REST_URL is set, this function will log a warning
- * reminding the operator to complete the Upstash migration.
+ * When UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are set, requests are tracked
+ * in Redis using a sliding-window algorithm — persistent across serverless cold starts and
+ * multiple instances.
+ *
+ * When those env vars are absent (local development), the module falls back to a simple
+ * in-memory Map with the same semantics.
+ *
+ * Setup (production):
+ *   1. Create a Redis database at console.upstash.com
+ *   2. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel env vars
  */
+
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+export type RateLimitResult = {
+  allowed: boolean
+  remaining: number
+  resetAt: number
+}
+
+/* ============================================================
+   In-memory fallback (local dev / no env vars)
+   ============================================================ */
 
 type RateLimitEntry = {
   count: number
@@ -54,27 +48,7 @@ const cleanup = () => {
   }
 }
 
-export type RateLimitResult = {
-  allowed: boolean
-  remaining: number
-  resetAt: number
-}
-
-/**
- * Check rate limit for a given key (e.g. user ID).
- * @param key - Unique identifier for the rate limit bucket
- * @param limit - Max requests allowed in the window
- * @param windowMs - Time window in milliseconds
- */
-export const checkRateLimit = (key: string, limit: number, windowMs: number): RateLimitResult => {
-  // Warn operators that Upstash credentials are present but migration is incomplete
-  if (process.env.UPSTASH_REDIS_REST_URL) {
-    console.warn(
-      '[rate-limit] UPSTASH_REDIS_REST_URL is set but Upstash integration is not yet active. ' +
-        'Complete the TODO migration in apps/web/src/lib/rate-limit.ts to enable persistent rate limiting.',
-    )
-  }
-
+const checkRateLimitInMemory = (key: string, limit: number, windowMs: number): RateLimitResult => {
   cleanup()
 
   const now = Date.now()
@@ -92,4 +66,74 @@ export const checkRateLimit = (key: string, limit: number, windowMs: number): Ra
   }
 
   return { allowed: true, remaining: limit - entry.count, resetAt: entry.resetAt }
+}
+
+/* ============================================================
+   Upstash Redis backend
+   ============================================================ */
+
+/**
+ * Converts milliseconds to a duration string accepted by @upstash/ratelimit.
+ * Upstash supports: "1 ms", "1 s", "1 m", "1 h", "1 d"
+ */
+const msToUpstashWindow = (ms: number): `${number} ms` | `${number} s` | `${number} m` => {
+  const seconds = ms / 1_000
+  const minutes = seconds / 60
+  if (Number.isInteger(minutes) && minutes >= 1) {
+    return `${minutes} m`
+  }
+  if (Number.isInteger(seconds) && seconds >= 1) {
+    return `${seconds} s`
+  }
+  return `${ms} ms`
+}
+
+const checkRateLimitUpstash = async (
+  key: string,
+  limit: number,
+  windowMs: number,
+): Promise<RateLimitResult> => {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  })
+
+  const ratelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(limit, msToUpstashWindow(windowMs)),
+  })
+
+  const { success, remaining, reset } = await ratelimit.limit(key)
+
+  return {
+    allowed: success,
+    remaining,
+    resetAt: reset,
+  }
+}
+
+/* ============================================================
+   Public API
+   ============================================================ */
+
+/**
+ * Check rate limit for a given key (e.g. user ID or email).
+ *
+ * @param key - Unique identifier for the rate limit bucket
+ * @param limit - Max requests allowed in the window
+ * @param windowMs - Time window in milliseconds
+ * @returns Promise resolving to { allowed, remaining, resetAt }
+ */
+export const checkRateLimit = async (
+  key: string,
+  limit: number,
+  windowMs: number,
+): Promise<RateLimitResult> => {
+  const useUpstash = !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if (useUpstash) {
+    return checkRateLimitUpstash(key, limit, windowMs)
+  }
+
+  return checkRateLimitInMemory(key, limit, windowMs)
 }
