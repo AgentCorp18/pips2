@@ -29,42 +29,28 @@ const createChainForIndex = (idx: number) => {
 
 const mockGetUser = vi.fn()
 
-const { mockGetCurrentOrg } = vi.hoisted(() => ({
-  mockGetCurrentOrg: vi
-    .fn()
-    .mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 const mockSupabase = {
-  auth: {
-    getUser: () => mockGetUser(),
-  },
+  auth: { getUser: () => mockGetUser() },
   from: () => {
     const idx = fromCallIndex++
     return createChainForIndex(idx)
   },
 }
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => mockSupabase),
-}))
-
 vi.mock('@/lib/auth-context', () => ({
   getAuthContext: vi.fn(async () => {
     const result = await mockGetUser()
-    const user = result?.data?.user ?? null
-    const org = user ? await mockGetCurrentOrg() : null
     return {
       supabase: mockSupabase,
-      user,
-      orgId: org?.orgId ?? null,
+      user: result?.data?.user ?? null,
+      orgId: 'org-1',
     }
   }),
-}))
-
-vi.mock('@/lib/get-current-org', () => ({
-  getCurrentOrg: mockGetCurrentOrg,
-  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 /* ============================================================
@@ -72,7 +58,7 @@ vi.mock('@/lib/get-current-org', () => ({
    ============================================================ */
 
 import { getNotificationPreferences, updateNotificationPreferences } from '../actions'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { getAuthContext } from '@/lib/auth-context'
 
 /* ============================================================
    getNotificationPreferences
@@ -94,7 +80,11 @@ describe('getNotificationPreferences', () => {
 
   it('returns error when user has no org membership', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
 
     const result = await getNotificationPreferences()
     expect(result).toEqual({ error: 'You are not a member of any organization' })

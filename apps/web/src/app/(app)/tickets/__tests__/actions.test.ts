@@ -36,39 +36,6 @@ const createChainForIndex = (idx: number) => {
 
 const mockGetUser = vi.fn()
 
-const { mockGetCurrentOrg } = vi.hoisted(() => ({
-  mockGetCurrentOrg: vi
-    .fn()
-    .mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
-}))
-
-const mockSupabase = {
-  auth: {
-    getUser: () => mockGetUser(),
-  },
-  from: () => {
-    const idx = fromCallIndex++
-    return createChainForIndex(idx)
-  },
-}
-
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => mockSupabase),
-}))
-
-vi.mock('@/lib/auth-context', () => ({
-  getAuthContext: vi.fn(async () => {
-    const result = await mockGetUser()
-    const user = result?.data?.user ?? null
-    const org = user ? await mockGetCurrentOrg() : null
-    return {
-      supabase: mockSupabase,
-      user,
-      orgId: org?.orgId ?? null,
-    }
-  }),
-}))
-
 vi.mock('@/lib/permissions', () => ({
   requirePermission: vi.fn().mockResolvedValue('admin'),
 }))
@@ -78,12 +45,36 @@ vi.mock('next/cache', () => ({
 }))
 
 vi.mock('@/lib/get-current-org', () => ({
-  getCurrentOrg: mockGetCurrentOrg,
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
   ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
+}))
+
+const mockSupabase = {
+  auth: { getUser: () => mockGetUser() },
+  from: () => {
+    const idx = fromCallIndex++
+    return createChainForIndex(idx)
+  },
+}
+
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => {
+    const result = await mockGetUser()
+    return {
+      supabase: mockSupabase,
+      user: result?.data?.user ?? null,
+      orgId: 'org-1',
+    }
+  }),
+}))
+
+// Some ticket functions still use createClient directly
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn(async () => mockSupabase),
 }))
 
 /* ============================================================
@@ -107,7 +98,7 @@ import {
 } from '../actions'
 import { requirePermission } from '@/lib/permissions'
 import { revalidatePath } from 'next/cache'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { getAuthContext } from '@/lib/auth-context'
 
 /* ============================================================
    Helpers
@@ -168,7 +159,11 @@ describe('createTicket', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
 
     const fd = makeFormData(validTicketFields)
     const result = await createTicket({}, fd)
@@ -219,8 +214,8 @@ describe('createTicket', () => {
     fromResults = [
       // from('org_members') -> assignee found
       { data: { user_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d' } },
-      // from('projects') -> project belongs to org
-      { data: { id: 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e' } },
+      // from('projects') -> cross-org validation: project belongs to org-1
+      { data: { org_id: 'org-1' } },
       // from('tickets').insert() -> success
       { error: null },
     ]
@@ -723,7 +718,11 @@ describe('bulkUpdateTickets', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
 
     const result = await bulkUpdateTickets(['tkt-1'], { status: 'done' })
     expect(result).toEqual({ error: 'You must belong to an organization' })
@@ -792,7 +791,11 @@ describe('bulkDeleteTickets', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
 
     const result = await bulkDeleteTickets(['tkt-1'])
     expect(result).toEqual({ error: 'You must belong to an organization' })

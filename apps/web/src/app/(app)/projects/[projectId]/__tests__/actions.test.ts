@@ -37,18 +37,12 @@ const createChainForIndex = (idx: number) => {
 const mockGetUser = vi.fn()
 
 const mockSupabase = {
-  auth: {
-    getUser: () => mockGetUser(),
-  },
+  auth: { getUser: () => mockGetUser() },
   from: () => {
     const idx = fromCallIndex++
     return createChainForIndex(idx)
   },
 }
-
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => mockSupabase),
-}))
 
 vi.mock('@/lib/auth-context', () => ({
   getAuthContext: vi.fn(async () => {
@@ -56,7 +50,7 @@ vi.mock('@/lib/auth-context', () => ({
     return {
       supabase: mockSupabase,
       user: result?.data?.user ?? null,
-      orgId: result?.data?.user ? 'org-1' : null,
+      orgId: 'org-1',
     }
   }),
 }))

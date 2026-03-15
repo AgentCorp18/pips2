@@ -34,39 +34,6 @@ const createChainForIndex = (idx: number) => {
 
 const mockGetUser = vi.fn()
 
-const { mockGetCurrentOrg } = vi.hoisted(() => ({
-  mockGetCurrentOrg: vi
-    .fn()
-    .mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
-}))
-
-const mockSupabase = {
-  auth: {
-    getUser: () => mockGetUser(),
-  },
-  from: () => {
-    const idx = fromCallIndex++
-    return createChainForIndex(idx)
-  },
-}
-
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => mockSupabase),
-}))
-
-vi.mock('@/lib/auth-context', () => ({
-  getAuthContext: vi.fn(async () => {
-    const result = await mockGetUser()
-    const user = result?.data?.user ?? null
-    const org = user ? await mockGetCurrentOrg() : null
-    return {
-      supabase: mockSupabase,
-      user,
-      orgId: org?.orgId ?? null,
-    }
-  }),
-}))
-
 vi.mock('@/lib/permissions', () => ({
   requirePermission: vi.fn().mockResolvedValue('admin'),
 }))
@@ -76,12 +43,36 @@ vi.mock('next/cache', () => ({
 }))
 
 vi.mock('@/lib/get-current-org', () => ({
-  getCurrentOrg: mockGetCurrentOrg,
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
   ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 vi.mock('@/lib/analytics', () => ({
   trackServerEvent: vi.fn(),
+}))
+
+const mockSupabase = {
+  auth: { getUser: () => mockGetUser() },
+  from: () => {
+    const idx = fromCallIndex++
+    return createChainForIndex(idx)
+  },
+}
+
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => {
+    const result = await mockGetUser()
+    return {
+      supabase: mockSupabase,
+      user: result?.data?.user ?? null,
+      orgId: 'org-1',
+    }
+  }),
+}))
+
+// getInitiativeProgress still uses createClient directly
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn(async () => mockSupabase),
 }))
 
 /* ============================================================
@@ -100,7 +91,7 @@ import {
 } from '../actions'
 import { requirePermission } from '@/lib/permissions'
 import { revalidatePath } from 'next/cache'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { getAuthContext } from '@/lib/auth-context'
 
 /* ============================================================
    Helpers
@@ -168,7 +159,11 @@ describe('createInitiative', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
     const fd = makeFormData(validInitiativeFields)
     const result = await createInitiative({}, fd)
     expect(result).toEqual({ error: 'You must belong to an organization' })
@@ -266,7 +261,11 @@ describe('getInitiatives', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
 
     const result = await getInitiatives()
     expect(result).toEqual({ initiatives: [], error: 'No organization' })
@@ -615,7 +614,11 @@ describe('updateInitiative', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
 
     const result = await updateInitiative('init-1', { status: 'active' })
     expect(result).toEqual({ error: 'No organization' })
@@ -690,7 +693,11 @@ describe('archiveInitiative', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
 
     const result = await archiveInitiative('init-1')
     expect(result).toEqual({ error: 'No organization' })
@@ -768,7 +775,11 @@ describe('addProjectToInitiative', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
     const result = await addProjectToInitiative(
       'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
       'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',
@@ -856,7 +867,11 @@ describe('removeProjectFromInitiative', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    vi.mocked(getCurrentOrg).mockResolvedValueOnce(null)
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: { id: 'user-1' } as never,
+      orgId: null,
+    })
     const result = await removeProjectFromInitiative('init-1', 'proj-1')
     expect(result).toEqual({ error: 'No organization' })
   })
