@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
 
 /* ============================================================
@@ -27,15 +28,8 @@ const getAuthContext = async () => {
 
   if (!user) return { supabase, user: null, orgId: null }
 
-  // Get user's current org
-  const { data: membership } = await supabase
-    .from('organization_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .limit(1)
-    .single()
-
-  return { supabase, user, orgId: membership?.org_id ?? null }
+  const currentOrg = await getCurrentOrg(supabase, user.id)
+  return { supabase, user, orgId: currentOrg?.orgId ?? null }
 }
 
 /* ============================================================
@@ -557,10 +551,7 @@ export const getOrgMembers = async (): Promise<ActionResult<OrgMemberInfo[]>> =>
   if (!user) return { error: 'Not authenticated' }
   if (!orgId) return { error: 'No organization context' }
 
-  const { data: members } = await supabase
-    .from('organization_members')
-    .select('user_id')
-    .eq('org_id', orgId)
+  const { data: members } = await supabase.from('org_members').select('user_id').eq('org_id', orgId)
 
   if (!members) return { data: [] }
 

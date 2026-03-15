@@ -35,6 +35,15 @@ const createChainForIndex = (idx: number) => {
 
 const mockGetUser = vi.fn()
 
+const { mockGetCurrentOrg } = vi.hoisted(() => ({
+  mockGetCurrentOrg: vi.fn(),
+}))
+
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: (...args: unknown[]) => mockGetCurrentOrg(...args),
+  ORG_COOKIE_NAME: 'pips-org-id',
+}))
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
     auth: {
@@ -78,12 +87,11 @@ describe('getChannels', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    // membership query (from getAuthContext)
-    fromResults = [{ data: null }]
 
     const result = await getChannels()
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -92,8 +100,6 @@ describe('getChannels', () => {
   it('returns error when membership fetch fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members
       { data: null, error: { message: 'DB error' } },
     ]
@@ -105,8 +111,6 @@ describe('getChannels', () => {
   it('returns empty array when user has no channel memberships', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members — empty
       { data: [] },
     ]
@@ -118,8 +122,6 @@ describe('getChannels', () => {
   it('returns error when channel fetch fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members
       { data: [{ channel_id: 'ch-1', last_read_at: null }] },
       // chat_channels
@@ -143,8 +145,6 @@ describe('getChannels', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members — no last_read_at
       { data: [{ channel_id: 'ch-1', last_read_at: null }] },
       // chat_channels
@@ -170,8 +170,6 @@ describe('getChannels', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members — with last_read_at
       { data: [{ channel_id: 'ch-1', last_read_at: '2026-01-01T10:00:00Z' }] },
       // chat_channels
@@ -194,11 +192,11 @@ describe('getChannel', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await getChannel('ch-1')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -207,8 +205,6 @@ describe('getChannel', () => {
   it('returns error when channel is not found', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels — not found
       { data: null, error: { message: 'not found' } },
     ]
@@ -230,8 +226,6 @@ describe('getChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels
       { data: channel, error: null },
       // chat_channel_members
@@ -256,8 +250,6 @@ describe('getChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels
       { data: channel, error: null },
       // chat_channel_members
@@ -289,8 +281,6 @@ describe('getChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels
       { data: channel, error: null },
       // chat_channel_members
@@ -313,11 +303,11 @@ describe('getMessages', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await getMessages('ch-1')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -326,8 +316,6 @@ describe('getMessages', () => {
   it('returns error when message fetch fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages
       { data: null, error: { message: 'DB error' } },
     ]
@@ -339,8 +327,6 @@ describe('getMessages', () => {
   it('returns empty messages list', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages
       { data: [], error: null },
       // profiles
@@ -368,8 +354,6 @@ describe('getMessages', () => {
       },
     ]
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages
       { data: messages, error: null },
       // profiles
@@ -400,8 +384,6 @@ describe('getMessages', () => {
       created_at: `2026-01-01T${String(i).padStart(2, '0')}:00:00Z`,
     }))
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages
       { data: messages, error: null },
       // profiles
@@ -429,8 +411,6 @@ describe('getMessages', () => {
       },
     ]
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages
       { data: messages, error: null },
       // profiles — empty (no profile for ghost-user)
@@ -451,11 +431,11 @@ describe('sendMessage', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await sendMessage('ch-1', 'Hello')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -463,8 +443,8 @@ describe('sendMessage', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // organization_members returns null membership
-    fromResults = [{ data: null }]
+    mockGetCurrentOrg.mockResolvedValue(null)
+    fromResults = []
 
     const result = await sendMessage('ch-1', 'Hello')
     expect(result).toEqual({ error: 'No organization context' })
@@ -472,7 +452,6 @@ describe('sendMessage', () => {
 
   it('returns error when message body is empty', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1' } }]
 
     const result = await sendMessage('ch-1', '   ')
     expect(result).toEqual({ error: 'Message cannot be empty' })
@@ -481,8 +460,6 @@ describe('sendMessage', () => {
   it('returns error when insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages insert
       { data: null, error: { message: 'DB error' } },
     ]
@@ -505,8 +482,6 @@ describe('sendMessage', () => {
       created_at: '2026-01-01T12:00:00Z',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages insert
       { data: newMessage, error: null },
     ]
@@ -529,8 +504,6 @@ describe('sendMessage', () => {
       created_at: '2026-01-01T12:00:00Z',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages insert
       { data: newMessage, error: null },
     ]
@@ -556,8 +529,6 @@ describe('sendMessage', () => {
       created_at: '2026-01-01T12:00:00Z',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages insert
       { data: newMessage, error: null },
     ]
@@ -576,11 +547,11 @@ describe('editMessage', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await editMessage('msg-1', 'Updated body')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -589,8 +560,6 @@ describe('editMessage', () => {
   it('returns error when update fails (e.g., not the author)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages update
       { error: { message: 'RLS violation' } },
     ]
@@ -602,8 +571,6 @@ describe('editMessage', () => {
   it('edits message successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages update
       { error: null },
     ]
@@ -622,11 +589,11 @@ describe('deleteMessage', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await deleteMessage('msg-1')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -635,8 +602,6 @@ describe('deleteMessage', () => {
   it('returns error when soft delete fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages update
       { error: { message: 'RLS violation' } },
     ]
@@ -648,8 +613,6 @@ describe('deleteMessage', () => {
   it('soft deletes message successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_messages update (sets deleted_at)
       { error: null },
     ]
@@ -668,11 +631,11 @@ describe('createChannel', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await createChannel('custom', 'My Channel')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -680,8 +643,8 @@ describe('createChannel', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // organization_members returns null membership
-    fromResults = [{ data: null }]
+    mockGetCurrentOrg.mockResolvedValue(null)
+    fromResults = []
 
     const result = await createChannel('custom', 'My Channel')
     expect(result).toEqual({ error: 'No organization context' })
@@ -690,8 +653,6 @@ describe('createChannel', () => {
   it('returns error when channel insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels insert
       { data: null, error: { message: 'DB error' } },
     ]
@@ -713,8 +674,6 @@ describe('createChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels insert
       { data: newChannel, error: null },
       // chat_channel_members insert for creator
@@ -738,8 +697,6 @@ describe('createChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels insert
       { data: newChannel, error: null },
       // chat_channel_members insert for user-1
@@ -765,8 +722,6 @@ describe('createChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels select (existing DMs)
       { data: [existingDm], error: null },
       // chat_channel_members for existingDm
@@ -790,8 +745,6 @@ describe('createChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels select (no existing DMs)
       { data: [], error: null },
       // chat_channels insert
@@ -816,11 +769,11 @@ describe('archiveChannel', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await archiveChannel('ch-1')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -829,8 +782,6 @@ describe('archiveChannel', () => {
   it('returns error when archive update fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels update
       { error: { message: 'RLS violation' } },
     ]
@@ -842,8 +793,6 @@ describe('archiveChannel', () => {
   it('archives channel successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channels update
       { error: null },
     ]
@@ -862,11 +811,11 @@ describe('markChannelRead', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await markChannelRead('ch-1')
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -875,8 +824,6 @@ describe('markChannelRead', () => {
   it('returns error when update fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members update
       { error: { message: 'DB error' } },
     ]
@@ -888,8 +835,6 @@ describe('markChannelRead', () => {
   it('updates last_read_at successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members update
       { error: null },
     ]
@@ -908,11 +853,11 @@ describe('addMembers', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await addMembers('ch-1', ['user-2'])
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -921,8 +866,6 @@ describe('addMembers', () => {
   it('adds members successfully and returns success', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
       // chat_channel_members upsert for user-2
       { data: null, error: null },
       // chat_channel_members upsert for user-3
@@ -935,10 +878,7 @@ describe('addMembers', () => {
 
   it('adds zero members and returns success', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
-    ]
+    fromResults = []
 
     const result = await addMembers('ch-1', [])
     expect(result).toEqual({})
@@ -954,11 +894,11 @@ describe('getOrgMembers', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
   })
 
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    fromResults = [{ data: null }]
 
     const result = await getOrgMembers()
     expect(result).toEqual({ error: 'Not authenticated' })
@@ -966,8 +906,8 @@ describe('getOrgMembers', () => {
 
   it('returns error when user has no organization', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    // organization_members returns null membership (no orgId)
-    fromResults = [{ data: null }]
+    mockGetCurrentOrg.mockResolvedValue(null)
+    fromResults = []
 
     const result = await getOrgMembers()
     expect(result).toEqual({ error: 'No organization context' })
@@ -976,9 +916,7 @@ describe('getOrgMembers', () => {
   it('returns empty array when org has no members', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
-      // organization_members for getOrgMembers
+      // org_members for getOrgMembers
       { data: null, error: null },
     ]
 
@@ -989,9 +927,7 @@ describe('getOrgMembers', () => {
   it('returns member profiles for org members', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
-      // organization_members for getOrgMembers
+      // org_members for getOrgMembers
       { data: [{ user_id: 'user-2' }, { user_id: 'user-3' }], error: null },
       // profiles for user-2
       { data: { display_name: 'Alice', avatar_url: 'https://example.com/alice.png' }, error: null },
@@ -1016,9 +952,7 @@ describe('getOrgMembers', () => {
   it('uses Unknown display name for members with missing profiles', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // organization_members (getAuthContext)
-      { data: { org_id: 'org-1' } },
-      // organization_members for getOrgMembers
+      // org_members for getOrgMembers
       { data: [{ user_id: 'ghost-user' }], error: null },
       // profiles — not found
       { data: null, error: { message: 'not found' } },
