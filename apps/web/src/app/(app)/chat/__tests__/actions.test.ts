@@ -627,6 +627,45 @@ describe('editMessage', () => {
     const result = await editMessage('msg-1', 'Updated body')
     expect(result).toEqual({})
   })
+
+  it('updates mentions when edited body adds a new @mention', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_messages update
+      { error: null },
+    ]
+
+    const result = await editMessage(
+      'msg-1',
+      'Hey @[a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d] updated message',
+    )
+    expect(result).toEqual({})
+  })
+
+  it('clears mentions when edited body removes all @mentions', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_messages update
+      { error: null },
+    ]
+
+    const result = await editMessage('msg-1', 'No mentions here anymore')
+    expect(result).toEqual({})
+  })
+
+  it('handles multiple @mentions in edited body', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_messages update
+      { error: null },
+    ]
+
+    const result = await editMessage(
+      'msg-1',
+      'Hey @[a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d] and @[b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e]',
+    )
+    expect(result).toEqual({})
+  })
 })
 
 /* ============================================================
