@@ -10,7 +10,7 @@ CREATE POLICY "Org members can create channels"
   ON chat_channels FOR INSERT
   WITH CHECK (
     org_id IN (SELECT user_org_ids())
-    AND user_has_org_role(org_id, ARRAY['owner', 'admin', 'manager', 'member'])
+    AND user_has_org_role(org_id, ARRAY['owner', 'admin', 'manager', 'member']::org_role[])
   );
 
 CREATE POLICY "Channel members can add members"
@@ -21,6 +21,6 @@ CREATE POLICY "Channel members can add members"
       SELECT 1 FROM chat_channels c
       WHERE c.id = channel_id
         AND c.org_id IN (SELECT user_org_ids())
-        AND user_has_org_role(c.org_id, ARRAY['owner', 'admin', 'manager', 'member'])
+        AND user_has_org_role(c.org_id, ARRAY['owner', 'admin', 'manager', 'member']::org_role[])
     )
   );
