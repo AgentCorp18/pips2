@@ -31,8 +31,8 @@ A platform where Marc can onboard a new user, have them create an org, run a PIP
 | #   | Item                                                       | Category    | Status      |
 | --- | ---------------------------------------------------------- | ----------- | ----------- |
 | 8   | Form "Discard Changes" dialog when navigating away unsaved | UX          | Complete    |
-| 9   | File attachments on tickets and forms                      | Feature Gap | Not Started |
-| 10  | Rich text editing in ticket descriptions                   | Feature Gap | Not Started |
+| 9   | File attachments on tickets and forms                      | Feature Gap | Complete    |
+| 10  | Rich text editing in ticket descriptions                   | Feature Gap | Complete    |
 | 11  | Email notifications (beyond in-app) via Resend             | Feature Gap | Complete    |
 | 12  | Onboarding funnel instrumentation (signup → first project) | Analytics   | Complete    |
 | 13  | Core Web Vitals monitoring via Vercel Speed Insights       | Performance | Complete    |
@@ -84,9 +84,9 @@ A platform where Marc can onboard a new user, have them create an org, run a PIP
 
 | Metric             | Current | Target |
 | ------------------ | ------- | ------ |
-| Unit tests         | 2,834   | 3,000+ |
+| Unit tests         | 2,821   | 3,000+ |
 | E2E tests          | 68      | 150+   |
-| Test files         | 238     | 250+   |
+| Test files         | 240     | 250+   |
 | Coverage threshold | 40%     | 60%    |
 | Type errors        | 0       | 0      |
 | Lint errors        | 0       | 0      |
