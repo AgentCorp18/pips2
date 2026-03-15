@@ -85,6 +85,8 @@ const deriveStatus = (checks: HealthResponse['checks']): HealthStatus => {
    Does NOT require authentication.
    ============================================================ */
 
+export const dynamic = 'force-dynamic'
+
 export const GET = async () => {
   const [database, auth] = await Promise.all([checkDatabase(), checkAuth()])
 

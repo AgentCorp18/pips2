@@ -125,29 +125,27 @@ export const getChannel = async (
     return { error: 'Channel not found' }
   }
 
-  // Get members with profiles
+  // Get members with profiles (batch query to avoid N+1)
   const { data: members } = await supabase
     .from('chat_channel_members')
     .select('user_id, joined_at, muted')
     .eq('channel_id', channelId)
 
-  const memberProfiles: ChannelMember[] = await Promise.all(
-    (members ?? []).map(async (m) => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, avatar_url')
-        .eq('id', m.user_id)
-        .single()
+  const memberIds = (members ?? []).map((m) => m.user_id)
+  const { data: profiles } =
+    memberIds.length > 0
+      ? await supabase.from('profiles').select('id, display_name, avatar_url').in('id', memberIds)
+      : { data: [] }
 
-      return {
-        user_id: m.user_id,
-        display_name: profile?.display_name ?? 'Unknown',
-        avatar_url: profile?.avatar_url ?? null,
-        joined_at: m.joined_at,
-        muted: m.muted,
-      }
-    }),
-  )
+  const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]))
+
+  const memberProfiles: ChannelMember[] = (members ?? []).map((m) => ({
+    user_id: m.user_id,
+    display_name: profileMap[m.user_id]?.display_name ?? 'Unknown',
+    avatar_url: profileMap[m.user_id]?.avatar_url ?? null,
+    joined_at: m.joined_at,
+    muted: m.muted,
+  }))
 
   return { data: { channel: channel as ChatChannel, members: memberProfiles } }
 }
@@ -641,23 +639,22 @@ export const getOrgMembers = async (): Promise<ActionResult<OrgMemberInfo[]>> =>
 
   const { data: members } = await supabase.from('org_members').select('user_id').eq('org_id', orgId)
 
-  if (!members) return { data: [] }
+  if (!members || members.length === 0) return { data: [] }
 
-  const profiles: OrgMemberInfo[] = await Promise.all(
-    members.map(async (m) => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, avatar_url')
-        .eq('id', m.user_id)
-        .single()
+  // Batch profile lookup to avoid N+1 queries
+  const memberIds = members.map((m) => m.user_id)
+  const { data: profileRows } = await supabase
+    .from('profiles')
+    .select('id, display_name, avatar_url')
+    .in('id', memberIds)
 
-      return {
-        user_id: m.user_id,
-        display_name: profile?.display_name ?? 'Unknown',
-        avatar_url: profile?.avatar_url ?? null,
-      }
-    }),
-  )
+  const profileMap = Object.fromEntries((profileRows ?? []).map((p) => [p.id, p]))
 
-  return { data: profiles }
+  const result: OrgMemberInfo[] = members.map((m) => ({
+    user_id: m.user_id,
+    display_name: profileMap[m.user_id]?.display_name ?? 'Unknown',
+    avatar_url: profileMap[m.user_id]?.avatar_url ?? null,
+  }))
+
+  return { data: result }
 }
