@@ -377,6 +377,27 @@ export const addProjectToInitiative = async (
     return { error: 'Insufficient permissions' }
   }
 
+  // Cross-org validation: ensure both initiative and project belong to this org
+  const { data: initiative } = await supabase
+    .from('initiatives')
+    .select('org_id')
+    .eq('id', initiativeId)
+    .single()
+
+  if (!initiative || initiative.org_id !== orgId) {
+    return { error: 'Initiative not found' }
+  }
+
+  const { data: project } = await supabase
+    .from('projects')
+    .select('org_id')
+    .eq('id', projectId)
+    .single()
+
+  if (!project || project.org_id !== orgId) {
+    return { error: 'Project not found' }
+  }
+
   const { error } = await supabase.from('initiative_projects').insert({
     initiative_id: initiativeId,
     project_id: projectId,

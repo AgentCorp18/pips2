@@ -799,7 +799,14 @@ describe('addProjectToInitiative', () => {
 
   it('links project to initiative successfully', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: null }]
+    fromResults = [
+      // from('initiatives') -> cross-org validation
+      { data: { org_id: 'org-1' } },
+      // from('projects') -> cross-org validation
+      { data: { org_id: 'org-1' } },
+      // from('initiative_projects').insert() -> success
+      { error: null },
+    ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await addProjectToInitiative(
@@ -812,7 +819,7 @@ describe('addProjectToInitiative', () => {
 
   it('links project with optional notes', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: null }]
+    fromResults = [{ data: { org_id: 'org-1' } }, { data: { org_id: 'org-1' } }, { error: null }]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await addProjectToInitiative(
@@ -825,7 +832,11 @@ describe('addProjectToInitiative', () => {
 
   it('returns specific error when project is already linked (unique constraint 23505)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: { code: '23505', message: 'duplicate key' } }]
+    fromResults = [
+      { data: { org_id: 'org-1' } },
+      { data: { org_id: 'org-1' } },
+      { error: { code: '23505', message: 'duplicate key' } },
+    ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await addProjectToInitiative(
@@ -837,7 +848,11 @@ describe('addProjectToInitiative', () => {
 
   it('returns generic error for other DB failures', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: { code: '23503', message: 'FK violation' } }]
+    fromResults = [
+      { data: { org_id: 'org-1' } },
+      { data: { org_id: 'org-1' } },
+      { error: { code: '23503', message: 'FK violation' } },
+    ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await addProjectToInitiative(
