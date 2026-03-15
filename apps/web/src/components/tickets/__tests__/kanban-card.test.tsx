@@ -62,8 +62,8 @@ describe('KanbanCard', () => {
 
   it('renders the due date', () => {
     render(<KanbanCard {...defaultProps} />)
-    // toLocaleDateString with {month: 'short', day: 'numeric'}
-    const dateStr = new Date('2026-12-31').toLocaleDateString(undefined, {
+    // Use local-midnight parsing to match FormattedDate's timezone-safe behaviour
+    const dateStr = new Date('2026-12-31T00:00:00').toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
     })
@@ -72,7 +72,7 @@ describe('KanbanCard', () => {
 
   it('does not render due date when null', () => {
     render(<KanbanCard {...defaultProps} dueDate={null} />)
-    const dateStr = new Date('2026-12-31').toLocaleDateString(undefined, {
+    const dateStr = new Date('2026-12-31T00:00:00').toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
     })
@@ -94,7 +94,7 @@ describe('KanbanCard', () => {
   it('shows overdue styling when due date is in the past', () => {
     const pastDate = '2020-01-01'
     render(<KanbanCard {...defaultProps} dueDate={pastDate} />)
-    const dateStr = new Date(pastDate).toLocaleDateString(undefined, {
+    const dateStr = new Date(`${pastDate}T00:00:00`).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
     })

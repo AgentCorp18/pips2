@@ -372,6 +372,26 @@ describe('updateTicket', () => {
     const result = await updateTicket('ticket-1', { status: 'in_progress' })
     expect(result).toEqual({})
   })
+
+  it('does not override explicit priority when setting type to ceo_request', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1', started_at: null, status: 'todo' } }, { error: null }]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    // User explicitly sets priority to 'high' alongside type change
+    const result = await updateTicket('ticket-1', { type: 'ceo_request', priority: 'high' })
+    expect(result).toEqual({})
+  })
+
+  it('auto-escalates to critical when type changed to ceo_request without explicit priority', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [{ data: { org_id: 'org-1', started_at: null, status: 'todo' } }, { error: null }]
+    vi.mocked(requirePermission).mockResolvedValue('admin')
+
+    // Only type change, no explicit priority — should auto-escalate
+    const result = await updateTicket('ticket-1', { type: 'ceo_request' })
+    expect(result).toEqual({})
+  })
 })
 
 /* ============================================================

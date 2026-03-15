@@ -91,13 +91,20 @@ describe('TicketCard', () => {
 
   it('renders the due date', () => {
     render(<TicketCard {...defaultProps} />)
-    const dateStr = new Date('2026-06-30').toLocaleString(undefined, { dateStyle: 'medium' })
+    // Use local-midnight parsing to match FormattedDate's timezone-safe behaviour:
+    // bare YYYY-MM-DD strings are rewritten to YYYY-MM-DDT00:00:00 (no offset) so
+    // the date never shifts for users west of UTC.
+    const dateStr = new Date('2026-06-30T00:00:00').toLocaleString(undefined, {
+      dateStyle: 'medium',
+    })
     expect(screen.getByText(dateStr)).toBeInTheDocument()
   })
 
   it('does not render due date when null', () => {
     render(<TicketCard {...defaultProps} dueDate={null} />)
-    const dateStr = new Date('2026-06-30').toLocaleString(undefined, { dateStyle: 'medium' })
+    const dateStr = new Date('2026-06-30T00:00:00').toLocaleString(undefined, {
+      dateStyle: 'medium',
+    })
     expect(screen.queryByText(dateStr)).not.toBeInTheDocument()
   })
 

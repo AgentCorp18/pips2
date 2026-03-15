@@ -204,7 +204,8 @@ export const updateTicket = async (
   if (d.priority !== undefined) update.priority = d.priority
 
   // CEO Request auto-escalation: if type changes to ceo_request, force critical priority
-  if (d.type === 'ceo_request') {
+  // (only when no explicit priority was provided — don't override user's chosen priority)
+  if (d.type === 'ceo_request' && d.priority === undefined) {
     update.priority = 'critical'
   }
   if (d.assignee_id !== undefined) update.assignee_id = d.assignee_id || null
