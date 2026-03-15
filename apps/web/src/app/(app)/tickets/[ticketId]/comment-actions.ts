@@ -64,7 +64,11 @@ export const addComment = async (ticketId: string, body: string): Promise<Commen
     return { error: 'Ticket not found' }
   }
 
-  await requirePermission(ticket.org_id, 'ticket.comment')
+  try {
+    await requirePermission(ticket.org_id, 'ticket.comment')
+  } catch {
+    return { error: 'You do not have permission to comment on tickets' }
+  }
 
   const mentions = extractMentions(result.data.body)
 

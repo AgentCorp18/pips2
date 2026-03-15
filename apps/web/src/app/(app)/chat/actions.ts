@@ -522,8 +522,25 @@ export const markChannelRead = async (channelId: string): Promise<ActionResult> 
    ============================================================ */
 
 export const generateSummary = async (channelId: string): Promise<ActionResult<ChatSummary>> => {
-  const { supabase, user } = await getAuthContext()
+  const { supabase, user, orgId } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization context' }
+
+  // Verify channel belongs to caller's org
+  const { data: channel } = await supabase
+    .from('chat_channels')
+    .select('org_id')
+    .eq('id', channelId)
+    .eq('org_id', orgId)
+    .single()
+
+  if (!channel) return { error: 'Channel not found' }
+
+  try {
+    await requirePermission(orgId, 'chat.send')
+  } catch {
+    return { error: 'Insufficient permissions' }
+  }
 
   // Fetch recent messages
   const { data: messages, error: msgError } = await supabase

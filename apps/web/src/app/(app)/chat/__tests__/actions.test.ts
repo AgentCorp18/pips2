@@ -35,6 +35,16 @@ const createChainForIndex = (idx: number) => {
 
 const mockGetUser = vi.fn()
 
+const mockSupabase = {
+  auth: {
+    getUser: () => mockGetUser(),
+  },
+  from: () => {
+    const idx = fromCallIndex++
+    return createChainForIndex(idx)
+  },
+}
+
 const { mockGetCurrentOrg, mockRequirePermission } = vi.hoisted(() => ({
   mockGetCurrentOrg: vi.fn(),
   mockRequirePermission: vi.fn(),
@@ -50,15 +60,20 @@ vi.mock('@/lib/permissions', () => ({
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
-    auth: {
-      getUser: () => mockGetUser(),
-    },
-    from: () => {
-      const idx = fromCallIndex++
-      return createChainForIndex(idx)
-    },
-  })),
+  createClient: vi.fn(async () => mockSupabase),
+}))
+
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => {
+    const result = await mockGetUser()
+    const user = result?.data?.user ?? null
+    const org = user ? await mockGetCurrentOrg() : null
+    return {
+      supabase: mockSupabase,
+      user,
+      orgId: org?.orgId ?? null,
+    }
+  }),
 }))
 
 vi.mock('next/cache', () => ({
@@ -469,7 +484,9 @@ describe('sendMessage', () => {
 
   it('returns error when user lacks chat.send permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.send'))
+    mockRequirePermission.mockRejectedValue(
+      new Error('Insufficient permissions: requires chat.send'),
+    )
 
     const result = await sendMessage('ch-1', 'Hello')
     expect(result).toEqual({ error: 'Insufficient permissions to send messages' })
@@ -593,7 +610,9 @@ describe('editMessage', () => {
 
   it('returns error when user lacks chat.send permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.send'))
+    mockRequirePermission.mockRejectedValue(
+      new Error('Insufficient permissions: requires chat.send'),
+    )
 
     const result = await editMessage('msg-1', 'Updated body')
     expect(result).toEqual({ error: 'Insufficient permissions to edit messages' })
@@ -652,7 +671,9 @@ describe('deleteMessage', () => {
 
   it('returns error when user lacks chat.send permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.send'))
+    mockRequirePermission.mockRejectedValue(
+      new Error('Insufficient permissions: requires chat.send'),
+    )
 
     const result = await deleteMessage('msg-1')
     expect(result).toEqual({ error: 'Insufficient permissions to delete messages' })
@@ -712,7 +733,9 @@ describe('createChannel', () => {
 
   it('returns error when user lacks chat.manage permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.manage'))
+    mockRequirePermission.mockRejectedValue(
+      new Error('Insufficient permissions: requires chat.manage'),
+    )
 
     const result = await createChannel('custom', 'My Channel')
     expect(result).toEqual({ error: 'Insufficient permissions to create channels' })
@@ -850,7 +873,9 @@ describe('archiveChannel', () => {
 
   it('returns error when user lacks chat.manage permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.manage'))
+    mockRequirePermission.mockRejectedValue(
+      new Error('Insufficient permissions: requires chat.manage'),
+    )
 
     const result = await archiveChannel('ch-1')
     expect(result).toEqual({ error: 'Insufficient permissions to archive channels' })
@@ -943,7 +968,9 @@ describe('addMembers', () => {
 
   it('returns error when user lacks chat.manage permission', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.manage'))
+    mockRequirePermission.mockRejectedValue(
+      new Error('Insufficient permissions: requires chat.manage'),
+    )
 
     const result = await addMembers('ch-1', ['user-2'])
     expect(result).toEqual({ error: 'Insufficient permissions to manage channel members' })

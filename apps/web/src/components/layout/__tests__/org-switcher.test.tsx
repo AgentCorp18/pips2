@@ -69,6 +69,13 @@ describe('OrgSwitcher', () => {
     expect(svgs.length).toBe(1)
   })
 
+  it('trigger is disabled when only one org', () => {
+    render(<OrgSwitcher orgs={singleOrg} currentOrgId="org-1" />)
+    const trigger = screen.getByTestId('org-switcher-trigger')
+    // Trigger is disabled so the dropdown cannot be opened
+    expect(trigger).toBeDisabled()
+  })
+
   it('does not open dropdown when single org is clicked', async () => {
     const user = userEvent.setup()
     render(<OrgSwitcher orgs={singleOrg} currentOrgId="org-1" />)
@@ -76,7 +83,7 @@ describe('OrgSwitcher', () => {
     const trigger = screen.getByTestId('org-switcher-trigger')
     await user.click(trigger)
 
-    // Dropdown content should not appear
+    // Dropdown content should not appear because the trigger is disabled
     expect(screen.queryByTestId('org-switcher-content')).not.toBeInTheDocument()
   })
 
@@ -86,6 +93,12 @@ describe('OrgSwitcher', () => {
   })
 
   /* ---- Multiple orgs ---- */
+
+  it('trigger is enabled when multiple orgs', () => {
+    render(<OrgSwitcher orgs={multipleOrgs} currentOrgId="org-1" />)
+    const trigger = screen.getByTestId('org-switcher-trigger')
+    expect(trigger).not.toBeDisabled()
+  })
 
   it('shows chevron when multiple orgs', () => {
     render(<OrgSwitcher orgs={multipleOrgs} currentOrgId="org-1" />)

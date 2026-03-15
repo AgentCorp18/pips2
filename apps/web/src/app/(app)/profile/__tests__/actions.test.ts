@@ -30,25 +30,43 @@ const createChainForIndex = (idx: number) => {
 const mockGetUser = vi.fn()
 const mockStorageRemove = vi.fn()
 
+const mockSupabase = {
+  auth: {
+    getUser: () => mockGetUser(),
+  },
+  from: () => {
+    const idx = fromCallIndex++
+    return createChainForIndex(idx)
+  },
+  storage: {
+    from: () => ({
+      remove: mockStorageRemove,
+    }),
+  },
+}
+
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
-    auth: {
-      getUser: () => mockGetUser(),
-    },
-    from: () => {
-      const idx = fromCallIndex++
-      return createChainForIndex(idx)
-    },
-    storage: {
-      from: () => ({
-        remove: mockStorageRemove,
-      }),
-    },
-  })),
+  createClient: vi.fn(async () => mockSupabase),
+}))
+
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => {
+    const result = await mockGetUser()
+    return {
+      supabase: mockSupabase,
+      user: result?.data?.user ?? null,
+      orgId: result?.data?.user ? 'org-1' : null,
+    }
+  }),
 }))
 
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
+}))
+
+vi.mock('@/lib/get-current-org', () => ({
+  getCurrentOrg: vi.fn().mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' }),
+  ORG_COOKIE_NAME: 'pips-org-id',
 }))
 
 /* ============================================================
