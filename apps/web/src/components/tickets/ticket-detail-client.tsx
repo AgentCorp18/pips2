@@ -160,16 +160,33 @@ export const TicketDetailClient = ({
 
   const saveTitle = () => {
     if (titleDraft.trim() && titleDraft !== ticket.title) {
-      saveField('title', titleDraft.trim())
+      startTransition(async () => {
+        const result = await updateTicket(ticket.id, { title: titleDraft.trim() })
+        if (result?.error) {
+          console.error('Failed to save title:', result.error)
+          return // Keep edit mode open so the user can retry
+        }
+        setEditingTitle(false)
+      })
+    } else {
+      setTitleDraft(ticket.title) // Revert draft if empty
+      setEditingTitle(false)
     }
-    setEditingTitle(false)
   }
 
   const saveDescription = () => {
     if (descDraft !== (ticket.description ?? '')) {
-      saveField('description', descDraft)
+      startTransition(async () => {
+        const result = await updateTicket(ticket.id, { description: descDraft })
+        if (result?.error) {
+          console.error('Failed to save description:', result.error)
+          return // Keep edit mode open so the user can retry
+        }
+        setEditingDesc(false)
+      })
+    } else {
+      setEditingDesc(false)
     }
-    setEditingDesc(false)
   }
 
   return (

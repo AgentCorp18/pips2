@@ -78,11 +78,15 @@ export const useChatRealtime = (channelId: string | null, currentUserId: string 
           })
         },
       )
-      .subscribe((status) => {
+      .subscribe((status, err) => {
         dispatch({ type: 'CONNECTION_CHANGE', isConnected: status === 'SUBSCRIBED' })
+        if (err) {
+          console.error(`[chat-realtime] Subscription error for channel ${channelId}:`, err)
+        }
       })
 
     return () => {
+      channel.unsubscribe()
       supabase.removeChannel(channel)
     }
   }, [channelId, activeChannelId, currentUserId, appendMessage, updateMessage, incrementUnread])
