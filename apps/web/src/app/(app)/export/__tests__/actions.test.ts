@@ -128,6 +128,11 @@ describe('exportProjectsCSV', () => {
   it('returns error when user has no org', async () => {
     // No user signed in
     mockGetUser.mockResolvedValue({ data: { user: null } })
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: null,
+      orgId: null,
+    })
 
     const result = await exportProjectsCSV()
     expect(result).toEqual({ error: 'You must be signed in to an organization' })
@@ -269,6 +274,11 @@ describe('exportTicketsCSV', () => {
 
   it('returns error when user has no org', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
+    vi.mocked(getAuthContext).mockResolvedValueOnce({
+      supabase: mockSupabase as never,
+      user: null,
+      orgId: null,
+    })
 
     const result = await exportTicketsCSV()
     expect(result).toEqual({ error: 'You must be signed in to an organization' })
