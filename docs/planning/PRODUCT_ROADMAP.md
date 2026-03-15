@@ -1,10 +1,10 @@
 # PIPS 2.0 Product Roadmap
 
-> Version: 1.3
+> Version: 2.0
 > Author: Marc Albers
 > Created: 2026-03-02
-> Status: Active — All feature phases COMPLETE, Polish COMPLETE, Beta Launch (Phase 7) COMPLETE
-> Last Updated: March 13, 2026 (test counts updated to 2,504 unit / 68 E2E)
+> Status: Active — All Phases 0-10 COMPLETE, CEO bug fix sprints ongoing
+> Last Updated: March 15, 2026 (2,794 unit tests / 68 E2E, chat + initiatives live)
 
 ---
 
@@ -32,7 +32,12 @@
 > - Workshop facilitation (session CRUD, timer, Realtime, templates) (not in original roadmap)
 > - Interactive guide overhaul (9 components, 4 new pages) (not in original roadmap)
 > - Sprint 0 production hardening (security headers, rate limiting) (not in original roadmap)
-> - 2,504 unit tests across 219 files (far exceeding any target)
+> - 2,794 unit tests across 235 files (far exceeding any target)
+> - Real-time team chat (channels, DMs, AI summaries, @mentions) (not in original roadmap)
+> - Strategic Initiatives layer with weighted progress (not in original roadmap)
+> - CEO Request ticket type with auto-escalation (not in original roadmap)
+> - 16 CEO bug fix tickets triaged and resolved via PIPS methodology (not in original roadmap)
+> - Claude Code skills for all 6 PIPS steps + 11 form types (not in original roadmap)
 
 ---
 
@@ -42,15 +47,16 @@
 2. [Phase 0: Foundation — COMPLETE](#2-phase-0-foundation-weeks-1-4)
 3. [Phase 1: MVP — COMPLETE](#3-phase-1-mvp--core-pips-workflow-weeks-5-12)
 4. [Phase 1.5: Post-MVP Stabilization — COMPLETE](#4-phase-15-post-mvp-stabilization)
-5. [Phase 2: Knowledge Hub & Training Completion](#5-phase-2-knowledge-hub--training-completion)
-6. [Phase 3: Workshop, Billing & Polish](#6-phase-3-workshop-billing--polish)
+5. [Phase 2: Knowledge Hub & Training Completion — COMPLETE](#5-phase-2-knowledge-hub--training-completion)
+6. [Phase 3: Workshop, Billing & Polish — COMPLETE (workshop)](#6-phase-3-workshop-billing--polish)
 7. [Phase 4: Integrations & API](#7-phase-4-integrations--api)
 8. [Phase 5: White-Label & Enterprise](#8-phase-5-white-label--enterprise)
 9. [Phase 6: AI & Advanced Features](#9-phase-6-ai--advanced-features)
-10. [Future Roadmap (Year 2+)](#10-future-roadmap-year-2)
-11. [Risk Register](#11-risk-register)
-12. [Success Criteria Per Phase](#12-success-criteria-per-phase)
-13. [Dependencies & Critical Path](#13-dependencies--critical-path)
+10. [NEW: Phases 7-10 & CEO Sprints](#10-new-phases-7-10)
+11. [Future Roadmap (Year 2+)](#11-future-roadmap-year-2)
+12. [Risk Register](#11-risk-register)
+13. [Success Criteria Per Phase](#12-success-criteria-per-phase)
+14. [Dependencies & Critical Path](#13-dependencies--critical-path)
 
 ---
 
