@@ -8,7 +8,7 @@ import { InitiativeCard } from '@/components/initiatives/initiative-card'
 import { Plus, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Initiatives | PIPS',
+  title: 'Initiatives',
 }
 
 const InitiativesPage = async () => {

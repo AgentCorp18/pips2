@@ -14,7 +14,7 @@ type Props = {
 }
 
 export const metadata: Metadata = {
-  title: 'Initiative | PIPS',
+  title: 'Initiative',
 }
 
 const STATUS_STYLES: Record<InitiativeStatus, { label: string; className: string }> = {

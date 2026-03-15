@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useActionState, useEffect, useRef } from 'react'
+import { useState, useActionState, useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -228,6 +228,7 @@ export const ProjectForm = () => {
   const router = useRouter()
   const hasRedirected = useRef(false)
   const [state, formAction, isPending] = useActionState(createProject, initialState)
+  const [isNavigating, startTransition] = useTransition()
   const [mode, setMode] = useState<CreateMode>('blank')
   const [currentStep, setCurrentStep] = useState(1)
   const [name, setName] = useState('')
@@ -238,7 +239,9 @@ export const ProjectForm = () => {
     if (state.success && state.projectId && !hasRedirected.current) {
       hasRedirected.current = true
       toast.success('Project created')
-      router.push(`/projects/${state.projectId}`)
+      startTransition(() => {
+        router.push(`/projects/${state.projectId}`)
+      })
     }
   }, [state, router])
 
@@ -473,8 +476,16 @@ export const ProjectForm = () => {
                     Next
                   </Button>
                 ) : (
-                  <Button type="submit" disabled={isPending} data-testid="create-project-button">
-                    {isPending ? 'Creating project...' : 'Create project'}
+                  <Button
+                    type="submit"
+                    disabled={isPending || isNavigating}
+                    data-testid="create-project-button"
+                  >
+                    {isPending
+                      ? 'Creating project...'
+                      : isNavigating
+                        ? 'Redirecting...'
+                        : 'Create project'}
                   </Button>
                 )}
               </div>
