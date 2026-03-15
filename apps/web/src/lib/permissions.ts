@@ -30,6 +30,34 @@ export const getUserOrgRole = async (orgId: string): Promise<OrgRole | null> => 
   return (data?.role as OrgRole) ?? null
 }
 
+/**
+ * Check if a role has a specific permission in an org,
+ * respecting per-org overrides stored in org_permission_overrides.
+ */
+export const hasOrgPermission = async (
+  orgId: string,
+  role: OrgRole,
+  permission: Permission,
+): Promise<boolean> => {
+  // Owner always has everything — no overrides apply
+  if (role === 'owner') return true
+
+  // Check for org-specific override
+  const supabase = await createClient()
+  const { data: override } = await supabase
+    .from('org_permission_overrides')
+    .select('allowed')
+    .eq('org_id', orgId)
+    .eq('role', role)
+    .eq('permission', permission)
+    .maybeSingle()
+
+  if (override !== null) return override.allowed as boolean
+
+  // Fall back to default permission matrix
+  return hasPermission(role, permission)
+}
+
 /** Check if current user has permission — throws if not */
 export const requirePermission = async (
   orgId: string,
@@ -37,7 +65,9 @@ export const requirePermission = async (
 ): Promise<OrgRole> => {
   const role = await getUserOrgRole(orgId)
   if (!role) throw new Error('Not a member of this organization')
-  if (!hasPermission(role, permission)) {
+
+  const allowed = await hasOrgPermission(orgId, role, permission)
+  if (!allowed) {
     throw new Error(`Insufficient permissions: requires ${permission}`)
   }
   return role
