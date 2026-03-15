@@ -384,6 +384,31 @@ export const FormShell = (props: FormShellProps) => {
   )
 }
 
+/* ---- Inline markdown renderer (bold + italic only, no dangerouslySetInnerHTML) ---- */
+
+/**
+ * Renders a string containing **bold** and *italic* markdown syntax as React
+ * elements. Content comes exclusively from static step-content.ts (developer-
+ * authored), but we avoid dangerouslySetInnerHTML entirely as a defence-in-depth
+ * measure — it removes the XSS risk category completely.
+ */
+const InlineMarkdown = ({ text }: { text: string }): React.ReactElement => {
+  // Split on **bold** or *italic* tokens, keeping the delimiters via capture groups
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/)
+
+  const nodes = parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={index}>{part.slice(1, -1)}</em>
+    }
+    return <span key={index}>{part}</span>
+  })
+
+  return <>{nodes}</>
+}
+
 /* ---- Best Practices (collapsible, progressive disclosure) ---- */
 
 const BestPracticesSection = ({ practices }: { practices: string[] }) => {
@@ -425,13 +450,9 @@ const BestPracticesSection = ({ practices }: { practices: string[] }) => {
                 className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
               >
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-success)]" />
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: practice
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em>$1</em>'),
-                  }}
-                />
+                <span>
+                  <InlineMarkdown text={practice} />
+                </span>
               </li>
             ))}
           </ul>
@@ -475,13 +496,9 @@ const AboutThisToolSection = ({ tips }: { tips: string[] }) => {
                 className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]"
               >
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent)]" />
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: tip
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em>$1</em>'),
-                  }}
-                />
+                <span>
+                  <InlineMarkdown text={tip} />
+                </span>
               </li>
             ))}
           </ul>
