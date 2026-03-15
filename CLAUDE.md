@@ -55,14 +55,19 @@ IMPORTANT: After every change, run in this order:
 - Don't skip type checking — 2,339+ unit tests must continue passing
 - Don't use default exports — named exports only
 
-## Work Tracking
+## Work Tracking — MANDATORY (Hard Gate)
 
-Agents track all work inside the PIPS app itself (pips-app.vercel.app). Full instructions are in `.claude/rules/multi-agent.md`.
+**NO WORK may be performed unless it is first captured in the PIPS app (pips-app.vercel.app).** This is a BLOCKING requirement — not optional, not "nice to have." ALL planning, development, investigation, analysis, decisions, discussions, and handoffs MUST be documented in the app.
 
-- Create a PIPS project for each sprint or initiative; use the 6-step methodology to frame complex problems
-- Every work item gets a ticket; use sub-tickets for subtasks and "Assigned To" to route work to the right agent
-- Use PIPS chat channels for handoffs and coordination — project channel for sprint-level updates, ticket channel for scoped discussion
-- When you find a bug or have an improvement idea mid-task, create a ticket immediately so it is not lost
+Full instructions: `.claude/rules/multi-agent.md`
+
+### Required workflow:
+
+1. **Before work**: Create Initiative/Project + Ticket in PIPS app. No ticket = no work.
+2. **During work**: Update ticket status, add comments with progress/decisions/findings, post in chat channels for coordination, fill out PIPS step forms for non-trivial problems
+3. **After work**: Close ticket with summary + PR link, fill out Step 6 evaluation forms
+4. **Discoveries**: Create tickets immediately for bugs found or improvement ideas
+5. **Handoffs**: Post in ticket chat channel with context before reassigning
 
 ## Gotchas
 
