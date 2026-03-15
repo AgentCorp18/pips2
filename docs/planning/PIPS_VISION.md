@@ -21,7 +21,7 @@ A platform where Marc can onboard a new user, have them create an org, run a PIP
 | 1   | Default "General" channel on org creation                      | Bug      | Complete    |
 | 2   | Mobile scrolling issues                                        | Bug      | Complete    |
 | 3   | Mobile UI polish (touch targets, responsive layouts)           | UX       | Complete    |
-| 4   | Replace in-memory rate limiter with Upstash Redis              | Security | Not Started |
+| 4   | Replace in-memory rate limiter with Upstash Redis              | Security | Complete    |
 | 5   | Stripe billing integration (checkout, subscriptions, webhooks) | Revenue  | Not Started |
 | 6   | Legal review of Privacy Policy and Terms                       | Legal    | Not Started |
 | 7   | E2E test coverage for all CEO-reported flows                   | Testing  | Complete    |
@@ -33,9 +33,9 @@ A platform where Marc can onboard a new user, have them create an org, run a PIP
 | 8   | Form "Discard Changes" dialog when navigating away unsaved | UX          | Complete    |
 | 9   | File attachments on tickets and forms                      | Feature Gap | Not Started |
 | 10  | Rich text editing in ticket descriptions                   | Feature Gap | Not Started |
-| 11  | Email notifications (beyond in-app) via Resend             | Feature Gap | Not Started |
-| 12  | Onboarding funnel instrumentation (signup → first project) | Analytics   | Not Started |
-| 13  | Core Web Vitals monitoring via Vercel Speed Insights       | Performance | Not Started |
+| 11  | Email notifications (beyond in-app) via Resend             | Feature Gap | Complete    |
+| 12  | Onboarding funnel instrumentation (signup → first project) | Analytics   | Complete    |
+| 13  | Core Web Vitals monitoring via Vercel Speed Insights       | Performance | Complete    |
 | 14  | jspdf upgrade v2 → v4                                      | Tech Debt   | Not Started |
 | 15  | Comprehensive error boundaries on all route segments       | Reliability | Complete    |
 
@@ -84,9 +84,9 @@ A platform where Marc can onboard a new user, have them create an org, run a PIP
 
 | Metric             | Current | Target |
 | ------------------ | ------- | ------ |
-| Unit tests         | 2,794   | 3,000+ |
+| Unit tests         | 2,834   | 3,000+ |
 | E2E tests          | 68      | 150+   |
-| Test files         | 235     | 250+   |
+| Test files         | 238     | 250+   |
 | Coverage threshold | 40%     | 60%    |
 | Type errors        | 0       | 0      |
 | Lint errors        | 0       | 0      |

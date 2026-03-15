@@ -10,6 +10,7 @@ import {
 } from '@/lib/validations'
 import { getBaseUrl } from '@/lib/base-url'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type AuthActionState = {
   error?: string
@@ -65,6 +66,8 @@ export const login = async (
     }
     return { error: 'Invalid email or password', email: result.data.email }
   }
+
+  void trackServerEvent('login.completed', { method: 'password' })
 
   const redirectTo = (formData.get('redirect') as string) ?? undefined
   // Only allow internal redirects to prevent open redirect attacks
@@ -130,6 +133,8 @@ export const signup = async (
     console.error('Signup error:', error.message)
     return { error: 'Unable to create account. Please try again or use a different email.' }
   }
+
+  void trackServerEvent('signup.completed')
 
   return {
     success: 'Check your email for a confirmation link to complete your registration.',

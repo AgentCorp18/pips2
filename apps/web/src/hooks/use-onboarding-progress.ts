@@ -1,4 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
+import { track } from '@vercel/analytics'
 
 const STORAGE_KEY = 'pips-onboarding-progress'
 
@@ -52,12 +53,23 @@ export const useOnboardingProgress = () => {
   const completeStep = useCallback((step: OnboardingStep) => {
     const current = getState()
     if (current.completedSteps.includes(step)) return
-    setState({ ...current, completedSteps: [...current.completedSteps, step] })
+    const updated = [...current.completedSteps, step]
+    setState({ ...current, completedSteps: updated })
+    try {
+      track('onboarding.step_completed', { step, progress: `${updated.length}/4` })
+    } catch {
+      /* analytics must never block */
+    }
   }, [])
 
   const dismiss = useCallback(() => {
     const current = getState()
     setState({ ...current, dismissed: true })
+    try {
+      track('onboarding.dismissed', { steps_completed: current.completedSteps.length })
+    } catch {
+      /* analytics must never block */
+    }
   }, [])
 
   const isStepComplete = useCallback(
