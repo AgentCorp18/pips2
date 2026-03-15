@@ -60,6 +60,16 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
+// Admin client shares the same from() index pool so test sequences are contiguous
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(() => ({
+    from: () => {
+      const idx = fromCallIndex++
+      return createChainForIndex(idx)
+    },
+  })),
+}))
+
 /* ============================================================
    Import after mocks
    ============================================================ */
@@ -653,12 +663,12 @@ describe('createChannel', () => {
   it('returns error when channel insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // chat_channels insert
+      // chat_channels insert (admin client)
       { data: null, error: { message: 'DB error' } },
     ]
 
     const result = await createChannel('custom', 'My Channel')
-    expect(result).toEqual({ error: 'Failed to create channel' })
+    expect(result.error).toMatch(/Failed to create channel/)
   })
 
   it('creates a custom channel and adds creator as member', async () => {

@@ -182,6 +182,26 @@ export const acceptInvitation = async (token: string): Promise<ActionResult> => 
     return { success: false, error: 'Failed to join the organization. Please try again.' }
   }
 
+  // Auto-enroll the new member in the org's General channel (non-critical)
+  const { data: generalChannel } = await admin
+    .from('chat_channels')
+    .select('id')
+    .eq('org_id', invitation.org_id as string)
+    .eq('type', 'org')
+    .eq('name', 'General')
+    .is('archived_at', null)
+    .maybeSingle()
+
+  if (generalChannel) {
+    const { error: channelMemberError } = await admin
+      .from('chat_channel_members')
+      .insert({ channel_id: generalChannel.id, user_id: user.id })
+
+    if (channelMemberError) {
+      console.error('Failed to add new member to General channel:', channelMemberError.message)
+    }
+  }
+
   // Mark invitation as accepted
   await admin.from('org_invitations').update({ status: 'accepted' }).eq('id', invitation.id)
 

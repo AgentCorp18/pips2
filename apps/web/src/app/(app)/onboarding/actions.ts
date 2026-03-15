@@ -125,6 +125,33 @@ export const createOrganization = async (
       // Non-critical — defaults will be used
       console.error('Failed to create org_settings:', settingsError.message)
     }
+
+    // Create a default "General" org-wide channel
+    const { data: generalChannel, error: channelError } = await admin
+      .from('chat_channels')
+      .insert({
+        org_id: org.id,
+        type: 'org',
+        name: 'General',
+        created_by: user.id,
+      })
+      .select('id')
+      .single()
+
+    if (channelError || !generalChannel) {
+      // Non-critical — channel can be created later from the chat UI
+      console.error('Failed to create General channel:', channelError?.message)
+    } else {
+      // Add the org owner as the first member of the General channel
+      const { error: channelMemberError } = await admin.from('chat_channel_members').insert({
+        channel_id: generalChannel.id,
+        user_id: user.id,
+      })
+
+      if (channelMemberError) {
+        console.error('Failed to add owner to General channel:', channelMemberError.message)
+      }
+    }
   } catch (err) {
     console.error('Unexpected error during org creation:', err)
     return { error: 'An unexpected error occurred. Please try again.' }

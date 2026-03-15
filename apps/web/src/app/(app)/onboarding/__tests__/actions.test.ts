@@ -241,6 +241,10 @@ describe('createOrganization', () => {
       { error: null },
       // from('org_settings').insert() -> success
       { error: null },
+      // from('chat_channels').insert().select().single() -> success (General channel)
+      { data: { id: 'ch-general-1' } },
+      // from('chat_channel_members').insert() -> success
+      { error: null },
     ]
 
     const fd = makeFormData({ name: 'My Org', slug: 'my-org' })
@@ -259,6 +263,52 @@ describe('createOrganization', () => {
       { error: null },
       // from('org_settings').insert() -> non-critical error
       { error: { message: 'Settings error' } },
+      // from('chat_channels').insert().select().single() -> success (General channel)
+      { data: { id: 'ch-general-1' } },
+      // from('chat_channel_members').insert() -> success
+      { error: null },
+    ]
+
+    const fd = makeFormData({ name: 'My Org', slug: 'my-org' })
+    await expect(createOrganization(emptyState, fd)).rejects.toThrow('NEXT_REDIRECT')
+    expect(mockRedirect).toHaveBeenCalledWith('/dashboard')
+  })
+
+  it('still redirects when General channel creation fails (non-critical)', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // checkSlugAvailability -> not taken
+      { data: null },
+      // from('organizations').insert().select().single() -> success
+      { data: { id: 'new-org-1' } },
+      // from('org_members').insert() -> success
+      { error: null },
+      // from('org_settings').insert() -> success
+      { error: null },
+      // from('chat_channels').insert().select().single() -> non-critical error
+      { data: null, error: { message: 'Channel error' } },
+    ]
+
+    const fd = makeFormData({ name: 'My Org', slug: 'my-org' })
+    await expect(createOrganization(emptyState, fd)).rejects.toThrow('NEXT_REDIRECT')
+    expect(mockRedirect).toHaveBeenCalledWith('/dashboard')
+  })
+
+  it('still redirects when General channel member insert fails (non-critical)', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // checkSlugAvailability -> not taken
+      { data: null },
+      // from('organizations').insert().select().single() -> success
+      { data: { id: 'new-org-1' } },
+      // from('org_members').insert() -> success
+      { error: null },
+      // from('org_settings').insert() -> success
+      { error: null },
+      // from('chat_channels').insert().select().single() -> success
+      { data: { id: 'ch-general-1' } },
+      // from('chat_channel_members').insert() -> non-critical error
+      { error: { message: 'Member insert error' } },
     ]
 
     const fd = makeFormData({ name: 'My Org', slug: 'my-org' })

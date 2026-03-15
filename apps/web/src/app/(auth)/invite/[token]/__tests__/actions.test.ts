@@ -487,7 +487,7 @@ describe('acceptInvitation', () => {
     expect(redirect).toHaveBeenCalledWith('/dashboard')
   })
 
-  it('inserts new member and redirects on success', async () => {
+  it('inserts new member, enrolls in General channel, and redirects on success', async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'u-1', email: 'user@example.com' } },
     })
@@ -510,7 +510,75 @@ describe('acceptInvitation', () => {
       { data: null },
       // from('org_members').insert() -> success
       { data: null, error: null },
+      // from('chat_channels').select().eq(org_id).eq(type).eq(name).maybeSingle() -> General channel found
+      { data: { id: 'ch-general-1' } },
+      // from('chat_channel_members').insert() -> success
+      { data: null, error: null },
       // from('org_invitations').update() -> mark accepted
+      { data: null, error: null },
+    ]
+
+    await acceptInvitation('token-abc')
+
+    expect(redirect).toHaveBeenCalledWith('/dashboard')
+  })
+
+  it('still redirects when General channel is not found (non-critical)', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'user@example.com' } },
+    })
+
+    adminResults = [
+      {
+        data: {
+          id: 'inv-1',
+          org_id: 'org-1',
+          email: 'user@example.com',
+          role: 'member',
+          status: 'pending',
+          expires_at: futureDate(),
+        },
+      },
+      { data: null },
+      { data: null },
+      // org_members insert -> success
+      { data: null, error: null },
+      // General channel -> not found
+      { data: null },
+      // org_invitations update -> mark accepted
+      { data: null, error: null },
+    ]
+
+    await acceptInvitation('token-abc')
+
+    expect(redirect).toHaveBeenCalledWith('/dashboard')
+  })
+
+  it('still redirects when General channel member insert fails (non-critical)', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u-1', email: 'user@example.com' } },
+    })
+
+    adminResults = [
+      {
+        data: {
+          id: 'inv-1',
+          org_id: 'org-1',
+          email: 'user@example.com',
+          role: 'member',
+          status: 'pending',
+          expires_at: futureDate(),
+        },
+      },
+      { data: null },
+      { data: null },
+      // org_members insert -> success
+      { data: null, error: null },
+      // General channel -> found
+      { data: { id: 'ch-general-1' } },
+      // chat_channel_members insert -> non-critical error
+      { error: { message: 'Member insert error' } },
+      // org_invitations update -> mark accepted
       { data: null, error: null },
     ]
 

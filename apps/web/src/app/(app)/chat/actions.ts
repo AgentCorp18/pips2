@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
 
@@ -309,6 +310,14 @@ export const createChannel = async (
   if (!user) return { error: 'Not authenticated' }
   if (!orgId) return { error: 'No organization context' }
 
+  let admin: ReturnType<typeof createAdminClient>
+  try {
+    admin = createAdminClient()
+  } catch (err) {
+    console.error('Admin client creation failed:', err)
+    return { error: 'Server configuration error. Please contact support.' }
+  }
+
   // For DM channels, check if one already exists between these users
   if (type === 'direct' && memberIds && memberIds.length === 1) {
     const otherUserId = memberIds[0]
@@ -338,7 +347,12 @@ export const createChannel = async (
     }
   }
 
-  const { data: channel, error } = await supabase
+  // Use the admin client for channel INSERT to bypass RLS chicken-and-egg:
+  // The INSERT policy on chat_channels verifies org membership, which is fine,
+  // but the subsequent INSERT on chat_channel_members referencing the new channel_id
+  // requires the channel to exist first. Using admin for both avoids any ordering
+  // or policy-evaluation issues during creation.
+  const { data: channel, error } = await admin
     .from('chat_channels')
     .insert({
       org_id: orgId,
@@ -351,18 +365,28 @@ export const createChannel = async (
     .single()
 
   if (error) {
-    console.error('Failed to create channel:', error.message)
-    return { error: 'Failed to create channel' }
+    console.error('Failed to create channel:', error.message, 'code:', error.code)
+    return { error: `Failed to create channel: ${error.message}` }
   }
 
-  // Add creator as member
+  // Add creator and any additional members via admin client
   const allMembers = [user.id, ...(memberIds ?? [])].filter((id, i, arr) => arr.indexOf(id) === i)
 
   for (const memberId of allMembers) {
-    await supabase.from('chat_channel_members').insert({
+    const { error: memberError } = await admin.from('chat_channel_members').insert({
       channel_id: channel.id,
       user_id: memberId,
     })
+    if (memberError) {
+      console.error(
+        'Failed to add member',
+        memberId,
+        'to channel',
+        channel.id,
+        ':',
+        memberError.message,
+      )
+    }
   }
 
   return { data: channel as ChatChannel }
