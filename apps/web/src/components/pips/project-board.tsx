@@ -68,7 +68,7 @@ const ColumnView = ({ projects }: { projects: BoardProject[] }) => {
         return (
           <div
             key={col.id}
-            className="flex min-w-[250px] flex-1 flex-col"
+            className="flex min-w-[200px] flex-1 flex-col sm:min-w-[250px]"
             role="group"
             data-testid={`project-board-column-${col.id}`}
             aria-label={`${col.label} column, ${columnProjects.length} project${columnProjects.length !== 1 ? 's' : ''}`}
@@ -137,88 +137,97 @@ const SwimLaneView = ({ projects }: { projects: BoardProject[] }) => {
   }
 
   return (
-    <div
-      className="overflow-x-auto pb-4"
-      data-testid="project-board"
-      role="region"
-      aria-label="Project board by step and status"
-    >
-      {/* Column headers — one per PIPS step */}
-      <div className="mb-2 grid grid-cols-[140px_repeat(6,1fr)] gap-2">
-        <div /> {/* Spacer for row labels */}
-        {PIPS_STEPS.map((step) => (
-          <div key={step.number} className="flex items-center gap-2 px-2">
-            <span
-              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-              style={{ backgroundColor: step.color }}
-            >
-              {step.number}
-            </span>
-            <span
-              className="truncate text-xs font-semibold"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              {step.name}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Status rows */}
-      {BOARD_COLUMNS.map((col) => {
-        const rowProjects = grid[col.id] ?? {}
-        const rowTotal = Object.values(rowProjects).reduce((sum, arr) => sum + arr.length, 0)
-
-        return (
-          <div
-            key={col.id}
-            className="mb-2 grid grid-cols-[140px_repeat(6,1fr)] gap-2"
-            data-testid={`swimlane-row-${col.id}`}
-          >
-            {/* Row label */}
-            <div
-              className="flex items-start gap-2 rounded-lg p-2"
-              style={{ borderLeft: `3px solid ${col.color}` }}
-            >
+    <div className="relative">
+      {/* Scroll affordance gradient on right edge */}
+      <div
+        className="pointer-events-none absolute top-0 right-0 z-10 hidden h-full w-8 bg-gradient-to-l from-[var(--color-bg-primary,#fff)] to-transparent sm:hidden"
+        aria-hidden="true"
+        style={{ display: 'block' }}
+      />
+      <div
+        className="overflow-x-auto pb-4"
+        data-testid="project-board"
+        role="region"
+        aria-label="Project board by step and status"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        {/* Column headers — one per PIPS step */}
+        <div className="mb-2 grid grid-cols-[100px_repeat(6,minmax(120px,1fr))] gap-2 sm:grid-cols-[140px_repeat(6,1fr)]">
+          <div /> {/* Spacer for row labels */}
+          {PIPS_STEPS.map((step) => (
+            <div key={step.number} className="flex items-center gap-2 px-2">
               <span
-                className="inline-block h-2.5 w-2.5 shrink-0 rounded-full mt-1"
-                style={{ backgroundColor: col.color }}
-              />
-              <div className="min-w-0">
-                <p
-                  className="truncate text-xs font-semibold"
-                  style={{ color: 'var(--color-text-primary)' }}
-                >
-                  {col.label}
-                </p>
-                <p className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {rowTotal} project{rowTotal !== 1 ? 's' : ''}
-                </p>
-              </div>
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                style={{ backgroundColor: step.color }}
+              >
+                {step.number}
+              </span>
+              <span
+                className="truncate text-xs font-semibold"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                {step.name}
+              </span>
             </div>
+          ))}
+        </div>
 
-            {/* Step cells */}
-            {PIPS_STEPS.map((step) => {
-              const cellProjects = rowProjects[step.number] ?? []
+        {/* Status rows */}
+        {BOARD_COLUMNS.map((col) => {
+          const rowProjects = grid[col.id] ?? {}
+          const rowTotal = Object.values(rowProjects).reduce((sum, arr) => sum + arr.length, 0)
 
-              return (
-                <div
-                  key={step.number}
-                  className="min-h-[60px] rounded-lg p-1.5"
-                  style={{ backgroundColor: 'var(--color-bg-secondary, #F9FAFB)' }}
-                  data-testid={`swimlane-cell-${col.id}-${step.number}`}
-                >
-                  <div className="flex flex-col gap-1.5">
-                    {cellProjects.map((project) => (
-                      <ProjectBoardCard key={project.id} project={project} compact />
-                    ))}
-                  </div>
+          return (
+            <div
+              key={col.id}
+              className="mb-2 grid grid-cols-[100px_repeat(6,minmax(120px,1fr))] gap-2 sm:grid-cols-[140px_repeat(6,1fr)]"
+              data-testid={`swimlane-row-${col.id}`}
+            >
+              {/* Row label */}
+              <div
+                className="flex items-start gap-2 rounded-lg p-2"
+                style={{ borderLeft: `3px solid ${col.color}` }}
+              >
+                <span
+                  className="inline-block h-2.5 w-2.5 shrink-0 rounded-full mt-1"
+                  style={{ backgroundColor: col.color }}
+                />
+                <div className="min-w-0">
+                  <p
+                    className="truncate text-xs font-semibold"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {col.label}
+                  </p>
+                  <p className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                    {rowTotal} project{rowTotal !== 1 ? 's' : ''}
+                  </p>
                 </div>
-              )
-            })}
-          </div>
-        )
-      })}
+              </div>
+
+              {/* Step cells */}
+              {PIPS_STEPS.map((step) => {
+                const cellProjects = rowProjects[step.number] ?? []
+
+                return (
+                  <div
+                    key={step.number}
+                    className="min-h-[60px] rounded-lg p-1.5"
+                    style={{ backgroundColor: 'var(--color-bg-secondary, #F9FAFB)' }}
+                    data-testid={`swimlane-cell-${col.id}-${step.number}`}
+                  >
+                    <div className="flex flex-col gap-1.5">
+                      {cellProjects.map((project) => (
+                        <ProjectBoardCard key={project.id} project={project} compact />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
