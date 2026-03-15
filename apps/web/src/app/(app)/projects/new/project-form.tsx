@@ -428,7 +428,7 @@ export const ProjectForm = () => {
               )}
 
               {/* Navigation */}
-              <div className="mt-2 flex justify-between gap-3">
+              <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 {currentStep > 1 ? (
                   <Button
                     type="button"

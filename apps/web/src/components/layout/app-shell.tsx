@@ -203,7 +203,7 @@ export const AppShell = ({ children, orgs, currentOrgId }: AppShellProps) => {
               <button
                 type="button"
                 onClick={toggleSidebar}
-                className="rounded-[var(--radius-md)] p-1.5 transition-colors hover:bg-[var(--color-surface-secondary)]"
+                className="rounded-[var(--radius-md)] p-2.5 transition-colors hover:bg-[var(--color-surface-secondary)]"
                 aria-label="Open sidebar"
               >
                 <Menu size={20} style={{ color: 'var(--color-text-secondary)' }} />

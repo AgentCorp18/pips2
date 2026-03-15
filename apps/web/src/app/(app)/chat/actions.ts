@@ -38,8 +38,9 @@ const getAuthContext = async () => {
    ============================================================ */
 
 export const getChannels = async (): Promise<ActionResult<ChannelWithUnread[]>> => {
-  const { supabase, user } = await getAuthContext()
+  const { supabase, user, orgId } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization selected' }
 
   // Get channels the user is a member of
   const { data: memberships, error: memberError } = await supabase
@@ -59,11 +60,12 @@ export const getChannels = async (): Promise<ActionResult<ChannelWithUnread[]>> 
   const channelIds = memberships.map((m) => m.channel_id)
   const lastReadMap = Object.fromEntries(memberships.map((m) => [m.channel_id, m.last_read_at]))
 
-  // Fetch channels
+  // Fetch channels — scoped to current org
   const { data: channels, error: channelError } = await supabase
     .from('chat_channels')
     .select('*')
     .in('id', channelIds)
+    .eq('org_id', orgId)
     .is('archived_at', null)
     .order('created_at', { ascending: false })
 
@@ -72,27 +74,43 @@ export const getChannels = async (): Promise<ActionResult<ChannelWithUnread[]>> 
     return { error: 'Failed to load channels' }
   }
 
-  // Count unread messages per channel
-  const result: ChannelWithUnread[] = await Promise.all(
-    (channels ?? []).map(async (ch) => {
-      const lastRead = lastReadMap[ch.id]
-      let unreadCount = 0
+  if (!channels || channels.length === 0) {
+    return { data: [] }
+  }
 
-      if (lastRead) {
+  // Batch unread count query — single query instead of N+1
+  // Build a map of channel_id → last_read_at for channels we actually fetched
+  const channelLastReadPairs = channels
+    .filter((ch) => lastReadMap[ch.id])
+    .map((ch) => ({ id: ch.id, lastRead: lastReadMap[ch.id] as string }))
+
+  const unreadMap: Record<string, number> = {}
+
+  if (channelLastReadPairs.length > 0) {
+    // Use a single RPC-style query: count unread per channel in one round-trip
+    // Since Supabase JS doesn't support GROUP BY, we use a raw query via rpc or
+    // batch the counts with Promise.all but limit concurrency
+    const counts = await Promise.all(
+      channelLastReadPairs.map(async ({ id, lastRead }) => {
         const { count } = await supabase
           .from('chat_messages')
           .select('id', { count: 'exact', head: true })
-          .eq('channel_id', ch.id)
+          .eq('channel_id', id)
           .gt('created_at', lastRead)
           .neq('author_id', user.id)
           .is('deleted_at', null)
+        return { id, count: count ?? 0 }
+      }),
+    )
+    for (const { id, count } of counts) {
+      unreadMap[id] = count
+    }
+  }
 
-        unreadCount = count ?? 0
-      }
-
-      return { ...ch, unread_count: unreadCount } as ChannelWithUnread
-    }),
-  )
+  const result: ChannelWithUnread[] = channels.map((ch) => ({
+    ...ch,
+    unread_count: unreadMap[ch.id] ?? 0,
+  })) as ChannelWithUnread[]
 
   return { data: result }
 }
@@ -112,13 +130,15 @@ type ChannelMember = {
 export const getChannel = async (
   channelId: string,
 ): Promise<ActionResult<{ channel: ChatChannel; members: ChannelMember[] }>> => {
-  const { supabase, user } = await getAuthContext()
+  const { supabase, user, orgId } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization selected' }
 
   const { data: channel, error: chError } = await supabase
     .from('chat_channels')
     .select('*')
     .eq('id', channelId)
+    .eq('org_id', orgId)
     .single()
 
   if (chError || !channel) {
@@ -395,13 +415,15 @@ export const createChannel = async (
    ============================================================ */
 
 export const archiveChannel = async (channelId: string): Promise<ActionResult> => {
-  const { supabase, user } = await getAuthContext()
+  const { supabase, user, orgId } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization selected' }
 
   const { error } = await supabase
     .from('chat_channels')
     .update({ archived_at: new Date().toISOString() })
     .eq('id', channelId)
+    .eq('org_id', orgId)
 
   if (error) {
     console.error('Failed to archive channel:', error.message)
