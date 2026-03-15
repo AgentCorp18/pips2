@@ -19,6 +19,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, User } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { AiAssistButton } from '@/components/ui/ai-assist-button'
+import { InlineMarkdown } from '@/components/ui/inline-markdown'
 
 /* ============================================================
    Types
@@ -323,9 +324,7 @@ const CommentItem = ({
           </div>
         </div>
       ) : (
-        <p className="whitespace-pre-wrap text-sm" style={{ color: 'var(--color-text-primary)' }}>
-          {comment.body}
-        </p>
+        <InlineMarkdown content={comment.body} />
       )}
     </div>
   )

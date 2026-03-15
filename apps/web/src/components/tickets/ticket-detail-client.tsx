@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +17,8 @@ import { DatePicker } from '@/components/ui/date-picker'
 import Link from 'next/link'
 import { Pencil, Check, X, Calendar, User, Tag, FolderKanban, ArrowUpRight } from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
+import { MarkdownToolbar } from '@/components/ui/markdown-toolbar'
+import { InlineMarkdown } from '@/components/ui/inline-markdown'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 
 /* ============================================================
@@ -118,6 +120,7 @@ export const TicketDetailClient = ({
   parentTicket,
 }: TicketDetailClientProps) => {
   const [isPending, startTransition] = useTransition()
+  const descTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Inline editing states
   const [editingTitle, setEditingTitle] = useState(false)
@@ -243,12 +246,22 @@ export const TicketDetailClient = ({
           </h2>
           {editingDesc ? (
             <div className="space-y-2">
-              <Textarea
-                value={descDraft}
-                onChange={(e) => setDescDraft(e.target.value)}
-                rows={6}
-                autoFocus
-              />
+              <div>
+                <MarkdownToolbar
+                  textareaRef={descTextareaRef}
+                  onChange={setDescDraft}
+                  disabled={isPending}
+                />
+                <Textarea
+                  ref={descTextareaRef}
+                  value={descDraft}
+                  onChange={(e) => setDescDraft(e.target.value)}
+                  rows={6}
+                  autoFocus
+                  className="rounded-t-none"
+                  placeholder="Supports **bold**, _italic_, `code`, lists, and more..."
+                />
+              </div>
               <div className="flex gap-2">
                 <Button size="sm" onClick={saveDescription} disabled={isPending}>
                   Save
@@ -272,12 +285,7 @@ export const TicketDetailClient = ({
               onClick={() => setEditingDesc(true)}
             >
               {ticket.description ? (
-                <p
-                  className="whitespace-pre-wrap text-sm"
-                  style={{ color: 'var(--color-text-primary)' }}
-                >
-                  {ticket.description}
-                </p>
+                <InlineMarkdown content={ticket.description} />
               ) : (
                 <p className="text-sm italic" style={{ color: 'var(--color-text-tertiary)' }}>
                   Click to add a description...
