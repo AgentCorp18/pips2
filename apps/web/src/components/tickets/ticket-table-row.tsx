@@ -103,7 +103,7 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
         )}
       </TableCell>
       <TableCell className="text-sm" onClick={navigate}>
-        {ticket.dueDate ? <FormattedDate date={ticket.dueDate} fallback="--" /> : '--'}
+        {ticket.dueDate ? <FormattedDate date={ticket.dueDate} showTime={false} fallback="--" /> : '--'}
       </TableCell>
       <TableCell className="text-sm text-muted-foreground" onClick={navigate}>
         <FormattedDate date={ticket.createdAt} />

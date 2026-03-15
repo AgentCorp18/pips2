@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { format, parseISO } from 'date-fns'
+import { format, parse } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -32,7 +32,9 @@ export const DatePicker = ({
   const [internalValue, setInternalValue] = React.useState(defaultValue ?? '')
   const value = controlledValue !== undefined ? controlledValue : internalValue
 
-  const date = value ? parseISO(value) : undefined
+  // parse() with a format string interprets the date in local time, avoiding
+  // the UTC-midnight timezone shift that parseISO() causes for YYYY-MM-DD strings.
+  const date = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined
 
   const handleSelect = (day: Date | undefined) => {
     const formatted = day ? format(day, 'yyyy-MM-dd') : ''
