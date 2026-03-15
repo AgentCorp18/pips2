@@ -486,7 +486,7 @@ type FormRowProps = {
 
 const FormRow = ({ form, projectId, stepNumber, started, recommended }: FormRowProps) => (
   <Link
-    href={`/projects/${projectId}/steps/${stepNumber}/forms/${form.type}`}
+    href={`/projects/${projectId}/steps/${stepNumber}/forms/${form.slug ?? form.type}`}
     data-testid={`form-link-${form.type}`}
     className={cn(
       'flex items-center justify-between rounded-[var(--radius-md)] border px-4 py-3 transition-all hover:bg-[var(--color-surface-secondary)]',

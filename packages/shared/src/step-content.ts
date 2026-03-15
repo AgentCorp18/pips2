@@ -9,6 +9,8 @@ import type { PipsStepNumber } from './constants'
 
 export type StepFormDef = {
   type: string
+  /** URL slug for the form route. Defaults to `type` if not set. */
+  slug?: string
   name: string
   description: string
   required: boolean
@@ -68,6 +70,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
       },
       {
         type: 'list_reduction',
+        slug: 'list-reduction',
         name: 'List Reduction',
         description:
           'Narrow a long list of candidate problems to a manageable shortlist through structured elimination',
@@ -76,6 +79,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
       },
       {
         type: 'weighted_voting',
+        slug: 'weighted-voting',
         name: 'Weighted Voting',
         description: 'Prioritize options by distributing a fixed number of votes across candidates',
         required: false,
@@ -275,6 +279,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
     forms: [
       {
         type: 'criteria_matrix',
+        slug: 'criteria-matrix',
         name: 'Criteria Matrix',
         description: 'Score and rank solutions against weighted criteria',
         required: true,
@@ -296,6 +301,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
       },
       {
         type: 'implementation_plan',
+        slug: 'implementation-plan',
         name: 'Implementation Plan',
         description: 'Timeline, resources, milestones, and risk mitigation',
         required: true,
@@ -360,6 +366,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
     forms: [
       {
         type: 'milestone_tracker',
+        slug: 'milestone-tracker',
         name: 'Milestone Tracker',
         description: 'Track progress against planned milestones and dates',
         required: true,
@@ -367,6 +374,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
       },
       {
         type: 'implementation_checklist',
+        slug: 'implementation-checklist',
         name: 'Implementation Checklist',
         description: 'Detailed task checklist with status and owners',
         required: false,
@@ -417,6 +425,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
     forms: [
       {
         type: 'before_after',
+        slug: 'before-after',
         name: 'Before & After Comparison',
         description: 'Compare baseline metrics with post-implementation results',
         required: true,
@@ -431,6 +440,7 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
       },
       {
         type: 'lessons_learned',
+        slug: 'lessons-learned',
         name: 'Lessons Learned',
         description: 'Document insights, successes, and areas for improvement',
         required: false,
