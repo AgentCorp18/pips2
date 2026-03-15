@@ -214,9 +214,9 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
 
             {/* Empty state */}
             {showEmptyState && (
-              <Command.Empty className="px-3 py-6 text-center text-sm text-[var(--color-text-tertiary)]">
+              <div className="px-3 py-6 text-center text-sm text-[var(--color-text-tertiary)]">
                 No results found
-              </Command.Empty>
+              </div>
             )}
 
             {/* Search results grouped by type */}
