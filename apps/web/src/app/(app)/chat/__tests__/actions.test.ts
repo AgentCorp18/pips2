@@ -35,13 +35,18 @@ const createChainForIndex = (idx: number) => {
 
 const mockGetUser = vi.fn()
 
-const { mockGetCurrentOrg } = vi.hoisted(() => ({
+const { mockGetCurrentOrg, mockRequirePermission } = vi.hoisted(() => ({
   mockGetCurrentOrg: vi.fn(),
+  mockRequirePermission: vi.fn(),
 }))
 
 vi.mock('@/lib/get-current-org', () => ({
   getCurrentOrg: (...args: unknown[]) => mockGetCurrentOrg(...args),
   ORG_COOKIE_NAME: 'pips-org-id',
+}))
+
+vi.mock('@/lib/permissions', () => ({
+  requirePermission: (...args: unknown[]) => mockRequirePermission(...args),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -443,6 +448,7 @@ describe('sendMessage', () => {
     fromCallIndex = 0
     fromResults = []
     mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('member')
   })
 
   it('returns error when user is not authenticated', async () => {
@@ -459,6 +465,14 @@ describe('sendMessage', () => {
 
     const result = await sendMessage('ch-1', 'Hello')
     expect(result).toEqual({ error: 'No organization context' })
+  })
+
+  it('returns error when user lacks chat.send permission', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.send'))
+
+    const result = await sendMessage('ch-1', 'Hello')
+    expect(result).toEqual({ error: 'Insufficient permissions to send messages' })
   })
 
   it('returns error when message body is empty', async () => {
@@ -559,6 +573,7 @@ describe('editMessage', () => {
     fromCallIndex = 0
     fromResults = []
     mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('member')
   })
 
   it('returns error when user is not authenticated', async () => {
@@ -566,6 +581,22 @@ describe('editMessage', () => {
 
     const result = await editMessage('msg-1', 'Updated body')
     expect(result).toEqual({ error: 'Not authenticated' })
+  })
+
+  it('returns error when user has no organization', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockGetCurrentOrg.mockResolvedValue(null)
+
+    const result = await editMessage('msg-1', 'Updated body')
+    expect(result).toEqual({ error: 'No organization context' })
+  })
+
+  it('returns error when user lacks chat.send permission', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.send'))
+
+    const result = await editMessage('msg-1', 'Updated body')
+    expect(result).toEqual({ error: 'Insufficient permissions to edit messages' })
   })
 
   it('returns error when update fails (e.g., not the author)', async () => {
@@ -601,6 +632,7 @@ describe('deleteMessage', () => {
     fromCallIndex = 0
     fromResults = []
     mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('member')
   })
 
   it('returns error when user is not authenticated', async () => {
@@ -608,6 +640,22 @@ describe('deleteMessage', () => {
 
     const result = await deleteMessage('msg-1')
     expect(result).toEqual({ error: 'Not authenticated' })
+  })
+
+  it('returns error when user has no organization', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockGetCurrentOrg.mockResolvedValue(null)
+
+    const result = await deleteMessage('msg-1')
+    expect(result).toEqual({ error: 'No organization context' })
+  })
+
+  it('returns error when user lacks chat.send permission', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.send'))
+
+    const result = await deleteMessage('msg-1')
+    expect(result).toEqual({ error: 'Insufficient permissions to delete messages' })
   })
 
   it('returns error when soft delete fails', async () => {
@@ -643,6 +691,7 @@ describe('createChannel', () => {
     fromCallIndex = 0
     fromResults = []
     mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('admin')
   })
 
   it('returns error when user is not authenticated', async () => {
@@ -659,6 +708,14 @@ describe('createChannel', () => {
 
     const result = await createChannel('custom', 'My Channel')
     expect(result).toEqual({ error: 'No organization context' })
+  })
+
+  it('returns error when user lacks chat.manage permission', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.manage'))
+
+    const result = await createChannel('custom', 'My Channel')
+    expect(result).toEqual({ error: 'Insufficient permissions to create channels' })
   })
 
   it('returns error when channel insert fails', async () => {
@@ -781,6 +838,7 @@ describe('archiveChannel', () => {
     fromCallIndex = 0
     fromResults = []
     mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('admin')
   })
 
   it('returns error when user is not authenticated', async () => {
@@ -788,6 +846,14 @@ describe('archiveChannel', () => {
 
     const result = await archiveChannel('ch-1')
     expect(result).toEqual({ error: 'Not authenticated' })
+  })
+
+  it('returns error when user lacks chat.manage permission', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.manage'))
+
+    const result = await archiveChannel('ch-1')
+    expect(result).toEqual({ error: 'Insufficient permissions to archive channels' })
   })
 
   it('returns error when archive update fails', async () => {
@@ -865,6 +931,7 @@ describe('addMembers', () => {
     fromCallIndex = 0
     fromResults = []
     mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('admin')
   })
 
   it('returns error when user is not authenticated', async () => {
@@ -872,6 +939,14 @@ describe('addMembers', () => {
 
     const result = await addMembers('ch-1', ['user-2'])
     expect(result).toEqual({ error: 'Not authenticated' })
+  })
+
+  it('returns error when user lacks chat.manage permission', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockRequirePermission.mockRejectedValue(new Error('Insufficient permissions: requires chat.manage'))
+
+    const result = await addMembers('ch-1', ['user-2'])
+    expect(result).toEqual({ error: 'Insufficient permissions to manage channel members' })
   })
 
   it('adds members successfully and returns success', async () => {
