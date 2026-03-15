@@ -28,6 +28,8 @@ import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
 import { cn } from '@/lib/utils'
 import type { ZodType } from 'zod'
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog'
 
 type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved'
 
@@ -217,18 +219,10 @@ export const FormShell = (props: FormShellProps) => {
     }
   }, [hasPendingChanges, doSave])
 
-  /* beforeunload warning — prompt when navigating away with unsaved changes */
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasPendingChanges) {
-        e.preventDefault()
-      }
-    }
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-    }
-  }, [hasPendingChanges])
+  /* Unsaved changes — beforeunload + client-side navigation dialog */
+  const { showDialog, confirmDiscard, cancelDiscard } = useUnsavedChanges({
+    isDirty: hasPendingChanges,
+  })
 
   /* BUG 2 FIX: Only show success toast when doSave actually succeeded */
   const handleManualSave = () => {
@@ -379,6 +373,13 @@ export const FormShell = (props: FormShellProps) => {
         {/* Knowledge Cadence Bar — contextual content links */}
         <KnowledgeCadenceBar context={derivedCadenceContext} defaultCollapsed />
       </div>
+
+      {/* Discard changes confirmation dialog */}
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onKeepEditing={cancelDiscard}
+      />
     </FormViewProvider>
   )
 }
