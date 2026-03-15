@@ -15,7 +15,17 @@ import {
 import { updateTicket } from '@/app/(app)/tickets/actions'
 import { DatePicker } from '@/components/ui/date-picker'
 import Link from 'next/link'
-import { Pencil, Check, X, Calendar, User, Tag, FolderKanban, ArrowUpRight } from 'lucide-react'
+import {
+  Pencil,
+  Check,
+  X,
+  Calendar,
+  User,
+  Tag,
+  FolderKanban,
+  ArrowUpRight,
+  Layers,
+} from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import { MarkdownToolbar } from '@/components/ui/markdown-toolbar'
 import { InlineMarkdown } from '@/components/ui/inline-markdown'
@@ -102,10 +112,22 @@ type ParentTicketInfo = {
   sequenceId: string
 }
 
+type OrgProject = {
+  id: string
+  title: string
+}
+
+type LinkedInitiative = {
+  id: string
+  title: string
+}
+
 type TicketDetailClientProps = {
   ticket: TicketData
   sequenceId: string
   members: OrgMember[]
+  orgProjects: OrgProject[]
+  linkedInitiative: LinkedInitiative | null
   parentTicket?: ParentTicketInfo
 }
 
@@ -117,6 +139,8 @@ export const TicketDetailClient = ({
   ticket,
   sequenceId,
   members,
+  orgProjects,
+  linkedInitiative,
   parentTicket,
 }: TicketDetailClientProps) => {
   const [isPending, startTransition] = useTransition()
@@ -389,11 +413,38 @@ export const TicketDetailClient = ({
         </SidebarField>
 
         {/* Project */}
-        {ticket.project && (
-          <SidebarField label="Project" icon={<FolderKanban size={14} />}>
-            <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-              {ticket.project.title}
-            </p>
+        <SidebarField label="Project" icon={<FolderKanban size={14} />}>
+          <Select
+            value={ticket.project?.id ?? '__none__'}
+            onValueChange={(v) => saveField('project_id', v === '__none__' ? null : v)}
+            disabled={isPending}
+          >
+            <SelectTrigger className="w-full" size="sm" data-testid="ticket-project-select">
+              <SelectValue placeholder="No project" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {orgProjects.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </SidebarField>
+
+        {/* Linked Initiative */}
+        {linkedInitiative && (
+          <SidebarField label="Initiative" icon={<Layers size={14} />}>
+            <Link
+              href={`/initiatives/${linkedInitiative.id}`}
+              className="inline-flex items-center gap-1 text-sm transition-colors hover:underline"
+              style={{ color: 'var(--color-primary)' }}
+              data-testid="ticket-linked-initiative"
+            >
+              {linkedInitiative.title}
+              <ArrowUpRight size={12} />
+            </Link>
           </SidebarField>
         )}
 

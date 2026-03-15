@@ -124,6 +124,36 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
     }
   })
 
+  // Fetch org projects for project selector
+  const { data: projectsRaw } = await supabase
+    .from('projects')
+    .select('id, title')
+    .eq('org_id', ticket.org_id)
+    .neq('status', 'archived')
+    .order('title')
+
+  const orgProjects = (projectsRaw ?? []).map((p) => ({
+    id: p.id as string,
+    title: p.title as string,
+  }))
+
+  // Fetch initiative linked to the ticket's project (if any)
+  let linkedInitiative: { id: string; title: string } | null = null
+  if (ticket.project) {
+    const projectObj = ticket.project as unknown as { id: string }
+    const { data: ipRow } = await supabase
+      .from('initiative_projects')
+      .select('initiative_id, initiatives!inner ( id, title )')
+      .eq('project_id', projectObj.id)
+      .limit(1)
+      .single()
+
+    if (ipRow) {
+      const init = ipRow.initiatives as unknown as { id: string; title: string }
+      linkedInitiative = { id: init.id, title: init.title }
+    }
+  }
+
   // Fetch org members for assignee selector and mentions
   const { data: membersRaw } = await supabase
     .from('org_members')
@@ -228,6 +258,8 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         ticket={ticketData}
         sequenceId={sequenceId}
         members={members}
+        orgProjects={orgProjects}
+        linkedInitiative={linkedInitiative}
         parentTicket={
           parentData && parentSequenceId
             ? { id: parentData.id, title: parentData.title, sequenceId: parentSequenceId }
