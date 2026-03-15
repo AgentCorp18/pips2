@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Building2, Users, Bell, ScrollText, Shield, Crown } from 'lucide-react'
+import { Building2, Users, Bell, ScrollText, Shield, Crown, KeyRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { OrgRole } from '@/stores/org-store'
 
@@ -11,6 +11,7 @@ const SETTINGS_NAV_ITEMS = [
   { label: 'Members', href: '/settings/members', icon: Users, adminOnly: false },
   { label: 'Notifications', href: '/settings/notifications', icon: Bell, adminOnly: false },
   { label: 'Security', href: '/settings/security', icon: Shield, adminOnly: false },
+  { label: 'Permissions', href: '/settings/permissions', icon: KeyRound, adminOnly: true },
   { label: 'Audit Log', href: '/settings/audit-log', icon: ScrollText, adminOnly: true },
   { label: 'Admin', href: '/settings/admin', icon: Crown, adminOnly: true },
 ]
@@ -24,7 +25,10 @@ export const SettingsNav = ({ role }: SettingsNavProps) => {
   const pathname = usePathname()
 
   return (
-    <nav className="mb-6 flex gap-1 overflow-x-auto border-b border-[var(--color-border)]" style={{ scrollbarWidth: 'none' }}>
+    <nav
+      className="mb-6 flex gap-1 overflow-x-auto border-b border-[var(--color-border)]"
+      style={{ scrollbarWidth: 'none' }}
+    >
       {SETTINGS_NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
         const Icon = item.icon
         const isActive =

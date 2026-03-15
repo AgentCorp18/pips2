@@ -77,6 +77,19 @@ describe('SettingsNav', () => {
     expect(membersLink?.className).toContain('border-[var(--color-primary)]')
   })
 
+  it('hides Permissions link for non-admin', () => {
+    render(<SettingsNav />)
+    expect(screen.queryByText('Permissions')).toBeNull()
+  })
+
+  it('renders Permissions link for admin', () => {
+    render(<SettingsNav role="admin" />)
+    expect(screen.getByText('Permissions')).toBeTruthy()
+    expect(screen.getByText('Permissions').closest('a')?.getAttribute('href')).toBe(
+      '/settings/permissions',
+    )
+  })
+
   it('hides Admin link for non-admin', () => {
     render(<SettingsNav />)
     expect(screen.queryByText('Admin')).toBeNull()
