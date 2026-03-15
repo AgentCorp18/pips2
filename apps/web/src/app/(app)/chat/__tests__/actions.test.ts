@@ -85,6 +85,7 @@ import {
   archiveChannel,
   markChannelRead,
   addMembers,
+  removeMember,
   getOrgMembers,
 } from '../actions'
 
@@ -876,9 +877,11 @@ describe('addMembers', () => {
   it('adds members successfully and returns success', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // chat_channel_members upsert for user-2
+      // admin: chat_channels select (org verification)
+      { data: { org_id: 'org-1' }, error: null },
+      // admin: chat_channel_members upsert for user-2
       { data: null, error: null },
-      // chat_channel_members upsert for user-3
+      // admin: chat_channel_members upsert for user-3
       { data: null, error: null },
     ]
 
@@ -888,10 +891,89 @@ describe('addMembers', () => {
 
   it('adds zero members and returns success', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = []
+    fromResults = [
+      // admin: chat_channels select (org verification)
+      { data: { org_id: 'org-1' }, error: null },
+    ]
 
     const result = await addMembers('ch-1', [])
     expect(result).toEqual({})
+  })
+
+  it('returns error when channel is not found or not in org', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // admin: chat_channels select — channel not found
+      { data: null, error: null },
+    ]
+
+    const result = await addMembers('ch-1', ['user-2'])
+    expect(result).toEqual({ error: 'Channel not found' })
+  })
+})
+
+/* ============================================================
+   removeMember
+   ============================================================ */
+
+describe('removeMember', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    fromCallIndex = 0
+    fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+  })
+
+  it('returns error when user is not authenticated', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const result = await removeMember('ch-1', 'user-2')
+    expect(result).toEqual({ error: 'Not authenticated' })
+  })
+
+  it('returns error when user has no organization', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockGetCurrentOrg.mockResolvedValue(null)
+
+    const result = await removeMember('ch-1', 'user-2')
+    expect(result).toEqual({ error: 'No organization context' })
+  })
+
+  it('returns error when channel is not found or not in org', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // admin: chat_channels select — not found
+      { data: null, error: null },
+    ]
+
+    const result = await removeMember('ch-1', 'user-2')
+    expect(result).toEqual({ error: 'Channel not found' })
+  })
+
+  it('removes a member successfully', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // admin: chat_channels select (org verification)
+      { data: { org_id: 'org-1' }, error: null },
+      // admin: chat_channel_members delete
+      { data: null, error: null },
+    ]
+
+    const result = await removeMember('ch-1', 'user-2')
+    expect(result).toEqual({})
+  })
+
+  it('returns error when delete fails', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // admin: chat_channels select (org verification)
+      { data: { org_id: 'org-1' }, error: null },
+      // admin: chat_channel_members delete — fails
+      { data: null, error: { message: 'DB error' } },
+    ]
+
+    const result = await removeMember('ch-1', 'user-2')
+    expect(result).toEqual({ error: 'Failed to remove member' })
   })
 })
 

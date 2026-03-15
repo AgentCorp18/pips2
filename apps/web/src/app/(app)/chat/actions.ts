@@ -418,13 +418,36 @@ export const archiveChannel = async (channelId: string): Promise<ActionResult> =
    ============================================================ */
 
 export const addMembers = async (channelId: string, userIds: string[]): Promise<ActionResult> => {
-  const { supabase, user } = await getAuthContext()
+  const { user, orgId } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization context' }
+
+  let admin: ReturnType<typeof createAdminClient>
+  try {
+    admin = createAdminClient()
+  } catch {
+    return { error: 'Server configuration error' }
+  }
+
+  // Verify the channel belongs to the user's org
+  const { data: channel } = await admin
+    .from('chat_channels')
+    .select('org_id')
+    .eq('id', channelId)
+    .single()
+
+  if (!channel || channel.org_id !== orgId) {
+    return { error: 'Channel not found' }
+  }
 
   for (const userId of userIds) {
-    await supabase
+    const { error } = await admin
       .from('chat_channel_members')
       .upsert({ channel_id: channelId, user_id: userId }, { onConflict: 'channel_id,user_id' })
+
+    if (error) {
+      console.error('Failed to add member', userId, ':', error.message)
+    }
   }
 
   return {}
@@ -558,6 +581,47 @@ export const generateSummary = async (channelId: string): Promise<ActionResult<C
     console.error('AI summary failed:', err)
     return { error: 'Failed to generate summary' }
   }
+}
+
+/* ============================================================
+   removeMember — Remove a member from a channel (admin only)
+   ============================================================ */
+
+export const removeMember = async (channelId: string, userId: string): Promise<ActionResult> => {
+  const { user, orgId } = await getAuthContext()
+  if (!user) return { error: 'Not authenticated' }
+  if (!orgId) return { error: 'No organization context' }
+
+  let admin: ReturnType<typeof createAdminClient>
+  try {
+    admin = createAdminClient()
+  } catch {
+    return { error: 'Server configuration error' }
+  }
+
+  // Verify the channel belongs to the user's org
+  const { data: channel } = await admin
+    .from('chat_channels')
+    .select('org_id')
+    .eq('id', channelId)
+    .single()
+
+  if (!channel || channel.org_id !== orgId) {
+    return { error: 'Channel not found' }
+  }
+
+  const { error } = await admin
+    .from('chat_channel_members')
+    .delete()
+    .eq('channel_id', channelId)
+    .eq('user_id', userId)
+
+  if (error) {
+    console.error('Failed to remove member:', error.message)
+    return { error: 'Failed to remove member' }
+  }
+
+  return {}
 }
 
 /* ============================================================

@@ -17,14 +17,23 @@ import {
   editMessage,
   deleteMessage,
   getMessages,
+  getChannel,
   markChannelRead,
   generateSummary,
 } from '../actions'
 import type { ChatChannel, ChatMessage, ChatSummary } from '@/stores/chat-store'
 
+type ChannelMember = {
+  user_id: string
+  display_name: string
+  avatar_url: string | null
+  joined_at: string
+  muted: boolean
+}
+
 type Props = {
   channel: ChatChannel
-  members: { user_id: string; display_name: string; avatar_url: string | null }[]
+  members: ChannelMember[]
   initialMessages: ChatMessage[]
   initialHasMore: boolean
   initialChannels: (ChatChannel & { unread_count?: number })[]
@@ -32,7 +41,7 @@ type Props = {
 
 export const ChannelViewClient = ({
   channel,
-  members,
+  members: initialMembers,
   initialMessages,
   initialHasMore,
   initialChannels,
@@ -43,6 +52,7 @@ export const ChannelViewClient = ({
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [summary, setSummary] = useState<ChatSummary | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [members, setMembers] = useState<ChannelMember[]>(initialMembers)
 
   // Get current user ID from Supabase client
   useEffect(() => {
@@ -69,6 +79,14 @@ export const ChannelViewClient = ({
   useChatRealtime(channel.id, currentUserId)
 
   const channelMessages = messages[channel.id] ?? initialMessages
+
+  // Re-fetch member list after add/remove
+  const handleMembersChanged = useCallback(async () => {
+    const result = await getChannel(channel.id)
+    if (result.data) {
+      setMembers(result.data.members)
+    }
+  }, [channel.id])
 
   // Load more messages
   const handleLoadMore = useCallback(async () => {
@@ -124,6 +142,7 @@ export const ChannelViewClient = ({
   }, [channel.id])
 
   const canSend = can('chat.send')
+  const canManage = can('chat.manage')
 
   return (
     <>
@@ -145,8 +164,10 @@ export const ChannelViewClient = ({
 
         <ChatChannelHeader
           channel={channel}
-          memberCount={members.length}
+          members={members}
+          canManage={canManage}
           onGenerateSummary={handleGenerateSummary}
+          onMembersChanged={() => void handleMembersChanged()}
         />
 
         {summary && <ChatSummaryPanel summary={summary} onClose={() => setSummary(null)} />}
