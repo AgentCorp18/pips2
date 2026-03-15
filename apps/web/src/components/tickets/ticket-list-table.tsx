@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react'
 import { SortableHeader, type SortDirection } from '@/components/ui/sortable-header'
 import { BulkActionsBar } from './bulk-actions-bar'
 import { TicketTableRow } from './ticket-table-row'
@@ -45,6 +45,7 @@ export const TicketListTable = ({
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [isFullScreen, setIsFullScreen] = useState(false)
 
   const allSelected = tickets.length > 0 && selectedIds.size === tickets.length
   const someSelected = selectedIds.size > 0 && !allSelected
@@ -96,7 +97,26 @@ export const TicketListTable = ({
   const currentDirection: SortDirection = sortOrder === 'asc' ? 'asc' : 'desc'
 
   return (
-    <div>
+    <div
+      className={
+        isFullScreen
+          ? 'fixed inset-0 z-50 flex flex-col overflow-auto bg-[var(--color-bg)] p-4'
+          : ''
+      }
+      data-testid="ticket-list-table-container"
+    >
+      <div className="mb-2 flex items-center justify-end gap-2">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => setIsFullScreen(!isFullScreen)}
+          aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
+          data-testid="table-fullscreen-toggle"
+        >
+          {isFullScreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+        </Button>
+      </div>
+
       {selectedIds.size > 0 && (
         <BulkActionsBar selectedIds={Array.from(selectedIds)} onClear={clearSelection} />
       )}
@@ -194,6 +214,8 @@ export const TicketListTable = ({
                 onSort={handleSort}
                 className="hidden lg:table-cell"
               />
+              {/* Mobile expand column header */}
+              <TableHead className="sm:hidden w-8" />
             </TableRow>
           </TableHeader>
           <TableBody>
