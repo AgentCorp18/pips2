@@ -18,26 +18,26 @@ A platform where Marc can onboard a new user, have them create an org, run a PIP
 
 | #   | Item                                                           | Category | Status      |
 | --- | -------------------------------------------------------------- | -------- | ----------- |
-| 1   | Default "General" channel on org creation                      | Bug      | In Progress |
-| 2   | Mobile scrolling issues                                        | Bug      | In Progress |
-| 3   | Mobile UI polish (touch targets, responsive layouts)           | UX       | In Progress |
+| 1   | Default "General" channel on org creation                      | Bug      | Complete    |
+| 2   | Mobile scrolling issues                                        | Bug      | Complete    |
+| 3   | Mobile UI polish (touch targets, responsive layouts)           | UX       | Complete    |
 | 4   | Replace in-memory rate limiter with Upstash Redis              | Security | Not Started |
 | 5   | Stripe billing integration (checkout, subscriptions, webhooks) | Revenue  | Not Started |
 | 6   | Legal review of Privacy Policy and Terms                       | Legal    | Not Started |
-| 7   | E2E test coverage for all CEO-reported flows                   | Testing  | In Progress |
+| 7   | E2E test coverage for all CEO-reported flows                   | Testing  | Complete    |
 
 #### High Priority (Should Fix)
 
 | #   | Item                                                       | Category    | Status      |
 | --- | ---------------------------------------------------------- | ----------- | ----------- |
-| 8   | Form "Discard Changes" dialog when navigating away unsaved | UX          | Not Started |
+| 8   | Form "Discard Changes" dialog when navigating away unsaved | UX          | Complete    |
 | 9   | File attachments on tickets and forms                      | Feature Gap | Not Started |
 | 10  | Rich text editing in ticket descriptions                   | Feature Gap | Not Started |
 | 11  | Email notifications (beyond in-app) via Resend             | Feature Gap | Not Started |
 | 12  | Onboarding funnel instrumentation (signup → first project) | Analytics   | Not Started |
 | 13  | Core Web Vitals monitoring via Vercel Speed Insights       | Performance | Not Started |
 | 14  | jspdf upgrade v2 → v4                                      | Tech Debt   | Not Started |
-| 15  | Comprehensive error boundaries on all route segments       | Reliability | Partial     |
+| 15  | Comprehensive error boundaries on all route segments       | Reliability | Complete    |
 
 #### Medium Priority (Nice to Have)
 
