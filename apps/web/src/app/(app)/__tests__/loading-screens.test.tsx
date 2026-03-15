@@ -8,6 +8,9 @@ import TicketsLoading from '../../(app)/tickets/loading'
 import TeamsLoading from '../../(app)/teams/loading'
 import AuditLogLoading from '../../(app)/settings/audit-log/loading'
 import NotificationPreferencesLoading from '../../(app)/settings/notifications/loading'
+import ChatLoading from '../../(app)/chat/loading'
+import ChannelLoading from '../../(app)/chat/[channelId]/loading'
+import SettingsLoading from '../../(app)/settings/loading'
 
 describe('Loading screens', () => {
   it('renders ProjectsLoading', () => {
@@ -48,5 +51,20 @@ describe('Loading screens', () => {
   it('renders NotificationPreferencesLoading', () => {
     const { container } = render(<NotificationPreferencesLoading />)
     expect(container.firstChild).toBeTruthy()
+  })
+
+  it('renders ChatLoading with aria-label', () => {
+    const { container } = render(<ChatLoading />)
+    expect(container.querySelector('[aria-label="Loading chat"]')).toBeTruthy()
+  })
+
+  it('renders ChannelLoading with aria-label', () => {
+    const { container } = render(<ChannelLoading />)
+    expect(container.querySelector('[aria-label="Loading channel"]')).toBeTruthy()
+  })
+
+  it('renders SettingsLoading with aria-label', () => {
+    const { container } = render(<SettingsLoading />)
+    expect(container.querySelector('[aria-label="Loading settings"]')).toBeTruthy()
   })
 })
