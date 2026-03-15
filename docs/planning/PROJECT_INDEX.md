@@ -1,9 +1,9 @@
 # PIPS 2.0 — Project Planning Index
 
-> **Version:** 1.3 — Updated 2026-03-12
+> **Version:** 2.0 — Updated 2026-03-15
 > **Created:** March 3, 2026
 > **Owner:** Project Manager Agent (Control Tower)
-> **Status:** All Phases 0-6 COMPLETE — Phase 7 (Beta Launch) IN PROGRESS
+> **Status:** All Phases 0-10 COMPLETE — Production, CEO bug fix sprints ongoing
 > **Product Name:** PIPS (Process Improvement and Problem Solving)
 > **Owner (Human):** Marc Albers (GitHub: AgentCorp18)
 > **Production URL:** https://pips-app.vercel.app
@@ -24,18 +24,21 @@ Tech Stack: Next.js 16 + TypeScript (strict) + Supabase + Vercel + Tailwind v4 +
 
 ## Current Build Status
 
-| Metric          | Value                                                   |
-| --------------- | ------------------------------------------------------- |
-| Unit tests      | 2,400+ passing (212+ files)                             |
-| E2E tests       | 41+ test cases, 7 spec files (in `apps/web/tests/e2e/`) |
-| Type errors     | 0                                                       |
-| Lint errors     | 0                                                       |
-| PIPS forms      | 18 interactive methodology forms                        |
-| DB migrations   | 13 applied to production                                |
-| Content nodes   | 205 seeded (FTS active)                                 |
-| Training data   | 4 paths, 27 modules, 59 exercises                       |
-| Marketing pages | 83+ SEO pages                                           |
-| Production      | Live since March 3, 2026                                |
+| Metric          | Value                                                  |
+| --------------- | ------------------------------------------------------ |
+| Unit tests      | 2,794 passing (235 files)                              |
+| E2E tests       | 68 test cases, 7 spec files (in `apps/web/tests/e2e/`) |
+| Type errors     | 0                                                      |
+| Lint errors     | 0                                                      |
+| PIPS forms      | 18 interactive methodology forms                       |
+| DB migrations   | 17 applied to production                               |
+| Content nodes   | 205 seeded (FTS active)                                |
+| Training data   | 4 paths, 27 modules, 59 exercises                      |
+| Marketing pages | 83+ SEO pages                                          |
+| Chat channels   | Real-time team chat with Supabase Realtime             |
+| Initiatives     | Strategic initiatives with weighted project progress   |
+| CEO tickets     | 16 filed, 13 resolved (3 in progress)                  |
+| Production      | Live since March 3, 2026                               |
 
 ### Phase Completion
 
@@ -51,7 +54,11 @@ Tech Stack: Next.js 16 + TypeScript (strict) + Supabase + Vercel + Tailwind v4 +
 | Phase 4 (Marketing Content + SEO)   | COMPLETE    | `f493409`, `79acef7`                                    |
 | Phase 5 (Workshop Facilitation)     | COMPLETE    | `f910c5b`, `29d9bcf`, `2cf29ec`                         |
 | Phase 6 (Polish & Quality)          | COMPLETE    | All WPs complete — Lighthouse + Final Gate done (PR #7) |
-| Phase 7 (Beta Launch)               | IN PROGRESS | P0 items 1-4 complete, smoke test + Sentry pending      |
+| Phase 7 (Beta Launch)               | COMPLETE    | P0 all complete, Sentry configured, smoke test done     |
+| Phase 8 (UX & Methodology Clarity)  | COMPLETE    | PRs #14-#18 merged (2026-03-13)                         |
+| Phase 9 (Content, UX & Team Chat)   | COMPLETE    | PR #22 merged, chat migration applied (2026-03-14)      |
+| Phase 10 (Skills & Initiatives)     | COMPLETE    | Initiatives, CEO Request type, Claude Code skills       |
+| CEO Bug Fix Sprints                 | IN PROGRESS | 13/16 tickets resolved, 3 in progress (2026-03-15)      |
 
 ---
 

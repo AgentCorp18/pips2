@@ -1,7 +1,7 @@
 # PIPS 2.0 — Final Project Plan
 
-**Last Updated:** March 13, 2026
-**Status:** Beta-Ready — All P0 complete, Phase 8 UX complete, 2,509 tests, docs refreshed
+**Last Updated:** March 15, 2026
+**Status:** Production — All phases through 10 complete, 2,794+ tests, 16 CEO tickets resolved, chat + initiatives live
 **Live:** pips-app.vercel.app
 
 ---
@@ -10,14 +10,16 @@
 
 | Metric                         | Value                                             |
 | ------------------------------ | ------------------------------------------------- |
-| Unit tests                     | 2,509 passing (219 files)                         |
+| Unit tests                     | 2,794 passing (235 files)                         |
 | E2E tests                      | 68 passing, 64 skipped (auth-gated), 7 spec files |
 | Type errors                    | 0                                                 |
 | Lint errors                    | 0 (0 warnings)                                    |
-| PRs merged                     | #6-#18 (all merged)                               |
-| Phases complete                | MVP + 1.5 through 8                               |
+| PRs merged                     | #6-#23 (all merged)                               |
+| Phases complete                | MVP + 1.5 through 10 + CEO bug fix sprints        |
 | Critical security issues fixed | 5 of 5                                            |
 | P1 security issues fixed       | 11 of 11                                          |
+| CEO Request tickets resolved   | 13 of 16 (3 in progress)                          |
+| DB migrations applied          | 17 (production)                                   |
 
 ---
 
@@ -103,7 +105,63 @@
 
 ---
 
-## Phase 9: Revenue Path (Beta + 60-90 days)
+## Phase 9: Content, UX & Team Chat — COMPLETE (2026-03-14)
+
+**Implemented in PR #22:**
+
+| Sprint                | Items                                                                                                   | Status |
+| --------------------- | ------------------------------------------------------------------------------------------------------- | ------ |
+| 1. Content Alignment  | 8 content divergences resolved across book, guide, workbook, workshop, step-content sources             | DONE   |
+| 2. Visual Consistency | Color audit, card layouts, form consistency, responsive behavior                                        | DONE   |
+| 3. UX Polish          | Breadcrumbs, Cmd+K expanded to 12 actions, back navigation, empty states                                | DONE   |
+| 4. Team Chat          | Real-time chat with channels, DMs, AI summaries, @mentions, notification integration, Supabase Realtime | DONE   |
+
+Chat tables: `chat_channels`, `chat_channel_members`, `chat_messages`, `chat_summaries` — all with RLS via SECURITY DEFINER functions.
+
+---
+
+## Phase 10: Skills & Initiatives — COMPLETE (2026-03-14)
+
+| Item                                     | Status |
+| ---------------------------------------- | ------ |
+| Initiatives DB tables + RLS              | DONE   |
+| Full CRUD server actions                 | DONE   |
+| Weighted progress by project priority    | DONE   |
+| UI: list, create, detail, edit pages     | DONE   |
+| Sidebar nav + command palette            | DONE   |
+| CEO Request ticket type                  | DONE   |
+| Auto-escalation to critical priority     | DONE   |
+| Org-scoping bug fix (getCurrentOrg)      | DONE   |
+| 6 Claude Code step skills                | DONE   |
+| 11 Claude Code form skills               | DONE   |
+| Test suites: chat (51), initiatives (83) | DONE   |
+
+---
+
+## CEO Bug Fix Sprints — COMPLETE (2026-03-15)
+
+**16 CEO Request tickets triaged and resolved through PIPS methodology:**
+
+| Ticket                   | Fix                                         | Status      |
+| ------------------------ | ------------------------------------------- | ----------- |
+| Channel not found error  | Fixed getCurrentOrg pattern in chat actions | DONE        |
+| Cannot edit ticket type  | Added Type select to ticket detail sidebar  | DONE        |
+| Full-width tables        | Changed table containers to max-w-full px-4 | DONE        |
+| Add time to dates        | FormattedDate component with showTime prop  | DONE        |
+| Priority auto-escalation | Fixed to not override explicit priority     | DONE        |
+| Chat RLS permissions     | Migration adding 'member' role to policies  | DONE        |
+| Due date timezone        | parseDateForDisplay() for local midnight    | DONE        |
+| Back button navigation   | router.replace() for filter/sort state      | DONE        |
+| Board swimlane flip      | Status rows x Step columns                  | DONE        |
+| CEO Request filter       | Added ceo_request to ALL_TYPES              | DONE        |
+| Chat mobile              | Single-panel layout, touch targets          | DONE        |
+| Failed to create channel | In progress — onboarding channel creation   | IN PROGRESS |
+| Mobile UI/UX             | In progress — responsive polish             | IN PROGRESS |
+| Mobile scrolling         | In progress — scroll container fixes        | IN PROGRESS |
+
+---
+
+## Next: Revenue Path (Beta + 60-90 days)
 
 **Entry:** Beta exit criteria met, pricing decisions made
 **Exit Criteria:** First paying customer, billing infrastructure operational
@@ -155,7 +213,7 @@ All changes must pass before merge:
 
 1. `pnpm tsc --noEmit` — zero type errors
 2. `pnpm lint` — zero lint errors
-3. `pnpm test` — all 2,509+ tests pass
+3. `pnpm test` — all 2,794+ tests pass
 4. `pnpm build` — production build succeeds
 5. PR review (agent or human)
 
@@ -169,5 +227,6 @@ All changes must pass before merge:
 | `docs/planning/2026-03-12-plan-review.md`    | Plan-vs-reality audit — 15+ outdated refs   |
 | `docs/work-log/2026-03-12-lighthouse.md`     | Lighthouse audit results — 13 fixes applied |
 | `docs/testing/SMOKE_TEST_CHECKLIST.md`       | Manual smoke test procedure                 |
-| `docs/planning/PRODUCT_ROADMAP.md`           | Original product roadmap (needs refresh)    |
-| `docs/planning/FULL_PROJECT_PLAN.md`         | Detailed project plan (needs refresh)       |
+| `docs/planning/PRODUCT_ROADMAP.md`           | Original product roadmap                    |
+| `docs/planning/FULL_PROJECT_PLAN.md`         | Detailed project plan                       |
+| `docs/planning/PIPS_VISION.md`               | Strategic vision & future roadmap           |
