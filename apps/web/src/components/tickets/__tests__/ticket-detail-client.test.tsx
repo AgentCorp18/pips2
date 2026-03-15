@@ -34,41 +34,55 @@ const mockMembers = [
   { user_id: 'u-2', display_name: 'Bob Jones' },
 ]
 
+const mockOrgProjects = [
+  { id: 'p-1', title: 'Auth Redesign' },
+  { id: 'p-2', title: 'Dashboard V2' },
+]
+
+const mockLinkedInitiative = { id: 'init-1', title: 'Q2 Security Push' }
+
+const defaultProps = {
+  sequenceId: 'TKT-001',
+  members: mockMembers,
+  orgProjects: mockOrgProjects,
+  linkedInitiative: null as { id: string; title: string } | null,
+}
+
 describe('TicketDetailClient', () => {
   it('renders ticket sequence ID', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('TKT-001')).toBeTruthy()
   })
 
   it('renders ticket title', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('Fix login bug')).toBeTruthy()
   })
 
   it('renders status badge', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     const matches = screen.getAllByText('In Progress')
     expect(matches.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders priority badge', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     const matches = screen.getAllByText('High')
     expect(matches.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders Description heading', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('Description')).toBeTruthy()
   })
 
   it('renders description text', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('Users cannot log in on mobile')).toBeTruthy()
   })
 
   it('renders sidebar field labels', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('Status')).toBeTruthy()
     expect(screen.getByText('Priority')).toBeTruthy()
     expect(screen.getByText('Assignee')).toBeTruthy()
@@ -77,18 +91,18 @@ describe('TicketDetailClient', () => {
   })
 
   it('renders reporter name', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('Bob Jones')).toBeTruthy()
   })
 
   it('renders project name', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('Project')).toBeTruthy()
     expect(screen.getByText('Auth Redesign')).toBeTruthy()
   })
 
   it('renders tags', () => {
-    render(<TicketDetailClient ticket={mockTicket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
     expect(screen.getByText('Tags')).toBeTruthy()
     expect(screen.getByText('auth')).toBeTruthy()
     expect(screen.getByText('mobile')).toBeTruthy()
@@ -96,19 +110,42 @@ describe('TicketDetailClient', () => {
 
   it('renders empty description placeholder when null', () => {
     const ticket = { ...mockTicket, description: null }
-    render(<TicketDetailClient ticket={ticket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={ticket} {...defaultProps} />)
     expect(screen.getByText('Click to add a description...')).toBeTruthy()
   })
 
-  it('hides project section when no project', () => {
+  it('renders project select dropdown', () => {
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
+    expect(screen.getByTestId('ticket-project-select')).toBeTruthy()
+  })
+
+  it('shows "None" when no project assigned', () => {
     const ticket = { ...mockTicket, project: null }
-    render(<TicketDetailClient ticket={ticket} sequenceId="TKT-001" members={mockMembers} />)
-    expect(screen.queryByText('Auth Redesign')).toBeNull()
+    render(<TicketDetailClient ticket={ticket} {...defaultProps} />)
+    expect(screen.getByTestId('ticket-project-select')).toBeTruthy()
+  })
+
+  it('renders linked initiative when present', () => {
+    render(
+      <TicketDetailClient
+        ticket={mockTicket}
+        {...defaultProps}
+        linkedInitiative={mockLinkedInitiative}
+      />,
+    )
+    expect(screen.getByText('Initiative')).toBeTruthy()
+    expect(screen.getByTestId('ticket-linked-initiative')).toBeTruthy()
+    expect(screen.getByText('Q2 Security Push')).toBeTruthy()
+  })
+
+  it('hides initiative section when no linked initiative', () => {
+    render(<TicketDetailClient ticket={mockTicket} {...defaultProps} />)
+    expect(screen.queryByText('Initiative')).toBeNull()
   })
 
   it('shows date picker placeholder when due_date is null', () => {
     const ticket = { ...mockTicket, due_date: null }
-    render(<TicketDetailClient ticket={ticket} sequenceId="TKT-001" members={mockMembers} />)
+    render(<TicketDetailClient ticket={ticket} {...defaultProps} />)
     expect(screen.getByText('Pick a date')).toBeTruthy()
   })
 })
