@@ -78,7 +78,7 @@ export const ChatCompose = ({ channelId, onSend, disabled }: Props) => {
           size="sm"
           onClick={() => void handleSend()}
           disabled={!draft.trim() || isSending || disabled}
-          className="h-9 w-9 shrink-0 p-0"
+          className="h-11 w-11 shrink-0 p-0"
           aria-label="Send message"
           data-testid="chat-send-button"
         >

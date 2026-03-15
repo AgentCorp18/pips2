@@ -68,7 +68,7 @@ export const ChatSidebar = ({ channels }: Props) => {
   }, [channels])
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="flex h-full w-full flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] md:w-64">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-4 py-3">
         <MessageSquare size={18} className="text-[var(--color-primary)]" />

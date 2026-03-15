@@ -34,7 +34,7 @@ export const ChatMessage = ({ message, currentUserId, onEdit, onDelete }: Props)
 
   if (isDeleted) {
     return (
-      <div className="px-4 py-1.5">
+      <div className="px-3 py-1.5 md:px-4">
         <p className="text-xs italic text-[var(--color-text-tertiary)]">This message was deleted</p>
       </div>
     )
@@ -49,7 +49,7 @@ export const ChatMessage = ({ message, currentUserId, onEdit, onDelete }: Props)
   })()
 
   return (
-    <div className="group flex gap-3 px-4 py-1.5 hover:bg-[var(--color-surface-secondary)]">
+    <div className="group flex gap-3 px-3 py-1.5 hover:bg-[var(--color-surface-secondary)] md:px-4">
       {/* Avatar */}
       <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-subtle)] text-xs font-medium text-[var(--color-primary)]">
         {message.author?.display_name?.charAt(0)?.toUpperCase() ?? '?'}

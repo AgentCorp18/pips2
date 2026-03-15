@@ -1,6 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { ChatPageClient } from '../chat-page-client'
 import { ChatChannelHeader } from '@/components/chat/chat-channel-header'
@@ -127,7 +129,20 @@ export const ChannelViewClient = ({
     <>
       <ChatPageClient initialChannels={initialChannels} />
 
+      {/* Thread panel — full-width on mobile (sidebar is hidden), flex-1 on desktop */}
       <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Mobile back button — navigates to channel list */}
+        <div className="flex items-center border-b border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 md:hidden">
+          <Link
+            href="/chat"
+            className="flex items-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+            aria-label="Back to channel list"
+          >
+            <ArrowLeft size={16} />
+            <span>Channels</span>
+          </Link>
+        </div>
+
         <ChatChannelHeader
           channel={channel}
           memberCount={members.length}

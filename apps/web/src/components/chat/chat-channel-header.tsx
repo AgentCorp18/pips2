@@ -36,12 +36,13 @@ export const ChatChannelHeader = ({ channel, memberCount, onGenerateSummary }: P
         </span>
       </div>
 
+      {/* AI Summary button — hidden on mobile to save space */}
       <Button
         variant="ghost"
         size="sm"
         onClick={() => void handleSummary()}
         disabled={isGenerating}
-        className="gap-1.5 text-xs"
+        className="hidden gap-1.5 text-xs md:flex"
       >
         {isGenerating ? (
           <>
