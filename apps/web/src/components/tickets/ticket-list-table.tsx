@@ -144,6 +144,7 @@ export const TicketListTable = ({
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}
+                className="hidden sm:table-cell"
               />
               <SortableHeader
                 label="Type"
@@ -151,6 +152,7 @@ export const TicketListTable = ({
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}
+                className="hidden md:table-cell"
               />
               <SortableHeader
                 label="Assignee"
@@ -158,6 +160,7 @@ export const TicketListTable = ({
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}
+                className="hidden sm:table-cell"
               />
               <SortableHeader
                 label="Due Date"
@@ -165,6 +168,7 @@ export const TicketListTable = ({
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}
+                className="hidden lg:table-cell"
               />
               <SortableHeader
                 label="Created"
@@ -172,6 +176,7 @@ export const TicketListTable = ({
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}
+                className="hidden xl:table-cell"
               />
               <SortableHeader
                 label="Updated"
@@ -179,6 +184,7 @@ export const TicketListTable = ({
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}
+                className="hidden xl:table-cell"
               />
               <SortableHeader
                 label="Reporter"
@@ -186,6 +192,7 @@ export const TicketListTable = ({
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}
+                className="hidden lg:table-cell"
               />
             </TableRow>
           </TableHeader>

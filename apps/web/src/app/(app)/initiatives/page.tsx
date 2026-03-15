@@ -42,8 +42,8 @@ const InitiativesPage = async () => {
   }))
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 p-6 md:p-10">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6 lg:p-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
             className="font-display text-2xl font-bold md:text-3xl"

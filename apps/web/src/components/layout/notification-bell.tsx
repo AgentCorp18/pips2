@@ -165,7 +165,7 @@ export const NotificationBell = () => {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="relative rounded-[var(--radius-md)] p-2 hover:bg-[var(--color-surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          className="relative flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-md)] p-2 hover:bg-[var(--color-surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
         >
           <Bell size={20} className="text-[var(--color-text-secondary)]" />
@@ -177,7 +177,7 @@ export const NotificationBell = () => {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-[min(320px,calc(100vw-2rem))]">
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2">
           <DropdownMenuLabel className="p-0 text-sm font-semibold">Notifications</DropdownMenuLabel>

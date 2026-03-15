@@ -242,7 +242,7 @@ export const FormShell = (props: FormShellProps) => {
     <FormViewProvider value={viewMode}>
       <div className="space-y-4">
         {/* Breadcrumb + save status bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           {isSandbox ? (
             <Link
               href="/tools"
@@ -253,8 +253,8 @@ export const FormShell = (props: FormShellProps) => {
               Back to tools
             </Link>
           ) : projectId ? (
-            <nav aria-label="Breadcrumb" data-testid="form-breadcrumb">
-              <ol className="flex items-center gap-1 text-sm">
+            <nav aria-label="Breadcrumb" data-testid="form-breadcrumb" className="min-w-0">
+              <ol className="flex flex-wrap items-center gap-1 text-sm">
                 <li>
                   <Link
                     href="/projects"
@@ -266,7 +266,7 @@ export const FormShell = (props: FormShellProps) => {
                 <li>
                   <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
                 </li>
-                <li>
+                <li className="hidden sm:block">
                   <Link
                     href={`/projects/${projectId}`}
                     className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
@@ -274,7 +274,7 @@ export const FormShell = (props: FormShellProps) => {
                     Project
                   </Link>
                 </li>
-                <li>
+                <li className="hidden sm:block">
                   <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
                 </li>
                 <li>
@@ -291,7 +291,7 @@ export const FormShell = (props: FormShellProps) => {
                 </li>
                 <li
                   aria-current="page"
-                  className="font-medium text-[var(--color-text-primary)] truncate max-w-[200px]"
+                  className="min-w-0 truncate font-medium text-[var(--color-text-primary)] max-w-[160px] sm:max-w-[200px]"
                 >
                   {title}
                 </li>
@@ -300,7 +300,7 @@ export const FormShell = (props: FormShellProps) => {
           ) : (
             <div />
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             {/* 3.2: Create Ticket button — only in project mode */}
             {!isSandbox && projectId && (
               <CreateTicketFromForm

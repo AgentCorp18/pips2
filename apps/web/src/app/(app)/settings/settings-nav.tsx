@@ -24,7 +24,7 @@ export const SettingsNav = ({ role }: SettingsNavProps) => {
   const pathname = usePathname()
 
   return (
-    <nav className="mb-6 flex gap-1 border-b border-[var(--color-border)]">
+    <nav className="mb-6 flex gap-1 overflow-x-auto border-b border-[var(--color-border)]" style={{ scrollbarWidth: 'none' }}>
       {SETTINGS_NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
         const Icon = item.icon
         const isActive =
@@ -35,13 +35,13 @@ export const SettingsNav = ({ role }: SettingsNavProps) => {
             key={item.href}
             href={item.href}
             className={cn(
-              'flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+              'flex shrink-0 items-center gap-2 border-b-2 px-2.5 py-2.5 text-sm font-medium transition-colors sm:px-4',
               isActive
                 ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
                 : 'border-transparent text-[var(--color-text-tertiary)] hover:border-[var(--color-border)] hover:text-[var(--color-text-secondary)]',
             )}
           >
-            <Icon size={16} />
+            <Icon size={16} aria-hidden="true" />
             {item.label}
           </Link>
         )

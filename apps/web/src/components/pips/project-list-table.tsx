@@ -77,6 +77,7 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
               currentSort={sortKey}
               currentDirection={sortDirection}
               onSort={handleSort}
+              className="hidden sm:table-cell"
             />
             <SortableHeader
               label="Steps Completed"
@@ -84,6 +85,7 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
               currentSort={sortKey}
               currentDirection={sortDirection}
               onSort={handleSort}
+              className="hidden md:table-cell"
             />
             <SortableHeader
               label="Owner"
@@ -91,6 +93,7 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
               currentSort={sortKey}
               currentDirection={sortDirection}
               onSort={handleSort}
+              className="hidden sm:table-cell"
             />
             <SortableHeader
               label="Target Date"
@@ -98,6 +101,7 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
               currentSort={sortKey}
               currentDirection={sortDirection}
               onSort={handleSort}
+              className="hidden lg:table-cell"
             />
             <SortableHeader
               label="Created"
@@ -105,6 +109,7 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
               currentSort={sortKey}
               currentDirection={sortDirection}
               onSort={handleSort}
+              className="hidden lg:table-cell"
             />
           </TableRow>
         </TableHeader>
@@ -127,7 +132,7 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
                     {statusConfig.label}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
                   {currentPipsStep && (
                     <div className="flex items-center gap-2">
                       <div
@@ -140,13 +145,13 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
                     </div>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <span className="text-sm">{project.stepsCompleted}/6</span>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
                   <span className="text-sm">{project.ownerName}</span>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell">
                   {project.targetDate ? (
                     <span className="text-sm">
                       <FormattedDate date={project.targetDate} />
@@ -155,7 +160,7 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
                     <span className="text-sm text-[var(--color-text-tertiary)]">-</span>
                   )}
                 </TableCell>
-                <TableCell className="text-sm text-[var(--color-text-tertiary)]">
+                <TableCell className="hidden lg:table-cell text-sm text-[var(--color-text-tertiary)]">
                   <FormattedDate date={project.createdAt} />
                 </TableCell>
               </TableRow>

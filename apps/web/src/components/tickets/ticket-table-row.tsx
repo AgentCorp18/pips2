@@ -59,7 +59,7 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
       >
         {ticket.sequenceId}
       </TableCell>
-      <TableCell className="max-w-[300px] truncate font-medium" onClick={navigate}>
+      <TableCell className="max-w-[200px] truncate font-medium md:max-w-[300px]" onClick={navigate}>
         {ticket.title}
       </TableCell>
       <TableCell onClick={navigate}>
@@ -67,7 +67,7 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
           {STATUS_CONFIG[ticket.status].label}
         </Badge>
       </TableCell>
-      <TableCell onClick={navigate}>
+      <TableCell className="hidden sm:table-cell" onClick={navigate}>
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-2.5 w-2.5 rounded-full"
@@ -76,13 +76,13 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
           <span className="text-sm">{PRIORITY_CONFIG[ticket.priority].label}</span>
         </span>
       </TableCell>
-      <TableCell onClick={navigate}>
+      <TableCell className="hidden md:table-cell" onClick={navigate}>
         <span className="flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
           {TYPE_ICONS[ticket.type]}
           <span className="text-sm">{TYPE_CONFIG[ticket.type].label}</span>
         </span>
       </TableCell>
-      <TableCell onClick={navigate}>
+      <TableCell className="hidden sm:table-cell" onClick={navigate}>
         {ticket.assigneeName ? (
           <span className="flex items-center gap-1.5 text-sm">
             {ticket.assigneeAvatar ? (
@@ -102,16 +102,16 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
           <span className="text-sm text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell className="text-sm" onClick={navigate}>
+      <TableCell className="hidden lg:table-cell text-sm" onClick={navigate}>
         {ticket.dueDate ? <FormattedDate date={ticket.dueDate} showTime={false} fallback="--" /> : '--'}
       </TableCell>
-      <TableCell className="text-sm text-muted-foreground" onClick={navigate}>
+      <TableCell className="hidden xl:table-cell text-sm text-muted-foreground" onClick={navigate}>
         <FormattedDate date={ticket.createdAt} />
       </TableCell>
-      <TableCell className="text-sm text-muted-foreground" onClick={navigate}>
+      <TableCell className="hidden xl:table-cell text-sm text-muted-foreground" onClick={navigate}>
         <FormattedDate date={ticket.updatedAt} />
       </TableCell>
-      <TableCell className="text-sm" onClick={navigate}>
+      <TableCell className="hidden lg:table-cell text-sm" onClick={navigate}>
         {ticket.reporterName ?? <span className="text-muted-foreground">--</span>}
       </TableCell>
     </TableRow>
