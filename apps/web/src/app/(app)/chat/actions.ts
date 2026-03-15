@@ -1,8 +1,7 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { getAuthContext } from '@/lib/auth-context'
 import { requirePermission } from '@/lib/permissions'
 import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
 
@@ -16,22 +15,6 @@ type ChannelWithUnread = ChatChannel & { unread_count: number }
 
 type MessageWithAuthor = ChatMessage & {
   author: { display_name: string; avatar_url: string | null }
-}
-
-/* ============================================================
-   Helper: get current user + org
-   ============================================================ */
-
-const getAuthContext = async () => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return { supabase, user: null, orgId: null }
-
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-  return { supabase, user, orgId: currentOrg?.orgId ?? null }
 }
 
 /* ============================================================

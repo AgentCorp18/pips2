@@ -38,6 +38,22 @@ const isAuthPath = (pathname: string) =>
 const isOnboardingPath = (pathname: string) =>
   pathname === '/onboarding' || pathname.startsWith('/onboarding/')
 
+/**
+ * Build a redirect response that carries any session cookies that
+ * updateSession() may have refreshed.  Without this, a redirect response
+ * (which is a brand-new NextResponse object) loses the Set-Cookie headers
+ * written by the Supabase SSR client, causing the destination page's
+ * createClient() to see no session and trigger another redirect — the
+ * classic ERR_TOO_MANY_REDIRECTS loop for new users hitting /onboarding.
+ */
+const redirectWithSession = (url: URL, supabaseResponse: NextResponse): NextResponse => {
+  const redirectResponse = NextResponse.redirect(url)
+  supabaseResponse.cookies.getAll().forEach(({ name, value }) => {
+    redirectResponse.cookies.set(name, value)
+  })
+  return redirectResponse
+}
+
 export const middleware = async (request: NextRequest) => {
   const { supabaseResponse, user, supabase } = await updateSession(request)
   const { pathname } = request.nextUrl
@@ -53,14 +69,14 @@ export const middleware = async (request: NextRequest) => {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('next', pathname)
-    return NextResponse.redirect(loginUrl)
+    return redirectWithSession(loginUrl, supabaseResponse)
   }
 
   // Redirect authenticated users away from auth pages
   if (user && isAuthPath(pathname)) {
     const dashboardUrl = request.nextUrl.clone()
     dashboardUrl.pathname = '/dashboard'
-    return NextResponse.redirect(dashboardUrl)
+    return redirectWithSession(dashboardUrl, supabaseResponse)
   }
 
   // For authenticated users on protected or onboarding paths, check org membership
@@ -79,14 +95,14 @@ export const middleware = async (request: NextRequest) => {
     if (!hasOrg && !isOnboardingPath(pathname)) {
       const onboardingUrl = request.nextUrl.clone()
       onboardingUrl.pathname = '/onboarding'
-      return NextResponse.redirect(onboardingUrl)
+      return redirectWithSession(onboardingUrl, supabaseResponse)
     }
 
     // User has an org and IS on onboarding — redirect to dashboard
     if (hasOrg && isOnboardingPath(pathname)) {
       const dashboardUrl = request.nextUrl.clone()
       dashboardUrl.pathname = '/dashboard'
-      return NextResponse.redirect(dashboardUrl)
+      return redirectWithSession(dashboardUrl, supabaseResponse)
     }
   }
 

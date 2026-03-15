@@ -232,6 +232,7 @@ export const ProjectForm = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [targetDate, setTargetDate] = useState('')
 
   useEffect(() => {
     if (state.success && state.projectId && !hasRedirected.current) {
@@ -308,6 +309,7 @@ export const ProjectForm = () => {
               {/* Hidden inputs so form always has data */}
               <input type="hidden" name="name" value={name} />
               <input type="hidden" name="description" value={description} />
+              <input type="hidden" name="target_completion_date" value={targetDate} />
 
               {/* Step 1: Name & Description */}
               {currentStep === 1 && (
@@ -372,6 +374,8 @@ export const ProjectForm = () => {
                   <DatePicker
                     id="target_completion_date"
                     name="target_completion_date"
+                    value={targetDate}
+                    onChange={setTargetDate}
                     disabled={isPending}
                     aria-describedby={
                       state.fieldErrors?.target_completion_date ? 'target-date-error' : undefined
@@ -421,6 +425,23 @@ export const ProjectForm = () => {
                         data-testid="review-description"
                       >
                         {description}
+                      </p>
+                    </div>
+                  )}
+                  {targetDate && (
+                    <div>
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: 'var(--color-text-tertiary)' }}
+                      >
+                        Target date
+                      </p>
+                      <p
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                        data-testid="review-target-date"
+                      >
+                        {targetDate}
                       </p>
                     </div>
                   )}

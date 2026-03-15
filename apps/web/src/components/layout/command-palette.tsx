@@ -17,7 +17,8 @@ import {
   MessageSquare,
   Settings,
 } from 'lucide-react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { VisuallyHidden } from 'radix-ui'
 import { globalSearch } from '@/app/(app)/search/actions'
 import type { SearchResultGroup } from '@/types/search'
 
@@ -184,6 +185,9 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent showCloseButton={false} className="overflow-hidden p-0 sm:max-w-lg">
+        <VisuallyHidden.Root>
+          <DialogTitle>Search or navigate</DialogTitle>
+        </VisuallyHidden.Root>
         <Command className="flex flex-col" shouldFilter={false} loop>
           {/* Search input */}
           <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-3">
@@ -247,8 +251,8 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                 </Command.Group>
               ))}
 
-            {/* Quick actions (shown when no search query) */}
-            {!hasQuery && (
+            {/* Quick actions (shown when no search results — includes while typing before results arrive) */}
+            {!hasResults && (
               <>
                 {(['Create', 'Navigate'] as const).map((group) => (
                   <Command.Group

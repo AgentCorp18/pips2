@@ -19,7 +19,28 @@ vi.mock('../../../dashboard/sample-project-action', () => ({
 }))
 
 vi.mock('@/components/ui/date-picker', () => ({
-  DatePicker: (props: Record<string, unknown>) => <input type="date" {...props} />,
+  DatePicker: ({
+    name,
+    id,
+    value,
+    onChange,
+    disabled,
+  }: {
+    name: string
+    id?: string
+    value?: string
+    onChange?: (val: string) => void
+    disabled?: boolean
+  }) => (
+    <input
+      type="date"
+      id={id}
+      name={name}
+      value={value ?? ''}
+      disabled={disabled}
+      onChange={(e) => onChange?.(e.target.value)}
+    />
+  ),
 }))
 
 describe('ProjectForm', () => {
@@ -126,6 +147,40 @@ describe('ProjectForm', () => {
     fireEvent.click(screen.getByTestId('step-next-button'))
     fireEvent.click(screen.getByTestId('step-back-button'))
     expect(screen.getByText('Target completion date')).toBeTruthy()
+  })
+
+  it('shows target date in review summary when a date is selected', () => {
+    const { container } = render(<ProjectForm />)
+    const nameInput = screen.getByTestId('project-name-input')
+    fireEvent.change(nameInput, { target: { value: 'Test Project' } })
+    fireEvent.click(screen.getByTestId('step-next-button'))
+    // The mock DatePicker renders as <input type="date" name="target_completion_date">
+    // We use container.querySelector to target the visible date input (not the hidden one)
+    const dateInput = container.querySelector(
+      'input[name="target_completion_date"][type="date"]',
+    ) as HTMLInputElement
+    expect(dateInput).toBeTruthy()
+    fireEvent.change(dateInput, { target: { value: '2027-01-01' } })
+    fireEvent.click(screen.getByTestId('step-next-button'))
+    expect(screen.getByTestId('review-target-date')).toHaveTextContent('2027-01-01')
+  })
+
+  it('includes target_completion_date hidden input on all steps', () => {
+    const { container } = render(<ProjectForm />)
+    const nameInput = screen.getByTestId('project-name-input')
+    fireEvent.change(nameInput, { target: { value: 'Test Project' } })
+    // Step 1 — hidden input should be present
+    const hiddenInput = container.querySelector(
+      'input[name="target_completion_date"][type="hidden"]',
+    )
+    expect(hiddenInput).toBeTruthy()
+    // Move to step 3 — hidden input should still be present
+    fireEvent.click(screen.getByTestId('step-next-button'))
+    fireEvent.click(screen.getByTestId('step-next-button'))
+    const hiddenInputOnStep3 = container.querySelector(
+      'input[name="target_completion_date"][type="hidden"]',
+    )
+    expect(hiddenInputOnStep3).toBeTruthy()
   })
 
   it('renders mode toggle with blank and template options', () => {

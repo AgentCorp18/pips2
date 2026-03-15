@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthContext } from '@/lib/auth-context'
 
 export type ProfileActionState = {
   error?: string
@@ -9,11 +9,7 @@ export type ProfileActionState = {
 }
 
 export const getProfile = async () => {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) return null
 
@@ -47,11 +43,7 @@ export const updateProfile = async (
     return { error: 'Display name must be 100 characters or fewer' }
   }
 
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in to update your profile' }
@@ -93,11 +85,7 @@ export const updateAvatarUrl = async (avatarUrl: string): Promise<ProfileActionS
     return { error: 'Invalid avatar URL' }
   }
 
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in to update your avatar' }
@@ -120,11 +108,7 @@ export const updateAvatarUrl = async (avatarUrl: string): Promise<ProfileActionS
 }
 
 export const removeAvatar = async (): Promise<ProfileActionState> => {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in to remove your avatar' }

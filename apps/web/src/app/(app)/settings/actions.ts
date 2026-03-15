@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getAuthContext } from '@/lib/auth-context'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { updateOrgSettingsSchema } from '@/lib/validations'
@@ -81,11 +82,7 @@ export const updateOrgSettings = async (
     return { fieldErrors }
   }
 
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { error: 'You must be signed in to update settings' }

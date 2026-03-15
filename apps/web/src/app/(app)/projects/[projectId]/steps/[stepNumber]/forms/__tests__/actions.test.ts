@@ -196,8 +196,8 @@ describe('saveFormData', () => {
   it('returns error when stepNumber is greater than project current_step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
-      // Project is only on step 1
-      { data: { org_id: 'org-1', current_step: 1 } },
+      // Project is only on step 1 — current_step is a pips_step enum string from the DB
+      { data: { org_id: 'org-1', current_step: 'identify' } },
     ]
 
     const result = await saveFormData(VALID_PROJECT_ID, 3, 'brainstorming', {
@@ -210,7 +210,7 @@ describe('saveFormData', () => {
 
   it('allows saving the current step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', current_step: 2 } }, { error: null }]
+    fromResults = [{ data: { org_id: 'org-1', current_step: 'analyze' } }, { error: null }]
 
     const result = await saveFormData(VALID_PROJECT_ID, 2, 'fishbone', {
       problemStatement: '',
@@ -221,7 +221,7 @@ describe('saveFormData', () => {
 
   it('allows saving a previous step', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ data: { org_id: 'org-1', current_step: 3 } }, { error: null }]
+    fromResults = [{ data: { org_id: 'org-1', current_step: 'generate' } }, { error: null }]
 
     const result = await saveFormData(VALID_PROJECT_ID, 1, 'problem_statement', {})
     expect(result).toEqual({ success: true })

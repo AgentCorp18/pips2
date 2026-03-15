@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthContext } from '@/lib/auth-context'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
@@ -16,11 +16,7 @@ export const advanceStep = async (
   projectId: string,
   stepNumber: number,
 ): Promise<StepActionResult> => {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { success: false, error: 'Not authenticated' }
@@ -108,11 +104,7 @@ export const overrideStep = async (
   projectId: string,
   stepNumber: number,
 ): Promise<StepActionResult> => {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { success: false, error: 'Not authenticated' }
@@ -188,11 +180,7 @@ export const updateProjectStatus = async (
   projectId: string,
   status: 'active' | 'completed' | 'on_hold' | 'cancelled',
 ): Promise<StepActionResult> => {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await getAuthContext()
 
   if (!user) {
     return { success: false, error: 'Not authenticated' }
