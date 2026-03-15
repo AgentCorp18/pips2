@@ -105,7 +105,7 @@ const InitiativeDetailPage = async ({ params }: Props) => {
         {initiative.target_metric && (
           <MetaCard icon={TrendingUp} label="Target Metric" value={initiative.target_metric} />
         )}
-        <MetaCard icon={User} label="Owner" value={initiative.owner.display_name} />
+        <MetaCard icon={User} label="Owner" value={initiative.owner?.display_name ?? 'Unknown'} />
         {initiative.target_end && (
           <MetaCard
             icon={Calendar}

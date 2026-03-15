@@ -47,11 +47,25 @@ const DashboardPage = async () => {
 
   const roleLabel = role as string
 
-  const [stats, stepData, activity] = await Promise.all([
-    getDashboardStats(orgId),
-    getProjectsByStep(orgId),
-    getRecentActivity(orgId, 10),
-  ])
+  let stats: Awaited<ReturnType<typeof getDashboardStats>> = {
+    activeProjects: 0,
+    openTickets: 0,
+    overdueTickets: 0,
+    completedThisMonth: 0,
+    teamMembers: 0,
+  }
+  let stepData: Awaited<ReturnType<typeof getProjectsByStep>> = []
+  let activity: Awaited<ReturnType<typeof getRecentActivity>> = []
+
+  try {
+    ;[stats, stepData, activity] = await Promise.all([
+      getDashboardStats(orgId),
+      getProjectsByStep(orgId),
+      getRecentActivity(orgId, 10),
+    ])
+  } catch (err) {
+    console.error('[DashboardPage] Error fetching data:', err)
+  }
 
   // Overview-level cadence context — surfaces introductory PIPS content
   const dashboardCadenceContext: ProductContext = {

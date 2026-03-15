@@ -203,6 +203,19 @@ describe('createProjectSchema', () => {
     expect(result.success).toBe(false)
   })
 
+  it('fails when name is only whitespace', () => {
+    const result = createProjectSchema.safeParse({ name: '   ' })
+    expect(result.success).toBe(false)
+  })
+
+  it('trims whitespace from name before validation', () => {
+    const result = createProjectSchema.safeParse({ name: '  Valid Name  ' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.name).toBe('Valid Name')
+    }
+  })
+
   it('allows empty description and date', () => {
     const result = createProjectSchema.safeParse({
       name: 'New Project',
