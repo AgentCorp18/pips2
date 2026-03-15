@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toggleBookmark } from '../actions'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import type { BookmarkWithContent } from '../actions'
 
 const PILLAR_CONFIG: Record<string, { label: string; icon: typeof BookOpen; color: string }> = {
@@ -101,7 +102,7 @@ export const BookmarkList = ({ bookmarks: initialBookmarks }: BookmarkListProps)
                   </Link>
                   <div className="mt-2 flex items-center gap-3">
                     <span className="text-xs text-[var(--color-text-tertiary)]">
-                      {new Date(bm.created_at).toLocaleDateString()}
+                      <FormattedDate date={bm.created_at} />
                     </span>
                     <Button
                       variant="ghost"

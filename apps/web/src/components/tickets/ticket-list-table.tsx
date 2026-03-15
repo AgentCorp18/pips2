@@ -21,6 +21,8 @@ export type TicketRow = {
   assigneeAvatar: string | null
   dueDate: string | null
   createdAt: string
+  updatedAt: string
+  reporterName: string | null
 }
 
 type TicketListTableProps = {
@@ -167,6 +169,20 @@ export const TicketListTable = ({
               <SortableHeader
                 label="Created"
                 sortKey="created_at"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Updated"
+                sortKey="updated_at"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Reporter"
+                sortKey="reporter_name"
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}

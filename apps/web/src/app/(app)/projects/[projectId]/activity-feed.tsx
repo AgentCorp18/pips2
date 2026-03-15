@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Activity } from 'lucide-react'
+import { formatDateTime } from '@/lib/format-date'
 import type { ProjectActivity } from './overview-actions'
 
 type ActivityFeedProps = {
@@ -18,7 +19,7 @@ const formatRelativeTime = (dateStr: string): string => {
   if (diffMins < 60) return `${diffMins}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString()
+  return formatDateTime(dateStr)
 }
 
 const ACTION_COLORS: Record<string, string> = {

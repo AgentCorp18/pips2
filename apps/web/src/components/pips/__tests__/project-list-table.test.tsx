@@ -37,6 +37,7 @@ const mockProjects: ProjectRow[] = [
     stepsCompleted: 1,
     ownerName: 'Alice',
     targetDate: '2026-06-15',
+    createdAt: '2026-01-10T00:00:00Z',
   },
   {
     id: 'proj-2',
@@ -46,6 +47,7 @@ const mockProjects: ProjectRow[] = [
     stepsCompleted: 6,
     ownerName: 'Bob',
     targetDate: null,
+    createdAt: '2026-02-01T00:00:00Z',
   },
 ]
 

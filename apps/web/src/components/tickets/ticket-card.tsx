@@ -135,7 +135,7 @@ export const TicketCard = ({
               {dueDate && (
                 <span className="flex items-center gap-1">
                   <Calendar size={12} />
-                  <FormattedDate date={dueDate} />
+                  <FormattedDate date={dueDate} showTime={false} />
                 </span>
               )}
             </div>

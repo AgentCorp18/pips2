@@ -90,13 +90,13 @@ describe('InitiativeCard', () => {
   it('renders target end date when present', () => {
     render(<InitiativeCard initiative={baseInitiative} />)
     // Date is formatted via toLocaleDateString — just check the element exists
-    const dateText = new Date('2026-12-31').toLocaleDateString()
+    const dateText = new Date('2026-12-31').toLocaleString(undefined, { dateStyle: 'medium' })
     expect(screen.getByText(dateText)).toBeTruthy()
   })
 
   it('does not render date when target_end is null', () => {
     render(<InitiativeCard initiative={{ ...baseInitiative, target_end: null }} />)
-    const dateText = new Date('2026-12-31').toLocaleDateString()
+    const dateText = new Date('2026-12-31').toLocaleString(undefined, { dateStyle: 'medium' })
     expect(screen.queryByText(dateText)).toBeNull()
   })
 

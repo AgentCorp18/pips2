@@ -20,6 +20,7 @@ import { ExportOnePagerButton } from '@/components/pips/export-one-pager-button'
 import { StepSummaryCard } from '@/components/pips/step-summary-card'
 import { Calendar, User, BarChart3 } from 'lucide-react'
 import { StartHereCard } from '@/components/pips/start-here-card'
+import { formatDateTime, formatDateOnly } from '@/lib/format-date'
 
 const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params
@@ -178,13 +179,11 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
             <MetaRow label="Created">
               <span className="flex items-center gap-1.5">
                 <Calendar size={14} className="text-[var(--color-text-tertiary)]" />
-                {new Date(project.created_at).toLocaleDateString()}
+                {formatDateTime(project.created_at)}
               </span>
             </MetaRow>
             <MetaRow label="Target Date">
-              {project.target_end
-                ? new Date(project.target_end as string).toLocaleDateString()
-                : 'Not set'}
+              {project.target_end ? formatDateOnly(project.target_end as string) : 'Not set'}
             </MetaRow>
             <MetaRow label="Owner">
               <span className="flex items-center gap-1.5">

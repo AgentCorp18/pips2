@@ -91,13 +91,13 @@ describe('TicketCard', () => {
 
   it('renders the due date', () => {
     render(<TicketCard {...defaultProps} />)
-    const dateStr = new Date('2026-06-30').toLocaleDateString()
+    const dateStr = new Date('2026-06-30').toLocaleString(undefined, { dateStyle: 'medium' })
     expect(screen.getByText(dateStr)).toBeInTheDocument()
   })
 
   it('does not render due date when null', () => {
     render(<TicketCard {...defaultProps} dueDate={null} />)
-    const dateStr = new Date('2026-06-30').toLocaleDateString()
+    const dateStr = new Date('2026-06-30').toLocaleString(undefined, { dateStyle: 'medium' })
     expect(screen.queryByText(dateStr)).not.toBeInTheDocument()
   })
 

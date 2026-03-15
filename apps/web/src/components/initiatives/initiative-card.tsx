@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Target, FolderKanban, Calendar } from 'lucide-react'
 import type { InitiativeStatus } from '@/types/initiatives'
+import { FormattedDate } from '@/components/ui/formatted-date'
 
 type InitiativeCardProps = {
   initiative: {
@@ -80,7 +81,7 @@ export const InitiativeCard = ({ initiative }: InitiativeCardProps) => {
         {initiative.target_end && (
           <span className="flex items-center gap-1">
             <Calendar size={12} />
-            {new Date(initiative.target_end).toLocaleDateString()}
+            <FormattedDate date={initiative.target_end} showTime={false} />
           </span>
         )}
         <span className="ml-auto">{initiative.owner.display_name}</span>

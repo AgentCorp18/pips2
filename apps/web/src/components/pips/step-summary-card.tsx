@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, Clock, Circle } from 'lucide-react'
+import { formatDateTime } from '@/lib/format-date'
 import type { StepHighlight } from '@/app/(app)/projects/[projectId]/overview-actions'
 
 type StepStatus = 'not_started' | 'in_progress' | 'completed' | 'skipped'
@@ -53,7 +54,7 @@ export const StepSummaryCard = ({
             <div className="space-y-2">
               {completedAt && (
                 <p className="text-[10px] text-[var(--color-text-tertiary)]">
-                  Completed {new Date(completedAt).toLocaleDateString()}
+                  Completed {formatDateTime(completedAt)}
                 </p>
               )}
               <dl className="space-y-1.5">

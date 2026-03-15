@@ -196,6 +196,12 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       avatar_url: string | null
     } | null
 
+    const reporter = ticket.reporter as unknown as {
+      id: string
+      full_name: string
+      display_name: string | null
+    } | null
+
     return {
       id: ticket.id,
       sequenceId: `${prefix}-${ticket.sequence_number}`,
@@ -207,13 +213,13 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       assigneeAvatar: assignee?.avatar_url ?? null,
       dueDate: ticket.due_date,
       createdAt: ticket.created_at,
+      updatedAt: ticket.updated_at,
+      reporterName: reporter ? reporter.display_name || reporter.full_name || null : null,
     }
   })
 
   return (
-    <div
-      className={`mx-auto ${view === 'board' ? 'max-w-full px-4' : 'max-w-[var(--content-max-width)]'}`}
-    >
+    <div className="mx-auto max-w-full px-4">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>

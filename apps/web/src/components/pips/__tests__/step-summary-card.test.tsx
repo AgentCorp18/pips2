@@ -87,8 +87,8 @@ describe('StepSummaryCard', () => {
     )
     // "Completed" appears in both badge and the date line; use getAllByText
     expect(screen.getAllByText(/Completed/).length).toBeGreaterThanOrEqual(1)
-    // The date text contains "Completed" prefix + the formatted date
-    const dateLine = screen.getByText(/Completed\s+\d/)
+    // The date text contains "Completed" prefix + the formatted date (e.g., "Completed Mar 1, 2026")
+    const dateLine = screen.getByText(/Completed\s+\w/)
     expect(dateLine).toBeInTheDocument()
   })
 

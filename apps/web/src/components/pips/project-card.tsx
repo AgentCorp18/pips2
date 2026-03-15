@@ -88,7 +88,7 @@ export const ProjectCard = ({
               {targetDate && (
                 <span className="flex items-center gap-1">
                   <Calendar size={12} />
-                  <FormattedDate date={targetDate} />
+                  <FormattedDate date={targetDate} showTime={false} />
                 </span>
               )}
             </div>

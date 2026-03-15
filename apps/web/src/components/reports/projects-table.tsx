@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table'
 import { SortableHeader } from '@/components/ui/sortable-header'
 import { useSortable } from '@/hooks/use-sortable'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import type { ProjectTableRow } from '@/app/(app)/reports/actions'
 
 type Props = {
@@ -112,7 +113,7 @@ export const ProjectsTable = ({ rows }: Props) => {
             <TableCell>
               {row.lastActivity ? (
                 <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  {new Date(row.lastActivity).toLocaleDateString()}
+                  <FormattedDate date={row.lastActivity} />
                 </span>
               ) : (
                 <span style={{ color: 'var(--color-text-tertiary)' }}>--</span>

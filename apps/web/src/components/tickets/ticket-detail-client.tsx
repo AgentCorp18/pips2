@@ -41,6 +41,15 @@ const PRIORITY_OPTIONS: { value: TicketPriority; label: string }[] = [
   { value: 'none', label: 'None' },
 ]
 
+const TYPE_OPTIONS: { value: TicketType; label: string }[] = [
+  { value: 'general', label: 'General' },
+  { value: 'task', label: 'Task' },
+  { value: 'bug', label: 'Bug' },
+  { value: 'feature', label: 'Feature' },
+  { value: 'pips_project', label: 'PIPS Project' },
+  { value: 'ceo_request', label: 'CEO Request' },
+]
+
 const STATUS_COLORS: Record<TicketStatus, string> = {
   backlog: 'bg-gray-100 text-gray-700',
   todo: 'bg-blue-100 text-blue-700',
@@ -316,6 +325,26 @@ export const TicketDetailClient = ({
             </SelectTrigger>
             <SelectContent>
               {PRIORITY_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </SidebarField>
+
+        {/* Type */}
+        <SidebarField label="Type">
+          <Select
+            value={ticket.type}
+            onValueChange={(v) => saveField('type', v)}
+            disabled={isPending}
+          >
+            <SelectTrigger className="w-full" size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TYPE_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
                   {o.label}
                 </SelectItem>

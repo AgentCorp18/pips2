@@ -23,6 +23,8 @@ const TICKET: TicketRow = {
   assigneeAvatar: null,
   dueDate: '2026-03-15',
   createdAt: '2026-03-01',
+  updatedAt: '2026-03-10',
+  reporterName: 'Carol',
 }
 
 // Wrap in table for valid HTML

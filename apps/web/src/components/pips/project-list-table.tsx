@@ -20,6 +20,7 @@ export type ProjectRow = {
   stepsCompleted: number
   ownerName: string
   targetDate: string | null
+  createdAt: string
 }
 
 type ProjectListTableProps = {
@@ -98,6 +99,13 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
               currentDirection={sortDirection}
               onSort={handleSort}
             />
+            <SortableHeader
+              label="Created"
+              sortKey="createdAt"
+              currentSort={sortKey}
+              currentDirection={sortDirection}
+              onSort={handleSort}
+            />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -146,6 +154,9 @@ export const ProjectListTable = ({ projects }: ProjectListTableProps) => {
                   ) : (
                     <span className="text-sm text-[var(--color-text-tertiary)]">-</span>
                   )}
+                </TableCell>
+                <TableCell className="text-sm text-[var(--color-text-tertiary)]">
+                  <FormattedDate date={project.createdAt} />
                 </TableCell>
               </TableRow>
             )

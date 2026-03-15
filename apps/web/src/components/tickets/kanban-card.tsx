@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Bug, CheckSquare, CircleDot, Crown, Lightbulb, FolderKanban, Calendar } from 'lucide-react'
 import { useMounted } from '@/hooks/use-mounted'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import type { TicketPriority, TicketType } from '@/types/tickets'
 
 /* ============================================================
@@ -114,12 +115,11 @@ export const KanbanCard = ({
             style={{ color: isOverdue ? '#EF4444' : 'var(--color-text-tertiary)' }}
           >
             <Calendar size={10} aria-hidden="true" />
-            {mounted
-              ? new Date(dueDate).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })
-              : '\u00A0'}
+            <FormattedDate
+              date={dueDate}
+              options={{ month: 'short', day: 'numeric' }}
+              showTime={false}
+            />
           </span>
         )}
       </div>

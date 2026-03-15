@@ -5,12 +5,23 @@ import { useMounted } from '@/hooks/use-mounted'
 type FormattedDateProps = {
   /** ISO 8601 date string */
   date: string
-  /** Intl.DateTimeFormat options (defaults to short date) */
+  /** Intl.DateTimeFormat options (defaults to medium date + short time) */
   options?: Intl.DateTimeFormatOptions
   /** Optional locale (defaults to user locale) */
   locale?: string
   /** Fallback text shown during SSR / before hydration */
   fallback?: string
+  /** Whether to show time alongside the date (default: true) */
+  showTime?: boolean
+}
+
+const DEFAULT_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+}
+
+const DATE_ONLY_OPTIONS: Intl.DateTimeFormatOptions = {
+  dateStyle: 'medium',
 }
 
 /**
@@ -22,6 +33,7 @@ export const FormattedDate = ({
   options,
   locale,
   fallback = '\u00A0',
+  showTime = true,
 }: FormattedDateProps) => {
   const mounted = useMounted()
 
@@ -29,5 +41,7 @@ export const FormattedDate = ({
     return <span>{fallback}</span>
   }
 
-  return <>{new Date(date).toLocaleDateString(locale, options)}</>
+  const resolvedOptions = options ?? (showTime ? DEFAULT_DATE_OPTIONS : DATE_ONLY_OPTIONS)
+
+  return <>{new Date(date).toLocaleString(locale, resolvedOptions)}</>
 }

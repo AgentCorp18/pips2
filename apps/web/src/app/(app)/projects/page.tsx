@@ -55,6 +55,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       status,
       current_step,
       target_end,
+      created_at,
       owner_id,
       profiles!projects_owner_id_fkey ( full_name, display_name ),
       project_steps ( step, status )
@@ -103,6 +104,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       ownerName: ownerProfile?.display_name || ownerProfile?.full_name || 'Unknown',
       stepsCompleted,
       targetDate: project.target_end,
+      createdAt: project.created_at,
     }
   })
 
@@ -111,9 +113,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
   const boardProjects: BoardProject[] = transformedProjects
 
   return (
-    <div
-      className={`mx-auto ${view === 'board' ? 'max-w-full px-4' : 'max-w-[var(--content-max-width)]'}`}
-    >
+    <div className="mx-auto max-w-full px-4">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>

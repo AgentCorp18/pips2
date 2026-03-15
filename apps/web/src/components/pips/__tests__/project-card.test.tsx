@@ -99,14 +99,14 @@ describe('ProjectCard', () => {
   it('shows the target date', () => {
     render(<ProjectCard {...defaultProps} />)
     // Date renders via toLocaleDateString
-    const dateText = new Date('2026-06-15').toLocaleDateString()
+    const dateText = new Date('2026-06-15').toLocaleString(undefined, { dateStyle: 'medium' })
     expect(screen.getByText(dateText)).toBeInTheDocument()
   })
 
   it('does not render target date when null', () => {
     render(<ProjectCard {...defaultProps} targetDate={null} />)
     // No Calendar icon should pair with a date
-    const dateText = new Date('2026-06-15').toLocaleDateString()
+    const dateText = new Date('2026-06-15').toLocaleString(undefined, { dateStyle: 'medium' })
     expect(screen.queryByText(dateText)).not.toBeInTheDocument()
   })
 

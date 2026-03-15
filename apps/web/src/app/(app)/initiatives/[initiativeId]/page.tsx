@@ -6,6 +6,7 @@ import { getInitiativeDetail, getInitiativeProgress } from '@/app/(app)/initiati
 import { InitiativeProgressBar } from '@/components/initiatives/initiative-progress-bar'
 import { Button } from '@/components/ui/button'
 import { Target, ArrowLeft, Pencil, FolderKanban, Calendar, User, TrendingUp } from 'lucide-react'
+import { formatDateOnly } from '@/lib/format-date'
 import type { InitiativeStatus } from '@/types/initiatives'
 
 type Props = {
@@ -109,7 +110,7 @@ const InitiativeDetailPage = async ({ params }: Props) => {
           <MetaCard
             icon={Calendar}
             label="Target End"
-            value={new Date(initiative.target_end).toLocaleDateString()}
+            value={formatDateOnly(initiative.target_end)}
           />
         )}
       </div>

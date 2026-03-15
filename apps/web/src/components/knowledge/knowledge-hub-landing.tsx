@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ReadingProgress } from './reading-progress'
+import { FormattedDate } from '@/components/ui/formatted-date'
 import type {
   ReadHistoryWithContent,
   ReadingSessionWithContent,
@@ -271,7 +272,7 @@ export const KnowledgeHubLanding = ({
                           </span>
                         )}
                         <span className="text-xs text-[var(--color-text-tertiary)]">
-                          {new Date(item.last_read_at).toLocaleDateString()}
+                          <FormattedDate date={item.last_read_at} />
                         </span>
                         <ArrowRight size={12} className="text-[var(--color-text-tertiary)]" />
                       </div>

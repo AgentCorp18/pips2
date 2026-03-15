@@ -34,6 +34,8 @@ const mockTickets: TicketRow[] = [
     assigneeAvatar: null,
     dueDate: '2026-04-01',
     createdAt: '2026-03-01',
+    updatedAt: '2026-03-05',
+    reporterName: 'Bob',
   },
   {
     id: 't-2',
@@ -46,6 +48,8 @@ const mockTickets: TicketRow[] = [
     assigneeAvatar: null,
     dueDate: null,
     createdAt: '2026-03-02',
+    updatedAt: '2026-03-02',
+    reporterName: null,
   },
 ]
 

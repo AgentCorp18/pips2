@@ -25,6 +25,7 @@ import {
   getStepCompletionFunnel,
   getProjectsTable,
 } from '../actions'
+import { formatDateTime } from '@/lib/format-date'
 
 export const metadata: Metadata = {
   title: 'Project Health Report',
@@ -194,7 +195,7 @@ const ProjectHealthPage = async () => {
                     <TableCell>
                       {row.lastActivity ? (
                         <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                          {new Date(row.lastActivity).toLocaleDateString()}
+                          {formatDateTime(row.lastActivity)}
                         </span>
                       ) : (
                         <span style={{ color: 'var(--color-text-tertiary)' }}>--</span>

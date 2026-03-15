@@ -108,6 +108,12 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
       <TableCell className="text-sm text-muted-foreground" onClick={navigate}>
         <FormattedDate date={ticket.createdAt} />
       </TableCell>
+      <TableCell className="text-sm text-muted-foreground" onClick={navigate}>
+        <FormattedDate date={ticket.updatedAt} />
+      </TableCell>
+      <TableCell className="text-sm" onClick={navigate}>
+        {ticket.reporterName ?? <span className="text-muted-foreground">--</span>}
+      </TableCell>
     </TableRow>
   )
 }
