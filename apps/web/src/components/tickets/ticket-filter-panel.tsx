@@ -27,7 +27,7 @@ type TicketFilterPanelProps = {
   basePath?: string
 }
 
-const ALL_TYPES: TicketType[] = ['general', 'task', 'bug', 'feature', 'pips_project']
+const ALL_TYPES: TicketType[] = ['general', 'task', 'bug', 'feature', 'pips_project', 'ceo_request']
 
 /* ============================================================
    Component
@@ -67,7 +67,7 @@ export const TicketFilterPanel = ({
         ;[...current, value].forEach((v) => params.append(key, v))
       }
       params.delete('page')
-      router.push(`${basePath}?${params.toString()}`)
+      router.replace(`${basePath}?${params.toString()}`)
     },
     [router, searchParams, basePath],
   )
@@ -81,7 +81,7 @@ export const TicketFilterPanel = ({
         params.delete(key)
       }
       params.delete('page')
-      router.push(`${basePath}?${params.toString()}`)
+      router.replace(`${basePath}?${params.toString()}`)
     },
     [router, searchParams, basePath],
   )
@@ -96,7 +96,7 @@ export const TicketFilterPanel = ({
     params.delete('quick')
     params.delete('search')
     params.delete('page')
-    router.push(`${basePath}?${params.toString()}`)
+    router.replace(`${basePath}?${params.toString()}`)
   }, [router, searchParams, basePath])
 
   return (

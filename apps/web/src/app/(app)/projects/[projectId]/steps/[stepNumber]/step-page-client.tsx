@@ -39,9 +39,9 @@ export const StepPageClient = ({
       if (result.success) {
         toast.success('Step completed successfully')
         if (stepNumber < 6) {
-          router.push(`/projects/${projectId}/steps/${stepNumber + 1}`)
+          router.replace(`/projects/${projectId}/steps/${stepNumber + 1}`)
         } else {
-          router.push(`/projects/${projectId}`)
+          router.replace(`/projects/${projectId}`)
         }
       } else {
         toast.error(result.error ?? 'Failed to advance step')
@@ -55,9 +55,9 @@ export const StepPageClient = ({
       if (result.success) {
         toast.success('Step skipped')
         if (stepNumber < 6) {
-          router.push(`/projects/${projectId}/steps/${stepNumber + 1}`)
+          router.replace(`/projects/${projectId}/steps/${stepNumber + 1}`)
         } else {
-          router.push(`/projects/${projectId}`)
+          router.replace(`/projects/${projectId}`)
         }
       } else {
         toast.error(result.error ?? 'Failed to skip step')

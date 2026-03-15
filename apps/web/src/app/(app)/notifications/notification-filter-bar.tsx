@@ -50,7 +50,7 @@ export const NotificationFilterBar = ({ activeFilter }: NotificationFilterBarPro
       }
       // Reset pagination when changing filters
       params.delete('offset')
-      router.push(`/notifications?${params.toString()}`)
+      router.replace(`/notifications?${params.toString()}`)
     },
     [router, searchParams],
   )

@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TicketListFilters } from '../ticket-list-filters'
 
-const mockPush = vi.fn()
+const mockReplace = vi.fn()
 let mockSearchParams = new URLSearchParams()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => mockSearchParams,
 }))
 
@@ -17,7 +17,7 @@ const MEMBERS = [
 
 describe('TicketListFilters', () => {
   beforeEach(() => {
-    mockPush.mockReset()
+    mockReplace.mockReset()
     mockSearchParams = new URLSearchParams()
   })
 
@@ -47,13 +47,13 @@ describe('TicketListFilters', () => {
     mockSearchParams = new URLSearchParams('status=todo')
     render(<TicketListFilters members={MEMBERS} />)
     fireEvent.click(screen.getByText('Clear'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets')
   })
 
   it('navigates with search param on Enter', () => {
     render(<TicketListFilters members={MEMBERS} />)
     const input = screen.getByPlaceholderText('Search tickets...')
     fireEvent.keyDown(input, { key: 'Enter', currentTarget: { value: 'login bug' } })
-    expect(mockPush).toHaveBeenCalled()
+    expect(mockReplace).toHaveBeenCalled()
   })
 })

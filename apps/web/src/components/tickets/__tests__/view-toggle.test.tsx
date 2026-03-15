@@ -2,17 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ViewToggle } from '../view-toggle'
 
-const mockPush = vi.fn()
+const mockReplace = vi.fn()
 const mockSearchParams = new URLSearchParams()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => mockSearchParams,
 }))
 
 describe('ViewToggle', () => {
   beforeEach(() => {
-    mockPush.mockReset()
+    mockReplace.mockReset()
   })
 
   it('renders Table button', () => {
@@ -38,13 +38,13 @@ describe('ViewToggle', () => {
   it('navigates to table view on Table click', () => {
     render(<ViewToggle current="cards" />)
     fireEvent.click(screen.getByText('Table'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets?view=table')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets?view=table')
   })
 
   it('navigates to cards view on Cards click', () => {
     render(<ViewToggle current="table" />)
     fireEvent.click(screen.getByText('Cards'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets?view=cards')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets?view=cards')
   })
 
   it('renders Board button', () => {
@@ -60,7 +60,7 @@ describe('ViewToggle', () => {
   it('navigates to board view on Board click', () => {
     render(<ViewToggle current="table" />)
     fireEvent.click(screen.getByText('Board'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets?view=board')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets?view=board')
   })
 
   it('highlights Board button when current is board', () => {
@@ -71,12 +71,12 @@ describe('ViewToggle', () => {
   it('uses custom basePath for navigation', () => {
     render(<ViewToggle current="cards" basePath="/projects" />)
     fireEvent.click(screen.getByText('Table'))
-    expect(mockPush).toHaveBeenCalledWith('/projects?view=table')
+    expect(mockReplace).toHaveBeenCalledWith('/projects?view=table')
   })
 
   it('uses custom basePath for board navigation', () => {
     render(<ViewToggle current="table" basePath="/projects" />)
     fireEvent.click(screen.getByText('Board'))
-    expect(mockPush).toHaveBeenCalledWith('/projects?view=board')
+    expect(mockReplace).toHaveBeenCalledWith('/projects?view=board')
   })
 })

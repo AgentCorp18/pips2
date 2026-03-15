@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getTicket, getChildTickets, getParentTicket } from '../actions'
 import { getComments } from './comment-actions'
@@ -199,12 +201,24 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
 
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
-      {parentData && parentSequenceId && (
+      {parentData && parentSequenceId ? (
         <ParentTicketLink
           parentId={parentData.id}
           parentTitle={parentData.title}
           parentSequenceId={parentSequenceId}
         />
+      ) : (
+        <div className="mb-2">
+          <Link
+            href="/tickets"
+            className="inline-flex items-center gap-1 text-xs hover:underline"
+            style={{ color: 'var(--color-text-tertiary)' }}
+            data-testid="back-to-tickets-link"
+          >
+            <ChevronLeft size={14} />
+            Back to Tickets
+          </Link>
+        </div>
       )}
 
       <TicketDetailClient

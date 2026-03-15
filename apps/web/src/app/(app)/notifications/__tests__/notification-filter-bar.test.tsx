@@ -2,17 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { NotificationFilterBar } from '../notification-filter-bar'
 
-const mockPush = vi.fn()
+const mockReplace = vi.fn()
 const mockSearchParams = new URLSearchParams()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => mockSearchParams,
 }))
 
 describe('NotificationFilterBar', () => {
   beforeEach(() => {
-    mockPush.mockClear()
+    mockReplace.mockClear()
   })
 
   it('renders all filter chips', () => {
@@ -31,13 +31,13 @@ describe('NotificationFilterBar', () => {
   it('navigates with filter param when a filter chip is clicked', () => {
     render(<NotificationFilterBar activeFilter="all" />)
     fireEvent.click(screen.getByTestId('notification-filter-assigned'))
-    expect(mockPush).toHaveBeenCalledWith('/notifications?filter=assigned')
+    expect(mockReplace).toHaveBeenCalledWith('/notifications?filter=assigned')
   })
 
   it('removes filter param when "All" is clicked', () => {
     render(<NotificationFilterBar activeFilter="assigned" />)
     fireEvent.click(screen.getByTestId('notification-filter-all'))
-    expect(mockPush).toHaveBeenCalledWith('/notifications?')
+    expect(mockReplace).toHaveBeenCalledWith('/notifications?')
   })
 
   it('displays correct labels', () => {

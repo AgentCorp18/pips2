@@ -64,10 +64,10 @@ const mockProjects: BoardProject[] = [
 ]
 
 /* ============================================================
-   Tests
+   Tests — Column View (default layout: status as columns)
    ============================================================ */
 
-describe('ProjectBoard', () => {
+describe('ProjectBoard — ColumnView', () => {
   it('renders the board with data-testid', () => {
     render(<ProjectBoard projects={mockProjects} />)
     expect(screen.getByTestId('project-board')).toBeInTheDocument()
@@ -153,5 +153,110 @@ describe('ProjectBoard', () => {
     expect(screen.getByTestId('project-board')).toBeInTheDocument()
     expect(screen.getByTestId('project-board-count-active')).toHaveTextContent('0')
     expect(screen.getByTestId('project-board-count-completed')).toHaveTextContent('0')
+  })
+})
+
+/* ============================================================
+   Tests — Swim Lane View (status rows, step columns)
+   ============================================================ */
+
+describe('ProjectBoard — SwimLaneView', () => {
+  it('renders the board with data-testid', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    expect(screen.getByTestId('project-board')).toBeInTheDocument()
+  })
+
+  it('has correct region aria-label', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    expect(
+      screen.getByRole('region', { name: 'Project board by step and status' }),
+    ).toBeInTheDocument()
+  })
+
+  it('renders a row for each status', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    expect(screen.getByTestId('swimlane-row-active')).toBeInTheDocument()
+    expect(screen.getByTestId('swimlane-row-on_hold')).toBeInTheDocument()
+    expect(screen.getByTestId('swimlane-row-completed')).toBeInTheDocument()
+    expect(screen.getByTestId('swimlane-row-cancelled')).toBeInTheDocument()
+  })
+
+  it('renders step column headers', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    expect(screen.getByText('Identify')).toBeInTheDocument()
+    expect(screen.getByText('Analyze')).toBeInTheDocument()
+    expect(screen.getByText('Generate')).toBeInTheDocument()
+    expect(screen.getByText('Select & Plan')).toBeInTheDocument()
+    expect(screen.getByText('Implement')).toBeInTheDocument()
+    expect(screen.getByText('Evaluate')).toBeInTheDocument()
+  })
+
+  it('renders status row labels', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    // Row labels appear inside the swimlane rows (not column headers)
+    const activeRow = screen.getByTestId('swimlane-row-active')
+    expect(activeRow).toHaveTextContent('Active')
+    const onHoldRow = screen.getByTestId('swimlane-row-on_hold')
+    expect(onHoldRow).toHaveTextContent('On Hold')
+  })
+
+  it('places projects in the correct cell (status row, step column)', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    // proj-1: active status, step 2 → cell active-2
+    const activeStep2Cell = screen.getByTestId('swimlane-cell-active-2')
+    expect(activeStep2Cell).toHaveTextContent('Reduce Cycle Time')
+
+    // proj-2: completed status, step 6 → cell completed-6
+    const completedStep6Cell = screen.getByTestId('swimlane-cell-completed-6')
+    expect(completedStep6Cell).toHaveTextContent('Improve Quality')
+
+    // proj-3: on_hold status, step 3 → cell on_hold-3
+    const onHoldStep3Cell = screen.getByTestId('swimlane-cell-on_hold-3')
+    expect(onHoldStep3Cell).toHaveTextContent('Reduce Waste')
+  })
+
+  it('shows row project totals in row labels', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    const activeRow = screen.getByTestId('swimlane-row-active')
+    expect(activeRow).toHaveTextContent('1 project')
+    const onHoldRow = screen.getByTestId('swimlane-row-on_hold')
+    expect(onHoldRow).toHaveTextContent('1 project')
+    const cancelledRow = screen.getByTestId('swimlane-row-cancelled')
+    expect(cancelledRow).toHaveTextContent('0 projects')
+  })
+
+  it('renders project links in swimlane cells', () => {
+    render(<ProjectBoard projects={mockProjects} layout="swimlanes" />)
+    const links = screen.getAllByRole('link')
+    const hrefs = links.map((l) => l.getAttribute('href'))
+    expect(hrefs).toContain('/projects/proj-1')
+    expect(hrefs).toContain('/projects/proj-2')
+    expect(hrefs).toContain('/projects/proj-3')
+  })
+
+  it('handles unknown status by placing into active row', () => {
+    const unknownProject: BoardProject = {
+      id: 'proj-x',
+      name: 'Unknown Status Project',
+      description: null,
+      status: 'some_unknown_status',
+      currentStep: 1,
+      stepsCompleted: 0,
+      ownerName: 'Dan',
+      targetDate: null,
+    }
+    render(<ProjectBoard projects={[unknownProject]} layout="swimlanes" />)
+    const activeStep1Cell = screen.getByTestId('swimlane-cell-active-1')
+    expect(activeStep1Cell).toHaveTextContent('Unknown Status Project')
+  })
+
+  it('renders empty swimlane board when no projects', () => {
+    render(<ProjectBoard projects={[]} layout="swimlanes" />)
+    expect(screen.getByTestId('project-board')).toBeInTheDocument()
+    expect(screen.getByTestId('swimlane-row-active')).toBeInTheDocument()
+    expect(screen.getByTestId('swimlane-row-completed')).toBeInTheDocument()
+    // All cells should contain no project cards
+    const activeStep1Cell = screen.getByTestId('swimlane-cell-active-1')
+    expect(activeStep1Cell.querySelectorAll('a')).toHaveLength(0)
   })
 })

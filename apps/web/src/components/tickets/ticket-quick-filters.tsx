@@ -72,7 +72,7 @@ export const TicketQuickFilters = ({ basePath = '/tickets' }: TicketQuickFilters
     // Reset to page 1 when filters change
     params.delete('page')
 
-    router.push(`${basePath}?${params.toString()}`)
+    router.replace(`${basePath}?${params.toString()}`)
   }
 
   return (

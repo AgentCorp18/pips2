@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TicketFilterPanel } from '../ticket-filter-panel'
 
-const mockPush = vi.fn()
+const mockReplace = vi.fn()
 let mockSearchParams = new URLSearchParams()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => mockSearchParams,
 }))
 
@@ -32,6 +32,7 @@ vi.mock('@/components/tickets/ticket-config', () => ({
     bug: { label: 'Bug' },
     feature: { label: 'Feature' },
     pips_project: { label: 'PIPS Project' },
+    ceo_request: { label: 'CEO Request' },
   },
 }))
 
@@ -40,7 +41,7 @@ const PROJECTS = [{ id: 'p1', name: 'Project Alpha' }]
 
 describe('TicketFilterPanel', () => {
   beforeEach(() => {
-    mockPush.mockReset()
+    mockReplace.mockReset()
     mockSearchParams = new URLSearchParams()
   })
 
@@ -78,6 +79,12 @@ describe('TicketFilterPanel', () => {
     expect(screen.getByText('High')).toBeTruthy()
   })
 
+  it('renders ceo_request type filter chip when expanded', () => {
+    render(<TicketFilterPanel members={MEMBERS} projects={PROJECTS} />)
+    fireEvent.click(screen.getByText('Advanced Filters'))
+    expect(screen.getByText('CEO Request')).toBeTruthy()
+  })
+
   it('renders assignee dropdown with members', () => {
     render(<TicketFilterPanel members={MEMBERS} projects={PROJECTS} />)
     fireEvent.click(screen.getByText('Advanced Filters'))
@@ -96,7 +103,7 @@ describe('TicketFilterPanel', () => {
     render(<TicketFilterPanel members={MEMBERS} projects={PROJECTS} />)
     fireEvent.click(screen.getByText('Advanced Filters'))
     fireEvent.click(screen.getByText('Todo'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets?status=todo')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets?status=todo')
   })
 
   it('shows active count badge when filters are active', () => {
@@ -120,6 +127,6 @@ describe('TicketFilterPanel', () => {
     render(<TicketFilterPanel members={MEMBERS} projects={PROJECTS} basePath="/tickets/board" />)
     fireEvent.click(screen.getByText('Advanced Filters'))
     fireEvent.click(screen.getByText('Todo'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets/board?status=todo')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets/board?status=todo')
   })
 })

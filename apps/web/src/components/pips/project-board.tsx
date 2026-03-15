@@ -112,20 +112,28 @@ const ColumnView = ({ projects }: { projects: BoardProject[] }) => {
 }
 
 /* ============================================================
-   Swim Lane View (rows=steps, cols=status)
+   Swim Lane View (rows=status, cols=steps)
    ============================================================ */
 
 const SwimLaneView = ({ projects }: { projects: BoardProject[] }) => {
-  // Build a 2D grid: step (row) x status (column)
-  const grid: Record<number, Record<string, BoardProject[]>> = {}
-  for (const step of PIPS_STEPS) {
-    grid[step.number] = { active: [], on_hold: [], completed: [], cancelled: [] }
+  // Build a 2D grid: status (row) x step (column)
+  const grid: Record<string, Record<number, BoardProject[]>> = {
+    active: {},
+    on_hold: {},
+    completed: {},
+    cancelled: {},
+  }
+  for (const col of BOARD_COLUMNS) {
+    for (const step of PIPS_STEPS) {
+      grid[col.id] = grid[col.id] ?? {}
+      grid[col.id]![step.number] = []
+    }
   }
 
   for (const project of projects) {
     const stepNum = Math.max(1, Math.min(6, project.currentStep || 1))
-    const status = project.status in (grid[stepNum] ?? {}) ? project.status : 'active'
-    grid[stepNum]?.[status]?.push(project)
+    const status = project.status in grid ? project.status : 'active'
+    grid[status]![stepNum]?.push(project)
   }
 
   return (
@@ -135,50 +143,53 @@ const SwimLaneView = ({ projects }: { projects: BoardProject[] }) => {
       role="region"
       aria-label="Project board by step and status"
     >
-      {/* Column headers */}
-      <div className="mb-2 grid grid-cols-[140px_repeat(4,1fr)] gap-2">
+      {/* Column headers — one per PIPS step */}
+      <div className="mb-2 grid grid-cols-[140px_repeat(6,1fr)] gap-2">
         <div /> {/* Spacer for row labels */}
-        {BOARD_COLUMNS.map((col) => (
-          <div key={col.id} className="flex items-center gap-2 px-2">
+        {PIPS_STEPS.map((step) => (
+          <div key={step.number} className="flex items-center gap-2 px-2">
             <span
-              className="inline-block h-2 w-2 rounded-full"
-              style={{ backgroundColor: col.color }}
-            />
-            <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              {col.label}
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+              style={{ backgroundColor: step.color }}
+            >
+              {step.number}
+            </span>
+            <span
+              className="truncate text-xs font-semibold"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              {step.name}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Step rows */}
-      {PIPS_STEPS.map((step) => {
-        const rowProjects = grid[step.number] ?? {}
+      {/* Status rows */}
+      {BOARD_COLUMNS.map((col) => {
+        const rowProjects = grid[col.id] ?? {}
         const rowTotal = Object.values(rowProjects).reduce((sum, arr) => sum + arr.length, 0)
 
         return (
           <div
-            key={step.number}
-            className="mb-2 grid grid-cols-[140px_repeat(4,1fr)] gap-2"
-            data-testid={`swimlane-row-${step.number}`}
+            key={col.id}
+            className="mb-2 grid grid-cols-[140px_repeat(6,1fr)] gap-2"
+            data-testid={`swimlane-row-${col.id}`}
           >
             {/* Row label */}
             <div
               className="flex items-start gap-2 rounded-lg p-2"
-              style={{ borderLeft: `3px solid ${step.color}` }}
+              style={{ borderLeft: `3px solid ${col.color}` }}
             >
               <span
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                style={{ backgroundColor: step.color }}
-              >
-                {step.number}
-              </span>
+                className="inline-block h-2.5 w-2.5 shrink-0 rounded-full mt-1"
+                style={{ backgroundColor: col.color }}
+              />
               <div className="min-w-0">
                 <p
                   className="truncate text-xs font-semibold"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
-                  {step.name}
+                  {col.label}
                 </p>
                 <p className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
                   {rowTotal} project{rowTotal !== 1 ? 's' : ''}
@@ -186,16 +197,16 @@ const SwimLaneView = ({ projects }: { projects: BoardProject[] }) => {
               </div>
             </div>
 
-            {/* Status cells */}
-            {BOARD_COLUMNS.map((col) => {
-              const cellProjects = rowProjects[col.id] ?? []
+            {/* Step cells */}
+            {PIPS_STEPS.map((step) => {
+              const cellProjects = rowProjects[step.number] ?? []
 
               return (
                 <div
-                  key={col.id}
+                  key={step.number}
                   className="min-h-[60px] rounded-lg p-1.5"
                   style={{ backgroundColor: 'var(--color-bg-secondary, #F9FAFB)' }}
-                  data-testid={`swimlane-cell-${step.number}-${col.id}`}
+                  data-testid={`swimlane-cell-${col.id}-${step.number}`}
                 >
                   <div className="flex flex-col gap-1.5">
                     {cellProjects.map((project) => (

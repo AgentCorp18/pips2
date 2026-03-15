@@ -42,13 +42,13 @@ export const TicketListFilters = ({ members }: TicketListFiltersProps) => {
       } else {
         params.delete(key)
       }
-      router.push(`/tickets?${params.toString()}`)
+      router.replace(`/tickets?${params.toString()}`)
     },
     [router, searchParams],
   )
 
   const clearFilters = useCallback(() => {
-    router.push('/tickets')
+    router.replace('/tickets')
   }, [router])
 
   const hasFilters =

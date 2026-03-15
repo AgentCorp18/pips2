@@ -59,7 +59,7 @@ export const TicketListTable = ({
         if (val) params.set(key, val)
         else params.delete(key)
       }
-      router.push(`/tickets?${params.toString()}`)
+      router.replace(`/tickets?${params.toString()}`)
     },
     [router, searchParams],
   )

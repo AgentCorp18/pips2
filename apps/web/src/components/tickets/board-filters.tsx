@@ -47,13 +47,13 @@ export const BoardFilters = ({ members, projects }: BoardFiltersProps) => {
       } else {
         params.delete(key)
       }
-      router.push(`/tickets/board?${params.toString()}`)
+      router.replace(`/tickets/board?${params.toString()}`)
     },
     [router, searchParams],
   )
 
   const clearFilters = useCallback(() => {
-    router.push('/tickets/board')
+    router.replace('/tickets/board')
   }, [router])
 
   const hasFilters =

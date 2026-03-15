@@ -27,7 +27,7 @@ export const NotificationPagination = ({ total, offset, limit }: NotificationPag
       } else {
         params.delete('offset')
       }
-      router.push(`/notifications?${params.toString()}`)
+      router.replace(`/notifications?${params.toString()}`)
     },
     [router, searchParams, limit],
   )

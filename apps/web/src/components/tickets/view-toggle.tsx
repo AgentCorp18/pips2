@@ -28,7 +28,7 @@ export const ViewToggle = ({ current, basePath = '/tickets' }: ViewToggleProps) 
     (view: ViewMode) => {
       const params = new URLSearchParams(searchParams.toString())
       params.set('view', view)
-      router.push(`${basePath}?${params.toString()}`)
+      router.replace(`${basePath}?${params.toString()}`)
     },
     [router, searchParams, basePath],
   )

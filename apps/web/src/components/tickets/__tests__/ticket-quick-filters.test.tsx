@@ -2,17 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TicketQuickFilters, getActiveQuickFilters } from '../ticket-quick-filters'
 
-const mockPush = vi.fn()
+const mockReplace = vi.fn()
 let mockSearchParams = new URLSearchParams()
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => mockSearchParams,
 }))
 
 describe('TicketQuickFilters', () => {
   beforeEach(() => {
-    mockPush.mockReset()
+    mockReplace.mockReset()
     mockSearchParams = new URLSearchParams()
   })
 
@@ -33,27 +33,27 @@ describe('TicketQuickFilters', () => {
   it('navigates with quick filter param on click', () => {
     render(<TicketQuickFilters />)
     fireEvent.click(screen.getByText('My Open'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets?quick=my_open')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets?quick=my_open')
   })
 
   it('uses custom basePath', () => {
     render(<TicketQuickFilters basePath="/tickets/board" />)
     fireEvent.click(screen.getByText('Overdue'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets/board?quick=overdue')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets/board?quick=overdue')
   })
 
   it('removes filter when clicking active filter', () => {
     mockSearchParams = new URLSearchParams('quick=my_open')
     render(<TicketQuickFilters />)
     fireEvent.click(screen.getByText('My Open'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets?')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets?')
   })
 
   it('appends filter when one is already active', () => {
     mockSearchParams = new URLSearchParams('quick=my_open')
     render(<TicketQuickFilters />)
     fireEvent.click(screen.getByText('Overdue'))
-    expect(mockPush).toHaveBeenCalledWith('/tickets?quick=my_open&quick=overdue')
+    expect(mockReplace).toHaveBeenCalledWith('/tickets?quick=my_open&quick=overdue')
   })
 })
 
