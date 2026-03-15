@@ -1,3 +1,4 @@
+import { getAuthContext } from '@/lib/auth-context'
 import { getChannel, getChannels, getMessages } from '../actions'
 import { ChannelViewClient } from './channel-view-client'
 
@@ -7,7 +8,8 @@ type Props = {
 
 export default async function ChannelPage({ params }: Props) {
   const { channelId } = await params
-  const [channelResult, messagesResult, channelsResult] = await Promise.all([
+  const [{ user }, channelResult, messagesResult, channelsResult] = await Promise.all([
+    getAuthContext(),
     getChannel(channelId),
     getMessages(channelId),
     getChannels(),
@@ -31,6 +33,7 @@ export default async function ChannelPage({ params }: Props) {
         initialMessages={messagesResult.data?.messages ?? []}
         initialHasMore={messagesResult.data?.hasMore ?? false}
         initialChannels={channelsResult.data ?? []}
+        currentUserId={user?.id ?? null}
       />
     </div>
   )
