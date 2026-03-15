@@ -331,8 +331,17 @@ export const TicketCreateForm = ({
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => router.back()}
+              data-testid="cancel-ticket-button"
+            >
+              Cancel
+            </Button>
             <Button type="submit" disabled={pending} data-testid="create-ticket-button">
               {pending ? 'Creating...' : 'Create Ticket'}
             </Button>
