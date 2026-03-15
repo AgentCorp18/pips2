@@ -241,6 +241,20 @@ export const ProjectForm = () => {
     }
   }, [state, router])
 
+  // Warn on browser navigation (reload, close tab) when form has unsaved data
+  const hasUnsavedData = mode === 'blank' && (name.trim() !== '' || description.trim() !== '')
+
+  useEffect(() => {
+    if (!hasUnsavedData || hasRedirected.current) return
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [hasUnsavedData])
+
   const stepConfig = STEPS[currentStep - 1]!
 
   return (
