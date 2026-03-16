@@ -6,6 +6,21 @@ import { requirePermission } from '@/lib/permissions'
 import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
 
 /* ============================================================
+   Utilities
+   ============================================================ */
+
+/** Parse @[uuid] mention tokens from a message body. Returns deduplicated UUID array. */
+const extractMentions = (body: string): string[] => {
+  const mentionRegex = /@\[([0-9a-f-]{36})\]/g
+  const mentions: string[] = []
+  let match
+  while ((match = mentionRegex.exec(body)) !== null) {
+    if (match[1]) mentions.push(match[1])
+  }
+  return mentions
+}
+
+/* ============================================================
    Types
    ============================================================ */
 
@@ -233,12 +248,7 @@ export const sendMessage = async (
   if (!trimmedBody) return { error: 'Message cannot be empty' }
 
   // Extract @mentions (UUIDs in format @[uuid])
-  const mentionRegex = /@\[([0-9a-f-]{36})\]/g
-  const mentions: string[] = []
-  let match
-  while ((match = mentionRegex.exec(trimmedBody)) !== null) {
-    if (match[1]) mentions.push(match[1])
-  }
+  const mentions = extractMentions(trimmedBody)
 
   const { data, error } = await supabase
     .from('chat_messages')
@@ -275,9 +285,12 @@ export const editMessage = async (messageId: string, body: string): Promise<Acti
     return { error: 'Insufficient permissions to edit messages' }
   }
 
+  const trimmedBody = body.trim()
+  const mentions = extractMentions(trimmedBody)
+
   const { error } = await supabase
     .from('chat_messages')
-    .update({ body: body.trim(), edited_at: new Date().toISOString() })
+    .update({ body: trimmedBody, edited_at: new Date().toISOString(), mentions })
     .eq('id', messageId)
     .eq('author_id', user.id)
 
