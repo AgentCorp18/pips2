@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
@@ -220,7 +221,8 @@ export const FormShell = (props: FormShellProps) => {
   }, [hasPendingChanges, doSave])
 
   /* Unsaved changes — beforeunload + client-side navigation dialog */
-  const { showDialog, confirmDiscard, cancelDiscard } = useUnsavedChanges({
+  const router = useRouter()
+  const { showDialog, confirmDiscard, cancelDiscard, guardNavigation } = useUnsavedChanges({
     isDirty: hasPendingChanges,
   })
 
@@ -238,47 +240,59 @@ export const FormShell = (props: FormShellProps) => {
         {/* Breadcrumb + save status bar */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           {isSandbox ? (
-            <Link
+            <GuardedLink
               href="/tools"
               className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               data-testid="back-to-tools-link"
+              isDirty={hasPendingChanges}
+              guardNavigation={guardNavigation}
+              router={router}
             >
               <ArrowLeft size={14} />
               Back to tools
-            </Link>
+            </GuardedLink>
           ) : projectId ? (
             <nav aria-label="Breadcrumb" data-testid="form-breadcrumb" className="min-w-0">
               <ol className="flex flex-wrap items-center gap-1 text-sm">
                 <li>
-                  <Link
+                  <GuardedLink
                     href="/projects"
                     className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                    isDirty={hasPendingChanges}
+                    guardNavigation={guardNavigation}
+                    router={router}
                   >
                     Projects
-                  </Link>
+                  </GuardedLink>
                 </li>
                 <li>
                   <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
                 </li>
                 <li className="hidden sm:block">
-                  <Link
+                  <GuardedLink
                     href={`/projects/${projectId}`}
                     className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                    isDirty={hasPendingChanges}
+                    guardNavigation={guardNavigation}
+                    router={router}
                   >
                     Project
-                  </Link>
+                  </GuardedLink>
                 </li>
                 <li className="hidden sm:block">
                   <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
                 </li>
                 <li>
-                  <Link
+                  <GuardedLink
                     href={`/projects/${projectId}/steps/${stepNumber}`}
                     className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                    isDirty={hasPendingChanges}
+                    guardNavigation={guardNavigation}
+                    router={router}
                   >
                     Step {stepNumber}
                     {stepContent ? `: ${stepContent.title}` : ''}
-                  </Link>
+                  </GuardedLink>
                 </li>
                 <li>
                   <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />
@@ -568,6 +582,47 @@ const SandboxImportBanner = ({
         </button>
       </div>
     </div>
+  )
+}
+
+/* ---- Guarded Link — intercepts navigation when form is dirty ---- */
+
+type GuardedLinkProps = {
+  href: string
+  isDirty: boolean
+  guardNavigation: (action: () => void) => void
+  router: ReturnType<typeof useRouter>
+  className?: string
+  children: React.ReactNode
+  'data-testid'?: string
+}
+
+const GuardedLink = ({
+  href,
+  isDirty,
+  guardNavigation: guard,
+  router,
+  className,
+  children,
+  ...rest
+}: GuardedLinkProps) => {
+  if (!isDirty) {
+    return (
+      <Link href={href} className={className} {...rest}>
+        {children}
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={() => guard(() => router.push(href))}
+      {...rest}
+    >
+      {children}
+    </button>
   )
 }
 

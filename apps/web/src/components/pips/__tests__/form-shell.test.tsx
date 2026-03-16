@@ -15,6 +15,10 @@ vi.mock('next/link', () => ({
   ),
 }))
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
+}))
+
 const { mockSaveFormData, mockToast } = vi.hoisted(() => ({
   mockSaveFormData: vi.fn(),
   mockToast: { error: vi.fn(), success: vi.fn() },
