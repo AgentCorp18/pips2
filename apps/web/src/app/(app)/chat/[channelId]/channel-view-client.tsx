@@ -37,6 +37,8 @@ type Props = {
   initialMessages: ChatMessage[]
   initialHasMore: boolean
   initialChannels: (ChatChannel & { unread_count?: number })[]
+  /** Resolved server-side so the thread renders immediately without a client-side async load. */
+  currentUserId: string | null
 }
 
 export const ChannelViewClient = ({
@@ -45,25 +47,14 @@ export const ChannelViewClient = ({
   initialMessages,
   initialHasMore,
   initialChannels,
+  currentUserId,
 }: Props) => {
   const { messages, setMessages, setActiveChannel, clearUnread } = useChatStore()
   const org = useOrgStore((s) => s.org)
   const { can } = usePermissions(org?.role ?? null)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [summary, setSummary] = useState<ChatSummary | null>(null)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [members, setMembers] = useState<ChannelMember[]>(initialMembers)
-
-  // Get current user ID from Supabase client
-  useEffect(() => {
-    const loadUser = async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data } = await supabase.auth.getUser()
-      setCurrentUserId(data.user?.id ?? null)
-    }
-    void loadUser()
-  }, [])
 
   // Set active channel and hydrate messages
   useEffect(() => {
@@ -172,19 +163,17 @@ export const ChannelViewClient = ({
 
         {summary && <ChatSummaryPanel summary={summary} onClose={() => setSummary(null)} />}
 
-        {currentUserId && (
-          <ChatThread
-            channelId={channel.id}
-            messages={channelMessages}
-            currentUserId={currentUserId}
-            hasMore={hasMore}
-            onLoadMore={handleLoadMore}
-            onSend={handleSend}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            canSend={canSend}
-          />
-        )}
+        <ChatThread
+          channelId={channel.id}
+          messages={channelMessages}
+          currentUserId={currentUserId ?? ''}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          onSend={handleSend}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          canSend={canSend}
+        />
       </div>
     </>
   )
