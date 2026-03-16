@@ -1,7 +1,7 @@
 /**
  * Vercel Cron handler — dispatches unsent notification emails.
  *
- * Runs every minute. Queries notifications with email_sent = false,
+ * Runs daily (Hobby plan limit). Queries notifications with email_sent = false,
  * checks user notification preferences, sends branded emails via
  * Resend, and marks them as sent.
  *
