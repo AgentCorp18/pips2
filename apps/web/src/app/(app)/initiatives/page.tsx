@@ -28,18 +28,44 @@ const InitiativesPage = async () => {
       `
       *,
       owner:profiles!initiatives_owner_id_fkey ( id, display_name, avatar_url ),
-      initiative_projects ( id )
+      initiative_projects (
+        id,
+        project:projects!initiative_projects_project_id_fkey (
+          project_steps ( status )
+        )
+      )
     `,
     )
     .eq('org_id', currentOrg.orgId)
     .is('archived_at', null)
     .order('created_at', { ascending: false })
 
-  const items = (initiatives ?? []).map((i) => ({
-    ...i,
-    project_count: i.initiative_projects?.length ?? 0,
-    owner: i.owner ?? { id: i.owner_id, display_name: 'Unknown', avatar_url: null },
-  }))
+  const items = (initiatives ?? []).map((i) => {
+    const links = i.initiative_projects ?? []
+    const project_count = links.length
+
+    let step_progress = 0
+    if (project_count > 0) {
+      let totalProgress = 0
+      for (const link of links) {
+        const steps =
+          (link.project as unknown as { project_steps: Array<{ status: string }> } | null)
+            ?.project_steps ?? []
+        const completedSteps = steps.filter(
+          (s) => s.status === 'completed' || s.status === 'skipped',
+        ).length
+        totalProgress += (completedSteps / 6) * 100
+      }
+      step_progress = Math.round(totalProgress / project_count)
+    }
+
+    return {
+      ...i,
+      project_count,
+      step_progress,
+      owner: i.owner ?? { id: i.owner_id, display_name: 'Unknown', avatar_url: null },
+    }
+  })
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6 lg:p-10">

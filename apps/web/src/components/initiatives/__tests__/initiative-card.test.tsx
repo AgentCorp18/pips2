@@ -28,6 +28,7 @@ const baseInitiative = {
   target_metric: 'Monthly churn rate',
   target_end: '2026-12-31',
   project_count: 3,
+  step_progress: 75,
   owner: { id: 'user-1', display_name: 'Alice Johnson' },
 }
 
@@ -128,5 +129,43 @@ describe('InitiativeCard', () => {
   it('renders data-testid attribute on card element', () => {
     render(<InitiativeCard initiative={baseInitiative} />)
     expect(screen.getByTestId('initiative-card')).toBeTruthy()
+  })
+
+  it('renders progress bar when project_count is greater than zero', () => {
+    render(<InitiativeCard initiative={baseInitiative} />)
+    expect(screen.getByTestId('initiative-progress')).toBeTruthy()
+    expect(screen.getByTestId('initiative-progress-pct')).toBeTruthy()
+    expect(screen.getByText('75%')).toBeTruthy()
+  })
+
+  it('does not render progress bar when project_count is zero', () => {
+    render(
+      <InitiativeCard initiative={{ ...baseInitiative, project_count: 0, step_progress: 0 }} />,
+    )
+    expect(screen.queryByTestId('initiative-progress')).toBeNull()
+  })
+
+  it('renders green progress color for progress above 66', () => {
+    render(<InitiativeCard initiative={{ ...baseInitiative, step_progress: 80 }} />)
+    const pct = screen.getByTestId('initiative-progress-pct')
+    // JSDOM converts hex to rgb in inline styles
+    expect(pct.getAttribute('style')).toContain('rgb(22, 163, 74)')
+  })
+
+  it('renders yellow progress color for progress between 33 and 66 inclusive', () => {
+    render(<InitiativeCard initiative={{ ...baseInitiative, step_progress: 50 }} />)
+    const pct = screen.getByTestId('initiative-progress-pct')
+    expect(pct.getAttribute('style')).toContain('rgb(202, 138, 4)')
+  })
+
+  it('renders red progress color for progress below 33', () => {
+    render(<InitiativeCard initiative={{ ...baseInitiative, step_progress: 20 }} />)
+    const pct = screen.getByTestId('initiative-progress-pct')
+    expect(pct.getAttribute('style')).toContain('rgb(220, 38, 38)')
+  })
+
+  it('renders step progress label', () => {
+    render(<InitiativeCard initiative={baseInitiative} />)
+    expect(screen.getByText('Step progress')).toBeTruthy()
   })
 })

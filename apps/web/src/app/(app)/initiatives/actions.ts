@@ -115,6 +115,7 @@ export const createInitiative = async (
 export const getInitiatives = async (): Promise<{
   initiatives: (Initiative & {
     project_count: number
+    step_progress: number
     owner: { id: string; display_name: string }
   })[]
   error?: string
@@ -131,7 +132,12 @@ export const getInitiatives = async (): Promise<{
       `
       *,
       owner:profiles!initiatives_owner_id_fkey ( id, display_name ),
-      initiative_projects ( id )
+      initiative_projects (
+        id,
+        project:projects!initiative_projects_project_id_fkey (
+          project_steps ( status )
+        )
+      )
     `,
     )
     .eq('org_id', orgId)
@@ -140,11 +146,34 @@ export const getInitiatives = async (): Promise<{
 
   if (error) return { initiatives: [], error: error.message }
 
-  const initiatives = (data ?? []).map((i) => ({
-    ...i,
-    project_count: i.initiative_projects?.length ?? 0,
-    owner: i.owner ?? { id: i.owner_id, display_name: 'Unknown' },
-  }))
+  const initiatives = (data ?? []).map((i) => {
+    const links = i.initiative_projects ?? []
+    const project_count = links.length
+
+    // Calculate average step completion across all linked projects.
+    // Each project has 6 steps; progress = (completed_steps / 6) * 100 averaged across projects.
+    let step_progress = 0
+    if (project_count > 0) {
+      let totalProgress = 0
+      for (const link of links) {
+        const steps =
+          (link.project as unknown as { project_steps: Array<{ status: string }> } | null)
+            ?.project_steps ?? []
+        const completedSteps = steps.filter(
+          (s) => s.status === 'completed' || s.status === 'skipped',
+        ).length
+        totalProgress += (completedSteps / 6) * 100
+      }
+      step_progress = Math.round(totalProgress / project_count)
+    }
+
+    return {
+      ...i,
+      project_count,
+      step_progress,
+      owner: i.owner ?? { id: i.owner_id, display_name: 'Unknown' },
+    }
+  })
 
   return { initiatives }
 }

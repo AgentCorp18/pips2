@@ -15,8 +15,15 @@ type InitiativeCardProps = {
     target_metric: string | null
     target_end: string | null
     project_count: number
+    step_progress: number
     owner: { id: string; display_name: string }
   }
+}
+
+const getProgressColor = (progress: number): string => {
+  if (progress > 66) return '#16a34a' // green-600
+  if (progress >= 33) return '#ca8a04' // yellow-600
+  return '#dc2626' // red-600
 }
 
 const STATUS_STYLES: Record<InitiativeStatus, { label: string; className: string }> = {
@@ -68,6 +75,33 @@ export const InitiativeCard = ({ initiative }: InitiativeCardProps) => {
         <p className="mb-3 text-xs font-medium" style={{ color: initiative.color }}>
           {initiative.target_metric}
         </p>
+      )}
+
+      {initiative.project_count > 0 && (
+        <div className="mb-3" data-testid="initiative-progress">
+          <div className="mb-1 flex items-center justify-between text-xs">
+            <span style={{ color: 'var(--color-text-tertiary)' }}>Step progress</span>
+            <span
+              className="font-semibold"
+              style={{ color: getProgressColor(initiative.step_progress) }}
+              data-testid="initiative-progress-pct"
+            >
+              {initiative.step_progress}%
+            </span>
+          </div>
+          <div
+            className="h-1.5 overflow-hidden rounded-full"
+            style={{ backgroundColor: 'var(--color-border)' }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${initiative.step_progress}%`,
+                backgroundColor: getProgressColor(initiative.step_progress),
+              }}
+            />
+          </div>
+        </div>
       )}
 
       <div
