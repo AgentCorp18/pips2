@@ -73,7 +73,7 @@ describe('ProjectForm', () => {
 
   it('renders Project name label on step 1', () => {
     render(<ProjectForm />)
-    expect(screen.getByLabelText('Project name')).toBeTruthy()
+    expect(screen.getByLabelText(/^Project name/)).toBeTruthy()
   })
 
   it('renders Description label on step 1', () => {
@@ -93,13 +93,13 @@ describe('ProjectForm', () => {
 
   it('name input has placeholder', () => {
     render(<ProjectForm />)
-    const input = screen.getByLabelText('Project name')
+    const input = screen.getByLabelText(/^Project name/)
     expect(input.getAttribute('placeholder')).toContain('Reduce onboarding')
   })
 
   it('name input is required', () => {
     render(<ProjectForm />)
-    const input = screen.getByLabelText('Project name')
+    const input = screen.getByLabelText(/^Project name/)
     expect(input.getAttribute('aria-required')).toBe('true')
   })
 
