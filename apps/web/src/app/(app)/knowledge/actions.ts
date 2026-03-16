@@ -56,7 +56,12 @@ export const getContentByPillar = cache(async (pillar: string): Promise<ContentN
     .order('sort_order')
 
   if (error) {
-    console.error('getContentByPillar error:', error)
+    console.error('[knowledge] getContentByPillar failed', {
+      pillar,
+      code: error.code,
+      message: error.message,
+    })
+    void trackServerEvent('knowledge.error', { fn: 'getContentByPillar', pillar, code: error.code })
     return []
   }
   return data ?? []
@@ -74,7 +79,21 @@ export const getContentBySlug = cache(
       .single()
 
     if (error) {
-      console.error('getContentBySlug error:', error)
+      // PGRST116 = no rows — not a real error, just missing content
+      if (error.code !== 'PGRST116') {
+        console.error('[knowledge] getContentBySlug failed', {
+          pillar,
+          slug,
+          code: error.code,
+          message: error.message,
+        })
+        void trackServerEvent('knowledge.error', {
+          fn: 'getContentBySlug',
+          pillar,
+          slug,
+          code: error.code,
+        })
+      }
       return null
     }
     return data
@@ -91,7 +110,16 @@ export const getContentChildren = cache(async (parentId: string): Promise<Conten
     .order('sort_order')
 
   if (error) {
-    console.error('getContentChildren error:', error)
+    console.error('[knowledge] getContentChildren failed', {
+      parentId,
+      code: error.code,
+      message: error.message,
+    })
+    void trackServerEvent('knowledge.error', {
+      fn: 'getContentChildren',
+      parentId,
+      code: error.code,
+    })
     return []
   }
   return data ?? []
@@ -114,7 +142,18 @@ export const searchContent = async (query: string, pillar?: string): Promise<Con
 
   const { data, error } = await q
   if (error) {
-    console.error('searchContent error:', error)
+    console.error('[knowledge] searchContent failed', {
+      query: query.slice(0, 100),
+      pillar,
+      code: error.code,
+      message: error.message,
+    })
+    void trackServerEvent('knowledge.error', {
+      fn: 'searchContent',
+      query: query.slice(0, 50),
+      pillar: pillar ?? null,
+      code: error.code,
+    })
     return []
   }
 
@@ -144,7 +183,16 @@ export const getContentForContext = async (
     .is('parent_id', null)
     .order('sort_order')
   if (error) {
-    console.error('getContentForContext error:', error)
+    console.error('[knowledge] getContentForContext failed', {
+      steps,
+      tools,
+      code: error.code,
+      message: error.message,
+    })
+    void trackServerEvent('knowledge.error', {
+      fn: 'getContentForContext',
+      code: error.code,
+    })
     return []
   }
 
@@ -175,7 +223,15 @@ export const getUserBookmarks = async (): Promise<BookmarkRow[]> => {
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('getUserBookmarks error:', error)
+    console.error('[knowledge] getUserBookmarks failed', {
+      userId: user.id,
+      code: error.code,
+      message: error.message,
+    })
+    void trackServerEvent('knowledge.error', {
+      fn: 'getUserBookmarks',
+      code: error.code,
+    })
     return []
   }
   return data ?? []
@@ -196,7 +252,17 @@ export const getUserBookmarksWithContent = async (): Promise<BookmarkWithContent
     .order('created_at', { ascending: false })
 
   if (error || !bookmarks?.length) {
-    if (error) console.error('getUserBookmarksWithContent error:', error)
+    if (error) {
+      console.error('[knowledge] getUserBookmarksWithContent failed', {
+        userId: user.id,
+        code: error.code,
+        message: error.message,
+      })
+      void trackServerEvent('knowledge.error', {
+        fn: 'getUserBookmarksWithContent',
+        code: error.code,
+      })
+    }
     return []
   }
 
@@ -361,7 +427,17 @@ export const getAllReadingSessions = async (): Promise<ReadingSessionWithContent
     .order('last_accessed_at', { ascending: false })
 
   if (error || !sessions?.length) {
-    if (error) console.error('getAllReadingSessions error:', error)
+    if (error) {
+      console.error('[knowledge] getAllReadingSessions failed', {
+        userId: user.id,
+        code: error.code,
+        message: error.message,
+      })
+      void trackServerEvent('knowledge.error', {
+        fn: 'getAllReadingSessions',
+        code: error.code,
+      })
+    }
     return []
   }
 
@@ -399,7 +475,16 @@ export const getContentByTool = cache(async (toolSlug: string): Promise<ContentN
     .limit(50)
 
   if (error) {
-    console.error('getContentByTool error:', error)
+    console.error('[knowledge] getContentByTool failed', {
+      toolSlug,
+      code: error.code,
+      message: error.message,
+    })
+    void trackServerEvent('knowledge.error', {
+      fn: 'getContentByTool',
+      toolSlug,
+      code: error.code,
+    })
     return []
   }
 
@@ -423,7 +508,16 @@ export const getGuideContentForStep = cache(
       .limit(50)
 
     if (error) {
-      console.error('getGuideContentForStep error:', error)
+      console.error('[knowledge] getGuideContentForStep failed', {
+        stepNumber,
+        code: error.code,
+        message: error.message,
+      })
+      void trackServerEvent('knowledge.error', {
+        fn: 'getGuideContentForStep',
+        stepNumber,
+        code: error.code,
+      })
       return []
     }
 
@@ -451,7 +545,16 @@ export const getRecentReadHistory = async (limit = 10): Promise<ReadHistoryRow[]
     .limit(limit)
 
   if (error) {
-    console.error('getRecentReadHistory error:', error)
+    console.error('[knowledge] getRecentReadHistory failed', {
+      userId: user.id,
+      limit,
+      code: error.code,
+      message: error.message,
+    })
+    void trackServerEvent('knowledge.error', {
+      fn: 'getRecentReadHistory',
+      code: error.code,
+    })
     return []
   }
   return data ?? []
@@ -475,7 +578,18 @@ export const getRecentReadHistoryWithContent = async (
     .limit(limit)
 
   if (error || !history?.length) {
-    if (error) console.error('getRecentReadHistoryWithContent error:', error)
+    if (error) {
+      console.error('[knowledge] getRecentReadHistoryWithContent failed', {
+        userId: user.id,
+        limit,
+        code: error.code,
+        message: error.message,
+      })
+      void trackServerEvent('knowledge.error', {
+        fn: 'getRecentReadHistoryWithContent',
+        code: error.code,
+      })
+    }
     return []
   }
 
