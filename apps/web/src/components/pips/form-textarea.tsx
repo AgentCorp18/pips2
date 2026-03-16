@@ -47,7 +47,12 @@ export const FormTextarea = ({
       <div className="flex flex-col gap-1">
         <span className="text-sm font-medium text-[var(--color-text-primary)]">
           {label}
-          {required && <span className="text-[var(--color-error)]"> *</span>}
+          {required && (
+            <span className="text-[var(--color-error)]" aria-hidden="true">
+              {' '}
+              *
+            </span>
+          )}
         </span>
         {helperText && <p className="text-xs text-[var(--color-text-tertiary)]">{helperText}</p>}
         {value ? (
@@ -64,9 +69,8 @@ export const FormTextarea = ({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-1">
-        <Label htmlFor={id}>
+        <Label htmlFor={id} required={required}>
           {label}
-          {required && <span className="text-[var(--color-error)]"> *</span>}
         </Label>
         {aiFieldType && (
           <AiAssistButton
@@ -86,6 +90,7 @@ export const FormTextarea = ({
         placeholder={placeholder}
         rows={rows}
         maxLength={maxLength}
+        aria-required={required || undefined}
         className="flex min-h-[80px] w-full rounded-[var(--radius-md)] border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
       />
       <div className="flex justify-end">

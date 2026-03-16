@@ -318,7 +318,7 @@ export const ProjectForm = () => {
               {currentStep === 1 && (
                 <>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="name">Project name *</Label>
+                    <Label htmlFor="name" required>Project name</Label>
                     <Input
                       id="name"
                       type="text"

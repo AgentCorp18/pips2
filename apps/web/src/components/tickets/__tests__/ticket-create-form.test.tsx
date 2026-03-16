@@ -133,13 +133,13 @@ describe('TicketCreateForm', () => {
   it('renders the title input field in full form', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    expect(screen.getByLabelText('Title *')).toBeInTheDocument()
+    expect(screen.getByLabelText('Title')).toBeInTheDocument()
   })
 
   it('renders the title input with required attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    expect(screen.getByLabelText('Title *')).toBeRequired()
+    expect(screen.getByLabelText('Title')).toBeRequired()
   })
 
   it('renders the description textarea', () => {
@@ -201,7 +201,7 @@ describe('TicketCreateForm', () => {
   it('renders all expected labels in full form', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    expect(screen.getByText('Title *')).toBeInTheDocument()
+    expect(screen.getByLabelText('Title')).toBeInTheDocument()
     expect(screen.getByText('Description')).toBeInTheDocument()
     expect(screen.getByText('Type')).toBeInTheDocument()
     expect(screen.getByText('Priority')).toBeInTheDocument()
@@ -285,7 +285,7 @@ describe('TicketCreateForm', () => {
   it('title input has correct name attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    const input = screen.getByLabelText('Title *')
+    const input = screen.getByLabelText('Title')
     expect(input).toHaveAttribute('name', 'title')
   })
 
@@ -301,7 +301,7 @@ describe('TicketCreateForm', () => {
   it('title input has aria-required attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    expect(screen.getByLabelText('Title *')).toHaveAttribute('aria-required', 'true')
+    expect(screen.getByLabelText('Title')).toHaveAttribute('aria-required', 'true')
   })
 
   /* ---- Empty members/projects ---- */

@@ -59,7 +59,7 @@ export const CreateInitiativeForm = () => {
 
       {/* Title */}
       <div className="space-y-1.5">
-        <Label htmlFor="title">Title *</Label>
+        <Label htmlFor="title" required>Title</Label>
         <Input
           id="title"
           name="title"

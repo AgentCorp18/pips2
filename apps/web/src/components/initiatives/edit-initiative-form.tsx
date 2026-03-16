@@ -64,12 +64,13 @@ export const EditInitiativeForm = ({ initiative }: EditInitiativeFormProps) => {
     <form onSubmit={handleSubmit} className="space-y-6" data-testid="edit-initiative-form">
       {/* Title */}
       <div className="space-y-1.5">
-        <Label htmlFor="title">Title *</Label>
+        <Label htmlFor="title" required>Title</Label>
         <Input
           id="title"
           name="title"
           defaultValue={initiative.title}
           required
+          aria-required="true"
           data-testid="initiative-title-input"
         />
       </div>
