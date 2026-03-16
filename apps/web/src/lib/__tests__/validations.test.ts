@@ -319,7 +319,7 @@ describe('ticketFiltersSchema', () => {
 
   it('fails with invalid sort_by value', () => {
     const result = ticketFiltersSchema.safeParse({
-      sort_by: 'title',
+      sort_by: 'nonexistent_column',
     })
     expect(result.success).toBe(false)
   })
