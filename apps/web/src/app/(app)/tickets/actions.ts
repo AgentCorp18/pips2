@@ -63,7 +63,7 @@ export const createTicket = async (
   }
 
   try {
-    await requirePermission(orgId, 'ticket.create')
+    await requirePermission(orgId, 'ticket.create', { supabase, userId: user.id })
   } catch {
     return { error: 'You do not have permission to create tickets' }
   }
@@ -523,7 +523,7 @@ export const bulkUpdateTickets = async (
 
   // FIX 1: wrap requirePermission in try/catch
   try {
-    await requirePermission(orgId, 'ticket.update')
+    await requirePermission(orgId, 'ticket.update', { supabase, userId: user.id })
   } catch {
     return { error: 'You do not have permission to update tickets' }
   }
@@ -788,7 +788,7 @@ export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActi
 
   // FIX 1: wrap requirePermission in try/catch
   try {
-    await requirePermission(orgId, 'ticket.delete')
+    await requirePermission(orgId, 'ticket.delete', { supabase, userId: user.id })
   } catch {
     return { error: 'You do not have permission to delete tickets' }
   }

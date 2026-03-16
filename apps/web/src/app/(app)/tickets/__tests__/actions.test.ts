@@ -181,7 +181,7 @@ describe('createTicket', () => {
     const fd = makeFormData(validTicketFields)
     const result = await createTicket({}, fd)
     expect(result).toEqual({ success: true, redirectTo: '/tickets' })
-    expect(requirePermission).toHaveBeenCalledWith('org-1', 'ticket.create')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'ticket.create', expect.any(Object))
   })
 
   it('returns error when permission is denied', async () => {

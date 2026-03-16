@@ -1,7 +1,18 @@
 import { cookies } from 'next/headers'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { hasPermission, type Permission, type OrgRole } from '@pips/shared'
 import { ORG_COOKIE_NAME } from '@/lib/get-current-org'
+
+/**
+ * Optional context supplied by callers that have already bootstrapped auth.
+ * When provided, `requirePermission` skips its internal `createClient()` +
+ * `getUser()` calls — eliminating 2-3 redundant DB round-trips per request.
+ */
+export type PermissionContext = {
+  supabase: SupabaseClient
+  userId: string
+}
 
 /** Get current user's role in an org (system admins get 'owner' everywhere) */
 export const getUserOrgRole = async (orgId: string): Promise<OrgRole | null> => {
@@ -62,8 +73,38 @@ export const hasOrgPermission = async (
 export const requirePermission = async (
   orgId: string,
   permission: Permission,
+  context?: PermissionContext,
 ): Promise<OrgRole> => {
-  const role = await getUserOrgRole(orgId)
+  let role: OrgRole | null
+
+  if (context) {
+    // Fast path: caller already has the authenticated user — skip createClient() + getUser()
+    const { supabase, userId } = context
+
+    // System admins get owner-level access to every org
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_system_admin')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (profile?.is_system_admin) {
+      role = 'owner'
+    } else {
+      const { data } = await supabase
+        .from('org_members')
+        .select('role')
+        .eq('org_id', orgId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      role = (data?.role as OrgRole) ?? null
+    }
+  } else {
+    // Slow path: no context provided — fall back to original behavior
+    role = await getUserOrgRole(orgId)
+  }
+
   if (!role) throw new Error('Not a member of this organization')
 
   const allowed = await hasOrgPermission(orgId, role, permission)

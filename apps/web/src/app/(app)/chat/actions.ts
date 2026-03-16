@@ -239,7 +239,7 @@ export const sendMessage = async (
   if (!orgId) return { error: 'No organization context' }
 
   try {
-    await requirePermission(orgId, 'chat.send')
+    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
   } catch {
     return { error: 'Insufficient permissions to send messages' }
   }
@@ -280,7 +280,7 @@ export const editMessage = async (messageId: string, body: string): Promise<Acti
   if (!orgId) return { error: 'No organization context' }
 
   try {
-    await requirePermission(orgId, 'chat.send')
+    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
   } catch {
     return { error: 'Insufficient permissions to edit messages' }
   }
@@ -312,7 +312,7 @@ export const deleteMessage = async (messageId: string): Promise<ActionResult> =>
   if (!orgId) return { error: 'No organization context' }
 
   try {
-    await requirePermission(orgId, 'chat.send')
+    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
   } catch {
     return { error: 'Insufficient permissions to delete messages' }
   }
@@ -346,7 +346,7 @@ export const createChannel = async (
   if (!orgId) return { error: 'No organization context' }
 
   try {
-    await requirePermission(orgId, 'chat.manage')
+    await requirePermission(orgId, 'chat.manage', { supabase, userId: user.id })
   } catch {
     return { error: 'Insufficient permissions to create channels' }
   }
@@ -443,7 +443,7 @@ export const archiveChannel = async (channelId: string): Promise<ActionResult> =
   if (!orgId) return { error: 'No organization selected' }
 
   try {
-    await requirePermission(orgId, 'chat.manage')
+    await requirePermission(orgId, 'chat.manage', { supabase, userId: user.id })
   } catch {
     return { error: 'Insufficient permissions to archive channels' }
   }
@@ -550,7 +550,7 @@ export const generateSummary = async (channelId: string): Promise<ActionResult<C
   if (!channel) return { error: 'Channel not found' }
 
   try {
-    await requirePermission(orgId, 'chat.send')
+    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
   } catch {
     return { error: 'Insufficient permissions' }
   }
