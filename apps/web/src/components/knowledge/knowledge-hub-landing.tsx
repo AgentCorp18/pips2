@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Eye,
   GraduationCap,
+  FileText,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -150,6 +151,35 @@ export const KnowledgeHubLanding = ({
             </Link>
           )
         })}
+      </div>
+
+      {/* Case Studies */}
+      <div>
+        <Link href="/knowledge/case-studies" data-testid="case-studies-link">
+          <Card className="group cursor-pointer transition-all hover:border-[var(--color-primary)] hover:shadow-md">
+            <CardContent className="flex items-center gap-4 py-4">
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: 'var(--color-step-6-subtle)' }}
+              >
+                <FileText size={20} className="text-[var(--color-step-6)]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  Case Studies
+                </h3>
+                <p className="text-xs text-[var(--color-text-tertiary)]">
+                  Real-world examples of PIPS in action — including how we used PIPS to improve PIPS
+                  itself
+                </p>
+              </div>
+              <ArrowRight
+                size={14}
+                className="shrink-0 text-[var(--color-text-tertiary)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+              />
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Continue Learning */}
