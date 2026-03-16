@@ -1,0 +1,84 @@
+-- ============================================================
+-- BETA TEST SCENARIO: Reduce Customer Support Response Time
+-- ============================================================
+--
+-- SCENARIO OVERVIEW
+-- -----------------
+-- Organization: TechFlow Solutions (mid-size SaaS company)
+-- Problem: Support response time climbed from 1.5hr to 4.2hr
+-- Goal: Reduce first response time to under 1 hour
+-- Duration: ~6 weeks (Feb 3 - Mar 15, 2026)
+-- Users: 10 team members across 3 teams
+--
+-- EXECUTION ORDER
+-- ---------------
+-- Run each file in order using the Supabase SQL editor or psql
+-- with the service role (bypasses RLS):
+--
+--   1. beta-scenario-support-response-time.sql  — Org, users, teams, initiative, projects
+--   2. beta-scenario-02-project-steps.sql       — Project steps for all 5 projects
+--   3. beta-scenario-03-forms-project1.sql      — All PIPS forms for Project 1 (completed)
+--   4. beta-scenario-04-forms-projects2-5.sql   — PIPS forms for Projects 2-5 (various stages)
+--   5. beta-scenario-05-tickets.sql             — 13 tickets + 7 sub-tickets + 1 bug
+--   6. beta-scenario-06-comments.sql            — Ticket and project comments
+--   7. beta-scenario-07-chat.sql                — Chat channels, members, and messages
+--
+-- CLEANUP
+-- -------
+-- To remove all scenario data, run in reverse dependency order:
+--
+--   DELETE FROM chat_messages WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM chat_channel_members WHERE channel_id IN (SELECT id FROM chat_channels WHERE org_id = 'b0010000-0000-4000-8000-000000000001');
+--   DELETE FROM chat_channels WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM comments WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM tickets WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM project_forms WHERE project_id IN (SELECT id FROM projects WHERE org_id = 'b0010000-0000-4000-8000-000000000001');
+--   DELETE FROM project_steps WHERE project_id IN (SELECT id FROM projects WHERE org_id = 'b0010000-0000-4000-8000-000000000001');
+--   DELETE FROM initiative_projects WHERE initiative_id = 'e0010000-0000-4000-8000-000000000001';
+--   DELETE FROM project_members WHERE project_id IN (SELECT id FROM projects WHERE org_id = 'b0010000-0000-4000-8000-000000000001');
+--   DELETE FROM projects WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM initiatives WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM team_members WHERE team_id IN (SELECT id FROM teams WHERE org_id = 'b0010000-0000-4000-8000-000000000001');
+--   DELETE FROM teams WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM notifications WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM audit_log WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM org_members WHERE org_id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM organizations WHERE id = 'b0010000-0000-4000-8000-000000000001';
+--   DELETE FROM profiles WHERE id LIKE 'c0010000-0000-4000-8000-00000000%';
+--   DELETE FROM auth.users WHERE id LIKE 'c0010000-0000-4000-8000-00000000%';
+--
+-- DATA SUMMARY
+-- ------------
+-- Organization:    1 (TechFlow Solutions)
+-- Users:           10
+-- Teams:           3 (Support Ops, Engineering, Analytics & Training)
+-- Initiative:      1 (Reduce Customer Support Response Time)
+-- Projects:        5 (at various stages of the PIPS 6-step cycle)
+-- Project Steps:   30 (6 per project)
+-- PIPS Forms:      36 (19 for Project 1, 17 for Projects 2-5)
+-- Tickets:         20 (13 main tickets + 7 sub-tickets, including 1 bug)
+-- Comments:        22 (ticket and project comments)
+-- Chat Channels:   9 (1 org, 3 team, 5 project)
+-- Chat Messages:   ~35 (across all channels)
+--
+-- PROJECT STATUS MAP
+-- ------------------
+-- Project 1: "Reduce First Response Time"        -> COMPLETED (all 6 steps, full forms)
+-- Project 2: "Auto-Triage System"                -> Step 5 (Implement) in progress
+-- Project 3: "Real-Time Dashboard"               -> Step 4 (Select & Plan) in progress
+-- Project 4: "Knowledge Base Redesign"           -> Step 3 (Generate) in progress
+-- Project 5: "Training & Certification Program"  -> Step 2 (Analyze) in progress
+--
+-- USERS
+-- -----
+-- Sarah Chen          — VP Customer Success (admin, initiative owner)
+-- Marcus Rivera       — Support Ops Manager (manager, Project 1 lead)
+-- Aisha Patel         — Senior Support Agent (member, cross-team)
+-- David Kim           — Engineering Manager (manager, Project 2 lead)
+-- Priya Sharma        — Backend Engineer (member)
+-- James O'Brien       — Data Analyst (manager, Project 3 lead)
+-- Lisa Nguyen         — Training Manager (manager, Project 5 lead)
+-- Tom Bradshaw        — Frontend Engineer (member)
+-- Rachel Foster       — Support Agent (member)
+-- Carlos Mendez       — KB Content Writer (member, Project 4 lead)
+-- ============================================================
