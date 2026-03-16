@@ -42,11 +42,15 @@ export const useUnsavedChanges = ({
   const [showDialog, setShowDialog] = useState(false)
   /** Stores the navigation action to run after the user confirms. */
   const pendingActionRef = useRef<(() => void) | null>(null)
+  /** Sync ref so the beforeunload handler always reads the latest value
+   *  without waiting for a React re-render cycle. */
+  const isDirtyRef = useRef(isDirty)
+  isDirtyRef.current = isDirty
 
   /* ── browser tab / window close ─────────────────────────────────── */
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
+      if (isDirtyRef.current) {
         e.preventDefault()
       }
     }
@@ -54,7 +58,7 @@ export const useUnsavedChanges = ({
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-  }, [isDirty])
+  }, [])
 
   /* ── client-side navigation guard ───────────────────────────────── */
   const guardNavigation = useCallback(
