@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { TableRow, TableCell } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -101,6 +102,19 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
             {TYPE_ICONS[ticket.type]}
             <span className="text-sm">{TYPE_CONFIG[ticket.type].label}</span>
           </span>
+        </TableCell>
+        <TableCell className="hidden md:table-cell text-sm" onClick={(e) => e.stopPropagation()}>
+          {ticket.projectId && ticket.projectName ? (
+            <Link
+              href={`/projects/${ticket.projectId}`}
+              className="truncate max-w-[120px] inline-block hover:underline"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              {ticket.projectName}
+            </Link>
+          ) : (
+            <span className="text-muted-foreground">--</span>
+          )}
         </TableCell>
         <TableCell className="hidden sm:table-cell">
           {ticket.assigneeName ? (

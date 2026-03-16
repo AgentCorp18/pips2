@@ -23,6 +23,8 @@ export type TicketRow = {
   createdAt: string
   updatedAt: string
   reporterName: string | null
+  projectId: string | null
+  projectName: string | null
 }
 
 type TicketListTableProps = {
@@ -169,6 +171,14 @@ export const TicketListTable = ({
               <SortableHeader
                 label="Type"
                 sortKey="type"
+                currentSort={sortBy}
+                currentDirection={currentDirection}
+                onSort={handleSort}
+                className="hidden md:table-cell"
+              />
+              <SortableHeader
+                label="Project"
+                sortKey="project_title"
                 currentSort={sortBy}
                 currentDirection={currentDirection}
                 onSort={handleSort}

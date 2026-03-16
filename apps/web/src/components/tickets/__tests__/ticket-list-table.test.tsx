@@ -36,6 +36,8 @@ const mockTickets: TicketRow[] = [
     createdAt: '2026-03-01',
     updatedAt: '2026-03-05',
     reporterName: 'Bob',
+    projectId: 'proj-1',
+    projectName: 'Auth Redesign',
   },
   {
     id: 't-2',
@@ -50,6 +52,8 @@ const mockTickets: TicketRow[] = [
     createdAt: '2026-03-02',
     updatedAt: '2026-03-02',
     reporterName: null,
+    projectId: null,
+    projectName: null,
   },
 ]
 
@@ -70,6 +74,7 @@ describe('TicketListTable', () => {
     expect(screen.getByText('Status')).toBeTruthy()
     expect(screen.getByText('Priority')).toBeTruthy()
     expect(screen.getByText('Type')).toBeTruthy()
+    expect(screen.getByText('Project')).toBeTruthy()
     expect(screen.getByText('Assignee')).toBeTruthy()
     expect(screen.getByText('Due Date')).toBeTruthy()
     expect(screen.getByText('Created')).toBeTruthy()

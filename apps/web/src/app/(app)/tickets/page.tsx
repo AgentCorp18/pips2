@@ -202,6 +202,11 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       display_name: string | null
     } | null
 
+    const project = ticket.project as unknown as {
+      id: string
+      title: string
+    } | null
+
     return {
       id: ticket.id,
       sequenceId: `${prefix}-${ticket.sequence_number}`,
@@ -215,6 +220,8 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       createdAt: ticket.created_at,
       updatedAt: ticket.updated_at,
       reporterName: reporter ? reporter.display_name || reporter.full_name || null : null,
+      projectId: project?.id ?? null,
+      projectName: project?.title ?? null,
     }
   })
 

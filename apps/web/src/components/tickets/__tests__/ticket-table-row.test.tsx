@@ -25,6 +25,8 @@ const TICKET: TicketRow = {
   createdAt: '2026-03-01',
   updatedAt: '2026-03-10',
   reporterName: 'Carol',
+  projectId: 'proj-1',
+  projectName: 'Auth Redesign',
 }
 
 // Wrap in table for valid HTML
