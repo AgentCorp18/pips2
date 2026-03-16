@@ -18,7 +18,7 @@
 | Phases complete                | MVP + 1.5 through 10 + CEO bug fix sprints        |
 | Critical security issues fixed | 5 of 5                                            |
 | P1 security issues fixed       | 11 of 11                                          |
-| CEO Request tickets resolved   | 13 of 16 (3 in progress)                          |
+| CEO Request tickets resolved   | 16 of 16 (all complete)                           |
 | DB migrations applied          | 17 (production)                                   |
 
 ---
@@ -140,24 +140,26 @@ Chat tables: `chat_channels`, `chat_channel_members`, `chat_messages`, `chat_sum
 
 ## CEO Bug Fix Sprints — COMPLETE (2026-03-15)
 
-**16 CEO Request tickets triaged and resolved through PIPS methodology:**
+**18 CEO Request tickets triaged and resolved through PIPS methodology:**
 
-| Ticket                   | Fix                                         | Status      |
-| ------------------------ | ------------------------------------------- | ----------- |
-| Channel not found error  | Fixed getCurrentOrg pattern in chat actions | DONE        |
-| Cannot edit ticket type  | Added Type select to ticket detail sidebar  | DONE        |
-| Full-width tables        | Changed table containers to max-w-full px-4 | DONE        |
-| Add time to dates        | FormattedDate component with showTime prop  | DONE        |
-| Priority auto-escalation | Fixed to not override explicit priority     | DONE        |
-| Chat RLS permissions     | Migration adding 'member' role to policies  | DONE        |
-| Due date timezone        | parseDateForDisplay() for local midnight    | DONE        |
-| Back button navigation   | router.replace() for filter/sort state      | DONE        |
-| Board swimlane flip      | Status rows x Step columns                  | DONE        |
-| CEO Request filter       | Added ceo_request to ALL_TYPES              | DONE        |
-| Chat mobile              | Single-panel layout, touch targets          | DONE        |
-| Failed to create channel | In progress — onboarding channel creation   | IN PROGRESS |
-| Mobile UI/UX             | In progress — responsive polish             | IN PROGRESS |
-| Mobile scrolling         | In progress — scroll container fixes        | IN PROGRESS |
+| Ticket                   | Fix                                                                           | Status |
+| ------------------------ | ----------------------------------------------------------------------------- | ------ |
+| Channel not found error  | Fixed getCurrentOrg pattern in chat actions                                   | DONE   |
+| Cannot edit ticket type  | Added Type select to ticket detail sidebar                                    | DONE   |
+| Full-width tables        | Changed table containers to max-w-full px-4                                   | DONE   |
+| Add time to dates        | FormattedDate component with showTime prop                                    | DONE   |
+| Priority auto-escalation | Fixed to not override explicit priority                                       | DONE   |
+| Chat RLS permissions     | Migration adding 'member' role to policies                                    | DONE   |
+| Due date timezone        | parseDateForDisplay() for local midnight                                      | DONE   |
+| Back button navigation   | router.replace() for filter/sort state                                        | DONE   |
+| Board swimlane flip      | Status rows x Step columns                                                    | DONE   |
+| CEO Request filter       | Added ceo_request to ALL_TYPES                                                | DONE   |
+| Chat mobile              | Single-panel layout, touch targets                                            | DONE   |
+| Failed to create channel | Backfilled General channels for 4 pre-existing orgs; trigger handles new orgs | DONE   |
+| Mobile UI/UX             | Touch targets, form stacking, swimlane scroll, sidebar overlap fixes          | DONE   |
+| Mobile scrolling         | Scroll container isolation, single active scrollable area                     | DONE   |
+| Unsaved changes dialog   | Flush-save on navigation instead of false-positive dialog                     | DONE   |
+| Activity feed display    | Fixed "System created comments" — entity-specific labels + friendly names     | DONE   |
 
 ---
 

@@ -45,7 +45,9 @@ export const useUnsavedChanges = ({
   /** Sync ref so the beforeunload handler always reads the latest value
    *  without waiting for a React re-render cycle. */
   const isDirtyRef = useRef(isDirty)
-  isDirtyRef.current = isDirty
+  useEffect(() => {
+    isDirtyRef.current = isDirty
+  }, [isDirty])
 
   /* ── browser tab / window close ─────────────────────────────────── */
   useEffect(() => {

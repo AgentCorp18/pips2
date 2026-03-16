@@ -185,21 +185,40 @@ export const getRecentActivity = async (orgId: string, limit = 10): Promise<Acti
   return logs.map((log) => {
     const userName = log.user_id ? (userMap.get(log.user_id) ?? 'Unknown') : 'System'
     const newData = log.new_data as Record<string, unknown> | null
-    const title = (newData?.title as string) ?? log.entity_type
 
-    let description = ''
-    switch (log.action) {
-      case 'insert':
-        description = `${userName} created ${log.entity_type} "${title}"`
-        break
-      case 'update':
-        description = `${userName} updated ${log.entity_type} "${title}"`
-        break
-      case 'delete':
-        description = `${userName} deleted ${log.entity_type} "${title}"`
-        break
-      default:
-        description = `${userName} performed ${log.action} on ${log.entity_type}`
+    // Extract a human-readable label for the entity
+    const entityLabel =
+      (newData?.title as string) ??
+      (newData?.name as string) ??
+      (newData?.body as string)?.slice(0, 60) ??
+      null
+
+    // Friendly entity type names
+    const ENTITY_NAMES: Record<string, string> = {
+      tickets: 'ticket',
+      projects: 'project',
+      comments: 'comment',
+      chat_messages: 'message',
+      chat_channels: 'channel',
+      organizations: 'organization',
+      initiatives: 'initiative',
+    }
+    const entityName = ENTITY_NAMES[log.entity_type] ?? log.entity_type
+
+    const ACTION_VERBS: Record<string, string> = {
+      insert: 'created',
+      update: 'updated',
+      delete: 'deleted',
+    }
+    const verb = ACTION_VERBS[log.action]
+
+    let description: string
+    if (verb) {
+      description = entityLabel
+        ? `${userName} ${verb} ${entityName} "${entityLabel}"`
+        : `${userName} ${verb} a ${entityName}`
+    } else {
+      description = `${userName} performed ${log.action} on ${entityName}`
     }
 
     return {

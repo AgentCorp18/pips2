@@ -222,9 +222,41 @@ export const FormShell = (props: FormShellProps) => {
 
   /* Unsaved changes — beforeunload + client-side navigation dialog */
   const router = useRouter()
-  const { showDialog, confirmDiscard, cancelDiscard, guardNavigation } = useUnsavedChanges({
+  const {
+    showDialog,
+    confirmDiscard,
+    cancelDiscard,
+    guardNavigation: baseGuard,
+  } = useUnsavedChanges({
     isDirty: hasPendingChanges,
   })
+
+  /* Flush-save wrapper: on navigation attempt, cancel debounce and save
+     immediately. If save succeeds → navigate without dialog. Only show
+     discard dialog when the save actually fails. This prevents the false-
+     positive dialog when auto-save would have saved the data anyway. */
+  const guardNavigation = useCallback(
+    (action: () => void) => {
+      if (!hasPendingChanges) {
+        action()
+        return
+      }
+      // Cancel pending debounce timer
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+      // Flush save immediately
+      void doSave().then((succeeded) => {
+        if (succeeded) {
+          action() // Navigate without dialog
+        } else {
+          baseGuard(action) // Show discard dialog
+        }
+      })
+    },
+    [hasPendingChanges, doSave, baseGuard],
+  )
 
   /* BUG 2 FIX: Only show success toast when doSave actually succeeded */
   const handleManualSave = () => {
