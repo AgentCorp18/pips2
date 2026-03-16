@@ -203,7 +203,18 @@ export const ticketFiltersSchema = z.object({
   search: z.string().max(200).optional(),
   page: z.coerce.number().int().min(1).default(1),
   per_page: z.coerce.number().int().min(1).max(100).default(25),
-  sort_by: z.enum(['created_at', 'updated_at', 'priority', 'due_date']).default('created_at'),
+  sort_by: z
+    .enum([
+      'created_at',
+      'updated_at',
+      'priority',
+      'due_date',
+      'sequence_number',
+      'title',
+      'status',
+      'type',
+    ])
+    .default('created_at'),
   sort_order: z.enum(['asc', 'desc']).default('desc'),
 })
 

@@ -6,6 +6,8 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react'
 import { SortableHeader, type SortDirection } from '@/components/ui/sortable-header'
+import { ColumnToggle, type ColumnDef } from '@/components/ui/column-toggle'
+import { useColumnVisibility } from '@/hooks/use-column-visibility'
 import { BulkActionsBar } from './bulk-actions-bar'
 import { TicketTableRow } from './ticket-table-row'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
@@ -23,6 +25,7 @@ export type TicketRow = {
   createdAt: string
   updatedAt: string
   reporterName: string | null
+  modifiedByName: string | null
   projectId: string | null
   projectName: string | null
 }
@@ -42,6 +45,56 @@ type TicketListTableProps = {
   members?: OrgMember[]
 }
 
+/* ============================================================
+   Column definitions — all available columns for the ticket table.
+   Columns with a sortKey can be sorted server-side.
+   ============================================================ */
+
+const TICKET_COLUMNS: ColumnDef[] = [
+  { id: 'id', label: 'ID', canHide: false },
+  { id: 'title', label: 'Title', canHide: false },
+  { id: 'status', label: 'Status', canHide: false },
+  { id: 'priority', label: 'Priority', canHide: true },
+  { id: 'type', label: 'Type', canHide: true },
+  { id: 'project', label: 'Project', canHide: true },
+  { id: 'assignee', label: 'Assignee', canHide: true },
+  { id: 'due_date', label: 'Due Date', canHide: true },
+  { id: 'created_at', label: 'Created', canHide: true },
+  { id: 'updated_at', label: 'Modified Date', canHide: true },
+  { id: 'reporter', label: 'Created By', canHide: true },
+  { id: 'modified_by', label: 'Modified By', canHide: true },
+]
+
+const ALL_COLUMN_IDS = TICKET_COLUMNS.map((c) => c.id)
+
+/** Default visible columns */
+const DEFAULT_VISIBLE = [
+  'id',
+  'title',
+  'status',
+  'priority',
+  'type',
+  'project',
+  'assignee',
+  'due_date',
+  'created_at',
+  'updated_at',
+  'reporter',
+  'modified_by',
+]
+
+/** Columns that support server-side sorting via Supabase */
+const SORTABLE_COLUMNS: Record<string, string> = {
+  id: 'sequence_number',
+  title: 'title',
+  status: 'status',
+  priority: 'priority',
+  type: 'type',
+  due_date: 'due_date',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+}
+
 export const TicketListTable = ({
   tickets,
   total,
@@ -55,6 +108,12 @@ export const TicketListTable = ({
   const searchParams = useSearchParams()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isFullScreen, setIsFullScreen] = useState(false)
+
+  const { visibleColumns, toggleColumn, resetToDefaults, isVisible } = useColumnVisibility(
+    'tickets',
+    ALL_COLUMN_IDS,
+    DEFAULT_VISIBLE,
+  )
 
   const allSelected = tickets.length > 0 && selectedIds.size === tickets.length
   const someSelected = selectedIds.size > 0 && !allSelected
@@ -105,6 +164,25 @@ export const TicketListTable = ({
   /* Map server-side sortBy/sortOrder to SortableHeader props */
   const currentDirection: SortDirection = sortOrder === 'asc' ? 'asc' : 'desc'
 
+  /** Render a column header — sortable if the column has a sort key */
+  const renderHeader = (colId: string, label: string, className?: string) => {
+    if (!isVisible(colId)) return null
+    const sortKey = SORTABLE_COLUMNS[colId]
+    if (sortKey) {
+      return (
+        <SortableHeader
+          label={label}
+          sortKey={sortKey}
+          currentSort={sortBy}
+          currentDirection={currentDirection}
+          onSort={handleSort}
+          className={className}
+        />
+      )
+    }
+    return <TableHead className={className}>{label}</TableHead>
+  }
+
   return (
     <div
       className={
@@ -115,6 +193,12 @@ export const TicketListTable = ({
       data-testid="ticket-list-table-container"
     >
       <div className="mb-2 flex items-center justify-end gap-2">
+        <ColumnToggle
+          columns={TICKET_COLUMNS}
+          visibleColumns={visibleColumns}
+          onToggle={toggleColumn}
+          onReset={resetToDefaults}
+        />
         <Button
           variant="ghost"
           size="icon-sm"
@@ -150,91 +234,18 @@ export const TicketListTable = ({
                   aria-label="Select all tickets"
                 />
               </TableHead>
-              <SortableHeader
-                label="ID"
-                sortKey="sequence_number"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-              />
-              <SortableHeader
-                label="Title"
-                sortKey="title"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-              />
-              <SortableHeader
-                label="Status"
-                sortKey="status"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-              />
-              <SortableHeader
-                label="Priority"
-                sortKey="priority"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden sm:table-cell"
-              />
-              <SortableHeader
-                label="Type"
-                sortKey="type"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden md:table-cell"
-              />
-              <SortableHeader
-                label="Project"
-                sortKey="project_title"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden md:table-cell"
-              />
-              <SortableHeader
-                label="Assignee"
-                sortKey="assignee_name"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden sm:table-cell"
-              />
-              <SortableHeader
-                label="Due Date"
-                sortKey="due_date"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden lg:table-cell"
-              />
-              <SortableHeader
-                label="Created"
-                sortKey="created_at"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden xl:table-cell"
-              />
-              <SortableHeader
-                label="Updated"
-                sortKey="updated_at"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden xl:table-cell"
-              />
-              <SortableHeader
-                label="Reporter"
-                sortKey="reporter_name"
-                currentSort={sortBy}
-                currentDirection={currentDirection}
-                onSort={handleSort}
-                className="hidden lg:table-cell"
-              />
+              {renderHeader('id', 'ID')}
+              {renderHeader('title', 'Title')}
+              {renderHeader('status', 'Status')}
+              {renderHeader('priority', 'Priority', 'hidden sm:table-cell')}
+              {renderHeader('type', 'Type', 'hidden md:table-cell')}
+              {renderHeader('project', 'Project', 'hidden md:table-cell')}
+              {renderHeader('assignee', 'Assignee', 'hidden sm:table-cell')}
+              {renderHeader('due_date', 'Due Date', 'hidden lg:table-cell')}
+              {renderHeader('created_at', 'Created', 'hidden xl:table-cell')}
+              {renderHeader('updated_at', 'Modified Date', 'hidden xl:table-cell')}
+              {renderHeader('reporter', 'Created By', 'hidden lg:table-cell')}
+              {renderHeader('modified_by', 'Modified By', 'hidden xl:table-cell')}
               {/* Mobile expand column header */}
               <TableHead className="sm:hidden w-8" />
             </TableRow>
@@ -246,15 +257,16 @@ export const TicketListTable = ({
                 ticket={ticket}
                 isSelected={selectedIds.has(ticket.id)}
                 onToggle={toggleOne}
+                visibleColumns={visibleColumns}
               />
             ))}
           </TableBody>
         </Table>
       </div>
 
-      {/* Pagination footer */}
+      {/* Pagination footer — pb-16 reserves space for QuickCreateFab */}
       {total > 0 && (
-        <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
+        <div className="mt-3 flex items-center justify-between pb-16 text-sm text-muted-foreground">
           <span>
             Showing {from}-{to} of {total}
           </span>

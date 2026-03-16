@@ -121,7 +121,7 @@ export const GET = async (request: Request) => {
     return NextResponse.json({ error: 'Failed to fetch overdue tickets' }, { status: 500 })
   }
 
-  const tickets = (ticketRows ?? []) as TicketRow[]
+  const tickets = (ticketRows ?? []) as unknown as TicketRow[]
 
   if (tickets.length === 0) {
     console.log('[cron/overdue-digest] No overdue tickets found.')
@@ -165,7 +165,7 @@ export const GET = async (request: Request) => {
 
   // Key: org_id → list of admin rows
   const adminsByOrg = new Map<string, Array<AdminRow & { org_id: string }>>()
-  for (const row of (adminRows ?? []) as Array<AdminRow & { org_id: string }>) {
+  for (const row of (adminRows ?? []) as unknown as Array<AdminRow & { org_id: string }>) {
     const existing = adminsByOrg.get(row.org_id) ?? []
     existing.push(row)
     adminsByOrg.set(row.org_id, existing)

@@ -42,19 +42,27 @@ type TicketTableRowProps = {
   ticket: TicketRow
   isSelected: boolean
   onToggle: (id: string) => void
+  visibleColumns?: string[]
 }
 
 /* ============================================================
    Component
    ============================================================ */
 
-export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowProps) => {
+export const TicketTableRow = ({
+  ticket,
+  isSelected,
+  onToggle,
+  visibleColumns,
+}: TicketTableRowProps) => {
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
   const navigate = () => router.push(`/tickets/${ticket.id}`)
 
+  const show = (colId: string) => !visibleColumns || visibleColumns.includes(colId)
+
   // Count visible columns for the expanded detail row colspan
-  // Checkbox + ID + Title + Status + expand = 5 on mobile
+  // Checkbox + always-visible + expand = variable
   const mobileColSpan = 5
 
   return (
@@ -74,84 +82,117 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
             aria-label={`Select ${ticket.sequenceId}`}
           />
         </TableCell>
-        <TableCell className="font-mono text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-          {ticket.sequenceId}
-        </TableCell>
-        <TableCell className="max-w-[200px] truncate font-medium md:max-w-[300px]">
-          {ticket.title}
-        </TableCell>
-        <TableCell>
-          <Badge
-            className={`text-xs ${STATUS_CONFIG[ticket.status].className}`}
-            variant="secondary"
-          >
-            {STATUS_CONFIG[ticket.status].label}
-          </Badge>
-        </TableCell>
-        <TableCell className="hidden sm:table-cell">
-          <span className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-2.5 w-2.5 rounded-full"
-              style={{ backgroundColor: PRIORITY_CONFIG[ticket.priority].color }}
-            />
-            <span className="text-sm">{PRIORITY_CONFIG[ticket.priority].label}</span>
-          </span>
-        </TableCell>
-        <TableCell className="hidden md:table-cell">
-          <span className="flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
-            {TYPE_ICONS[ticket.type]}
-            <span className="text-sm">{TYPE_CONFIG[ticket.type].label}</span>
-          </span>
-        </TableCell>
-        <TableCell className="hidden md:table-cell text-sm" onClick={(e) => e.stopPropagation()}>
-          {ticket.projectId && ticket.projectName ? (
-            <Link
-              href={`/projects/${ticket.projectId}`}
-              className="truncate max-w-[120px] inline-block hover:underline"
-              style={{ color: 'var(--color-text-primary)' }}
+        {show('id') && (
+          <TableCell className="font-mono text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            {ticket.sequenceId}
+          </TableCell>
+        )}
+        {show('title') && (
+          <TableCell className="max-w-[200px] truncate font-medium md:max-w-[300px]">
+            {ticket.title}
+          </TableCell>
+        )}
+        {show('status') && (
+          <TableCell>
+            <Badge
+              className={`text-xs ${STATUS_CONFIG[ticket.status].className}`}
+              variant="secondary"
             >
-              {ticket.projectName}
-            </Link>
-          ) : (
-            <span className="text-muted-foreground">--</span>
-          )}
-        </TableCell>
-        <TableCell className="hidden sm:table-cell">
-          {ticket.assigneeName ? (
-            <span className="flex items-center gap-1.5 text-sm">
-              {ticket.assigneeAvatar ? (
-                <Image
-                  src={ticket.assigneeAvatar}
-                  alt={ticket.assigneeName}
-                  width={20}
-                  height={20}
-                  className="h-5 w-5 rounded-full"
-                />
-              ) : (
-                <User size={14} className="text-muted-foreground" />
-              )}
-              <span className="max-w-[100px] truncate">{ticket.assigneeName}</span>
+              {STATUS_CONFIG[ticket.status].label}
+            </Badge>
+          </TableCell>
+        )}
+        {show('priority') && (
+          <TableCell className="hidden sm:table-cell">
+            <span className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: PRIORITY_CONFIG[ticket.priority].color }}
+              />
+              <span className="text-sm">{PRIORITY_CONFIG[ticket.priority].label}</span>
             </span>
-          ) : (
-            <span className="text-sm text-muted-foreground">--</span>
-          )}
-        </TableCell>
-        <TableCell className="hidden lg:table-cell text-sm">
-          {ticket.dueDate ? (
-            <FormattedDate date={ticket.dueDate} showTime={false} fallback="--" />
-          ) : (
-            '--'
-          )}
-        </TableCell>
-        <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
-          <FormattedDate date={ticket.createdAt} />
-        </TableCell>
-        <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
-          <FormattedDate date={ticket.updatedAt} />
-        </TableCell>
-        <TableCell className="hidden lg:table-cell text-sm">
-          {ticket.reporterName ?? <span className="text-muted-foreground">--</span>}
-        </TableCell>
+          </TableCell>
+        )}
+        {show('type') && (
+          <TableCell className="hidden md:table-cell">
+            <span
+              className="flex items-center gap-1"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              {TYPE_ICONS[ticket.type]}
+              <span className="text-sm">{TYPE_CONFIG[ticket.type].label}</span>
+            </span>
+          </TableCell>
+        )}
+        {show('project') && (
+          <TableCell
+            className="hidden md:table-cell text-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {ticket.projectId && ticket.projectName ? (
+              <Link
+                href={`/projects/${ticket.projectId}`}
+                className="truncate max-w-[120px] inline-block hover:underline"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                {ticket.projectName}
+              </Link>
+            ) : (
+              <span className="text-muted-foreground">--</span>
+            )}
+          </TableCell>
+        )}
+        {show('assignee') && (
+          <TableCell className="hidden sm:table-cell">
+            {ticket.assigneeName ? (
+              <span className="flex items-center gap-1.5 text-sm">
+                {ticket.assigneeAvatar ? (
+                  <Image
+                    src={ticket.assigneeAvatar}
+                    alt={ticket.assigneeName}
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 rounded-full"
+                  />
+                ) : (
+                  <User size={14} className="text-muted-foreground" />
+                )}
+                <span className="max-w-[100px] truncate">{ticket.assigneeName}</span>
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">--</span>
+            )}
+          </TableCell>
+        )}
+        {show('due_date') && (
+          <TableCell className="hidden lg:table-cell text-sm">
+            {ticket.dueDate ? (
+              <FormattedDate date={ticket.dueDate} showTime={false} fallback="--" />
+            ) : (
+              '--'
+            )}
+          </TableCell>
+        )}
+        {show('created_at') && (
+          <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
+            <FormattedDate date={ticket.createdAt} />
+          </TableCell>
+        )}
+        {show('updated_at') && (
+          <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
+            <FormattedDate date={ticket.updatedAt} />
+          </TableCell>
+        )}
+        {show('reporter') && (
+          <TableCell className="hidden lg:table-cell text-sm">
+            {ticket.reporterName ?? <span className="text-muted-foreground">--</span>}
+          </TableCell>
+        )}
+        {show('modified_by') && (
+          <TableCell className="hidden xl:table-cell text-sm">
+            {ticket.modifiedByName ?? <span className="text-muted-foreground">--</span>}
+          </TableCell>
+        )}
         {/* Mobile expand toggle — only visible below sm */}
         <TableCell
           className="sm:hidden w-8"
@@ -201,7 +242,10 @@ export const TicketTableRow = ({ ticket, isSelected, onToggle }: TicketTableRowP
                 )}
               </MobileDetail>
               {ticket.reporterName && (
-                <MobileDetail label="Reporter">{ticket.reporterName}</MobileDetail>
+                <MobileDetail label="Created By">{ticket.reporterName}</MobileDetail>
+              )}
+              {ticket.modifiedByName && (
+                <MobileDetail label="Modified By">{ticket.modifiedByName}</MobileDetail>
               )}
               <MobileDetail label="Created">
                 <FormattedDate date={ticket.createdAt} />

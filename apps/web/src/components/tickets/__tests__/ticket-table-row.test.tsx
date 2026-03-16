@@ -25,6 +25,7 @@ const TICKET: TicketRow = {
   createdAt: '2026-03-01',
   updatedAt: '2026-03-10',
   reporterName: 'Carol',
+  modifiedByName: 'Carol',
   projectId: 'proj-1',
   projectName: 'Auth Redesign',
 }

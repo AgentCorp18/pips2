@@ -202,6 +202,12 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       display_name: string | null
     } | null
 
+    const modifier = ticket.modifier as unknown as {
+      id: string
+      full_name: string
+      display_name: string | null
+    } | null
+
     const project = ticket.project as unknown as {
       id: string
       title: string
@@ -220,6 +226,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
       createdAt: ticket.created_at,
       updatedAt: ticket.updated_at,
       reporterName: reporter ? reporter.display_name || reporter.full_name || null : null,
+      modifiedByName: modifier ? modifier.display_name || modifier.full_name || null : null,
       projectId: project?.id ?? null,
       projectName: project?.title ?? null,
     }

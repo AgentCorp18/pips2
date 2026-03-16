@@ -328,6 +328,7 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
       *,
       assignee:profiles!tickets_assignee_id_fkey ( id, full_name, display_name, avatar_url ),
       reporter:profiles!tickets_reporter_id_fkey ( id, full_name, display_name, avatar_url ),
+      modifier:profiles!tickets_updated_by_fkey ( id, full_name, display_name ),
       project:projects!tickets_project_id_fkey ( id, title )
     `,
       { count: 'exact' },
