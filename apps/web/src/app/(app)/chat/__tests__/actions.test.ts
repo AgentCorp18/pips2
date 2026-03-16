@@ -193,8 +193,15 @@ describe('getChannels', () => {
       { data: [{ channel_id: 'ch-1', last_read_at: '2026-01-01T10:00:00Z' }] },
       // chat_channels
       { data: [channel], error: null },
-      // chat_messages count (unread)
-      { count: 3, error: null },
+      // chat_messages batch unread — 3 rows newer than last_read_at
+      {
+        data: [
+          { channel_id: 'ch-1', created_at: '2026-01-01T11:00:00Z' },
+          { channel_id: 'ch-1', created_at: '2026-01-01T12:00:00Z' },
+          { channel_id: 'ch-1', created_at: '2026-01-01T13:00:00Z' },
+        ],
+        error: null,
+      },
     ]
 
     const result = await getChannels()
@@ -817,9 +824,7 @@ describe('createChannel', () => {
     fromResults = [
       // chat_channels insert
       { data: newChannel, error: null },
-      // chat_channel_members insert for user-1
-      { data: null, error: null },
-      // chat_channel_members insert for user-2
+      // chat_channel_members batch insert (user-1 + user-2 in one call)
       { data: null, error: null },
     ]
 
@@ -840,10 +845,16 @@ describe('createChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // chat_channels select (existing DMs)
-      { data: [existingDm], error: null },
-      // chat_channel_members for existingDm
-      { data: [{ user_id: 'user-1' }, { user_id: 'user-2' }], error: null },
+      // chat_channel_members — batch lookup for both users (finds shared channel)
+      {
+        data: [
+          { channel_id: 'dm-existing', user_id: 'user-1' },
+          { channel_id: 'dm-existing', user_id: 'user-2' },
+        ],
+        error: null,
+      },
+      // chat_channels — confirm dm-existing is a direct channel in this org
+      { data: existingDm, error: null },
     ]
 
     const result = await createChannel('direct', undefined, ['user-2'])
@@ -863,13 +874,11 @@ describe('createChannel', () => {
       created_at: '2026-01-01',
     }
     fromResults = [
-      // chat_channels select (no existing DMs)
+      // chat_channel_members — batch lookup returns empty (no shared channels)
       { data: [], error: null },
       // chat_channels insert
       { data: newDm, error: null },
-      // chat_channel_members insert for user-1
-      { data: null, error: null },
-      // chat_channel_members insert for user-2
+      // chat_channel_members batch insert (user-1 + user-2 in one call)
       { data: null, error: null },
     ]
 

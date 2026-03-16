@@ -77,32 +77,32 @@ export const getChannels = async (): Promise<ActionResult<ChannelWithUnread[]>> 
     return { data: [] }
   }
 
-  // Batch unread count query — single query instead of N+1
-  // Build a map of channel_id → last_read_at for channels we actually fetched
-  const channelLastReadPairs = channels
-    .filter((ch) => lastReadMap[ch.id])
-    .map((ch) => ({ id: ch.id, lastRead: lastReadMap[ch.id] as string }))
-
+  // Batch unread count — single query instead of N per channel
   const unreadMap: Record<string, number> = {}
 
-  if (channelLastReadPairs.length > 0) {
-    // Use a single RPC-style query: count unread per channel in one round-trip
-    // Since Supabase JS doesn't support GROUP BY, we use a raw query via rpc or
-    // batch the counts with Promise.all but limit concurrency
-    const counts = await Promise.all(
-      channelLastReadPairs.map(async ({ id, lastRead }) => {
-        const { count } = await supabase
-          .from('chat_messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('channel_id', id)
-          .gt('created_at', lastRead)
-          .neq('author_id', user.id)
-          .is('deleted_at', null)
-        return { id, count: count ?? 0 }
-      }),
-    )
-    for (const { id, count } of counts) {
-      unreadMap[id] = count
+  const channelIdsWithLastRead = channels.filter((ch) => lastReadMap[ch.id]).map((ch) => ch.id)
+
+  if (channelIdsWithLastRead.length > 0) {
+    // Fetch all potentially-unread messages in one query, count per channel in JS.
+    // We use the minimum last_read_at across all relevant channels as a lower bound
+    // so the result set is as small as possible.
+    const minLastRead = channelIdsWithLastRead
+      .map((id) => lastReadMap[id] as string)
+      .sort()[0] as string
+
+    const { data: unreadRows } = await supabase
+      .from('chat_messages')
+      .select('channel_id, created_at')
+      .in('channel_id', channelIdsWithLastRead)
+      .gt('created_at', minLastRead)
+      .neq('author_id', user.id)
+      .is('deleted_at', null)
+
+    for (const row of unreadRows ?? []) {
+      const lastRead = lastReadMap[row.channel_id]
+      if (lastRead && row.created_at > lastRead) {
+        unreadMap[row.channel_id] = (unreadMap[row.channel_id] ?? 0) + 1
+      }
     }
   }
 
@@ -359,30 +359,45 @@ export const createChannel = async (
     return { error: 'Server configuration error. Please contact support.' }
   }
 
-  // For DM channels, check if one already exists between these users
+  // For DM channels, check if one already exists between these users — single query
   if (type === 'direct' && memberIds && memberIds.length === 1) {
     const otherUserId = memberIds[0]
-    const { data: existing } = await supabase
-      .from('chat_channels')
-      .select('id, org_id, type, name, entity_id, created_by, archived_at, created_at')
-      .eq('org_id', orgId)
-      .eq('type', 'direct')
-      .is('archived_at', null)
 
-    if (existing) {
-      for (const ch of existing) {
-        const { data: members } = await supabase
-          .from('chat_channel_members')
-          .select('user_id')
-          .eq('channel_id', ch.id)
+    // Fetch all memberships for either user across direct channels in this org,
+    // then find channel_ids where both users appear (exactly 2 members).
+    const { data: dmMemberships } = await supabase
+      .from('chat_channel_members')
+      .select('channel_id, user_id')
+      .in('user_id', [user.id, otherUserId as string])
 
-        const memberUserIds = (members ?? []).map((m) => m.user_id)
-        if (
-          memberUserIds.length === 2 &&
-          memberUserIds.includes(user.id) &&
-          memberUserIds.includes(otherUserId)
-        ) {
-          return { data: ch as ChatChannel }
+    if (dmMemberships && dmMemberships.length > 0) {
+      // Group by channel_id and find channels containing both users
+      const channelUserMap = new Map<string, Set<string>>()
+      for (const row of dmMemberships) {
+        if (!channelUserMap.has(row.channel_id)) {
+          channelUserMap.set(row.channel_id, new Set())
+        }
+        channelUserMap.get(row.channel_id)!.add(row.user_id)
+      }
+
+      const sharedChannelIds = [...channelUserMap.entries()]
+        .filter(([, users]) => users.has(user.id) && users.has(otherUserId as string))
+        .map(([id]) => id)
+
+      if (sharedChannelIds.length > 0) {
+        // Look up which of those shared channels is a non-archived direct channel in this org
+        const { data: existingDm } = await supabase
+          .from('chat_channels')
+          .select('id, org_id, type, name, entity_id, created_by, archived_at, created_at')
+          .in('id', sharedChannelIds)
+          .eq('org_id', orgId)
+          .eq('type', 'direct')
+          .is('archived_at', null)
+          .limit(1)
+          .maybeSingle()
+
+        if (existingDm) {
+          return { data: existingDm as ChatChannel }
         }
       }
     }
@@ -410,24 +425,17 @@ export const createChannel = async (
     return { error: `Failed to create channel: ${error.message}` }
   }
 
-  // Add creator and any additional members via admin client
+  // Add creator and any additional members via admin client — single batch insert
   const allMembers = [user.id, ...(memberIds ?? [])].filter((id, i, arr) => arr.indexOf(id) === i)
 
-  for (const memberId of allMembers) {
-    const { error: memberError } = await admin.from('chat_channel_members').insert({
-      channel_id: channel.id,
-      user_id: memberId,
-    })
-    if (memberError) {
-      console.error(
-        'Failed to add member',
-        memberId,
-        'to channel',
-        channel.id,
-        ':',
-        memberError.message,
-      )
-    }
+  const memberRows = allMembers.map((userId) => ({
+    channel_id: channel.id,
+    user_id: userId,
+  }))
+
+  const { error: memberError } = await admin.from('chat_channel_members').insert(memberRows)
+  if (memberError) {
+    console.error('Failed to add members to channel', channel.id, ':', memberError.message)
   }
 
   return { data: channel as ChatChannel }
