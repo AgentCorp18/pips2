@@ -203,3 +203,84 @@ export const loadRelatedFormData = async (
 
   return Object.keys(result).length > 0 ? result : null
 }
+
+/**
+ * F6: List projects that have a specific form filled — for the "Copy from project" picker.
+ */
+export const listProjectsWithForm = async (
+  stepNumber: number,
+  formType: string,
+  excludeProjectId: string,
+): Promise<Array<{ id: string; title: string }>> => {
+  const { supabase, user, orgId } = await getAuthContext()
+  if (!user || !orgId) return []
+
+  const stepEnum = stepNumberToEnum(stepNumber)
+  const { data } = await supabase
+    .from('project_forms')
+    .select('project_id, projects!inner(id, title, org_id)')
+    .eq('step', stepEnum)
+    .eq('form_type', formType)
+    .neq('project_id', excludeProjectId)
+
+  if (!data) return []
+
+  return data
+    .filter((row) => {
+      const project = row.projects as unknown as { id: string; title: string; org_id: string }
+      return project?.org_id === orgId
+    })
+    .map((row) => {
+      const project = row.projects as unknown as { id: string; title: string }
+      return { id: project.id, title: project.title }
+    })
+}
+
+/**
+ * F6: Copy form data from one project to another.
+ */
+export const copyFormFromProject = async (
+  sourceProjectId: string,
+  targetProjectId: string,
+  stepNumber: number,
+  formType: string,
+): Promise<FormActionResult> => {
+  const { supabase, user, orgId } = await getAuthContext()
+  if (!user) return { success: false, error: 'Not authenticated' }
+  if (!orgId) return { success: false, error: 'No organization' }
+
+  const stepEnum = stepNumberToEnum(stepNumber)
+
+  // Load source form data
+  const { data: sourceForm } = await supabase
+    .from('project_forms')
+    .select('data')
+    .eq('project_id', sourceProjectId)
+    .eq('step', stepEnum)
+    .eq('form_type', formType)
+    .single()
+
+  if (!sourceForm?.data) {
+    return { success: false, error: 'Source form not found' }
+  }
+
+  // Save to target project (upsert)
+  const { error } = await supabase.from('project_forms').upsert(
+    {
+      project_id: targetProjectId,
+      step: stepEnum,
+      form_type: formType,
+      title: formType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      data: sourceForm.data,
+      created_by: user.id,
+    },
+    { onConflict: 'project_id,step,form_type' },
+  )
+
+  if (error) {
+    return { success: false, error: 'Failed to copy form data' }
+  }
+
+  revalidatePath(`/projects/${targetProjectId}/steps/${stepNumber}`)
+  return { success: true }
+}
