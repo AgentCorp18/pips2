@@ -205,6 +205,8 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
     type: ticket.type as TicketType,
     assignee_id: ticket.assignee_id,
     due_date: ticket.due_date,
+    started_at: ticket.started_at ?? null,
+    resolved_at: ticket.resolved_at ?? null,
     tags: ticket.tags ?? [],
     project,
     assignee,

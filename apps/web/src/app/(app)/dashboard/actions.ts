@@ -143,6 +143,66 @@ export const getProjectsByStep = async (orgId: string): Promise<StepDistribution
 }
 
 /* ============================================================
+   getAgingTickets
+   ============================================================ */
+
+export type AgingTicketRow = {
+  id: string
+  sequenceId: string
+  title: string
+  assigneeName: string | null
+  daysOpen: number
+}
+
+export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingTicketRow[]> => {
+  const supabase = await createClient()
+
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  const { data } = await supabase
+    .from('tickets')
+    .select(
+      `
+      id, title, sequence_number, started_at,
+      assignee:profiles!tickets_assignee_id_fkey ( display_name, full_name )
+    `,
+    )
+    .eq('org_id', orgId)
+    .in('status', ['in_progress', 'in_review', 'blocked'])
+    .not('started_at', 'is', null)
+    .lt('started_at', sevenDaysAgo.toISOString())
+    .order('started_at', { ascending: true })
+    .limit(limit)
+
+  if (!data) return []
+
+  // Get org prefix for sequence IDs
+  const { data: orgRow } = await supabase
+    .from('organizations')
+    .select('ticket_prefix')
+    .eq('id', orgId)
+    .single()
+
+  const prefix = (orgRow?.ticket_prefix as string) ?? 'TKT'
+
+  return data.map((t) => {
+    const assignee = t.assignee as unknown as {
+      display_name: string | null
+      full_name: string | null
+    } | null
+    const daysOpen = (Date.now() - new Date(t.started_at!).getTime()) / (1000 * 60 * 60 * 24)
+    return {
+      id: t.id,
+      sequenceId: `${prefix}-${t.sequence_number}`,
+      title: t.title as string,
+      assigneeName: assignee?.display_name ?? assignee?.full_name ?? null,
+      daysOpen: Math.round(daysOpen * 10) / 10,
+    }
+  })
+}
+
+/* ============================================================
    getRecentActivity
    ============================================================ */
 

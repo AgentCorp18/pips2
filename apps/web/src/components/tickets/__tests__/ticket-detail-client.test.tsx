@@ -21,6 +21,8 @@ const mockTicket = {
   type: 'bug' as const,
   assignee_id: 'u-1',
   due_date: '2026-04-01',
+  started_at: null,
+  resolved_at: null,
   tags: ['auth', 'mobile'],
   project: { id: 'p-1', title: 'Auth Redesign' },
   assignee: { id: 'u-1', display_name: 'Alice Smith', avatar_url: null },

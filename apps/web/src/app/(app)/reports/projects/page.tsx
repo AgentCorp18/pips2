@@ -17,13 +17,25 @@ import { KpiCard } from '@/components/reports/kpi-card'
 import { StepProgressChart } from '@/components/reports/step-progress-chart'
 import { TicketVelocityChart } from '@/components/reports/ticket-velocity-chart'
 import { StepFunnelChart } from '@/components/reports/step-funnel-chart'
-import { FolderKanban, TrendingUp, AlertTriangle, CheckCircle2, ArrowLeft } from 'lucide-react'
+import { CycleTimeTrendChart } from '@/components/reports/cycle-time-trend-chart'
+import {
+  FolderKanban,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowLeft,
+  Timer,
+  Clock,
+  Hourglass,
+} from 'lucide-react'
 import {
   getProjectHealthKpis,
   getProjectsByStep,
   getTicketVelocity,
   getStepCompletionFunnel,
   getProjectsTable,
+  getCycleTimeKpis,
+  getCycleTimeTrend,
 } from '../actions'
 import { formatDateTime } from '@/lib/format-date'
 
@@ -52,13 +64,16 @@ const ProjectHealthPage = async () => {
 
   const orgId = currentOrg.orgId
 
-  const [kpis, stepData, velocityData, funnelData, projectRows] = await Promise.all([
-    getProjectHealthKpis(orgId),
-    getProjectsByStep(orgId),
-    getTicketVelocity(orgId),
-    getStepCompletionFunnel(orgId),
-    getProjectsTable(orgId),
-  ])
+  const [kpis, stepData, velocityData, funnelData, projectRows, cycleTimeKpis, cycleTimeTrendData] =
+    await Promise.all([
+      getProjectHealthKpis(orgId),
+      getProjectsByStep(orgId),
+      getTicketVelocity(orgId),
+      getStepCompletionFunnel(orgId),
+      getProjectsTable(orgId),
+      getCycleTimeKpis(orgId),
+      getCycleTimeTrend(orgId),
+    ])
 
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
@@ -115,10 +130,56 @@ const ProjectHealthPage = async () => {
         />
       </div>
 
+      {/* Cycle Time KPIs */}
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <KpiCard
+          title="Avg Cycle Time (90d)"
+          value={
+            cycleTimeKpis.avgCycleTimeDays !== null ? `${cycleTimeKpis.avgCycleTimeDays}d` : 'N/A'
+          }
+          icon={Timer}
+          color="#8B5CF6"
+          subtitle="started → completed"
+        />
+        <KpiCard
+          title="Median Cycle Time (90d)"
+          value={
+            cycleTimeKpis.medianCycleTimeDays !== null
+              ? `${cycleTimeKpis.medianCycleTimeDays}d`
+              : 'N/A'
+          }
+          icon={Clock}
+          color="#06B6D4"
+          subtitle="Middle value — less skewed by outliers"
+        />
+        <KpiCard
+          title="Longest Open Ticket"
+          value={
+            cycleTimeKpis.longestOpenDays !== null ? `${cycleTimeKpis.longestOpenDays}d` : 'None'
+          }
+          icon={Hourglass}
+          color={
+            cycleTimeKpis.longestOpenDays !== null && cycleTimeKpis.longestOpenDays > 7
+              ? '#EF4444'
+              : '#F59E0B'
+          }
+          subtitle={
+            cycleTimeKpis.longestOpenTitle
+              ? `"${cycleTimeKpis.longestOpenTitle.slice(0, 40)}..."`
+              : 'All tickets on track'
+          }
+        />
+      </div>
+
       {/* Charts row */}
       <div className="mb-8 grid gap-6 lg:grid-cols-2">
         <StepProgressChart data={stepData} />
         <TicketVelocityChart data={velocityData} />
+      </div>
+
+      {/* Cycle Time Trend */}
+      <div className="mb-8">
+        <CycleTimeTrendChart data={cycleTimeTrendData} />
       </div>
 
       {/* Funnel */}

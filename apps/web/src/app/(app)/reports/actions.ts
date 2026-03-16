@@ -11,6 +11,7 @@ import type { ActivityTimelineData } from '@/components/reports/activity-timelin
 import type { FormCompletionData } from '@/components/reports/form-completion-chart'
 import type { StepDurationData } from '@/components/reports/step-duration-chart'
 import type { ToolPopularityData } from '@/components/reports/tool-popularity-chart'
+import type { CycleTimeTrendData } from '@/components/reports/cycle-time-trend-chart'
 
 /* ============================================================
    Shared helpers
@@ -254,6 +255,150 @@ export const getTicketVelocity = async (orgId: string): Promise<TicketVelocityDa
     created: data.created,
     completed: data.completed,
   }))
+}
+
+/* ============================================================
+   Cycle Time Metrics
+   ============================================================ */
+
+export type CycleTimeKpis = {
+  avgCycleTimeDays: number | null
+  medianCycleTimeDays: number | null
+  longestOpenDays: number | null
+  longestOpenTitle: string | null
+}
+
+export const getCycleTimeKpis = async (orgId: string): Promise<CycleTimeKpis> => {
+  if (!(await checkViewPermission(orgId))) {
+    return {
+      avgCycleTimeDays: null,
+      medianCycleTimeDays: null,
+      longestOpenDays: null,
+      longestOpenTitle: null,
+    }
+  }
+
+  const supabase = await createClient()
+
+  // Completed tickets with both timestamps (last 90 days)
+  const ninetyDaysAgo = new Date()
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+
+  const { data: completed } = await supabase
+    .from('tickets')
+    .select('started_at, resolved_at')
+    .eq('org_id', orgId)
+    .not('started_at', 'is', null)
+    .not('resolved_at', 'is', null)
+    .in('status', ['done', 'cancelled'])
+    .gte('resolved_at', ninetyDaysAgo.toISOString())
+
+  let avgCycleTimeDays: number | null = null
+  let medianCycleTimeDays: number | null = null
+
+  if (completed && completed.length > 0) {
+    const cycleTimes = completed
+      .map((t) => {
+        const start = new Date(t.started_at!).getTime()
+        const end = new Date(t.resolved_at!).getTime()
+        return (end - start) / (1000 * 60 * 60 * 24)
+      })
+      .filter((d) => d >= 0)
+      .sort((a, b) => a - b)
+
+    if (cycleTimes.length > 0) {
+      avgCycleTimeDays =
+        Math.round((cycleTimes.reduce((a, b) => a + b, 0) / cycleTimes.length) * 10) / 10
+      const mid = Math.floor(cycleTimes.length / 2)
+      medianCycleTimeDays =
+        cycleTimes.length % 2 === 0
+          ? Math.round(((cycleTimes[mid - 1]! + cycleTimes[mid]!) / 2) * 10) / 10
+          : Math.round(cycleTimes[mid]! * 10) / 10
+    }
+  }
+
+  // Longest open in-progress ticket
+  const { data: openTickets } = await supabase
+    .from('tickets')
+    .select('title, started_at')
+    .eq('org_id', orgId)
+    .not('started_at', 'is', null)
+    .in('status', ['in_progress', 'in_review', 'blocked'])
+    .order('started_at', { ascending: true })
+    .limit(1)
+
+  let longestOpenDays: number | null = null
+  let longestOpenTitle: string | null = null
+
+  if (openTickets && openTickets.length > 0) {
+    const oldest = openTickets[0]!
+    longestOpenDays =
+      Math.round(
+        ((Date.now() - new Date(oldest.started_at!).getTime()) / (1000 * 60 * 60 * 24)) * 10,
+      ) / 10
+    longestOpenTitle = oldest.title
+  }
+
+  return { avgCycleTimeDays, medianCycleTimeDays, longestOpenDays, longestOpenTitle }
+}
+
+export const getCycleTimeTrend = async (orgId: string): Promise<CycleTimeTrendData[]> => {
+  if (!(await checkViewPermission(orgId))) return []
+
+  const supabase = await createClient()
+
+  // Get completed tickets from the last 12 weeks with both timestamps
+  const twelveWeeksAgo = new Date()
+  twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84)
+
+  const { data: completed } = await supabase
+    .from('tickets')
+    .select('started_at, resolved_at, created_at')
+    .eq('org_id', orgId)
+    .not('resolved_at', 'is', null)
+    .in('status', ['done', 'cancelled'])
+    .gte('resolved_at', twelveWeeksAgo.toISOString())
+
+  if (!completed || completed.length === 0) return []
+
+  // Group by week of resolution
+  const weekMap = new Map<string, { cycleTimes: number[]; leadTimes: number[] }>()
+
+  for (const t of completed) {
+    const weekKey = getWeekStart(new Date(t.resolved_at!))
+    if (!weekMap.has(weekKey)) {
+      weekMap.set(weekKey, { cycleTimes: [], leadTimes: [] })
+    }
+    const bucket = weekMap.get(weekKey)!
+
+    // Cycle time (started_at → resolved_at)
+    if (t.started_at) {
+      const ct =
+        (new Date(t.resolved_at!).getTime() - new Date(t.started_at).getTime()) /
+        (1000 * 60 * 60 * 24)
+      if (ct >= 0) bucket.cycleTimes.push(ct)
+    }
+
+    // Lead time (created_at → resolved_at)
+    const lt =
+      (new Date(t.resolved_at!).getTime() - new Date(t.created_at).getTime()) /
+      (1000 * 60 * 60 * 24)
+    if (lt >= 0) bucket.leadTimes.push(lt)
+  }
+
+  // Sort by week and format
+  const weeks = Array.from(weekMap.entries()).sort(([a], [b]) => a.localeCompare(b))
+
+  return weeks.map(([weekKey, bucket]) => {
+    const avg = (arr: number[]) =>
+      arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0
+
+    return {
+      week: formatShortDate(new Date(weekKey)),
+      avgCycleTime: avg(bucket.cycleTimes),
+      avgLeadTime: avg(bucket.leadTimes),
+    }
+  })
 }
 
 export const getStepCompletionFunnel = async (orgId: string): Promise<StepFunnelData[]> => {

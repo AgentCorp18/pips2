@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge'
 import { StatCards } from '@/components/dashboard/stat-cards'
 import { ProjectsByStepChart } from '@/components/dashboard/projects-by-step-chart'
 import { RecentActivity } from '@/components/dashboard/recent-activity'
+import { AgingTicketsAlert } from '@/components/dashboard/aging-tickets-alert'
 import { CreateSampleProject } from './create-sample-project'
-import { getDashboardStats, getProjectsByStep, getRecentActivity } from './actions'
+import { getDashboardStats, getProjectsByStep, getRecentActivity, getAgingTickets } from './actions'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { WelcomeCards } from '@/components/dashboard/welcome-cards'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
@@ -56,12 +57,14 @@ const DashboardPage = async () => {
   }
   let stepData: Awaited<ReturnType<typeof getProjectsByStep>> = []
   let activity: Awaited<ReturnType<typeof getRecentActivity>> = []
+  let agingTickets: Awaited<ReturnType<typeof getAgingTickets>> = []
 
   try {
-    ;[stats, stepData, activity] = await Promise.all([
+    ;[stats, stepData, activity, agingTickets] = await Promise.all([
       getDashboardStats(orgId),
       getProjectsByStep(orgId),
       getRecentActivity(orgId, 10),
+      getAgingTickets(orgId),
     ])
   } catch (err) {
     console.error('[DashboardPage] Error fetching data:', err)
@@ -135,6 +138,13 @@ const DashboardPage = async () => {
           <div className="mt-8">
             <ProjectsByStepChart data={stepData} />
           </div>
+
+          {/* Aging Tickets Alert */}
+          {agingTickets.length > 0 && (
+            <div className="mt-8">
+              <AgingTicketsAlert tickets={agingTickets} />
+            </div>
+          )}
 
           {/* Recent Activity */}
           <div className="mt-8">

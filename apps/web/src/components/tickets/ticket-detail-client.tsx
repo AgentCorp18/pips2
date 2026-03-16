@@ -29,6 +29,7 @@ import {
 import { FormattedDate } from '@/components/ui/formatted-date'
 import { MarkdownToolbar } from '@/components/ui/markdown-toolbar'
 import { InlineMarkdown } from '@/components/ui/inline-markdown'
+import { CycleTimeBadge } from './cycle-time-badge'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 
 /* ============================================================
@@ -98,6 +99,8 @@ type TicketData = {
   type: TicketType
   assignee_id: string | null
   due_date: string | null
+  started_at: string | null
+  resolved_at: string | null
   tags: string[]
   project: { id: string; title: string } | null
   assignee: { id: string; display_name: string; avatar_url: string | null } | null
@@ -260,6 +263,18 @@ export const TicketDetailClient = ({
             >
               {PRIORITY_OPTIONS.find((o) => o.value === ticket.priority)?.label}
             </Badge>
+          </div>
+
+          {/* Cycle Time */}
+          <div className="mt-2">
+            <CycleTimeBadge
+              ticket={{
+                status: ticket.status,
+                started_at: ticket.started_at,
+                resolved_at: ticket.resolved_at,
+                created_at: ticket.created_at,
+              }}
+            />
           </div>
 
           {parentTicket && (
