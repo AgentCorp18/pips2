@@ -7,6 +7,13 @@ vi.mock('@/app/(app)/tickets/actions', () => ({
   bulkDeleteTickets: vi.fn(),
 }))
 
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}))
+
 vi.mock('@/components/tickets/ticket-config', () => ({
   STATUS_CONFIG: {
     open: { label: 'Open' },
@@ -24,6 +31,11 @@ vi.mock('@/components/tickets/ticket-config', () => ({
   ALL_STATUSES: ['open', 'in_progress', 'done', 'cancelled'],
   ALL_PRIORITIES: ['critical', 'high', 'medium', 'low', 'none'],
 }))
+
+const mockMembers = [
+  { user_id: 'user-1', display_name: 'Alice' },
+  { user_id: 'user-2', display_name: 'Bob' },
+]
 
 describe('BulkActionsBar', () => {
   const onClear = vi.fn()
@@ -80,5 +92,15 @@ describe('BulkActionsBar', () => {
   it('renders priority select trigger', () => {
     render(<BulkActionsBar selectedIds={['id-1']} onClear={onClear} />)
     expect(screen.getByLabelText('Set priority for selected tickets')).toBeTruthy()
+  })
+
+  it('does not render assignee select when no members provided', () => {
+    render(<BulkActionsBar selectedIds={['id-1']} onClear={onClear} />)
+    expect(screen.queryByLabelText('Set assignee for selected tickets')).toBeNull()
+  })
+
+  it('renders assignee select when members are provided', () => {
+    render(<BulkActionsBar selectedIds={['id-1']} onClear={onClear} members={mockMembers} />)
+    expect(screen.getByLabelText('Set assignee for selected tickets')).toBeTruthy()
   })
 })

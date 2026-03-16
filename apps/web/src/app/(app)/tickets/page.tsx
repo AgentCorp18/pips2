@@ -285,6 +285,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
               perPage={25}
               sortBy={sortBy}
               sortOrder={sortOrder as 'asc' | 'desc'}
+              members={members}
             />
           </div>
         ) : (

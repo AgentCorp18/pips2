@@ -27,6 +27,11 @@ export type TicketRow = {
   projectName: string | null
 }
 
+type OrgMember = {
+  user_id: string
+  display_name: string
+}
+
 type TicketListTableProps = {
   tickets: TicketRow[]
   total: number
@@ -34,6 +39,7 @@ type TicketListTableProps = {
   perPage: number
   sortBy: string
   sortOrder: 'asc' | 'desc'
+  members?: OrgMember[]
 }
 
 export const TicketListTable = ({
@@ -43,6 +49,7 @@ export const TicketListTable = ({
   perPage,
   sortBy,
   sortOrder,
+  members = [],
 }: TicketListTableProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -120,7 +127,11 @@ export const TicketListTable = ({
       </div>
 
       {selectedIds.size > 0 && (
-        <BulkActionsBar selectedIds={Array.from(selectedIds)} onClear={clearSelection} />
+        <BulkActionsBar
+          selectedIds={Array.from(selectedIds)}
+          onClear={clearSelection}
+          members={members}
+        />
       )}
 
       <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">

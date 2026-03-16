@@ -505,7 +505,7 @@ export const getTicketsForBoard = async (
 
 export const bulkUpdateTickets = async (
   ticketIds: string[],
-  data: { status?: TicketStatus; priority?: TicketPriority },
+  data: { status?: TicketStatus; priority?: TicketPriority; assignee_id?: string | null },
 ): Promise<TicketActionState> => {
   if (ticketIds.length === 0) {
     return { error: 'No tickets selected' }
@@ -528,9 +528,25 @@ export const bulkUpdateTickets = async (
     return { error: 'You do not have permission to update tickets' }
   }
 
+  // Validate assignee belongs to the same org if provided
+  if (data.assignee_id !== undefined && data.assignee_id !== null) {
+    const { data: assigneeMembership } = await supabase
+      .from('org_members')
+      .select('user_id')
+      .eq('user_id', data.assignee_id)
+      .eq('org_id', orgId)
+      .eq('status', 'active')
+      .maybeSingle()
+
+    if (!assigneeMembership) {
+      return { error: 'Assignee is not an active member of this organization' }
+    }
+  }
+
   const update: Record<string, unknown> = {}
   if (data.status) update.status = data.status
   if (data.priority) update.priority = data.priority
+  if (data.assignee_id !== undefined) update.assignee_id = data.assignee_id
 
   if (data.status === 'done' || data.status === 'cancelled') {
     update.resolved_at = new Date().toISOString()

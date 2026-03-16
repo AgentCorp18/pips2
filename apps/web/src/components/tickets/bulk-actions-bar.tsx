@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -29,18 +30,27 @@ import type { TicketStatus, TicketPriority } from '@/types/tickets'
    Types
    ============================================================ */
 
+type OrgMember = {
+  user_id: string
+  display_name: string
+}
+
 type BulkActionsBarProps = {
   selectedIds: string[]
   onClear: () => void
+  members?: OrgMember[]
 }
 
 /* ============================================================
    Component
    ============================================================ */
 
-export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) => {
+export const BulkActionsBar = ({ selectedIds, onClear, members = [] }: BulkActionsBarProps) => {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+
+  const count = selectedIds.length
+  const ticketWord = count === 1 ? 'ticket' : 'tickets'
 
   const handleStatusChange = (status: string) => {
     setError(null)
@@ -51,6 +61,7 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
       if (result.error) {
         setError(result.error)
       } else {
+        toast.success(`Updated status for ${count} ${ticketWord}`)
         onClear()
       }
     })
@@ -65,6 +76,27 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
       if (result.error) {
         setError(result.error)
       } else {
+        toast.success(`Updated priority for ${count} ${ticketWord}`)
+        onClear()
+      }
+    })
+  }
+
+  const handleAssigneeChange = (assigneeId: string) => {
+    setError(null)
+    const resolvedAssigneeId = assigneeId === '__unassign__' ? null : assigneeId
+    startTransition(async () => {
+      const result = await bulkUpdateTickets(selectedIds, {
+        assignee_id: resolvedAssigneeId,
+      })
+      if (result.error) {
+        setError(result.error)
+      } else {
+        const label =
+          resolvedAssigneeId === null
+            ? `Unassigned ${count} ${ticketWord}`
+            : `Assigned ${count} ${ticketWord}`
+        toast.success(label)
         onClear()
       }
     })
@@ -77,6 +109,7 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
       if (result.error) {
         setError(result.error)
       } else {
+        toast.success(`Deleted ${count} ${ticketWord}`)
         onClear()
       }
     })
@@ -85,11 +118,11 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
   return (
     <div
       role="toolbar"
-      aria-label={`Bulk actions for ${selectedIds.length} selected ticket${selectedIds.length !== 1 ? 's' : ''}`}
-      className="mb-3 flex items-center gap-3 rounded-lg border border-[var(--color-primary-light)] bg-[var(--color-primary-subtle,#f0edfa)] p-2 px-3"
+      aria-label={`Bulk actions for ${count} selected ${ticketWord}`}
+      className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border border-[var(--color-primary-light)] bg-[var(--color-primary-subtle,#f0edfa)] p-2 px-3"
     >
       <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-        {selectedIds.length} selected
+        {count} selected
       </span>
 
       {/* Status change */}
@@ -128,6 +161,27 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
         </SelectContent>
       </Select>
 
+      {/* Assignee change — only rendered when members are provided */}
+      {members.length > 0 && (
+        <Select onValueChange={handleAssigneeChange} disabled={isPending}>
+          <SelectTrigger
+            className="w-full sm:w-[160px]"
+            size="sm"
+            aria-label="Set assignee for selected tickets"
+          >
+            <SelectValue placeholder="Set assignee" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__unassign__">Unassigned</SelectItem>
+            {members.map((m) => (
+              <SelectItem key={m.user_id} value={m.user_id}>
+                {m.display_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
       {/* Delete with confirmation */}
       <AlertDialog>
         <AlertDialogTrigger asChild>
@@ -139,7 +193,7 @@ export const BulkActionsBar = ({ selectedIds, onClear }: BulkActionsBarProps) =>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedIds.length} ticket{selectedIds.length !== 1 ? 's' : ''}?
+              Delete {count} {ticketWord}?
             </AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. The selected tickets will be permanently removed.

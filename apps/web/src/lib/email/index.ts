@@ -22,3 +22,6 @@ export type { InvitationParams } from './invitation'
 
 export { welcomeTemplate } from './welcome'
 export type { WelcomeParams } from './welcome'
+
+export { overdueDigestTemplate } from './overdue-digest'
+export type { OverdueDigestParams, OverdueProject, OverdueTicket } from './overdue-digest'
