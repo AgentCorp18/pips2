@@ -70,20 +70,20 @@ export const saveFormData = async (
     }
   }
 
-  const { supabase, user } = await getAuthContext()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) {
     return { success: false, error: 'Not authenticated' }
   }
 
-  // Verify project exists and user belongs to the project's org
+  // Verify project exists and belongs to the user's current org (defense-in-depth)
   const { data: project } = await supabase
     .from('projects')
     .select('org_id, current_step')
     .eq('id', projectId)
     .single()
 
-  if (!project) {
+  if (!project || (orgId && project.org_id !== orgId)) {
     return { success: false, error: 'Project not found' }
   }
 
@@ -248,6 +248,17 @@ export const copyFormFromProject = async (
   if (!orgId) return { success: false, error: 'No organization' }
 
   const stepEnum = stepNumberToEnum(stepNumber)
+
+  // Verify both source and target projects belong to the current org
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, org_id')
+    .in('id', [sourceProjectId, targetProjectId])
+
+  const allInOrg = projects?.length === 2 && projects.every((p) => p.org_id === orgId)
+  if (!allInOrg) {
+    return { success: false, error: 'Projects not found or not in your organization' }
+  }
 
   // Load source form data
   const { data: sourceForm } = await supabase

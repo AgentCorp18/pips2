@@ -66,23 +66,35 @@ export const advanceStep = async (
     const nextStepEnum = stepNumberToEnum(stepNumber + 1)
 
     // Update project current_step
-    await supabase
+    const { error: advanceError } = await supabase
       .from('projects')
       .update({ current_step: nextStepEnum, updated_at: now })
       .eq('id', projectId)
 
+    if (advanceError) {
+      return { success: false, error: 'Failed to advance project step' }
+    }
+
     // Start next step
-    await supabase
+    const { error: startError } = await supabase
       .from('project_steps')
       .update({ status: 'in_progress', started_at: now })
       .eq('project_id', projectId)
       .eq('step', nextStepEnum)
+
+    if (startError) {
+      return { success: false, error: 'Failed to start next step' }
+    }
   } else {
     // All 6 steps complete — mark project as completed
-    await supabase
+    const { error: completeError } = await supabase
       .from('projects')
       .update({ status: 'completed', updated_at: now })
       .eq('id', projectId)
+
+    if (completeError) {
+      return { success: false, error: 'Failed to complete project' }
+    }
   }
 
   trackServerEvent('step.advanced', {
