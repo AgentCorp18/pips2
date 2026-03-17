@@ -86,7 +86,11 @@ export const createProject = async (
     started_at: i === 0 ? new Date().toISOString() : null,
   }))
 
-  const { error: stepsError } = await supabase.from('project_steps').insert(steps)
+  // Upsert: trigger auto-creates steps on project INSERT, but we override
+  // Step 1 to 'in_progress' with started_at. ON CONFLICT handles the overlap.
+  const { error: stepsError } = await supabase
+    .from('project_steps')
+    .upsert(steps, { onConflict: 'project_id,step' })
 
   if (stepsError) {
     // Clean up
