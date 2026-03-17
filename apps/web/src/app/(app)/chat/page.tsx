@@ -1,10 +1,12 @@
+import type { Metadata } from 'next'
 import { MessageSquare } from 'lucide-react'
 import { getAuthContext } from '@/lib/auth-context'
 import { ChatPageClient } from './chat-page-client'
 import { getChannels } from './actions'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Chat',
+  description: 'Collaborate with your team via project, ticket, and team chat channels.',
 }
 
 export default async function ChatPage() {
@@ -17,7 +19,7 @@ export default async function ChatPage() {
 
       {/* Empty state when no channel selected — hidden on mobile (sidebar is full-width there) */}
       <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-[var(--color-bg)]">
-        <MessageSquare size={48} className="text-[var(--color-text-tertiary)]" />
+        <MessageSquare size={48} className="text-[var(--color-text-tertiary)]" aria-hidden="true" />
         <h2 className="mt-4 text-lg font-medium text-[var(--color-text-primary)]">Team Chat</h2>
         <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
           Select a channel to start chatting

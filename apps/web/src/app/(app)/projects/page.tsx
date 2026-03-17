@@ -212,7 +212,7 @@ const EmptyState = () => (
       className="mb-6 flex h-20 w-20 items-center justify-center rounded-full"
       style={{ backgroundColor: 'var(--color-primary-subtle)' }}
     >
-      <FolderKanban size={36} style={{ color: 'var(--color-primary)' }} />
+      <FolderKanban size={36} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
     </div>
     <h3
       className="mb-2 text-xl font-semibold"

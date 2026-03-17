@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
   ChevronDown,
@@ -26,6 +27,11 @@ import type { PipsStepNumber } from '@pips/shared'
 import { PipsCycleDiagram } from '@/components/knowledge/guide/pips-cycle-diagram'
 import { ToolTag } from '@/components/knowledge/guide/tool-tag'
 import { TOOL_DISPLAY_NAMES } from './_tool-names'
+
+export const metadata: Metadata = {
+  title: 'PIPS Methodology Guide',
+  description: 'Comprehensive guide to the 6-step PIPS process improvement methodology.',
+}
 
 const PRINCIPLE_ICONS: Record<string, typeof BarChart3> = {
   'bar-chart': BarChart3,

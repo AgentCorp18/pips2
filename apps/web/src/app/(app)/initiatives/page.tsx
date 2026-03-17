@@ -9,6 +9,7 @@ import { Plus, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Initiatives',
+  description: 'Strategic goals that group multiple PIPS projects and track aggregated progress.',
 }
 
 const InitiativesPage = async () => {
@@ -98,7 +99,7 @@ const InitiativesPage = async () => {
             className="mb-4 flex h-12 w-12 items-center justify-center rounded-full"
             style={{ backgroundColor: 'var(--color-surface)' }}
           >
-            <Target size={24} style={{ color: 'var(--color-primary)' }} />
+            <Target size={24} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
           </div>
           <h3 className="mb-1 text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             No initiatives yet
