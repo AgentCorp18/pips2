@@ -161,6 +161,11 @@ export type AgingTicketRow = {
 }
 
 export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingTicketRow[]> => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return []
+  }
   const supabase = await createClient()
 
   const sevenDaysAgo = new Date()

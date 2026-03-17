@@ -1,6 +1,7 @@
 'use server'
 
 import { getAuthContext } from '@/lib/auth-context'
+import { requirePermission } from '@/lib/permissions'
 import { generateCSV } from '@/lib/csv'
 
 /* ============================================================
@@ -21,6 +22,12 @@ export const exportProjectsCSV = async (): Promise<ExportResult> => {
 
   if (!orgId) {
     return { error: 'You must be signed in to an organization' }
+  }
+
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return { error: 'You do not have permission to export data' }
   }
 
   const { data: projects, error } = await supabase
@@ -76,6 +83,12 @@ export const exportTicketsCSV = async (projectId?: string): Promise<ExportResult
 
   if (!orgId) {
     return { error: 'You must be signed in to an organization' }
+  }
+
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return { error: 'You do not have permission to export data' }
   }
 
   let query = supabase

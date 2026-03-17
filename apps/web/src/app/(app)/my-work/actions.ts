@@ -1,6 +1,7 @@
 'use server'
 
 import { getAuthContext } from '@/lib/auth-context'
+import { requirePermission } from '@/lib/permissions'
 
 export type MyWorkTicket = {
   id: string
@@ -23,6 +24,12 @@ export const getMyTickets = async (orgId: string): Promise<GroupedTickets> => {
   const { supabase, user } = await getAuthContext()
 
   if (!user) {
+    return { overdue: [], dueToday: [], thisWeek: [], later: [] }
+  }
+
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
     return { overdue: [], dueToday: [], thisWeek: [], later: [] }
   }
 

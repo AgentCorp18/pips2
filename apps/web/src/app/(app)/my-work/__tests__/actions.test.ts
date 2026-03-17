@@ -44,6 +44,10 @@ const mockSupabase = {
   },
 }
 
+vi.mock('@/lib/permissions', () => ({
+  requirePermission: vi.fn(async () => undefined),
+}))
+
 vi.mock('@/lib/auth-context', () => ({
   getAuthContext: vi.fn(async () => {
     const result = await mockGetUser()
