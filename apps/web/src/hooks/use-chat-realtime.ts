@@ -29,13 +29,22 @@ const realtimeReducer = (state: RealtimeState, action: RealtimeAction): Realtime
 
 /**
  * Subscribe to real-time chat messages for a specific channel.
- * Automatically appends new messages and handles edits/deletes.
+ * Routes thread replies to threadMessages store and top-level messages
+ * to the main channel messages store.
  */
 export const useChatRealtime = (channelId: string | null, currentUserId: string | null) => {
   const [state, dispatch] = useReducer(realtimeReducer, { isConnected: false })
   const supabaseRef = useRef(createClient())
   const wasConnectedRef = useRef(false)
-  const { appendMessage, updateMessage, activeChannelId, incrementUnread } = useChatStore()
+  const {
+    appendMessage,
+    updateMessage,
+    activeChannelId,
+    incrementUnread,
+    appendThreadMessage,
+    updateThreadMessage,
+    updateReplyCount,
+  } = useChatStore()
 
   useEffect(() => {
     if (!channelId) return
@@ -54,12 +63,20 @@ export const useChatRealtime = (channelId: string | null, currentUserId: string 
         },
         (payload) => {
           const newMessage = payload.new as ChatMessage
-          appendMessage(channelId, newMessage)
 
-          // Increment unread if this channel is not currently active
-          // and the message is from someone else
-          if (activeChannelId !== channelId && newMessage.author_id !== currentUserId) {
-            incrementUnread(channelId)
+          if (newMessage.reply_to_id) {
+            // Thread reply: route to thread store and update parent reply_count
+            appendThreadMessage(newMessage.reply_to_id, newMessage)
+            updateReplyCount(channelId, newMessage.reply_to_id, 1)
+          } else {
+            // Top-level message: route to main channel store
+            appendMessage(channelId, newMessage)
+
+            // Increment unread if this channel is not currently active
+            // and the message is from someone else
+            if (activeChannelId !== channelId && newMessage.author_id !== currentUserId) {
+              incrementUnread(channelId)
+            }
           }
         },
       )
@@ -73,11 +90,24 @@ export const useChatRealtime = (channelId: string | null, currentUserId: string 
         },
         (payload) => {
           const updated = payload.new as ChatMessage
-          updateMessage(channelId, updated.id, {
+          const updates: Partial<ChatMessage> = {
             body: updated.body,
             edited_at: updated.edited_at,
             deleted_at: updated.deleted_at,
-          })
+          }
+
+          if (updated.reply_to_id) {
+            // Thread reply update
+            updateThreadMessage(updated.reply_to_id, updated.id, updates)
+            // If soft-deleted, decrement reply_count on the parent
+            const prev = payload.old as Partial<ChatMessage>
+            if (prev.deleted_at == null && updated.deleted_at != null) {
+              updateReplyCount(channelId, updated.reply_to_id, -1)
+            }
+          } else {
+            // Top-level message update
+            updateMessage(channelId, updated.id, updates)
+          }
         },
       )
       .subscribe((status, err) => {
@@ -101,7 +131,17 @@ export const useChatRealtime = (channelId: string | null, currentUserId: string 
       channel.unsubscribe()
       supabase.removeChannel(channel)
     }
-  }, [channelId, activeChannelId, currentUserId, appendMessage, updateMessage, incrementUnread])
+  }, [
+    channelId,
+    activeChannelId,
+    currentUserId,
+    appendMessage,
+    updateMessage,
+    incrementUnread,
+    appendThreadMessage,
+    updateThreadMessage,
+    updateReplyCount,
+  ])
 
   return { isConnected: state.isConnected }
 }

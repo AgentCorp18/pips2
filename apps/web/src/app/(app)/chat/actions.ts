@@ -177,6 +177,7 @@ export const getMessages = async (
   channelId: string,
   cursor?: string,
   limit = 50,
+  parentMessageId?: string,
 ): Promise<ActionResult<{ messages: MessageWithAuthor[]; hasMore: boolean }>> => {
   const { supabase, user } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
@@ -186,10 +187,18 @@ export const getMessages = async (
     .select('*')
     .eq('channel_id', channelId)
     .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(limit + 1)
 
-  if (cursor) {
+  if (parentMessageId) {
+    // Thread view: fetch replies for this parent, ascending order
+    query = query.eq('reply_to_id', parentMessageId).order('created_at', { ascending: true })
+  } else {
+    // Main view: top-level messages only, newest first
+    query = query.is('reply_to_id', null).order('created_at', { ascending: false })
+  }
+
+  query = query.limit(limit + 1)
+
+  if (cursor && !parentMessageId) {
     query = query.lt('created_at', cursor)
   }
 
@@ -212,18 +221,35 @@ export const getMessages = async (
 
   const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]))
 
-  const messagesWithAuthors: MessageWithAuthor[] = messages
-    .map((m) => ({
-      ...m,
-      mentions: m.mentions ?? [],
-      author: {
-        display_name: profileMap[m.author_id]?.display_name ?? 'Unknown',
-        avatar_url: profileMap[m.author_id]?.avatar_url ?? null,
-      },
-    }))
-    .reverse() // Return in ascending order for display
+  const messagesWithAuthors: MessageWithAuthor[] = messages.map((m) => ({
+    ...m,
+    mentions: m.mentions ?? [],
+    reply_to_id: (m as { reply_to_id?: string | null }).reply_to_id ?? null,
+    reply_count: (m as { reply_count?: number }).reply_count ?? 0,
+    author: {
+      display_name: profileMap[m.author_id]?.display_name ?? 'Unknown',
+      avatar_url: profileMap[m.author_id]?.avatar_url ?? null,
+    },
+  }))
+
+  // Main channel messages come back newest-first from DB; reverse for display.
+  // Thread replies are already in ascending order.
+  if (!parentMessageId) {
+    messagesWithAuthors.reverse()
+  }
 
   return { data: { messages: messagesWithAuthors, hasMore } }
+}
+
+/* ============================================================
+   getThreadReplies — Convenience wrapper for thread replies
+   ============================================================ */
+
+export const getThreadReplies = async (
+  channelId: string,
+  parentMessageId: string,
+): Promise<ActionResult<{ messages: MessageWithAuthor[]; hasMore: boolean }>> => {
+  return getMessages(channelId, undefined, 50, parentMessageId)
 }
 
 /* ============================================================
@@ -233,6 +259,7 @@ export const getMessages = async (
 export const sendMessage = async (
   channelId: string,
   body: string,
+  replyToId?: string,
 ): Promise<ActionResult<ChatMessage>> => {
   const { supabase, user, orgId } = await getAuthContext()
   if (!user) return { error: 'Not authenticated' }
@@ -258,6 +285,7 @@ export const sendMessage = async (
       author_id: user.id,
       body: trimmedBody,
       mentions,
+      ...(replyToId ? { reply_to_id: replyToId } : {}),
     })
     .select()
     .single()

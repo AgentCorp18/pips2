@@ -86,6 +86,7 @@ import {
   getChannels,
   getChannel,
   getMessages,
+  getThreadReplies,
   sendMessage,
   editMessage,
   deleteMessage,
@@ -1195,5 +1196,191 @@ describe('getOrgMembers', () => {
     const result = await getOrgMembers()
     expect(result.data?.[0]?.display_name).toBe('Unknown')
     expect(result.data?.[0]?.avatar_url).toBeNull()
+  })
+})
+
+/* ============================================================
+   getMessages — threading behavior
+   ============================================================ */
+
+describe('getMessages (threading)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    fromCallIndex = 0
+    fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+  })
+
+  it('filters reply_to_id IS NULL when no parentMessageId provided', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_messages — top-level only
+      { data: [], error: null },
+      // profiles
+      { data: [], error: null },
+    ]
+
+    const result = await getMessages('ch-1')
+    // Should succeed (filter is applied inside query chain)
+    expect(result.data?.messages).toEqual([])
+    expect(result.data?.hasMore).toBe(false)
+  })
+
+  it('filters by reply_to_id when parentMessageId is provided', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const replyMsg = {
+      id: 'r-1',
+      channel_id: 'ch-1',
+      org_id: 'org-1',
+      author_id: 'user-2',
+      body: 'Thread reply',
+      mentions: [],
+      edited_at: null,
+      deleted_at: null,
+      created_at: '2026-01-01T10:05:00Z',
+      reply_to_id: 'msg-parent',
+      reply_count: 0,
+    }
+    fromResults = [
+      // chat_messages — thread replies
+      { data: [replyMsg], error: null },
+      // profiles
+      { data: [{ id: 'user-2', display_name: 'Bob', avatar_url: null }], error: null },
+    ]
+
+    const result = await getMessages('ch-1', undefined, 50, 'msg-parent')
+    expect(result.data?.messages).toHaveLength(1)
+    expect(result.data?.messages[0]?.body).toBe('Thread reply')
+  })
+
+  it('returns messages in ascending order for thread replies', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const replies = [
+      {
+        id: 'r-1',
+        channel_id: 'ch-1',
+        org_id: 'org-1',
+        author_id: 'user-2',
+        body: 'First',
+        mentions: [],
+        edited_at: null,
+        deleted_at: null,
+        created_at: '2026-01-01T10:00:00Z',
+        reply_to_id: 'msg-parent',
+        reply_count: 0,
+      },
+      {
+        id: 'r-2',
+        channel_id: 'ch-1',
+        org_id: 'org-1',
+        author_id: 'user-2',
+        body: 'Second',
+        mentions: [],
+        edited_at: null,
+        deleted_at: null,
+        created_at: '2026-01-01T10:01:00Z',
+        reply_to_id: 'msg-parent',
+        reply_count: 0,
+      },
+    ]
+    fromResults = [
+      { data: replies, error: null },
+      { data: [{ id: 'user-2', display_name: 'Bob', avatar_url: null }], error: null },
+    ]
+
+    const result = await getMessages('ch-1', undefined, 50, 'msg-parent')
+    // Thread replies should NOT be reversed (already ascending from DB)
+    expect(result.data?.messages[0]?.body).toBe('First')
+    expect(result.data?.messages[1]?.body).toBe('Second')
+  })
+})
+
+/* ============================================================
+   getThreadReplies — convenience wrapper
+   ============================================================ */
+
+describe('getThreadReplies', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    fromCallIndex = 0
+    fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+  })
+
+  it('returns error when user is not authenticated', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const result = await getThreadReplies('ch-1', 'msg-parent')
+    expect(result).toEqual({ error: 'Not authenticated' })
+  })
+
+  it('returns replies for the given parent message', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      { data: [], error: null },
+      { data: [], error: null },
+    ]
+
+    const result = await getThreadReplies('ch-1', 'msg-parent')
+    expect(result.data?.messages).toEqual([])
+    expect(result.data?.hasMore).toBe(false)
+  })
+})
+
+/* ============================================================
+   sendMessage — replyToId param
+   ============================================================ */
+
+describe('sendMessage (threading)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    fromCallIndex = 0
+    fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('member')
+  })
+
+  it('sends a top-level message when replyToId is not provided', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const newMessage = {
+      id: 'msg-new',
+      channel_id: 'ch-1',
+      org_id: 'org-1',
+      author_id: 'user-1',
+      body: 'Hello',
+      mentions: [],
+      edited_at: null,
+      deleted_at: null,
+      created_at: '2026-01-01T12:00:00Z',
+      reply_to_id: null,
+      reply_count: 0,
+    }
+    fromResults = [{ data: newMessage, error: null }]
+
+    const result = await sendMessage('ch-1', 'Hello')
+    expect(result.error).toBeUndefined()
+    expect(result.data?.reply_to_id).toBeNull()
+  })
+
+  it('sends a thread reply when replyToId is provided', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const replyMessage = {
+      id: 'reply-new',
+      channel_id: 'ch-1',
+      org_id: 'org-1',
+      author_id: 'user-1',
+      body: 'Thread reply',
+      mentions: [],
+      edited_at: null,
+      deleted_at: null,
+      created_at: '2026-01-01T12:00:00Z',
+      reply_to_id: 'msg-parent',
+      reply_count: 0,
+    }
+    fromResults = [{ data: replyMessage, error: null }]
+
+    const result = await sendMessage('ch-1', 'Thread reply', 'msg-parent')
+    expect(result.error).toBeUndefined()
+    expect(result.data?.reply_to_id).toBe('msg-parent')
   })
 })

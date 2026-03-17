@@ -28,6 +28,10 @@ export type ChatMessage = {
   edited_at: string | null
   deleted_at: string | null
   created_at: string
+  /** Threading: UUID of the parent message this is a reply to (null = top-level) */
+  reply_to_id: string | null
+  /** Threading: count of non-deleted replies to this message */
+  reply_count: number
   /** Joined author profile for display */
   author?: {
     display_name: string
@@ -55,6 +59,10 @@ type ChatState = {
   channels: ChatChannel[]
   /** Messages keyed by channel ID */
   messages: Record<string, ChatMessage[]>
+  /** Thread messages keyed by parent message ID */
+  threadMessages: Record<string, ChatMessage[]>
+  /** Currently open thread's parent message ID */
+  activeThreadId: string | null
   /** Unread counts keyed by channel ID */
   unreadCounts: Record<string, number>
   /** Compose draft keyed by channel ID */
@@ -76,12 +84,24 @@ type ChatState = {
   setDraft: (channelId: string, text: string) => void
   setLoaded: (loaded: boolean) => void
   clear: () => void
+  /* Thread actions */
+  setActiveThread: (parentMessageId: string | null) => void
+  setThreadMessages: (parentMessageId: string, messages: ChatMessage[]) => void
+  appendThreadMessage: (parentMessageId: string, message: ChatMessage) => void
+  updateThreadMessage: (
+    parentMessageId: string,
+    messageId: string,
+    updates: Partial<ChatMessage>,
+  ) => void
+  updateReplyCount: (channelId: string, parentMessageId: string, delta: number) => void
 }
 
 export const useChatStore = create<ChatState>((set) => ({
   activeChannelId: null,
   channels: [],
   messages: {},
+  threadMessages: {},
+  activeThreadId: null,
   unreadCounts: {},
   drafts: {},
   isLoaded: false,
@@ -164,10 +184,49 @@ export const useChatStore = create<ChatState>((set) => ({
       activeChannelId: null,
       channels: [],
       messages: {},
+      threadMessages: {},
+      activeThreadId: null,
       unreadCounts: {},
       drafts: {},
       isLoaded: false,
     }),
+
+  /* Thread actions */
+
+  setActiveThread: (parentMessageId) => set({ activeThreadId: parentMessageId }),
+
+  setThreadMessages: (parentMessageId, messages) =>
+    set((state) => ({
+      threadMessages: { ...state.threadMessages, [parentMessageId]: messages },
+    })),
+
+  appendThreadMessage: (parentMessageId, message) =>
+    set((state) => ({
+      threadMessages: {
+        ...state.threadMessages,
+        [parentMessageId]: [...(state.threadMessages[parentMessageId] ?? []), message],
+      },
+    })),
+
+  updateThreadMessage: (parentMessageId, messageId, updates) =>
+    set((state) => ({
+      threadMessages: {
+        ...state.threadMessages,
+        [parentMessageId]: (state.threadMessages[parentMessageId] ?? []).map((m) =>
+          m.id === messageId ? { ...m, ...updates } : m,
+        ),
+      },
+    })),
+
+  updateReplyCount: (channelId, parentMessageId, delta) =>
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [channelId]: (state.messages[channelId] ?? []).map((m) =>
+          m.id === parentMessageId ? { ...m, reply_count: Math.max(0, m.reply_count + delta) } : m,
+        ),
+      },
+    })),
 }))
 
 /** Total unread count across all channels */

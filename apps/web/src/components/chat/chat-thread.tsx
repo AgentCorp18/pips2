@@ -17,6 +17,8 @@ type Props = {
   onEdit: (messageId: string, body: string) => Promise<void>
   onDelete: (messageId: string) => Promise<void>
   canSend: boolean
+  /** Callback to open thread panel for a given message */
+  onReply?: (messageId: string) => void
 }
 
 export const ChatThread = ({
@@ -29,6 +31,7 @@ export const ChatThread = ({
   onEdit,
   onDelete,
   canSend,
+  onReply,
 }: Props) => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -98,6 +101,7 @@ export const ChatThread = ({
                 currentUserId={currentUserId}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onReply={onReply}
               />
             ))}
           </div>

@@ -8,6 +8,7 @@ import { ChatPageClient } from '../chat-page-client'
 import { ChatChannelHeader } from '@/components/chat/chat-channel-header'
 import { ChatThread } from '@/components/chat/chat-thread'
 import { ChatSummaryPanel } from '@/components/chat/chat-summary-panel'
+import { ThreadPanel } from '@/components/chat/thread-panel'
 import { useChatRealtime, useMembershipRealtime } from '@/hooks/use-chat-realtime'
 import { useChatStore } from '@/stores/chat-store'
 import { useOrgStore } from '@/stores/org-store'
@@ -49,12 +50,16 @@ export const ChannelViewClient = ({
   initialChannels,
   currentUserId,
 }: Props) => {
-  const { messages, setMessages, setActiveChannel, clearUnread } = useChatStore()
+  const { messages, setMessages, setActiveChannel, clearUnread, setActiveThread } = useChatStore()
   const org = useOrgStore((s) => s.org)
   const { can } = usePermissions(org?.role ?? null)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [summary, setSummary] = useState<ChatSummary | null>(null)
   const [members, setMembers] = useState<ChannelMember[]>(initialMembers)
+  /** The message whose thread is currently open, or null if no thread is active */
+  const [activeThreadParentMessage, setActiveThreadParentMessage] = useState<ChatMessage | null>(
+    null,
+  )
 
   // Set active channel and hydrate messages
   useEffect(() => {
@@ -135,6 +140,22 @@ export const ChannelViewClient = ({
     }
   }, [channel.id])
 
+  // Open thread panel for a message
+  const handleReply = useCallback(
+    (messageId: string) => {
+      const msg = channelMessages.find((m) => m.id === messageId) ?? null
+      setActiveThreadParentMessage(msg)
+      setActiveThread(messageId)
+    },
+    [channelMessages, setActiveThread],
+  )
+
+  // Close thread panel
+  const handleCloseThread = useCallback(() => {
+    setActiveThreadParentMessage(null)
+    setActiveThread(null)
+  }, [setActiveThread])
+
   const canSend = can('chat.send')
   const canManage = can('chat.manage')
 
@@ -142,42 +163,57 @@ export const ChannelViewClient = ({
     <>
       <ChatPageClient initialChannels={initialChannels} currentUserId={currentUserId} />
 
-      {/* Thread panel — full-width on mobile (sidebar is hidden), flex-1 on desktop */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile back button — navigates to channel list */}
-        <div className="flex items-center border-b border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 md:hidden">
-          <Link
-            href="/chat"
-            className="flex items-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
-            aria-label="Back to channel list"
-          >
-            <ArrowLeft size={16} />
-            <span>Channels</span>
-          </Link>
+      {/* Main content area — flex row to accommodate thread panel */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Channel area — takes remaining space, or full-width if no thread open */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Mobile back button — navigates to channel list */}
+          <div className="flex items-center border-b border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 md:hidden">
+            <Link
+              href="/chat"
+              className="flex items-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+              aria-label="Back to channel list"
+            >
+              <ArrowLeft size={16} />
+              <span>Channels</span>
+            </Link>
+          </div>
+
+          <ChatChannelHeader
+            channel={channel}
+            members={members}
+            canManage={canManage}
+            isConnected={isConnected}
+            onGenerateSummary={handleGenerateSummary}
+            onMembersChanged={() => void handleMembersChanged()}
+          />
+
+          {summary && <ChatSummaryPanel summary={summary} onClose={() => setSummary(null)} />}
+
+          <ChatThread
+            channelId={channel.id}
+            messages={channelMessages}
+            currentUserId={currentUserId ?? ''}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+            onSend={handleSend}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            canSend={canSend}
+            onReply={handleReply}
+          />
         </div>
 
-        <ChatChannelHeader
-          channel={channel}
-          members={members}
-          canManage={canManage}
-          isConnected={isConnected}
-          onGenerateSummary={handleGenerateSummary}
-          onMembersChanged={() => void handleMembersChanged()}
-        />
-
-        {summary && <ChatSummaryPanel summary={summary} onClose={() => setSummary(null)} />}
-
-        <ChatThread
-          channelId={channel.id}
-          messages={channelMessages}
-          currentUserId={currentUserId ?? ''}
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          onSend={handleSend}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          canSend={canSend}
-        />
+        {/* Thread panel — slides in from right when a thread is active */}
+        {activeThreadParentMessage && (
+          <ThreadPanel
+            parentMessage={activeThreadParentMessage}
+            channelId={channel.id}
+            currentUserId={currentUserId ?? ''}
+            onClose={handleCloseThread}
+            canSend={canSend}
+          />
+        )}
       </div>
     </>
   )
