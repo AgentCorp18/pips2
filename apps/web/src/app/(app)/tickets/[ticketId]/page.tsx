@@ -13,6 +13,7 @@ import { TicketAttachments } from '@/components/tickets/ticket-attachments'
 import { ParentTicketLink } from '@/components/tickets/parent-ticket-link'
 import { SubTickets } from '@/components/tickets/sub-tickets'
 import { TicketChangeLog } from '@/components/tickets/ticket-change-log'
+import { TicketProjectForms } from '@/components/tickets/ticket-project-forms'
 import { Separator } from '@/components/ui/separator'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 import { pipsStepEnumToNumber, buildProductContext } from '@pips/shared'
@@ -101,6 +102,18 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
     const parentPrefix = parentOrgSettings?.ticket_prefix ?? 'TKT'
     parentSequenceId = `${parentPrefix}-${parentData.sequence_number}`
   }
+
+  // Fetch project forms if ticket is linked to a project
+  const projectId = (ticket.project as unknown as { id: string } | null)?.id
+  const projectForms = projectId
+    ? await supabase
+        .from('project_forms')
+        .select('id, step, form_type, title')
+        .eq('project_id', projectId)
+        .order('step')
+        .order('form_type')
+        .then((r) => r.data ?? [])
+    : []
 
   // Fetch comments, audit log, and attachments in parallel
   const [commentsRaw, auditEntries, attachmentsRaw] = await Promise.all([
@@ -275,7 +288,20 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         </div>
       )}
 
-      <Separator className="my-8" />
+      {project && projectForms.length > 0 && (
+        <>
+          <div className="mt-6">
+            <TicketProjectForms
+              projectId={project.id}
+              projectTitle={project.title}
+              forms={projectForms}
+            />
+          </div>
+          <Separator className="my-8" />
+        </>
+      )}
+
+      {(!project || projectForms.length === 0) && <Separator className="my-8" />}
 
       <TicketAttachments
         ticketId={ticketId}
