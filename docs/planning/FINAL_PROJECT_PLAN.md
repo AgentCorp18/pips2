@@ -1,7 +1,7 @@
 # PIPS 2.0 — Final Project Plan
 
 **Last Updated:** March 17, 2026
-**Status:** Production — All phases through 10 complete, 3,073 tests, 18 CEO tickets resolved, chat + initiatives live, data reorganized, overnight improvement cycles complete
+**Status:** Production — All phases through 10 complete, 3,185 tests, 52 CEO tickets resolved, chat threading + templates + initiatives live, data reorganized, overnight improvement cycles complete
 **Live:** pips-app.vercel.app
 
 ---
@@ -10,7 +10,7 @@
 
 | Metric                         | Value                                             |
 | ------------------------------ | ------------------------------------------------- |
-| Unit tests                     | 3,073 passing (257 files)                         |
+| Unit tests                     | 3,185 passing (263 files: 258 web + 5 shared)     |
 | E2E tests                      | 68 passing, 64 skipped (auth-gated), 7 spec files |
 | Type errors                    | 0                                                 |
 | Lint errors                    | 0 (0 warnings)                                    |
@@ -18,8 +18,8 @@
 | Phases complete                | MVP + 1.5 through 10 + CEO bug fix sprints        |
 | Critical security issues fixed | 5 of 5                                            |
 | P1 security issues fixed       | 11 of 11                                          |
-| CEO Request tickets resolved   | 16 of 16 (all complete)                           |
-| DB migrations applied          | 17 (production)                                   |
+| CEO Request tickets resolved   | 52 of 52 (all complete)                           |
+| DB migrations applied          | 27 (production)                                   |
 
 ---
 
@@ -138,9 +138,20 @@ Chat tables: `chat_channels`, `chat_channel_members`, `chat_messages`, `chat_sum
 
 ---
 
+## PM Session: Chat Threading, Templates, Forms & A11y (2026-03-17)
+
+| Feature                 | Description                                                                           | Commit    |
+| ----------------------- | ------------------------------------------------------------------------------------- | --------- |
+| Chat Threading          | 1-level reply depth with DB triggers, thread panel UI, realtime routing, 38 new tests | `0941585` |
+| Ticket → Project Forms  | TicketProjectForms component bridges ticket detail to project PIPS forms              | `2b432f8` |
+| Form Template Library   | 10 system templates across 5 verticals, browse/apply UI, 56 new tests                 | `1c73403` |
+| A11y + Error Boundaries | aria-labels on icon buttons, 24 form route error boundaries                           | `f78fcf6` |
+
+---
+
 ## CEO Bug Fix Sprints — COMPLETE (2026-03-15)
 
-**18 CEO Request tickets triaged and resolved through PIPS methodology:**
+**52 CEO Request tickets triaged and resolved through PIPS methodology:**
 
 | Ticket                   | Fix                                                                           | Status |
 | ------------------------ | ----------------------------------------------------------------------------- | ------ |
@@ -261,7 +272,7 @@ All changes must pass before merge:
 
 1. `pnpm tsc --noEmit` — zero type errors
 2. `pnpm lint` — zero lint errors
-3. `pnpm test` — all 3,073+ tests pass
+3. `pnpm test` — all 3,185+ tests pass
 4. `pnpm build` — production build succeeds
 5. PR review (agent or human)
 
