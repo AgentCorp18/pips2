@@ -88,7 +88,18 @@ export const useChatStore = create<ChatState>((set) => ({
 
   setActiveChannel: (channelId) => set({ activeChannelId: channelId }),
 
-  setChannels: (channels) => set({ channels, isLoaded: true }),
+  setChannels: (channels) =>
+    set((state) => {
+      // Clean up stale unread counts for channels the user is no longer a member of
+      const validIds = new Set(channels.map((c) => c.id))
+      const unreadCounts = { ...state.unreadCounts }
+      for (const id of Object.keys(unreadCounts)) {
+        if (!validIds.has(id)) {
+          delete unreadCounts[id]
+        }
+      }
+      return { channels, isLoaded: true, unreadCounts }
+    }),
 
   addChannel: (channel) => set((state) => ({ channels: [channel, ...state.channels] })),
 

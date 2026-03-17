@@ -435,9 +435,70 @@ export const createChannel = async (
     user_id: userId,
   }))
 
-  const { error: memberError } = await admin.from('chat_channel_members').insert(memberRows)
+  // Use upsert to handle the rare case where a member row already exists (race condition)
+  const { error: memberError } = await admin
+    .from('chat_channel_members')
+    .upsert(memberRows, { onConflict: 'channel_id,user_id' })
   if (memberError) {
     console.error('Failed to add members to channel', channel.id, ':', memberError.message)
+  }
+
+  // For DM channels: verify no duplicate was created by a concurrent request.
+  // If another DM channel was created between our check and insert, prefer the older one.
+  if (type === 'direct' && memberIds && memberIds.length === 1) {
+    const otherUserId = memberIds[0] as string
+    const { data: allDms } = await admin
+      .from('chat_channels')
+      .select('id, created_at')
+      .eq('org_id', orgId)
+      .eq('type', 'direct')
+      .is('archived_at', null)
+      .order('created_at', { ascending: true })
+
+    if (allDms && allDms.length > 1) {
+      // Check which of these channels have both users as members
+      const dmIds = allDms.map((dm) => dm.id)
+      const { data: memberships } = await admin
+        .from('chat_channel_members')
+        .select('channel_id, user_id')
+        .in('channel_id', dmIds)
+        .in('user_id', [user.id, otherUserId])
+
+      if (memberships) {
+        const channelUserMap = new Map<string, Set<string>>()
+        for (const row of memberships) {
+          if (!channelUserMap.has(row.channel_id)) {
+            channelUserMap.set(row.channel_id, new Set())
+          }
+          channelUserMap.get(row.channel_id)!.add(row.user_id)
+        }
+
+        const duplicateDms = [...channelUserMap.entries()]
+          .filter(([, users]) => users.has(user.id) && users.has(otherUserId))
+          .map(([id]) => id)
+
+        // If there are duplicates, keep the oldest and archive the rest
+        if (duplicateDms.length > 1) {
+          const [keepId, ...archiveIds] = duplicateDms
+          if (archiveIds.length > 0) {
+            await admin
+              .from('chat_channels')
+              .update({ archived_at: new Date().toISOString() })
+              .in('id', archiveIds)
+
+            // If we created the one that got archived, return the kept one instead
+            if (archiveIds.includes(channel.id) && keepId) {
+              const { data: kept } = await admin
+                .from('chat_channels')
+                .select('*')
+                .eq('id', keepId)
+                .single()
+              if (kept) return { data: kept as ChatChannel }
+            }
+          }
+        }
+      }
+    }
   }
 
   return { data: channel as ChatChannel }

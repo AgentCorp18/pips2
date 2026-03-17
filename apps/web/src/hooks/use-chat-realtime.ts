@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useReducer, useRef } from 'react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useChatStore } from '@/stores/chat-store'
 import type { ChatMessage } from '@/stores/chat-store'
@@ -33,6 +34,7 @@ const realtimeReducer = (state: RealtimeState, action: RealtimeAction): Realtime
 export const useChatRealtime = (channelId: string | null, currentUserId: string | null) => {
   const [state, dispatch] = useReducer(realtimeReducer, { isConnected: false })
   const supabaseRef = useRef(createClient())
+  const wasConnectedRef = useRef(false)
   const { appendMessage, updateMessage, activeChannelId, incrementUnread } = useChatStore()
 
   useEffect(() => {
@@ -79,10 +81,20 @@ export const useChatRealtime = (channelId: string | null, currentUserId: string 
         },
       )
       .subscribe((status, err) => {
-        dispatch({ type: 'CONNECTION_CHANGE', isConnected: status === 'SUBSCRIBED' })
+        const nowConnected = status === 'SUBSCRIBED'
+        dispatch({ type: 'CONNECTION_CHANGE', isConnected: nowConnected })
+
         if (err) {
           console.error(`[chat-realtime] Subscription error for channel ${channelId}:`, err)
+          toast.error('Chat connection lost. Reconnecting...', { id: 'chat-connection' })
+        } else if (!nowConnected && wasConnectedRef.current) {
+          toast.warning('Chat disconnected. Reconnecting...', { id: 'chat-connection' })
+        } else if (nowConnected && wasConnectedRef.current === false) {
+          // Dismiss any disconnect toast on reconnect (but don't toast on initial connect)
+          toast.dismiss('chat-connection')
         }
+
+        wasConnectedRef.current = nowConnected
       })
 
     return () => {

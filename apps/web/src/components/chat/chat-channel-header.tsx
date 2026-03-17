@@ -18,6 +18,7 @@ type Props = {
   channel: ChatChannel
   members: ChannelMember[]
   canManage: boolean
+  isConnected?: boolean
   onGenerateSummary: () => Promise<void>
   onMembersChanged: () => void
 }
@@ -26,6 +27,7 @@ export const ChatChannelHeader = ({
   channel,
   members,
   canManage,
+  isConnected,
   onGenerateSummary,
   onMembersChanged,
 }: Props) => {
@@ -49,6 +51,12 @@ export const ChatChannelHeader = ({
         <div className="flex items-center gap-2">
           <Hash size={16} className="text-[var(--color-text-tertiary)]" />
           <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{displayName}</h3>
+          {isConnected !== undefined && (
+            <span
+              className={`inline-block h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`}
+              title={isConnected ? 'Connected' : 'Reconnecting...'}
+            />
+          )}
 
           {/* Clickable member count */}
           <button

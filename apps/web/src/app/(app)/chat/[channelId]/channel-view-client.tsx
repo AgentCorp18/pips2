@@ -67,7 +67,7 @@ export const ChannelViewClient = ({
   }, [channel.id, initialMessages, setActiveChannel, setMessages, clearUnread])
 
   // Subscribe to realtime updates
-  useChatRealtime(channel.id, currentUserId)
+  const { isConnected } = useChatRealtime(channel.id, currentUserId)
 
   const channelMessages = messages[channel.id] ?? initialMessages
 
@@ -160,6 +160,7 @@ export const ChannelViewClient = ({
           channel={channel}
           members={members}
           canManage={canManage}
+          isConnected={isConnected}
           onGenerateSummary={handleGenerateSummary}
           onMembersChanged={() => void handleMembersChanged()}
         />
