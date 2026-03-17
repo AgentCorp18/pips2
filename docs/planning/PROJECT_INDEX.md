@@ -1,6 +1,6 @@
 # PIPS 2.0 — Project Planning Index
 
-> **Version:** 2.0 — Updated 2026-03-15
+> **Version:** 2.0 — Updated 2026-03-17
 > **Created:** March 3, 2026
 > **Owner:** Project Manager Agent (Control Tower)
 > **Status:** All Phases 0-10 COMPLETE — Production, CEO bug fix sprints ongoing
@@ -26,39 +26,40 @@ Tech Stack: Next.js 16 + TypeScript (strict) + Supabase + Vercel + Tailwind v4 +
 
 | Metric          | Value                                                  |
 | --------------- | ------------------------------------------------------ |
-| Unit tests      | 2,794 passing (235 files)                              |
+| Unit tests      | 3,073 passing (257 files)                              |
 | E2E tests       | 68 test cases, 7 spec files (in `apps/web/tests/e2e/`) |
 | Type errors     | 0                                                      |
 | Lint errors     | 0                                                      |
-| PIPS forms      | 18 interactive methodology forms                       |
+| PIPS forms      | 25 interactive methodology forms                       |
 | DB migrations   | 17 applied to production                               |
 | Content nodes   | 205 seeded (FTS active)                                |
 | Training data   | 4 paths, 27 modules, 59 exercises                      |
 | Marketing pages | 83+ SEO pages                                          |
 | Chat channels   | Real-time team chat with Supabase Realtime             |
 | Initiatives     | Strategic initiatives with weighted project progress   |
-| CEO tickets     | 16 filed, 13 resolved (3 in progress)                  |
+| CEO tickets     | 18 filed, 18 resolved                                  |
 | Production      | Live since March 3, 2026                               |
 
 ### Phase Completion
 
-| Phase                               | Status      | Commit                                                  |
-| ----------------------------------- | ----------- | ------------------------------------------------------- |
-| Phase 0 (Foundation)                | COMPLETE    | MVP sprints                                             |
-| Phase 1 (MVP)                       | COMPLETE    | Live since 2026-03-03                                   |
-| Phase 1.5 (Stabilization)           | COMPLETE    | `85506c3`                                               |
-| Phase 2A (Knowledge Hub Foundation) | COMPLETE    | `8c3b012`                                               |
-| Phase 2B (Reading Experience)       | COMPLETE    | `7ec1a48`                                               |
-| Phase 2C (Cadence Bar)              | COMPLETE    | `0358558`                                               |
-| Phase 3 (Training Mode)             | COMPLETE    | `ca51d93`, `64b2a03`, `6851176`                         |
-| Phase 4 (Marketing Content + SEO)   | COMPLETE    | `f493409`, `79acef7`                                    |
-| Phase 5 (Workshop Facilitation)     | COMPLETE    | `f910c5b`, `29d9bcf`, `2cf29ec`                         |
-| Phase 6 (Polish & Quality)          | COMPLETE    | All WPs complete — Lighthouse + Final Gate done (PR #7) |
-| Phase 7 (Beta Launch)               | COMPLETE    | P0 all complete, Sentry configured, smoke test done     |
-| Phase 8 (UX & Methodology Clarity)  | COMPLETE    | PRs #14-#18 merged (2026-03-13)                         |
-| Phase 9 (Content, UX & Team Chat)   | COMPLETE    | PR #22 merged, chat migration applied (2026-03-14)      |
-| Phase 10 (Skills & Initiatives)     | COMPLETE    | Initiatives, CEO Request type, Claude Code skills       |
-| CEO Bug Fix Sprints                 | IN PROGRESS | 13/16 tickets resolved, 3 in progress (2026-03-15)      |
+| Phase                               | Status   | Commit                                                  |
+| ----------------------------------- | -------- | ------------------------------------------------------- |
+| Phase 0 (Foundation)                | COMPLETE | MVP sprints                                             |
+| Phase 1 (MVP)                       | COMPLETE | Live since 2026-03-03                                   |
+| Phase 1.5 (Stabilization)           | COMPLETE | `85506c3`                                               |
+| Phase 2A (Knowledge Hub Foundation) | COMPLETE | `8c3b012`                                               |
+| Phase 2B (Reading Experience)       | COMPLETE | `7ec1a48`                                               |
+| Phase 2C (Cadence Bar)              | COMPLETE | `0358558`                                               |
+| Phase 3 (Training Mode)             | COMPLETE | `ca51d93`, `64b2a03`, `6851176`                         |
+| Phase 4 (Marketing Content + SEO)   | COMPLETE | `f493409`, `79acef7`                                    |
+| Phase 5 (Workshop Facilitation)     | COMPLETE | `f910c5b`, `29d9bcf`, `2cf29ec`                         |
+| Phase 6 (Polish & Quality)          | COMPLETE | All WPs complete — Lighthouse + Final Gate done (PR #7) |
+| Phase 7 (Beta Launch)               | COMPLETE | P0 all complete, Sentry configured, smoke test done     |
+| Phase 8 (UX & Methodology Clarity)  | COMPLETE | PRs #14-#18 merged (2026-03-13)                         |
+| Phase 9 (Content, UX & Team Chat)   | COMPLETE | PR #22 merged, chat migration applied (2026-03-14)      |
+| Phase 10 (Skills & Initiatives)     | COMPLETE | Initiatives, CEO Request type, Claude Code skills       |
+| CEO Bug Fix Sprints                 | COMPLETE | 18/18 tickets resolved (2026-03-15)                     |
+| Overnight Improvement Cycles        | COMPLETE | 5 cycles, 17 actions hardened, commit f2d0e58f          |
 
 ---
 

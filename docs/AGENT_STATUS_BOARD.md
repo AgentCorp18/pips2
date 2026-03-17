@@ -1,6 +1,6 @@
 # PIPS 2.0 Agent Status Board
 
-**Last Updated:** March 12, 2026
+**Last Updated:** March 17, 2026
 
 ## Active Work
 
@@ -8,7 +8,20 @@
 | ----- | -------------------- | ------ | ------ |
 | —     | No active agent work | main   | Idle   |
 
-## Recent Completions (March 12, 2026)
+## Recent Completions (March 17, 2026 — Overnight Improvement Cycles)
+
+| Agent    | Task                                         | Commit     | Result                                              |
+| -------- | -------------------------------------------- | ---------- | --------------------------------------------------- |
+| Forge    | Server action permission hardening (Cycle 9) | `7b0c180`  | 4 actions secured with requirePermission            |
+| Forge    | Copy from Project dialog (Cycle 10)          | `99a1372`  | New component + 14 tests, integrated into FormShell |
+| Forge    | 3 critical bug fixes (Cycle 11)              | `049cdb4`  | Cascading errors, cross-org, org_id filter          |
+| Forge    | overrideStep error handling (Cycle 11b)      | `966e486`  | Same cascading fix in overrideStep                  |
+| Forge    | A11y + metadata fixes (Cycle 12)             | `ffca289`  | 3 pages + 4 icons                                   |
+| Forge    | 5 robustness fixes (Cycle 13)                | `f2d0e58f` | streamText, chat channel, org_id, state, email      |
+| Atlas    | Codebase exploration for each cycle          | —          | 10+ issues identified, prioritized per cycle        |
+| Sentinel | Test verification after each cycle           | —          | 3,073 tests passing, zero regressions               |
+
+## Previous Completions (March 12-16, 2026)
 
 | Agent              | Task                                   | PR/Branch              | Result                                             |
 | ------------------ | -------------------------------------- | ---------------------- | -------------------------------------------------- |
@@ -35,13 +48,18 @@ No pending merges.
 
 ## Phase Status
 
-| Phase                     | Status      | Notes                        |
-| ------------------------- | ----------- | ---------------------------- |
-| MVP (Phase 1)             | COMPLETE    | Live at pips-app.vercel.app  |
-| Phase 1.5 (Stabilization) | COMPLETE    | 11 bugs fixed                |
-| Phase 2 (Knowledge Hub)   | COMPLETE    | 205 content nodes, FTS       |
-| Phase 3 (Training)        | COMPLETE    | 4 paths, 27 modules          |
-| Phase 4 (Marketing)       | COMPLETE    | 83+ SEO pages                |
-| Phase 5 (Workshop)        | COMPLETE    | Realtime sync, templates     |
-| Phase 6 (Polish)          | COMPLETE    | Lighthouse + security done   |
-| Phase 7 (Beta Launch)     | IN PROGRESS | P0 items pending Marc action |
+| Phase                         | Status   | Notes                                        |
+| ----------------------------- | -------- | -------------------------------------------- |
+| MVP (Phase 1)                 | COMPLETE | Live at pips-app.vercel.app                  |
+| Phase 1.5 (Stabilization)     | COMPLETE | 11 bugs fixed                                |
+| Phase 2 (Knowledge Hub)       | COMPLETE | 205 content nodes, FTS                       |
+| Phase 3 (Training)            | COMPLETE | 4 paths, 27 modules                          |
+| Phase 4 (Marketing)           | COMPLETE | 83+ SEO pages                                |
+| Phase 5 (Workshop)            | COMPLETE | Realtime sync, templates                     |
+| Phase 6 (Polish)              | COMPLETE | Lighthouse + security done                   |
+| Phase 7 (Beta Launch)         | COMPLETE | P0 all complete, Sentry configured           |
+| Phase 8 (UX Clarity)          | COMPLETE | PRs #14-#18                                  |
+| Phase 9 (Content, UX, Chat)   | COMPLETE | PR #22, chat migration applied               |
+| Phase 10 (Skills/Initiatives) | COMPLETE | Initiatives, CEO Request, Claude Code skills |
+| CEO Bug Fix Sprints           | COMPLETE | 18/18 tickets resolved                       |
+| Overnight Improvement Cycles  | COMPLETE | 5 cycles, 6 commits, 3,073 tests             |

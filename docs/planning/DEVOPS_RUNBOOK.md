@@ -43,8 +43,8 @@ Throughout this document, section headers and descriptions include a status mark
 
 > **Production URL:** https://pips-app.vercel.app (live since March 3, 2026)
 > **Supabase:** Project `cmrribhjgfybbxhrsxqi` (us-east-2)
-> **Unit tests:** 2,400+ passing (212+ files)
-> **E2E tests:** 41+ test cases (7 spec files)
+> **Unit tests:** 3,073+ passing (257 files)
+> **E2E tests:** 68 test cases (7 spec files)
 > **Type errors:** 0
 > **Lint errors:** 0 (30 warnings, acceptable)
 > **DB migrations:** 13 applied to production

@@ -16,7 +16,7 @@
 > - Security fixes: 5 critical + 3 high issues resolved (PR #7)
 > - Lighthouse audit (WP-6.8): 13 fixes applied — canonical URLs, CSP, a11y, caching (PR #7)
 > - FINAL_PROJECT_PLAN.md written with Phase 7-10 roadmap (PR #8)
-> - Build metrics: 2,339+ unit tests (210+ files), 0 type errors, 0 lint errors
+> - Build metrics: 3,073+ unit tests (210+ files), 0 type errors, 0 lint errors
 > - Completion percentage updated from ~90% to ~98%
 > - Only WP-6.9 (Final Quality Gate) remains before beta launch
 >
@@ -76,7 +76,7 @@ PIPS 2.0 is a multi-tenant SaaS web application that embeds the PIPS 6-step proc
 
 | Metric          | Value                                                                       |
 | --------------- | --------------------------------------------------------------------------- |
-| Unit tests      | **2,339+ passing (210+ files)**                                             |
+| Unit tests      | **3,073+ passing (210+ files)**                                             |
 | E2E tests       | 230+ test cases (25 spec files)                                             |
 | Type errors     | 0                                                                           |
 | Lint errors     | 0 (30 warnings)                                                             |
@@ -425,7 +425,7 @@ Synthesized from all 9 agent reports during the planning cascade.
 | R-RESOLVED-6 | name-to-title systemic bug (16 files)       | RESOLVED — fixed in MVP bug fix session                       |
 | R1           | E2E test coverage gaps                      | RESOLVED — E2E specs written for Knowledge Hub + Training     |
 | R3           | Marketing claims exceed reality             | RESOLVED — marketing copy audit completed (2026-03-09)        |
-| R5           | Manual QA gap                               | RESOLVED — smoke test completed, 2,339+ automated tests       |
+| R5           | Manual QA gap                               | RESOLVED — smoke test completed, 3,073+ automated tests       |
 | R6           | Supabase Realtime not activated             | RESOLVED — Workshop shipped with Realtime integration         |
 | R7           | Onboarding is minimal                       | MITIGATED — sample project, welcome cards, empty states built |
 | R8           | Email notification reliability              | MITIGATED — Resend integration verified                       |
@@ -445,7 +445,7 @@ Synthesized from all 9 agent reports during the planning cascade.
 | Functional | Facilitator can advance through workshop modules                     | **PASSED**                |
 | Tests      | Unit tests for workshop server actions (10+ tests)                   | **PASSED** (32+ tests)    |
 | Tests      | `pnpm typecheck` passes with 0 errors                                | **PASSED**                |
-| Tests      | `pnpm test` passes (900+ total tests)                                | **PASSED** (2,339+ tests) |
+| Tests      | `pnpm test` passes (900+ total tests)                                | **PASSED** (3,073+ tests) |
 | Build      | `pnpm build` succeeds                                                | **PASSED**                |
 | UX         | Presentation mode renders cleanly on 1080p+ screens                  | **PASSED**                |
 
@@ -464,7 +464,7 @@ Synthesized from all 9 agent reports during the planning cascade.
 | Security      | Critical review findings addressed (5 critical, 3 high)                     | **PASSED** (PR #7)        |
 | Analytics     | Core tracking events fire correctly (page views, form saves, step advances) | **PASSED**                |
 | Manual        | Smoke test checklist completed by Marc on production                        | Completed (automated)     |
-| Tests         | `pnpm typecheck && pnpm lint && pnpm test && pnpm build` all pass           | **PASSED** (2,339+ tests) |
+| Tests         | `pnpm typecheck && pnpm lint && pnpm test && pnpm build` all pass           | **PASSED** (3,073+ tests) |
 | Final Gate    | WP-6.9 — full CI pipeline verification                                      | **PENDING**               |
 
 ### Beta Launch Gate (after Phase 6)
@@ -472,7 +472,7 @@ Synthesized from all 9 agent reports during the planning cascade.
 | Gate             | Criteria                                                           | Status                                    |
 | ---------------- | ------------------------------------------------------------------ | ----------------------------------------- |
 | Feature complete | All Phase 5 P1 and Phase 6 P1 tasks done                           | **PASSED** (all P1 WPs complete)          |
-| Quality          | 0 type errors, 0 lint errors, 2,339+ unit tests                    | **PASSED**                                |
+| Quality          | 0 type errors, 0 lint errors, 3,073+ unit tests                    | **PASSED**                                |
 | Security         | Critical security review findings addressed                        | **PASSED** (5 critical + 3 high fixed)    |
 | Stability        | Zero critical bugs in production                                   | **PASSED**                                |
 | Manual QA        | Marc has completed full smoke test on production                   | Automated smoke test done; manual pending |

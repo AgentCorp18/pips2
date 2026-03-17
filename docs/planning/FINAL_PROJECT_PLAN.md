@@ -1,7 +1,7 @@
 # PIPS 2.0 — Final Project Plan
 
-**Last Updated:** March 16, 2026
-**Status:** Production — All phases through 10 complete, 2,900+ tests, 18 CEO tickets resolved, chat + initiatives live, data reorganized
+**Last Updated:** March 17, 2026
+**Status:** Production — All phases through 10 complete, 3,073 tests, 18 CEO tickets resolved, chat + initiatives live, data reorganized, overnight improvement cycles complete
 **Live:** pips-app.vercel.app
 
 ---
@@ -10,7 +10,7 @@
 
 | Metric                         | Value                                             |
 | ------------------------------ | ------------------------------------------------- |
-| Unit tests                     | 2,900+ passing (242+ files)                       |
+| Unit tests                     | 3,073 passing (257 files)                         |
 | E2E tests                      | 68 passing, 64 skipped (auth-gated), 7 spec files |
 | Type errors                    | 0                                                 |
 | Lint errors                    | 0 (0 warnings)                                    |
@@ -193,6 +193,22 @@ All documented in PIPS app with 7 forms across 6 steps as a real PIPS process de
 
 ---
 
+## Overnight Improvement Cycles (2026-03-17)
+
+Autonomous PIPS-driven improvement loops, each following the full 6-step methodology with 24+ forms filled per project.
+
+| Cycle | Problem                                                                                                                                                                            | Fix                                                                                                                 | Commit               |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| 9     | 4 server actions missing `requirePermission` checks                                                                                                                                | Added `requirePermission(orgId, 'data.view')` to getAgingTickets, getMyTickets, exportProjectsCSV, exportTicketsCSV | `7b0c180`            |
+| 10    | Dead backend code: listProjectsWithForm/copyFormFromProject had no UI                                                                                                              | Built CopyFromProjectDialog component (177 lines) + 14 tests, integrated into FormShell                             | `99a1372`            |
+| 11    | 3 critical bugs: cascading error handling in advanceStep/overrideStep, cross-org validation in copyFormFromProject, org_id filter in saveFormData                                  | Fixed all 3 with proper error returns and org validation                                                            | `049cdb4`, `966e486` |
+| 12    | Missing page metadata and aria attributes on 3 pages + 4 decorative icons                                                                                                          | Added Metadata exports and aria-hidden="true"                                                                       | `ffca289`            |
+| 13    | 5 server action robustness issues: streamText error handling, createProject silent failures, getInitiativeDetail org_id, bulkUpdateTickets state, inviteMember email normalization | All 5 fixed across 5 files                                                                                          | `f2d0e58f`           |
+
+**Total impact:** 17 server actions hardened, 1 new UI component, 14 new tests, 5 security/reliability improvements.
+
+---
+
 ## Next: Revenue Path (Beta + 60-90 days)
 
 **Entry:** Beta exit criteria met, pricing decisions made
@@ -245,7 +261,7 @@ All changes must pass before merge:
 
 1. `pnpm tsc --noEmit` — zero type errors
 2. `pnpm lint` — zero lint errors
-3. `pnpm test` — all 2,794+ tests pass
+3. `pnpm test` — all 3,073+ tests pass
 4. `pnpm build` — production build succeeds
 5. PR review (agent or human)
 
