@@ -19,11 +19,12 @@ type CardDef = {
 
 const CARDS: CardDef[] = [
   {
-    key: 'activeProjects',
-    title: 'Active Projects',
+    key: 'totalProjects',
+    title: 'Total Projects',
     icon: FolderKanban,
     color: 'var(--color-step-1)',
-    testId: 'stat-active-projects',
+    testId: 'stat-total-projects',
+    href: '/projects',
   },
   {
     key: 'openTickets',

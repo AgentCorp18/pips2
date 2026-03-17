@@ -59,7 +59,9 @@ describe('getDashboardStats', () => {
 
   it('returns all counts when queries succeed', async () => {
     fromResults = [
-      // projects count
+      // total projects count
+      { count: 10, error: null },
+      // active projects count
       { count: 5, error: null },
       // open tickets count
       { count: 12, error: null },
@@ -73,6 +75,7 @@ describe('getDashboardStats', () => {
 
     const result = await getDashboardStats('org-1')
     expect(result).toEqual({
+      totalProjects: 10,
       activeProjects: 5,
       openTickets: 12,
       overdueTickets: 3,
@@ -88,10 +91,12 @@ describe('getDashboardStats', () => {
       { count: null, error: null },
       { count: null, error: null },
       { count: null, error: null },
+      { count: null, error: null },
     ]
 
     const result = await getDashboardStats('org-1')
     expect(result).toEqual({
+      totalProjects: 0,
       activeProjects: 0,
       openTickets: 0,
       overdueTickets: 0,
@@ -107,10 +112,12 @@ describe('getDashboardStats', () => {
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
+      { count: null, error: { message: 'error' } },
     ]
 
     const result = await getDashboardStats('org-1')
     expect(result).toEqual({
+      totalProjects: 0,
       activeProjects: 0,
       openTickets: 0,
       overdueTickets: 0,

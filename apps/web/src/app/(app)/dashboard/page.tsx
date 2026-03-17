@@ -49,6 +49,7 @@ const DashboardPage = async () => {
   const roleLabel = role as string
 
   let stats: Awaited<ReturnType<typeof getDashboardStats>> = {
+    totalProjects: 0,
     activeProjects: 0,
     openTickets: 0,
     overdueTickets: 0,
@@ -115,7 +116,7 @@ const DashboardPage = async () => {
       </div>
 
       {/* Conditional rendering: welcome experience vs full dashboard */}
-      {stats.activeProjects === 0 && stats.openTickets === 0 ? (
+      {stats.totalProjects === 0 ? (
         <>
           <WelcomeCards />
           <div className="mt-6">

@@ -9,6 +9,7 @@ import { PIPS_STEPS } from '@pips/shared'
    ============================================================ */
 
 export type DashboardStats = {
+  totalProjects: number
   activeProjects: number
   openTickets: number
   overdueTickets: number
@@ -42,6 +43,7 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
     await requirePermission(orgId, 'data.view')
   } catch {
     return {
+      totalProjects: 0,
       activeProjects: 0,
       openTickets: 0,
       overdueTickets: 0,
@@ -55,37 +57,41 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const today = now.toISOString().split('T')[0]
 
-  const [projectsRes, openTicketsRes, overdueRes, completedRes, membersRes] = await Promise.all([
-    supabase
-      .from('projects')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .in('status', ['active', 'draft']),
+  const [totalProjectsRes, projectsRes, openTicketsRes, overdueRes, completedRes, membersRes] =
+    await Promise.all([
+      supabase.from('projects').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
 
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked']),
+      supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .in('status', ['active', 'draft']),
 
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
-      .lt('due_date', today),
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked']),
 
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .eq('status', 'done')
-      .gte('resolved_at', startOfMonth),
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
+        .lt('due_date', today),
 
-    supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
-  ])
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('status', 'done')
+        .gte('resolved_at', startOfMonth),
+
+      supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
+    ])
 
   return {
+    totalProjects: totalProjectsRes.count ?? 0,
     activeProjects: projectsRes.count ?? 0,
     openTickets: openTicketsRes.count ?? 0,
     overdueTickets: overdueRes.count ?? 0,
