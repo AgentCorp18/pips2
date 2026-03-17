@@ -2,6 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StepView } from '../step-view'
 
+vi.mock('@/components/pips/step-advisor', () => ({
+  StepAdvisor: () => <div data-testid="step-advisor" />,
+}))
+
 vi.mock('@pips/shared', () => ({
   STEP_CONTENT: {
     1: {

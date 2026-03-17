@@ -34,6 +34,19 @@ export type { Permission } from './permissions'
 export { STEP_CONTENT, getStepForms, getRequiredForms, ALL_FORM_TYPES } from './step-content'
 export type { StepFormDef, StepContent, StepMethodology } from './step-content'
 
+export {
+  calculateMethodologyDepth,
+  getStepRecommendations,
+  getNextFormRecommendation,
+} from './methodology-depth'
+export type {
+  FormCategory,
+  FormRecommendation,
+  StepRecommendations,
+  MethodologyDepthResult,
+  StepDepth,
+} from './methodology-depth'
+
 export { PROJECT_TEMPLATES, getProjectTemplate } from './project-templates'
 export type {
   ProjectTemplate,

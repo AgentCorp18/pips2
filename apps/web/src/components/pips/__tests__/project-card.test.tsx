@@ -14,6 +14,10 @@ vi.mock('next/link', () => ({
   ),
 }))
 
+vi.mock('@/components/pips/methodology-depth-badge', () => ({
+  MethodologyDepthBadge: () => <div data-testid="methodology-depth-badge" />,
+}))
+
 vi.mock('@pips/shared', () => ({
   PIPS_STEPS: [
     { number: 1, name: 'Identify', color: '#2563EB' },

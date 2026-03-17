@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
+import { StepAdvisor } from '@/components/pips/step-advisor'
 
 type FormStatus = {
   form_type: string
@@ -81,6 +82,11 @@ export const StepView = ({
   // 1.3: Split forms into required and optional
   const requiredForms = content.forms.filter((f) => f.required)
   const optionalForms = content.forms.filter((f) => !f.required)
+
+  // Build set of completed form types for StepAdvisor
+  const completedFormTypes = new Set(
+    formStatuses.filter((fs) => fs.started).map((fs) => fs.form_type),
+  )
 
   // 1.6: Dependency warning — viewing a step ahead of current project step
   const showDependencyWarning =
@@ -173,6 +179,9 @@ export const StepView = ({
           </ul>
         </CardContent>
       </Card>
+
+      {/* Tool Advisor — contextual form recommendations */}
+      <StepAdvisor stepNumber={stepNumber} completedFormTypes={completedFormTypes} />
 
       {/* 1.3: Forms — split into Required Tools and Optional Tools */}
       {requiredForms.length > 0 && (

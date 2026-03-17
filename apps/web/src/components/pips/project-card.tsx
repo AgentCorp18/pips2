@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import { ArrowRight, Calendar, User } from 'lucide-react'
+import { MethodologyDepthBadge } from '@/components/pips/methodology-depth-badge'
 
 type ProjectCardProps = {
   id: string
@@ -16,6 +17,8 @@ type ProjectCardProps = {
   ownerName: string
   stepsCompleted: number
   targetDate: string | null
+  /** Completed form types for methodology depth badge */
+  completedFormTypes?: Set<string>
 }
 
 const STATUS_CONFIG: Record<
@@ -37,6 +40,7 @@ export const ProjectCard = ({
   ownerName,
   stepsCompleted,
   targetDate,
+  completedFormTypes,
 }: ProjectCardProps) => {
   const currentPipsStep = PIPS_STEPS.find((s) => s.number === currentStep)
   const fallback = { label: 'Active', variant: 'default' as const }
@@ -50,9 +54,14 @@ export const ProjectCard = ({
             <CardTitle className="text-base leading-snug group-hover:text-[var(--color-primary)]">
               {name}
             </CardTitle>
-            <Badge variant={statusConfig.variant} className="shrink-0 text-xs">
-              {statusConfig.label}
-            </Badge>
+            <div className="flex items-center gap-2">
+              {completedFormTypes && completedFormTypes.size > 0 && (
+                <MethodologyDepthBadge completedFormTypes={completedFormTypes} compact />
+              )}
+              <Badge variant={statusConfig.variant} className="shrink-0 text-xs">
+                {statusConfig.label}
+              </Badge>
+            </div>
           </div>
           {description && (
             <p className="mt-1 line-clamp-2 text-sm text-[var(--color-text-tertiary)]">

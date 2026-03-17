@@ -67,6 +67,27 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
 
   const projectList = projects ?? []
 
+  // Fetch completed form types per project (for methodology depth badge)
+  const projectIds = projectList.map((p) => p.id)
+  const { data: allForms } =
+    projectIds.length > 0
+      ? await supabase
+          .from('project_forms')
+          .select('project_id, form_type, data')
+          .in('project_id', projectIds)
+      : { data: [] }
+
+  const formsByProject = new Map<string, Set<string>>()
+  for (const f of allForms ?? []) {
+    const data = f.data as Record<string, unknown> | null
+    if (data && Object.keys(data).length > 0) {
+      if (!formsByProject.has(f.project_id)) {
+        formsByProject.set(f.project_id, new Set())
+      }
+      formsByProject.get(f.project_id)!.add(f.form_type)
+    }
+  }
+
   // View mode
   const viewParam = typeof params.view === 'string' ? params.view : 'cards'
   const view: ViewMode =
@@ -171,6 +192,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
                 ownerName={project.ownerName}
                 stepsCompleted={project.stepsCompleted}
                 targetDate={project.targetDate}
+                completedFormTypes={formsByProject.get(project.id) ?? new Set()}
               />
             ))}
           </div>
