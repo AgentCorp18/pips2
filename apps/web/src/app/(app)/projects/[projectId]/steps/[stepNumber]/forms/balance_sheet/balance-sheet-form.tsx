@@ -141,6 +141,7 @@ export const BalanceSheetForm = ({ projectId, initialData }: Props) => {
       title="Balance Sheet"
       description="Weigh gains against losses and observations to decide the path forward for this improvement."
       stepNumber={6}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >

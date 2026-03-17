@@ -112,6 +112,7 @@ export const ImplementationPlanForm = ({ projectId, initialData }: Props) => {
       title="Implementation Plan"
       description="Create a detailed plan with tasks, timeline, resources, and risk mitigation."
       stepNumber={4}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >

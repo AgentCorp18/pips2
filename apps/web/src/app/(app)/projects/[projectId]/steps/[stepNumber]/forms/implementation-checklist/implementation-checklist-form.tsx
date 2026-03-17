@@ -122,6 +122,7 @@ export const ImplementationChecklistForm = ({ projectId, initialData }: Props) =
       title="Implementation Checklist"
       description="Track detailed tasks with status, owners, and notes grouped by category."
       stepNumber={5}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >

@@ -221,6 +221,7 @@ export const RaciForm = ({ projectId, initialData }: Props) => {
       title="RACI Chart"
       description="Assign clear roles for each activity: Responsible, Accountable, Consulted, Informed."
       stepNumber={4}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >

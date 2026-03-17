@@ -157,6 +157,7 @@ export const PairedComparisonsForm = ({ projectId, initialData }: Props) => {
       title="Paired Comparisons"
       description="Compare options systematically in pairs. For each pair, select the better option. Results are tallied into a ranked list."
       stepNumber={4}
+      projectId={projectId}
       onSave={handleSave}
       isDirty={dirty}
     >
