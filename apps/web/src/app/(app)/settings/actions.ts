@@ -112,18 +112,19 @@ export const updateOrgSettings = async (
     return { error: 'Failed to update organization name' }
   }
 
-  // Update org_settings
-  const { error: settingsError } = await supabase
-    .from('org_settings')
-    .update({
+  // Upsert org_settings (trigger auto-creates row, but upsert handles edge cases)
+  const { error: settingsError } = await supabase.from('org_settings').upsert(
+    {
+      org_id: currentOrg.orgId,
       timezone: result.data.timezone,
       date_format: result.data.date_format,
       week_start: result.data.week_start,
       default_ticket_priority: result.data.default_ticket_priority,
       ticket_prefix: result.data.ticket_prefix,
       updated_at: new Date().toISOString(),
-    })
-    .eq('org_id', currentOrg.orgId)
+    },
+    { onConflict: 'org_id' },
+  )
 
   if (settingsError) {
     return { error: 'Failed to update organization settings' }

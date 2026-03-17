@@ -185,9 +185,9 @@ export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingT
 
   // Get org prefix for sequence IDs
   const { data: orgRow } = await supabase
-    .from('organizations')
+    .from('org_settings')
     .select('ticket_prefix')
-    .eq('id', orgId)
+    .eq('org_id', orgId)
     .single()
 
   const prefix = (orgRow?.ticket_prefix as string) ?? 'TKT'
