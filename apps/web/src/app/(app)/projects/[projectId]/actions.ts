@@ -166,21 +166,33 @@ export const overrideStep = async (
   if (stepNumber < 6) {
     const nextStepEnum = stepNumberToEnum(stepNumber + 1)
 
-    await supabase
+    const { error: advanceError } = await supabase
       .from('projects')
       .update({ current_step: nextStepEnum, updated_at: now })
       .eq('id', projectId)
 
-    await supabase
+    if (advanceError) {
+      return { success: false, error: 'Failed to advance project step' }
+    }
+
+    const { error: startError } = await supabase
       .from('project_steps')
       .update({ status: 'in_progress', started_at: now })
       .eq('project_id', projectId)
       .eq('step', nextStepEnum)
+
+    if (startError) {
+      return { success: false, error: 'Failed to start next step' }
+    }
   } else {
-    await supabase
+    const { error: completeError } = await supabase
       .from('projects')
       .update({ status: 'completed', updated_at: now })
       .eq('id', projectId)
+
+    if (completeError) {
+      return { success: false, error: 'Failed to complete project' }
+    }
   }
 
   revalidatePath(`/projects/${projectId}`)
