@@ -132,6 +132,24 @@ describe('FormShell', () => {
     render(<FormShell {...callbackProps} isDirty />)
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument()
   })
+
+  it('does not render save-status-indicator in idle state', () => {
+    render(<FormShell {...dataDrivenProps} />)
+    expect(screen.queryByTestId('save-status-indicator')).not.toBeInTheDocument()
+  })
+
+  it('renders save-status-indicator when unsaved changes exist', () => {
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Changed' }} />)
+    expect(screen.getByTestId('save-status-indicator')).toBeInTheDocument()
+  })
+
+  it('save-status-indicator contains "Unsaved changes" text when dirty', () => {
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Changed again' }} />)
+    const indicator = screen.getByTestId('save-status-indicator')
+    expect(indicator).toHaveTextContent('Unsaved changes')
+  })
 })
 
 /* ============================================================
@@ -189,6 +207,43 @@ describe('FormShell auto-save', () => {
     })
 
     expect(screen.getByText('Saved')).toBeInTheDocument()
+  })
+
+  it('save-status-indicator is present and shows "Saving..." during save', async () => {
+    let resolveSave!: (val: { success: boolean }) => void
+    mockSaveFormData.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSave = resolve
+      }),
+    )
+
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'In flight' }} />)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100)
+    })
+
+    const indicator = screen.getByTestId('save-status-indicator')
+    expect(indicator).toHaveTextContent('Saving...')
+
+    await act(async () => {
+      resolveSave({ success: true })
+    })
+  })
+
+  it('save-status-indicator shows "Saved" after successful save', async () => {
+    mockSaveFormData.mockResolvedValue({ success: true })
+
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Completed' }} />)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100)
+    })
+
+    const indicator = screen.getByTestId('save-status-indicator')
+    expect(indicator).toHaveTextContent('Saved')
   })
 
   it('shows error toast when data-driven save fails', async () => {

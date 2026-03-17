@@ -5,14 +5,21 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { Button } from '@/components/ui/button'
 import { InitiativeCard } from '@/components/initiatives/initiative-card'
+import { InitiativesFilters } from '@/components/initiatives/initiatives-filters'
 import { Plus, Target } from 'lucide-react'
+import type { InitiativeStatus } from '@/types/initiatives'
 
 export const metadata: Metadata = {
   title: 'Initiatives',
   description: 'Strategic goals that group multiple PIPS projects and track aggregated progress.',
 }
 
-const InitiativesPage = async () => {
+type InitiativesPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+const InitiativesPage = async ({ searchParams }: InitiativesPageProps) => {
+  const params = await searchParams
   const supabase = await createClient()
   const {
     data: { user },
@@ -23,7 +30,14 @@ const InitiativesPage = async () => {
   const currentOrg = await getCurrentOrg(supabase, user.id)
   if (!currentOrg) redirect('/onboarding')
 
-  const { data: initiatives } = await supabase
+  // Parse filter/sort params
+  const searchQuery = typeof params.search === 'string' ? params.search.trim() : ''
+  const statusFilter =
+    typeof params.status === 'string' ? (params.status as InitiativeStatus) : null
+  const sortParam = typeof params.sort === 'string' ? params.sort : 'newest'
+
+  // Build the query — include archived when the user explicitly filters by archived status
+  let query = supabase
     .from('initiatives')
     .select(
       `
@@ -38,8 +52,28 @@ const InitiativesPage = async () => {
     `,
     )
     .eq('org_id', currentOrg.orgId)
-    .is('archived_at', null)
-    .order('created_at', { ascending: false })
+
+  // Only filter out archived items when the user hasn't selected "archived" explicitly
+  if (statusFilter !== 'archived') {
+    query = query.is('archived_at', null)
+  }
+
+  // Status filter
+  if (statusFilter) {
+    query = query.eq('status', statusFilter)
+  }
+
+  // Apply DB-level sort where possible
+  if (sortParam === 'oldest') {
+    query = query.order('created_at', { ascending: true })
+  } else if (sortParam === 'name_az') {
+    query = query.order('title', { ascending: true })
+  } else {
+    // newest (default) and most_projects both start with created_at desc; most_projects is sorted in JS
+    query = query.order('created_at', { ascending: false })
+  }
+
+  const { data: initiatives } = await query
 
   const items = (initiatives ?? []).map((i) => {
     const links = i.initiative_projects ?? []
@@ -68,6 +102,17 @@ const InitiativesPage = async () => {
     }
   })
 
+  // Client-side search filter (title match)
+  const filtered = searchQuery
+    ? items.filter((i) => i.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    : items
+
+  // Sort by most_projects in JS (DB sort handled all others)
+  const sorted =
+    sortParam === 'most_projects'
+      ? [...filtered].sort((a, b) => b.project_count - a.project_count)
+      : filtered
+
   return (
     <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6 lg:p-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -90,7 +135,10 @@ const InitiativesPage = async () => {
         </Link>
       </div>
 
-      {items.length === 0 ? (
+      {/* Search / Filter / Sort */}
+      <InitiativesFilters />
+
+      {sorted.length === 0 ? (
         <div
           className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed p-12"
           style={{ borderColor: 'var(--color-border)' }}
@@ -102,25 +150,30 @@ const InitiativesPage = async () => {
             <Target size={24} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
           </div>
           <h3 className="mb-1 text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            No initiatives yet
+            {searchQuery || statusFilter
+              ? 'No initiatives match your filters'
+              : 'No initiatives yet'}
           </h3>
           <p
             className="mb-4 max-w-sm text-center text-sm"
             style={{ color: 'var(--color-text-secondary)' }}
           >
-            Create an initiative to group related projects under a strategic goal and track
-            aggregated progress.
+            {searchQuery || statusFilter
+              ? 'Try adjusting your search or filter to find what you are looking for.'
+              : 'Create an initiative to group related projects under a strategic goal and track aggregated progress.'}
           </p>
-          <Link href="/initiatives/new">
-            <Button>
-              <Plus size={16} className="mr-1.5" />
-              Create your first initiative
-            </Button>
-          </Link>
+          {!searchQuery && !statusFilter && (
+            <Link href="/initiatives/new">
+              <Button>
+                <Plus size={16} className="mr-1.5" />
+                Create your first initiative
+              </Button>
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((initiative) => (
+          {sorted.map((initiative) => (
             <InitiativeCard key={initiative.id} initiative={initiative} />
           ))}
         </div>

@@ -674,21 +674,30 @@ const SaveIndicator = ({ status }: { status: DisplayStatus }) => {
   switch (status) {
     case 'saving':
       return (
-        <span className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
+        <span
+          data-testid="save-status-indicator"
+          className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]"
+        >
           <Loader2 size={12} className="animate-spin" />
           <span data-testid="save-indicator-saving">Saving...</span>
         </span>
       )
     case 'saved':
       return (
-        <span className="flex items-center gap-1.5 text-xs text-[var(--color-success)]">
+        <span
+          data-testid="save-status-indicator"
+          className="flex items-center gap-1.5 text-xs text-[var(--color-success)]"
+        >
           <Check size={12} />
           <span data-testid="save-indicator-saved">Saved</span>
         </span>
       )
     case 'unsaved':
       return (
-        <span className="flex items-center gap-1.5 text-xs text-[var(--color-warning)]">
+        <span
+          data-testid="save-status-indicator"
+          className="flex items-center gap-1.5 text-xs text-[var(--color-warning)]"
+        >
           <span data-testid="save-indicator-unsaved">Unsaved changes</span>
         </span>
       )
