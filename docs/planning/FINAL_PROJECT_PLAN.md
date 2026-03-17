@@ -1,7 +1,7 @@
 # PIPS 2.0 — Final Project Plan
 
-**Last Updated:** March 15, 2026
-**Status:** Production — All phases through 10 complete, 2,794+ tests, 16 CEO tickets resolved, chat + initiatives live
+**Last Updated:** March 16, 2026
+**Status:** Production — All phases through 10 complete, 2,900+ tests, 18 CEO tickets resolved, chat + initiatives live, data reorganized
 **Live:** pips-app.vercel.app
 
 ---
@@ -10,7 +10,7 @@
 
 | Metric                         | Value                                             |
 | ------------------------------ | ------------------------------------------------- |
-| Unit tests                     | 2,794 passing (235 files)                         |
+| Unit tests                     | 2,900+ passing (242+ files)                       |
 | E2E tests                      | 68 passing, 64 skipped (auth-gated), 7 spec files |
 | Type errors                    | 0                                                 |
 | Lint errors                    | 0 (0 warnings)                                    |
@@ -160,6 +160,36 @@ Chat tables: `chat_channels`, `chat_channel_members`, `chat_messages`, `chat_sum
 | Mobile scrolling         | Scroll container isolation, single active scrollable area                     | DONE   |
 | Unsaved changes dialog   | Flush-save on navigation instead of false-positive dialog                     | DONE   |
 | Activity feed display    | Fixed "System created comments" — entity-specific labels + friendly names     | DONE   |
+
+---
+
+## Data Reorganization & Cycle Time Feature (2026-03-16)
+
+### Data Reorganization
+
+5 original organizations consolidated into 2 clean orgs:
+
+- **Test Organization** (`bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbb01`) — all fake/demo data (59 projects, 441 tickets, 7 teams, 23 channels, 2001 messages)
+- **Real Use Cases** (`bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbb02`) — all real work (34 projects, 203 tickets, 8 initiatives, 3 teams, 8 channels)
+
+Deleted orgs: PIPS Demo Company, Claude Projects, Beta Testers, PIPS Admin Test Org, Test
+
+### Cycle Time Visibility (Built via PIPS 6-Step Process)
+
+Problem: Timestamps (started_at, resolved_at) collected but never surfaced to users.
+
+| Component             | Description                                                                                                   | Status |
+| --------------------- | ------------------------------------------------------------------------------------------------------------- | ------ |
+| `cycle-time.ts`       | Pure utility functions: daysBetween, formatDuration, getAgingLevel, getCycleTime, getLeadTime, getElapsedTime | DONE   |
+| `CycleTimeBadge`      | Shows cycle/lead time for completed tickets, elapsed time with aging colors for in-progress                   | DONE   |
+| `CycleTimeTrendChart` | Recharts LineChart: weekly avg cycle time + lead time over 12 weeks                                           | DONE   |
+| `AgingTicketsAlert`   | Dashboard card listing top 10 in-progress tickets open > 7 days                                               | DONE   |
+| Cycle time KPIs       | 3-column row on reports page: avg, median, longest open ticket                                                | DONE   |
+| `updated_by` column   | Tracks who last modified a ticket, with trigger + backfill migration                                          | DONE   |
+| Configurable columns  | Users can show/hide ticket table columns                                                                      | DONE   |
+| 21 unit tests         | Full coverage of cycle-time utilities                                                                         | DONE   |
+
+All documented in PIPS app with 7 forms across 6 steps as a real PIPS process demonstration.
 
 ---
 
