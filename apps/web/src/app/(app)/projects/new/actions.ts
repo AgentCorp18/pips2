@@ -131,8 +131,9 @@ export const createProject = async (
         user_id: user.id,
       })
     }
-  } catch {
+  } catch (err) {
     // Non-critical — project was created successfully
+    console.error('Failed to create project chat channel:', err)
   }
 
   trackServerEvent('project.created', { project_id: project.id })

@@ -171,11 +171,14 @@ export const inviteMember = async (
 
     const supabase = await createClient()
 
+    // Normalize email for case-insensitive matching
+    const normalizedEmail = email.toLowerCase().trim()
+
     // Check if already a member (by email via profiles)
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
-      .eq('email', email)
+      .ilike('email', normalizedEmail)
       .single()
 
     if (profile) {
@@ -196,7 +199,7 @@ export const inviteMember = async (
       .from('org_invitations')
       .select('id')
       .eq('org_id', orgId)
-      .eq('email', email)
+      .ilike('email', normalizedEmail)
       .eq('status', 'pending')
       .single()
 
@@ -227,7 +230,7 @@ export const inviteMember = async (
       .from('org_invitations')
       .insert({
         org_id: orgId,
-        email,
+        email: normalizedEmail,
         role: validatedRole,
         invited_by: user.id,
       })
@@ -244,7 +247,7 @@ export const inviteMember = async (
     const inviteUrl = `${baseUrl}/invite/${invitation.token}`
 
     const html = invitationTemplate({
-      recipientEmail: email,
+      recipientEmail: normalizedEmail,
       orgName: org?.name ?? 'an organization',
       role: ROLE_LABELS[validatedRole],
       inviterName: (inviterProfile?.full_name as string) ?? 'A team member',
@@ -252,7 +255,7 @@ export const inviteMember = async (
     })
 
     await sendEmail({
-      to: email,
+      to: normalizedEmail,
       subject: `PIPS — You've been invited to join ${org?.name ?? 'an organization'}`,
       html,
     })

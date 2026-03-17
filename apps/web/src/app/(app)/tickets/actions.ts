@@ -555,6 +555,9 @@ export const bulkUpdateTickets = async (
 
   if (data.status === 'done' || data.status === 'cancelled') {
     update.resolved_at = new Date().toISOString()
+  } else if (data.status) {
+    // Transitioning away from done/cancelled — clear resolved_at
+    update.resolved_at = null
   }
 
   // FIX 3: Guard against empty update

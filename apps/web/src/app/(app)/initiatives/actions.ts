@@ -185,9 +185,11 @@ export const getInitiatives = async (): Promise<{
 export const getInitiativeDetail = async (
   initiativeId: string,
 ): Promise<{ initiative: InitiativeWithRelations | null; error?: string }> => {
-  const { supabase, user } = await getAuthContext()
+  const { supabase, user, orgId } = await getAuthContext()
 
   if (!user) return { initiative: null, error: 'Not authenticated' }
+
+  if (!orgId) return { initiative: null, error: 'No organization' }
 
   const { data, error } = await supabase
     .from('initiatives')
@@ -204,6 +206,7 @@ export const getInitiativeDetail = async (
     `,
     )
     .eq('id', initiativeId)
+    .eq('org_id', orgId)
     .single()
 
   if (error || !data) return { initiative: null, error: error?.message ?? 'Not found' }

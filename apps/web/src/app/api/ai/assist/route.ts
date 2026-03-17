@@ -137,12 +137,20 @@ export const POST = async (request: Request) => {
   }
 
   // Stream the response using Vercel AI SDK
-  const result = streamText({
-    model: anthropic('claude-sonnet-4-20250514'),
-    system: fullSystem,
-    prompt,
-    maxOutputTokens: tone === 'concise' ? 512 : tone === 'detailed' ? 2048 : 1024,
-  })
+  try {
+    const result = streamText({
+      model: anthropic('claude-sonnet-4-20250514'),
+      system: fullSystem,
+      prompt,
+      maxOutputTokens: tone === 'concise' ? 512 : tone === 'detailed' ? 2048 : 1024,
+    })
 
-  return result.toTextStreamResponse()
+    return result.toTextStreamResponse()
+  } catch (err) {
+    console.error('AI assist streaming error:', err)
+    return new Response(
+      JSON.stringify({ error: 'AI service is temporarily unavailable. Please try again.' }),
+      { status: 502, headers: { 'Content-Type': 'application/json' } },
+    )
+  }
 }
