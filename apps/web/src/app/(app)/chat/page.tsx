@@ -17,8 +17,8 @@ export default async function ChatPage() {
     <div className="flex h-[calc(100vh-var(--topbar-height)-3rem)] overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)]">
       <ChatPageClient initialChannels={channels} currentUserId={user?.id ?? null} />
 
-      {/* Empty state when no channel selected — hidden on mobile (sidebar is full-width there) */}
-      <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-[var(--color-bg)]">
+      {/* Empty state when no channel selected */}
+      <div className="flex flex-1 flex-col items-center justify-center bg-[var(--color-bg)]">
         <MessageSquare size={48} className="text-[var(--color-text-tertiary)]" aria-hidden="true" />
         <h2 className="mt-4 text-lg font-medium text-[var(--color-text-primary)]">Team Chat</h2>
         <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">

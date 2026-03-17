@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, BookOpen, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { MarkdownContent } from '@/components/knowledge/markdown-content'
@@ -71,19 +71,22 @@ const ToolPage = async ({ params }: ToolPageProps) => {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
+      <nav
+        className="flex items-center gap-1.5 text-sm text-muted-foreground"
+        aria-label="Breadcrumb"
+      >
         <Link href="/knowledge" className="hover:text-[var(--color-primary)]">
           Knowledge Hub
         </Link>
-        <span>/</span>
+        <ChevronRight size={14} aria-hidden="true" />
         <Link href="/knowledge/guide" className="hover:text-[var(--color-primary)]">
           Guide
         </Link>
-        <span>/</span>
+        <ChevronRight size={14} aria-hidden="true" />
         <Link href="/knowledge/guide/tools" className="hover:text-[var(--color-primary)]">
           Tools
         </Link>
-        <span>/</span>
+        <ChevronRight size={14} aria-hidden="true" />
         <span className="text-[var(--color-text-secondary)]">{displayName}</span>
       </nav>
 
