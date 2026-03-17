@@ -1,4 +1,5 @@
 import { MessageSquare } from 'lucide-react'
+import { getAuthContext } from '@/lib/auth-context'
 import { ChatPageClient } from './chat-page-client'
 import { getChannels } from './actions'
 
@@ -7,12 +8,12 @@ export const metadata = {
 }
 
 export default async function ChatPage() {
-  const result = await getChannels()
+  const [{ user }, result] = await Promise.all([getAuthContext(), getChannels()])
   const channels = result.data ?? []
 
   return (
     <div className="flex h-[calc(100vh-var(--topbar-height)-3rem)] overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)]">
-      <ChatPageClient initialChannels={channels} />
+      <ChatPageClient initialChannels={channels} currentUserId={user?.id ?? null} />
 
       {/* Empty state when no channel selected — hidden on mobile (sidebar is full-width there) */}
       <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-[var(--color-bg)]">

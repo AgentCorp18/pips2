@@ -8,7 +8,7 @@ import { ChatPageClient } from '../chat-page-client'
 import { ChatChannelHeader } from '@/components/chat/chat-channel-header'
 import { ChatThread } from '@/components/chat/chat-thread'
 import { ChatSummaryPanel } from '@/components/chat/chat-summary-panel'
-import { useChatRealtime } from '@/hooks/use-chat-realtime'
+import { useChatRealtime, useMembershipRealtime } from '@/hooks/use-chat-realtime'
 import { useChatStore } from '@/stores/chat-store'
 import { useOrgStore } from '@/stores/org-store'
 import { usePermissions } from '@/hooks/use-permissions'
@@ -79,6 +79,9 @@ export const ChannelViewClient = ({
     }
   }, [channel.id])
 
+  // Refresh members when membership changes (user added/removed from this channel)
+  useMembershipRealtime(currentUserId, handleMembersChanged)
+
   // Load more messages
   const handleLoadMore = useCallback(async () => {
     const firstMessage = channelMessages[0]
@@ -137,7 +140,7 @@ export const ChannelViewClient = ({
 
   return (
     <>
-      <ChatPageClient initialChannels={initialChannels} />
+      <ChatPageClient initialChannels={initialChannels} currentUserId={currentUserId} />
 
       {/* Thread panel — full-width on mobile (sidebar is hidden), flex-1 on desktop */}
       <div className="flex flex-1 flex-col overflow-hidden">

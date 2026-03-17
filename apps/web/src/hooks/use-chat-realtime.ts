@@ -93,3 +93,57 @@ export const useChatRealtime = (channelId: string | null, currentUserId: string 
 
   return { isConnected: state.isConnected }
 }
+
+/* ============================================================
+   Membership Realtime Hook
+   ============================================================ */
+
+/**
+ * Subscribe to real-time membership changes for the current user.
+ * Fires onMembershipChange when the user is added to or removed from any channel.
+ */
+export const useMembershipRealtime = (
+  currentUserId: string | null,
+  onMembershipChange: () => void,
+) => {
+  const supabaseRef = useRef(createClient())
+
+  useEffect(() => {
+    if (!currentUserId) return
+
+    const supabase = supabaseRef.current
+
+    const channel = supabase
+      .channel(`membership:${currentUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_channel_members',
+          filter: `user_id=eq.${currentUserId}`,
+        },
+        () => {
+          onMembershipChange()
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'chat_channel_members',
+          filter: `user_id=eq.${currentUserId}`,
+        },
+        () => {
+          onMembershipChange()
+        },
+      )
+      .subscribe()
+
+    return () => {
+      channel.unsubscribe()
+      supabase.removeChannel(channel)
+    }
+  }, [currentUserId, onMembershipChange])
+}

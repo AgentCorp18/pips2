@@ -1,17 +1,20 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { ChatSidebar } from '@/components/chat/chat-sidebar'
 import { ChatCreateDialog } from '@/components/chat/chat-create-dialog'
+import { useMembershipRealtime } from '@/hooks/use-chat-realtime'
 import { useChatStore } from '@/stores/chat-store'
+import { getChannels } from './actions'
 import type { ChatChannel } from '@/stores/chat-store'
 
 type Props = {
   initialChannels: (ChatChannel & { unread_count?: number })[]
+  currentUserId?: string | null
 }
 
-export const ChatPageClient = ({ initialChannels }: Props) => {
+export const ChatPageClient = ({ initialChannels, currentUserId }: Props) => {
   const { setChannels, channels, isLoaded } = useChatStore()
   const pathname = usePathname()
 
@@ -21,6 +24,16 @@ export const ChatPageClient = ({ initialChannels }: Props) => {
       setChannels(initialChannels)
     }
   }, [initialChannels, isLoaded, setChannels])
+
+  // Refresh channel list when user is added to or removed from a channel
+  const handleMembershipChange = useCallback(async () => {
+    const result = await getChannels()
+    if (result.data) {
+      setChannels(result.data)
+    }
+  }, [setChannels])
+
+  useMembershipRealtime(currentUserId ?? null, handleMembershipChange)
 
   const displayChannels = isLoaded ? channels : initialChannels
 
