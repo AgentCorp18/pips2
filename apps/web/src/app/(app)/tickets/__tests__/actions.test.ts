@@ -976,11 +976,15 @@ describe('setParentTicket', () => {
     fromResults = [
       // ticket lookup
       { data: { org_id: 'org-1', parent_id: null } },
-      // parent lookup
+      // parent lookup: tkt-2 has parent tkt-1 (which is the ticket being moved — circular)
       { data: { org_id: 'org-1', parent_id: null } },
-      // fetchParentId for parentTicketId (tkt-2) -> parent_id is tkt-1
-      // This means tkt-2's parent is tkt-1, creating a circular reference
-      { data: { parent_id: 'tkt-1' } },
+      // batch fetch: org tickets map — tkt-2's parent is tkt-1
+      {
+        data: [
+          { id: 'tkt-1', parent_id: null },
+          { id: 'tkt-2', parent_id: 'tkt-1' },
+        ],
+      },
     ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
@@ -991,18 +995,24 @@ describe('setParentTicket', () => {
   it('returns error when depth exceeds safety limit', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
-    // Build a chain of 11+ ancestors to trigger depth > 10
-    const results: Array<{ data?: unknown; error?: unknown }> = [
+    // Build a chain of 12 tickets: tkt-parent -> ancestor-0 -> ancestor-1 -> ... -> ancestor-10
+    const orgTickets = [
+      { id: 'tkt-child', parent_id: null },
+      { id: 'tkt-parent', parent_id: 'ancestor-0' },
+    ]
+    for (let i = 0; i < 11; i++) {
+      orgTickets.push({ id: `ancestor-${i}`, parent_id: `ancestor-${i + 1}` })
+    }
+    orgTickets.push({ id: 'ancestor-11', parent_id: null })
+
+    fromResults = [
       // ticket lookup
       { data: { org_id: 'org-1', parent_id: null } },
       // parent lookup
       { data: { org_id: 'org-1', parent_id: 'ancestor-0' } },
+      // batch fetch: org tickets — long chain forces depth > 10
+      { data: orgTickets },
     ]
-    // Each fetchParentId walks up the chain
-    for (let i = 0; i < 11; i++) {
-      results.push({ data: { parent_id: `ancestor-${i + 1}` } })
-    }
-    fromResults = results
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await setParentTicket('tkt-child', 'tkt-parent')
@@ -1011,45 +1021,58 @@ describe('setParentTicket', () => {
 
   it('returns error when max nesting depth of 3 would be exceeded', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    // Chain: tkt-parent -> grandparent -> great-grandparent -> gg-parent (depth 3 from tkt-1's perspective)
     fromResults = [
       // ticket lookup
       { data: { org_id: 'org-1', parent_id: null } },
-      // parent lookup (has 2 ancestors already -> depth=3)
+      // parent lookup
       { data: { org_id: 'org-1', parent_id: 'grandparent' } },
-      // fetchParentId for 'tkt-parent' -> has parent 'grandparent'
-      { data: { parent_id: 'great-grandparent' } },
-      // fetchParentId for 'grandparent' -> has parent 'great-grandparent'
-      { data: { parent_id: 'gg-parent' } },
-      // fetchParentId for 'great-grandparent' -> no parent (root)
-      { data: { parent_id: null } },
+      // batch fetch all org tickets
+      {
+        data: [
+          { id: 'tkt-1', parent_id: null },
+          { id: 'tkt-parent', parent_id: 'grandparent' },
+          { id: 'grandparent', parent_id: 'great-grandparent' },
+          { id: 'great-grandparent', parent_id: 'gg-parent' },
+          { id: 'gg-parent', parent_id: null },
+        ],
+      },
       // from('tickets').select('id').eq('parent_id', ticketId) -> has children
       { data: [{ id: 'child-1' }] },
     ]
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     const result = await setParentTicket('tkt-1', 'tkt-parent')
-    // depth is 3 (tkt-parent -> grandparent -> great-grandparent -> gg-parent = depth 3 from while loop)
-    // Actually let me trace through carefully:
     // visited = { tkt-1 }, depth=0, currentId='tkt-parent'
-    // iteration 1: depth=1, visited={tkt-1, tkt-parent}, currentId = parent_id of tkt-parent = 'great-grandparent' (fromResults[2])
-    // iteration 2: depth=2, visited={tkt-1, tkt-parent, great-grandparent}, currentId = parent_id of 'great-grandparent' = 'gg-parent' (fromResults[3])
-    // iteration 3: depth=3, visited={...}, currentId = parent_id of 'gg-parent' = null (fromResults[4])
-    // while exits. depth=3, 3 >= 3 -> "Maximum nesting depth of 3 levels would be exceeded"
-    // But then checks children: has children && depth >= 2 -> also catches this
-    // The first check triggers: depth >= 3
+    // iter 1: depth=1, currentId='grandparent'
+    // iter 2: depth=2, currentId='great-grandparent'
+    // iter 3: depth=3, currentId='gg-parent'
+    // iter 4: depth=4... wait, gg-parent has no parent, so loop exits at depth=3 after gg-parent
+    // Actually: iter 3 sets depth=3, currentId = parentMap.get('great-grandparent') = 'gg-parent'
+    //           iter 4: depth=4 > 3, but check: is depth >= 3 first (after while exits)? No.
+    // Let me re-trace: visited={tkt-1}, currentId='tkt-parent'
+    //   loop iter 1: not visited, add tkt-parent, depth=1, currentId=grandparent
+    //   loop iter 2: not visited, add grandparent, depth=2, currentId=great-grandparent
+    //   loop iter 3: not visited, add great-grandparent, depth=3, currentId=gg-parent
+    //   loop iter 4: not visited, add gg-parent, depth=4, currentId=null
+    //   loop exits. depth=4 >= 3 -> "Maximum nesting depth of 3 levels would be exceeded"
     expect(result).toEqual({ error: 'Maximum nesting depth of 3 levels would be exceeded' })
   })
 
-  it('sets parent ticket successfully', async () => {
+  it('sets parent ticket successfully with single batch org query', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // ticket lookup
       { data: { org_id: 'org-1', parent_id: null } },
       // parent lookup (root ticket, no parent)
       { data: { org_id: 'org-1', parent_id: null } },
-      // fetchParentId for parentTicketId -> null (it's a root)
-      { data: { parent_id: null } },
-      // depth=1 (just the parent), which is < 3 and < 10
+      // batch fetch: org tickets — tkt-parent is a root node
+      {
+        data: [
+          { id: 'tkt-child', parent_id: null },
+          { id: 'tkt-parent', parent_id: null },
+        ],
+      },
       // from('tickets').select('id').eq('parent_id', ticketId).limit(1) -> no children
       { data: [] },
       // from('tickets').update().eq() -> success
@@ -1069,7 +1092,12 @@ describe('setParentTicket', () => {
     fromResults = [
       { data: { org_id: 'org-1', parent_id: null } },
       { data: { org_id: 'org-1', parent_id: null } },
-      { data: { parent_id: null } },
+      {
+        data: [
+          { id: 'tkt-child', parent_id: null },
+          { id: 'tkt-parent', parent_id: null },
+        ],
+      },
       { data: [] },
       { error: { message: 'DB error' } },
     ]
@@ -1084,7 +1112,12 @@ describe('setParentTicket', () => {
     fromResults = [
       { data: { org_id: 'org-1', parent_id: null } },
       { data: { org_id: 'org-1', parent_id: null } },
-      { data: { parent_id: null } },
+      {
+        data: [
+          { id: 'tkt-child', parent_id: null },
+          { id: 'tkt-parent', parent_id: null },
+        ],
+      },
       { data: [] },
       { error: null },
     ]

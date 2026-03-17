@@ -1013,14 +1013,12 @@ describe('addMembers', () => {
     expect(result).toEqual({ error: 'Insufficient permissions to manage channel members' })
   })
 
-  it('adds members successfully and returns success', async () => {
+  it('adds members successfully via single batch upsert and returns success', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
       // admin: chat_channels select (org verification)
       { data: { org_id: 'org-1' }, error: null },
-      // admin: chat_channel_members upsert for user-2
-      { data: null, error: null },
-      // admin: chat_channel_members upsert for user-3
+      // admin: chat_channel_members batch upsert (one call for all members)
       { data: null, error: null },
     ]
 

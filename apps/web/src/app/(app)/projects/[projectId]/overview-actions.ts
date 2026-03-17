@@ -76,6 +76,15 @@ export const getProjectStats = async (projectId: string): Promise<ProjectStats> 
     supabase.from('projects').select('created_at').eq('id', projectId).single(),
   ])
 
+  if (createdRes.error || completedRes.error || projectRes.error) {
+    console.error('Failed to fetch project stats:', {
+      created: createdRes.error?.message,
+      completed: completedRes.error?.message,
+      project: projectRes.error?.message,
+    })
+    return { ticketsCreated: 0, ticketsCompleted: 0, daysActive: 1 }
+  }
+
   const createdAt = projectRes.data?.created_at ? new Date(projectRes.data.created_at) : new Date()
   const daysActive = Math.max(
     1,

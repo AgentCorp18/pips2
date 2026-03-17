@@ -594,13 +594,16 @@ export const addMembers = async (channelId: string, userIds: string[]): Promise<
     return { error: 'Channel not found' }
   }
 
-  for (const userId of userIds) {
-    const { error } = await admin
+  if (userIds.length > 0) {
+    const memberRows = userIds.map((userId) => ({
+      channel_id: channelId,
+      user_id: userId,
+    }))
+    const { error: batchError } = await admin
       .from('chat_channel_members')
-      .upsert({ channel_id: channelId, user_id: userId }, { onConflict: 'channel_id,user_id' })
-
-    if (error) {
-      console.error('Failed to add member', userId, ':', error.message)
+      .upsert(memberRows, { onConflict: 'channel_id,user_id' })
+    if (batchError) {
+      console.error('Failed to add members:', batchError.message)
     }
   }
 
@@ -705,7 +708,7 @@ export const generateSummary = async (channelId: string): Promise<ActionResult<C
     const firstMsg = messages[0]!
     const lastMsg = messages[messages.length - 1]!
 
-    const { data: firstMsgData } = await supabase
+    const { data: firstMsgData, error: firstMsgError } = await supabase
       .from('chat_messages')
       .select('id')
       .eq('channel_id', channelId)
@@ -713,13 +716,21 @@ export const generateSummary = async (channelId: string): Promise<ActionResult<C
       .limit(1)
       .single()
 
-    const { data: lastMsgData } = await supabase
+    if (firstMsgError) {
+      console.error('Failed to look up first message ID:', firstMsgError.message)
+    }
+
+    const { data: lastMsgData, error: lastMsgError } = await supabase
       .from('chat_messages')
       .select('id')
       .eq('channel_id', channelId)
       .eq('created_at', lastMsg.created_at)
       .limit(1)
       .single()
+
+    if (lastMsgError) {
+      console.error('Failed to look up last message ID:', lastMsgError.message)
+    }
 
     const { data: summary, error: saveError } = await supabase
       .from('chat_summaries')

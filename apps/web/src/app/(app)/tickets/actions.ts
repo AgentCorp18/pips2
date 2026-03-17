@@ -688,13 +688,21 @@ export const setParentTicket = async (
     return { error: 'Insufficient permissions' }
   }
 
-  // Helper to fetch a ticket's parent_id (breaks TS circular inference)
-  const fetchParentId = async (id: string): Promise<string | null> => {
-    const { data } = await supabase.from('tickets').select('parent_id').eq('id', id).single()
-    return (data?.parent_id as string | null) ?? null
+  // Fetch all tickets in the org that could be part of the ancestor chain in one query,
+  // then walk the parent chain in-memory — avoids N+1 sequential DB calls.
+  const { data: orgTickets } = await supabase
+    .from('tickets')
+    .select('id, parent_id')
+    .eq('org_id', ticket.org_id)
+
+  const parentMap = new Map<string, string | null>()
+  if (orgTickets) {
+    for (const t of orgTickets) {
+      parentMap.set(t.id, (t.parent_id as string | null) ?? null)
+    }
   }
 
-  // Check for circular reference: walk up from parentTicketId
+  // Check for circular reference: walk up from parentTicketId using in-memory map
   const visited = new Set<string>([ticketId])
   let depth = 0
   let currentId: string | null = parentTicketId
@@ -708,7 +716,7 @@ export const setParentTicket = async (
     if (depth > 10) {
       return { error: 'Hierarchy depth exceeds safety limit' }
     }
-    currentId = await fetchParentId(currentId)
+    currentId = parentMap.get(currentId) ?? null
   }
 
   // depth here is the depth of the parent from root.
