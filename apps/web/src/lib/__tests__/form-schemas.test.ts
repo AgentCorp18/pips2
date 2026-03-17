@@ -45,11 +45,10 @@ describe('FORM_SCHEMAS', () => {
     'evaluation',
     'lessons_learned',
     'balance_sheet',
-    'root_cause',
   ]
 
-  it('has entries for all 25 form types', () => {
-    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(25)
+  it('has entries for all 24 form types', () => {
+    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(24)
   })
 
   it('contains every expected form type key', () => {

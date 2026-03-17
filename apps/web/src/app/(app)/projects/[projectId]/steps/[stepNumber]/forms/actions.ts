@@ -39,8 +39,6 @@ const saveFormDataSchema = z.object({
     'pareto',
     'problem_statement',
     'raci',
-    'root_cause',
-    'solution_evaluation',
     'surveying',
     'weighted_voting',
   ]),

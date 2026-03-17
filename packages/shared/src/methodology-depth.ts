@@ -282,7 +282,6 @@ const RATIONALE_MAP: Record<string, string> = {
   before_after: 'Essential for comparing results against the original problem baseline',
   evaluation: 'Comprehensive assessment of whether targets were met',
   lessons_learned: 'Essential for capturing insights to improve future projects',
-  balance_sheet_eval: 'Post-implementation assessment of actual forces vs predictions',
 }
 
 const getRationale = (

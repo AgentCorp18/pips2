@@ -43,8 +43,8 @@ vi.mock('@/components/knowledge-cadence/knowledge-cadence-bar', () => ({
 const dataDrivenProps: FormShellProps = {
   projectId: 'proj-1',
   stepNumber: 2,
-  formType: 'root_cause',
-  title: 'Root Cause Analysis',
+  formType: 'fishbone',
+  title: 'Fishbone Analysis',
   description: 'Identify the root causes of the problem',
   children: <div data-testid="child-content">Form fields here</div>,
   data: { cause: 'Process variation' },
@@ -78,7 +78,7 @@ describe('FormShell', () => {
   it('renders the form title', () => {
     render(<FormShell {...dataDrivenProps} />)
     // Title appears in both breadcrumb and card header
-    const matches = screen.getAllByText('Root Cause Analysis')
+    const matches = screen.getAllByText('Fishbone Analysis')
     expect(matches.length).toBeGreaterThanOrEqual(1)
   })
 
@@ -162,7 +162,7 @@ describe('FormShell auto-save', () => {
       await vi.advanceTimersByTimeAsync(2100)
     })
 
-    expect(mockSaveFormData).toHaveBeenCalledWith('proj-1', 2, 'root_cause', {
+    expect(mockSaveFormData).toHaveBeenCalledWith('proj-1', 2, 'fishbone', {
       cause: 'Updated cause',
     })
   })
@@ -289,7 +289,7 @@ describe('FormShell auto-save', () => {
     })
 
     expect(mockSaveFormData).toHaveBeenCalledTimes(1)
-    expect(mockSaveFormData).toHaveBeenCalledWith('proj-1', 2, 'root_cause', { cause: 'Change 2' })
+    expect(mockSaveFormData).toHaveBeenCalledWith('proj-1', 2, 'fishbone', { cause: 'Change 2' })
   })
 })
 

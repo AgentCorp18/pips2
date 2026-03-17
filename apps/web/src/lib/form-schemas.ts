@@ -490,14 +490,6 @@ export const costBenefitSchema = z.object({
 export type CostBenefitData = z.infer<typeof costBenefitSchema>
 
 /* ============================================================
-   Step 2 — Root Cause (flexible form — captures analyst notes)
-   ============================================================ */
-
-export const rootCauseSchema = z.record(z.string(), z.unknown())
-
-export type RootCauseData = z.infer<typeof rootCauseSchema>
-
-/* ============================================================
    Schema Map — for dynamic lookup by form_type
    ============================================================ */
 
@@ -526,5 +518,4 @@ export const FORM_SCHEMAS: Record<string, z.ZodType> = {
   before_after: beforeAfterSchema,
   evaluation: evaluationSchema,
   lessons_learned: lessonsLearnedSchema,
-  root_cause: rootCauseSchema,
 }

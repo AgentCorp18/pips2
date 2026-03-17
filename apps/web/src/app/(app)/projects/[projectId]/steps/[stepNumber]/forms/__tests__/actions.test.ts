@@ -192,13 +192,12 @@ describe('saveFormData', () => {
     expect(result).toEqual({ success: false, error: 'Invalid form data' })
   })
 
-  it('saves root_cause form with flexible schema', async () => {
-    // root_cause uses z.record(z.string(), z.unknown()) — accepts any shape
+  it('rejects non-canonical form type', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [{ data: { org_id: 'org-1', current_step: 'analyze' } }, { error: null }]
 
     const result = await saveFormData(VALID_PROJECT_ID, 2, 'root_cause', { anything: 'goes' })
-    expect(result).toEqual({ success: true })
+    expect(result).toEqual({ success: false, error: 'Invalid input' })
   })
 
   it('returns error when stepNumber is greater than project current_step', async () => {
