@@ -25,6 +25,7 @@ import { buildProductContext, STEP_CONTENT } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { CreateTicketFromForm } from './create-ticket-from-form'
+import { CopyFromProjectDialog } from './copy-from-project-dialog'
 import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
 import { cn } from '@/lib/utils'
@@ -347,6 +348,15 @@ export const FormShell = (props: FormShellProps) => {
                 projectId={projectId}
                 stepNumber={stepNumber}
                 formTitle={title}
+              />
+            )}
+            {/* F6: Copy from Project — only in project mode with a known form type */}
+            {!isSandbox && projectId && formType && (
+              <CopyFromProjectDialog
+                projectId={projectId}
+                stepNumber={stepNumber}
+                formType={formType}
+                onCopied={() => window.location.reload()}
               />
             )}
             <FormViewToggle
