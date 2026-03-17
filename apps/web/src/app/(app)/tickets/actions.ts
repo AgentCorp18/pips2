@@ -244,7 +244,11 @@ export const updateTicket = async (
     update.resolved_at = null
   }
 
-  const { error: updateError } = await supabase.from('tickets').update(update).eq('id', ticketId)
+  const { error: updateError } = await supabase
+    .from('tickets')
+    .update(update)
+    .eq('id', ticketId)
+    .eq('org_id', ticket.org_id)
 
   if (updateError) {
     console.error('Failed to update ticket:', updateError.message)

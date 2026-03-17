@@ -154,6 +154,7 @@ export const updateComment = async (
       edited_at: new Date().toISOString(),
     })
     .eq('id', commentId)
+    .eq('org_id', comment.org_id)
 
   if (updateError) {
     console.error('Failed to update comment:', updateError.message)
@@ -205,7 +206,11 @@ export const deleteComment = async (commentId: string): Promise<CommentActionSta
     }
   }
 
-  const { error: deleteError } = await supabase.from('comments').delete().eq('id', commentId)
+  const { error: deleteError } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', commentId)
+    .eq('org_id', comment.org_id)
 
   if (deleteError) {
     console.error('Failed to delete comment:', deleteError.message)

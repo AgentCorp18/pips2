@@ -293,6 +293,7 @@ export const editMessage = async (messageId: string, body: string): Promise<Acti
     .update({ body: trimmedBody, edited_at: new Date().toISOString(), mentions })
     .eq('id', messageId)
     .eq('author_id', user.id)
+    .eq('org_id', orgId)
 
   if (error) {
     console.error('Failed to edit message:', error.message)
@@ -322,6 +323,7 @@ export const deleteMessage = async (messageId: string): Promise<ActionResult> =>
     .update({ deleted_at: new Date().toISOString() })
     .eq('id', messageId)
     .eq('author_id', user.id)
+    .eq('org_id', orgId)
 
   if (error) {
     console.error('Failed to delete message:', error.message)
