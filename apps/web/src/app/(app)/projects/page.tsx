@@ -12,7 +12,7 @@ import { ProjectBoard } from '@/components/pips/project-board'
 import type { BoardProject } from '@/components/pips/project-board'
 import { ViewToggle } from '@/components/tickets/view-toggle'
 import type { ViewMode } from '@/components/tickets/view-toggle'
-import { Plus, FolderKanban, Sparkles, Columns3, Rows3 } from 'lucide-react'
+import { Plus, FolderKanban, Sparkles, Columns3, Rows3, LayoutTemplate } from 'lucide-react'
 import { ExportProjectsButton } from '@/components/pips/export-projects-button'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
 
@@ -156,6 +156,12 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
         <div className="flex items-center gap-3">
           <ExportProjectsButton />
           <ViewToggle current={view} basePath="/projects" />
+          <Button asChild variant="outline" className="gap-2" data-testid="browse-templates-button">
+            <Link href="/projects/templates" data-testid="browse-templates-link">
+              <LayoutTemplate size={16} />
+              Browse Templates
+            </Link>
+          </Button>
           <Button asChild className="gap-2" data-testid="new-project-button">
             <Link href="/projects/new" data-testid="new-project-link">
               <Plus size={16} />
@@ -234,11 +240,17 @@ const EmptyState = () => (
     >
       It only takes a minute to get started — just give your project a name and description.
     </p>
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center justify-center gap-3">
       <Button asChild className="gap-2" data-testid="empty-create-project-button">
         <Link href="/projects/new">
           <Plus size={16} />
           Create Your First Project
+        </Link>
+      </Button>
+      <Button asChild variant="outline" className="gap-2" data-testid="empty-browse-templates-link">
+        <Link href="/projects/templates">
+          <LayoutTemplate size={16} />
+          Browse Templates
         </Link>
       </Button>
       <Button asChild variant="outline" className="gap-2" data-testid="empty-sample-project-link">
