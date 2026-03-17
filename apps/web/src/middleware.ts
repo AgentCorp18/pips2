@@ -21,6 +21,7 @@ const PROTECTED_PATHS = [
   '/reports',
   '/export',
   '/tools',
+  '/admin',
 ]
 
 /**

@@ -114,6 +114,28 @@ export const requirePermission = async (
   return role
 }
 
+/** Check if current user is a system admin. Returns user ID or throws. */
+export const requireSystemAdmin = async (): Promise<{
+  userId: string
+  supabase: SupabaseClient
+}> => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_system_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (!profile?.is_system_admin) throw new Error('System admin access required')
+
+  return { userId: user.id, supabase }
+}
+
 /** Get current user's org membership (org + role), respecting the active org cookie */
 export const getUserOrg = async () => {
   const supabase = await createClient()

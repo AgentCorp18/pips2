@@ -16,7 +16,14 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   }
 
   // Fetch all orgs and the currently selected org in parallel
-  const [orgs, currentOrg] = await Promise.all([getUserOrgs(), getCurrentOrg(supabase, user.id)])
+  // Also check system admin status for the admin nav link
+  const [orgs, currentOrg, profileData] = await Promise.all([
+    getUserOrgs(),
+    getCurrentOrg(supabase, user.id),
+    supabase.from('profiles').select('is_system_admin').eq('id', user.id).maybeSingle(),
+  ])
+
+  const isAdmin = profileData.data?.is_system_admin === true
 
   if (!currentOrg) {
     // No org membership — render children without the AppShell.
@@ -30,7 +37,7 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AppShell orgs={orgs} currentOrgId={currentOrg.orgId}>
+    <AppShell orgs={orgs} currentOrgId={currentOrg.orgId} isAdmin={isAdmin}>
       {children}
     </AppShell>
   )

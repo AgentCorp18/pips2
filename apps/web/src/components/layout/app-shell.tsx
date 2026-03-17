@@ -18,6 +18,7 @@ import {
   Wrench,
   MessageSquare,
   Target,
+  Shield,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
@@ -47,9 +48,10 @@ type AppShellProps = {
   children: React.ReactNode
   orgs: UserOrg[]
   currentOrgId: string
+  isAdmin?: boolean
 }
 
-export const AppShell = ({ children, orgs, currentOrgId }: AppShellProps) => {
+export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProps) => {
   const pathname = usePathname()
   const mounted = useMounted()
   const [commandOpen, setCommandOpen] = useState(false)
@@ -186,6 +188,20 @@ export const AppShell = ({ children, orgs, currentOrgId }: AppShellProps) => {
             )
           })}
         </nav>
+
+        {/* Admin link — only shown to system admins */}
+        {isAdmin && (
+          <div className="border-t border-[var(--sidebar-border)] px-3 py-2">
+            <a
+              href="/admin"
+              data-testid="nav-link-admin"
+              className="flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium opacity-70 transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100"
+            >
+              <Shield size={20} aria-hidden="true" />
+              Admin
+            </a>
+          </div>
+        )}
 
         {/* Theme toggle */}
         <div className="border-t border-[var(--sidebar-border)] px-3 py-3">
