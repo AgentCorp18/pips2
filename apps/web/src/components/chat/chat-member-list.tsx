@@ -117,6 +117,7 @@ export const ChatMemberList = ({
                     className="flex-shrink-0 h-7 w-7 p-0 text-[var(--color-text-tertiary)] hover:text-destructive hover:bg-destructive/10"
                     onClick={() => void handleRemove(member.user_id, member.display_name)}
                     disabled={removingId === member.user_id}
+                    aria-label={`Remove ${member.display_name}`}
                     title={`Remove ${member.display_name}`}
                   >
                     <UserMinus size={14} />

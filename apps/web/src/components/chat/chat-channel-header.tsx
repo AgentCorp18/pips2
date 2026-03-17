@@ -63,6 +63,7 @@ export const ChatChannelHeader = ({
             type="button"
             onClick={() => setMemberListOpen(true)}
             className="flex items-center gap-1 rounded-[var(--radius-md)] px-1.5 py-0.5 text-xs text-[var(--color-text-tertiary)] transition-colors hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-secondary)]"
+            aria-label="View channel members"
             title="View members"
           >
             <Users size={12} />

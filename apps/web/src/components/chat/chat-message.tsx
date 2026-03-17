@@ -82,10 +82,10 @@ export const ChatMessage = ({ message, currentUserId, onEdit, onDelete, onReply 
               className="h-8 text-sm"
               autoFocus
             />
-            <Button size="sm" variant="ghost" onClick={() => void handleSaveEdit()}>
+            <Button size="sm" variant="ghost" onClick={() => void handleSaveEdit()} aria-label="Confirm edit">
               <Check size={14} />
             </Button>
-            <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
+            <Button size="sm" variant="ghost" onClick={handleCancelEdit} aria-label="Cancel editing">
               <X size={14} />
             </Button>
           </div>
