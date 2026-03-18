@@ -1,5 +1,10 @@
 import type { NextConfig } from 'next'
 import { withSentryConfig } from '@sentry/nextjs'
+import withBundleAnalyzer from '@next/bundle-analyzer'
+
+const analyzeBundles = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
 
 const securityHeaders = [
   {
@@ -82,16 +87,18 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withSentryConfig(nextConfig, {
-  // Sentry organization and project slugs (placeholders until configured)
-  org: 'pips-app',
-  project: 'pips-web',
+export default analyzeBundles(
+  withSentryConfig(nextConfig, {
+    // Sentry organization and project slugs (placeholders until configured)
+    org: 'pips-app',
+    project: 'pips-web',
 
-  // Suppress Sentry build logs in CI output
-  silent: true,
+    // Suppress Sentry build logs in CI output
+    silent: true,
 
-  // Disable source map upload until a valid DSN and auth token are set
-  sourcemaps: {
-    disable: true,
-  },
-})
+    // Disable source map upload until a valid DSN and auth token are set
+    sourcemaps: {
+      disable: true,
+    },
+  }),
+)
