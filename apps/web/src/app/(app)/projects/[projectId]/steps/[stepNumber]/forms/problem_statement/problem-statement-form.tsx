@@ -94,8 +94,8 @@ const ProblemStatementFields = ({
         placeholder="Describe how things work today..."
         helperText="What is the current state of the process? Be specific with numbers and observations."
         rows={4}
-        aiFieldType="problem_statement"
-        aiContext={`Problem statement form — current state (as-is). Problem area: ${data.problemArea || 'not set'}`}
+        aiFieldType="as_is_state"
+        aiContext={`Problem area: ${data.problemArea || 'not yet selected'}. Team members: ${data.teamMembers.length > 0 ? data.teamMembers.join(', ') : 'none listed'}. Data sources: ${data.dataSources.length > 0 ? data.dataSources.join(', ') : 'none listed'}.`}
       />
 
       {/* Desired State */}
@@ -107,8 +107,8 @@ const ProblemStatementFields = ({
         placeholder="Describe what success looks like..."
         helperText="What would the ideal outcome look like? Include measurable targets."
         rows={4}
-        aiFieldType="problem_statement"
-        aiContext={`Problem statement form — desired state. Current state: ${data.asIs || 'not yet defined'}`}
+        aiFieldType="desired_state"
+        aiContext={`Problem area: ${data.problemArea || 'not yet selected'}. Current state (as-is): ${data.asIs || 'not yet defined'}.`}
       />
 
       {/* Gap */}
@@ -120,8 +120,8 @@ const ProblemStatementFields = ({
         placeholder="What is the difference between current and desired?"
         helperText="Clearly articulate the gap. This helps frame the problem."
         rows={3}
-        aiFieldType="problem_statement"
-        aiContext={`Problem statement form — gap analysis. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}`}
+        aiFieldType="gap_analysis"
+        aiContext={`Problem area: ${data.problemArea || 'not yet selected'}. Current state (as-is): ${data.asIs || 'not yet defined'}. Desired state: ${data.desired || 'not yet defined'}.`}
       />
 
       {/* Problem Statement */}
@@ -134,8 +134,8 @@ const ProblemStatementFields = ({
         helperText="Combine the As-Is, Desired State, and Gap into a concise, measurable statement."
         rows={3}
         required
-        aiFieldType="problem_statement"
-        aiContext={`Problem statement form — final statement. As-Is: ${data.asIs || 'not yet defined'}. Desired: ${data.desired || 'not yet defined'}. Gap: ${data.gap || 'not yet defined'}`}
+        aiFieldType="final_problem_statement"
+        aiContext={`Problem area: ${data.problemArea || 'not yet selected'}. Current state (as-is): ${data.asIs || 'not yet defined'}. Desired state: ${data.desired || 'not yet defined'}. Gap analysis: ${data.gap || 'not yet defined'}. Team members: ${data.teamMembers.length > 0 ? data.teamMembers.join(', ') : 'none listed'}.`}
       />
 
       {/* Problem Area */}

@@ -9,8 +9,48 @@ import { checkRateLimit } from '@/lib/rate-limit'
    ============================================================ */
 
 const SYSTEM_PROMPTS: Record<string, string> = {
+  /* ------------------------------------------------------------------
+     Step 1 — Identify: Problem Statement sub-fields
+     ------------------------------------------------------------------ */
   problem_statement:
     'You are helping write a problem statement for a process improvement project. Focus on the measurable gap between the current state and the desired state. Include who is affected, the scope, and how success will be measured. Avoid proposing solutions — focus only on describing the problem clearly.',
+  as_is_state:
+    'You are helping describe the current state (as-is) of a process that needs improvement. Be specific and data-driven: include measurable observations like cycle times, error rates, volumes, costs, or frequencies. Describe what actually happens today, step by step, without judging or proposing fixes. Use concrete numbers and real-world examples wherever possible.',
+  desired_state:
+    'You are helping describe the desired future state for a process improvement project. Based on the current state provided, paint a clear picture of what success looks like. Include specific, measurable targets (e.g., reduce defect rate from 8% to 2%, cut cycle time by 40%). Make the targets ambitious but realistic. Describe the ideal end-to-end flow.',
+  gap_analysis:
+    'You are helping articulate the gap between the current state and desired state of a process. Quantify the difference: how large is the gap in terms of time, cost, quality, customer satisfaction, or other metrics? Identify the key dimensions where the gap is most significant. Be factual and evidence-based.',
+  final_problem_statement:
+    'You are helping craft a concise, well-structured problem statement that synthesizes the as-is state, desired state, and gap analysis. The statement should be 1-3 sentences, neutral in tone (no blame), measurable, specific about scope, and focused on the problem — not the solution. Follow this pattern: "[Process/area] currently [as-is metric]. The target is [desired metric], representing a gap of [quantified gap]. This affects [who/what is impacted]."',
+
+  /* ------------------------------------------------------------------
+     Step 1 — Identify: Impact Assessment fields
+     ------------------------------------------------------------------ */
+  financial_impact:
+    'You are helping quantify the financial impact of a process problem. Estimate costs in concrete dollar amounts or percentages where possible. Consider: direct costs (rework, waste, overtime), indirect costs (opportunity cost, lost revenue), and hidden costs (workarounds, manual processes). Provide a range if exact figures are unknown (e.g., "$30,000-$50,000 annually"). Reference the problem statement context to make your estimates specific and grounded.',
+  customer_impact:
+    'You are helping describe how a process problem affects customers (external or internal). Be specific about: which customer segments are affected, how many customers, the frequency of impact, and the severity. Include measurable indicators like NPS drops, complaint rates, SLA breaches, wait times, or churn risk. Connect impacts directly to the problem described.',
+  employee_impact:
+    'You are helping describe how a process problem affects employees and team members. Consider: time spent on workarounds or manual fixes, frustration and morale effects, safety risks, skill underutilization, overtime hours, and burnout potential. Quantify where possible (e.g., "Each team member spends approximately 5 hours/week on manual data reconciliation"). Reference the specific problem to keep the response grounded.',
+  process_impact:
+    'You are helping map the downstream process impact of a problem. Identify: which other processes, departments, or workflows are disrupted; what bottlenecks are created; how throughput or capacity is reduced; and what ripple effects occur across the value chain. Be specific about cause-and-effect relationships. Quantify delays, rework loops, or capacity reductions where possible.',
+
+  /* ------------------------------------------------------------------
+     Step 1 — Identify: List Reduction fields
+     ------------------------------------------------------------------ */
+  elimination_criteria:
+    'You are helping define objective elimination criteria for narrowing down a list of candidate problems or solutions. Good criteria are: specific and measurable, aligned with project constraints (time, budget, resources), fair and consistently applicable to all items, and clearly defined so any team member would reach the same conclusion. Suggest 2-4 criteria with clear pass/fail thresholds. Reference the problem context to make criteria relevant.',
+  elimination_reason:
+    'You are helping explain why a specific item was eliminated from a list during the list reduction process. Write a brief, objective explanation (1-2 sentences) that references the elimination criteria. Be factual and respectful — the goal is documenting the rationale, not criticizing the idea.',
+
+  /* ------------------------------------------------------------------
+     Step 1 — Identify: Weighted Voting (no dedicated prompts needed
+     as this form is primarily numeric — options/voters are short labels)
+     ------------------------------------------------------------------ */
+
+  /* ------------------------------------------------------------------
+     Step 2 — Analyze
+     ------------------------------------------------------------------ */
   root_cause:
     'You are helping analyze root causes for a process improvement project. Use the 5-Why methodology: drill past symptoms to find the underlying systemic cause. Be specific, evidence-based, and avoid blaming individuals. Each "why" should logically follow from the previous answer.',
   solution:

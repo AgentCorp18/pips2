@@ -20,9 +20,19 @@ const ListReductionPage = async ({
 
   if (!user) redirect('/login')
 
-  const saved = await loadFormData(projectId, stepNumber, 'list_reduction')
+  const [saved, problemStatementData] = await Promise.all([
+    loadFormData(projectId, stepNumber, 'list_reduction'),
+    loadFormData(projectId, stepNumber, 'problem_statement'),
+  ])
 
-  return <ListReductionForm projectId={projectId} stepNumber={stepNumber} initialData={saved} />
+  return (
+    <ListReductionForm
+      projectId={projectId}
+      stepNumber={stepNumber}
+      initialData={saved}
+      problemStatementContext={problemStatementData}
+    />
+  )
 }
 
 export default ListReductionPage
