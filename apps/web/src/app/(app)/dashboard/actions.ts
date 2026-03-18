@@ -214,6 +214,125 @@ export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingT
 }
 
 /* ============================================================
+   getDashboardMetrics — completion rate, avg cycle time,
+   ticket velocity for dashboard widget
+   ============================================================ */
+
+export type DashboardMetrics = {
+  completionRate: number
+  avgCycleTimeDays: number | null
+  ticketsClosedThisWeek: number
+  ticketsCreatedThisWeek: number
+  formsCompletedCount: number
+}
+
+export const getDashboardMetrics = async (orgId: string): Promise<DashboardMetrics> => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return {
+      completionRate: 0,
+      avgCycleTimeDays: null,
+      ticketsClosedThisWeek: 0,
+      ticketsCreatedThisWeek: 0,
+      formsCompletedCount: 0,
+    }
+  }
+  const supabase = await createClient()
+
+  const now = new Date()
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const ninetyDaysAgo = new Date()
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+
+  const [
+    allProjectsRes,
+    completedProjectsRes,
+    completedTicketsRes,
+    closedThisWeekRes,
+    createdThisWeekRes,
+    orgProjectsRes,
+  ] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .in('status', ['active', 'draft', 'completed']),
+
+    supabase
+      .from('projects')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('status', 'completed'),
+
+    supabase
+      .from('tickets')
+      .select('started_at, resolved_at')
+      .eq('org_id', orgId)
+      .not('started_at', 'is', null)
+      .not('resolved_at', 'is', null)
+      .in('status', ['done', 'cancelled'])
+      .gte('resolved_at', ninetyDaysAgo.toISOString()),
+
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('status', 'done')
+      .gte('resolved_at', weekAgo.toISOString()),
+
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .gte('created_at', weekAgo.toISOString()),
+
+    supabase.from('projects').select('id').eq('org_id', orgId),
+  ])
+
+  // Completion rate
+  const total = allProjectsRes.count ?? 0
+  const completed = completedProjectsRes.count ?? 0
+  const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+
+  // Average cycle time
+  let avgCycleTimeDays: number | null = null
+  if (completedTicketsRes.data && completedTicketsRes.data.length > 0) {
+    const cycleTimes = completedTicketsRes.data
+      .map((t) => {
+        const start = new Date(t.started_at!).getTime()
+        const end = new Date(t.resolved_at!).getTime()
+        return (end - start) / (1000 * 60 * 60 * 24)
+      })
+      .filter((d) => d >= 0)
+
+    if (cycleTimes.length > 0) {
+      avgCycleTimeDays =
+        Math.round((cycleTimes.reduce((a, b) => a + b, 0) / cycleTimes.length) * 10) / 10
+    }
+  }
+
+  // Forms completed count
+  let formsCompletedCount = 0
+  if (orgProjectsRes.data && orgProjectsRes.data.length > 0) {
+    const projectIds = orgProjectsRes.data.map((p) => p.id)
+    const { count } = await supabase
+      .from('project_forms')
+      .select('id', { count: 'exact', head: true })
+      .in('project_id', projectIds)
+    formsCompletedCount = count ?? 0
+  }
+
+  return {
+    completionRate,
+    avgCycleTimeDays,
+    ticketsClosedThisWeek: closedThisWeekRes.count ?? 0,
+    ticketsCreatedThisWeek: createdThisWeekRes.count ?? 0,
+    formsCompletedCount,
+  }
+}
+
+/* ============================================================
    getRecentActivity
    ============================================================ */
 
