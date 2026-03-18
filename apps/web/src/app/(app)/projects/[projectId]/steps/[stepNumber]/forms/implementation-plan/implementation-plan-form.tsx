@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormShell } from '@/components/pips/form-shell'
+import { FormTextarea } from '@/components/pips/form-textarea'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import { FormFieldView, FormInlineView } from '@/components/pips/form-field-view'
 import { saveFormData } from '../actions'
@@ -222,36 +223,50 @@ const ImplementationPlanFields = ({
           </>
         ) : (
           <>
-            <div className="space-y-2">
-              <Label>Timeline</Label>
-              <textarea
-                value={data.timeline}
-                onChange={(e) => update({ ...data, timeline: e.target.value })}
-                placeholder="e.g., 3 months starting April 2026"
-                rows={3}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Resources Needed</Label>
-              <textarea
-                value={data.resources}
-                onChange={(e) => update({ ...data, resources: e.target.value })}
-                placeholder="People, tools, materials..."
-                rows={3}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Budget</Label>
-              <textarea
-                value={data.budget}
-                onChange={(e) => update({ ...data, budget: e.target.value })}
-                placeholder="Estimated costs and budget allocation"
-                rows={3}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              />
-            </div>
+            <FormTextarea
+              id="timeline"
+              label="Timeline"
+              value={data.timeline}
+              onChange={(v) => update({ ...data, timeline: v })}
+              placeholder="e.g., 3 months starting April 2026"
+              rows={3}
+              aiFieldType="implementation_timeline"
+              aiContext={`Selected solution: ${data.selectedSolution || 'not set'}. Tasks defined: ${
+                data.tasks.length > 0
+                  ? data.tasks
+                      .map((t) => t.title)
+                      .filter(Boolean)
+                      .join(', ')
+                  : 'none'
+              }.`}
+            />
+            <FormTextarea
+              id="resources"
+              label="Resources Needed"
+              value={data.resources}
+              onChange={(v) => update({ ...data, resources: v })}
+              placeholder="People, tools, materials..."
+              rows={3}
+              aiFieldType="implementation_resources"
+              aiContext={`Selected solution: ${data.selectedSolution || 'not set'}. Timeline: ${data.timeline || 'not set'}. Tasks: ${
+                data.tasks.length > 0
+                  ? data.tasks
+                      .map((t) => t.title)
+                      .filter(Boolean)
+                      .join(', ')
+                  : 'none'
+              }.`}
+            />
+            <FormTextarea
+              id="budget"
+              label="Budget"
+              value={data.budget}
+              onChange={(v) => update({ ...data, budget: v })}
+              placeholder="Estimated costs and budget allocation"
+              rows={3}
+              aiFieldType="implementation_budget"
+              aiContext={`Selected solution: ${data.selectedSolution || 'not set'}. Timeline: ${data.timeline || 'not set'}. Resources: ${data.resources || 'not set'}.`}
+            />
           </>
         )}
       </div>

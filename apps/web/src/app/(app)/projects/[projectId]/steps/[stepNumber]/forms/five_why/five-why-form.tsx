@@ -160,8 +160,15 @@ const FiveWhyFields = ({
               onChange={(v) => updateWhy(i, 'question', v)}
               placeholder={buildSuggestion(i)}
               rows={2}
-              aiFieldType="root_cause"
-              aiContext={`5-Why analysis — question #${i + 1}. Problem: ${data.problemStatement || 'not set'}`}
+              aiFieldType="five_why_question"
+              aiContext={`5-Why analysis — question #${i + 1} of ${data.whys.length}. Problem statement: ${data.problemStatement || 'not set'}. ${
+                i > 0
+                  ? `Previous answers in the chain: ${data.whys
+                      .slice(0, i)
+                      .map((w, idx) => `#${idx + 1} Q: ${w.question} A: ${w.answer}`)
+                      .join('; ')}`
+                  : ''
+              }`}
             />
 
             <FormTextarea
@@ -174,8 +181,15 @@ const FiveWhyFields = ({
                 i < data.whys.length - 1 ? 'This answer feeds the next "why" question.' : ''
               }
               rows={2}
-              aiFieldType="root_cause"
-              aiContext={`5-Why analysis — answer #${i + 1}. Question: ${why.question || buildSuggestion(i)}`}
+              aiFieldType="five_why_answer"
+              aiContext={`5-Why analysis — answer #${i + 1} of ${data.whys.length}. Question being answered: ${why.question || buildSuggestion(i)}. Problem statement: ${data.problemStatement || 'not set'}. ${
+                i > 0
+                  ? `Previous Q&A chain: ${data.whys
+                      .slice(0, i)
+                      .map((w, idx) => `#${idx + 1} Q: ${w.question} A: ${w.answer}`)
+                      .join('; ')}`
+                  : ''
+              }`}
             />
           </CardContent>
         </Card>
@@ -197,8 +211,8 @@ const FiveWhyFields = ({
         placeholder="Based on the analysis above, the root cause is..."
         helperText="Summarize the fundamental root cause identified through the 5-Why process."
         rows={3}
-        aiFieldType="root_cause"
-        aiContext={`5-Why analysis — root cause conclusion. Problem: ${data.problemStatement || 'not set'}. Why chain: ${data.whys.map((w, idx) => `#${idx + 1} Q: ${w.question} A: ${w.answer}`).join('; ')}`}
+        aiFieldType="root_cause_conclusion"
+        aiContext={`Problem statement: ${data.problemStatement || 'not set'}. Complete why-chain: ${data.whys.map((w, idx) => `#${idx + 1} Q: ${w.question} A: ${w.answer}`).join('; ')}`}
       />
     </div>
   )

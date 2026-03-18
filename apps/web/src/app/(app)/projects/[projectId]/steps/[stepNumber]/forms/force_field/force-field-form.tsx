@@ -142,6 +142,8 @@ export const ForceFieldForm = ({
           placeholder="Based on this analysis, our strategy is to..."
           helperText="How will you strengthen driving forces or weaken restraining forces?"
           rows={4}
+          aiFieldType="force_field_strategy"
+          aiContext={`Problem statement: ${data.problemStatement || 'not set'}. Driving forces (total strength ${drivingTotal}): ${data.drivingForces.map((f) => `${f.text} (strength ${f.strength})`).join(', ') || 'none'}. Restraining forces (total strength ${restrainingTotal}): ${data.restrainingForces.map((f) => `${f.text} (strength ${f.strength})`).join(', ') || 'none'}.`}
         />
       </div>
     </FormShell>
