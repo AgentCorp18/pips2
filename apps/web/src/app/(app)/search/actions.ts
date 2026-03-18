@@ -15,6 +15,27 @@ const PIPS_STEP_LABELS: Record<number, string> = {
   6: 'Evaluate',
 }
 
+const FORM_TYPE_LABELS: Record<string, string> = {
+  problem_statement: 'Problem Statement',
+  impact_assessment: 'Impact Assessment',
+  fishbone: 'Fishbone Diagram',
+  five_why: '5-Why Analysis',
+  force_field: 'Force Field Analysis',
+  checksheet: 'Checksheet',
+  brainstorming: 'Brainstorming',
+  brainwriting: 'Brainwriting',
+  paired_comparisons: 'Paired Comparisons',
+  criteria_matrix: 'Criteria Matrix',
+  balance_sheet: 'Balance Sheet',
+  raci: 'RACI Chart',
+  implementation_plan: 'Implementation Plan',
+  implementation_checklist: 'Implementation Checklist',
+  milestone_tracker: 'Milestone Tracker',
+  before_after: 'Before/After Comparison',
+  evaluation: 'Evaluation Summary',
+  lessons_learned: 'Lessons Learned',
+}
+
 /**
  * Resolve the current user's org ID from their membership.
  * Respects the org switcher cookie.
@@ -85,6 +106,17 @@ export const globalSearch = async (
     .textSearch('search_vector', ftsQuery, { type: 'plain' })
     .limit(LIMIT_PER_TYPE)
 
+  // Search forms: ilike on title, joined through projects for org scoping
+  const formsPromise = supabase
+    .from('project_forms')
+    .select(
+      'id, form_type, step, title, project_id, project:projects!inner(id, title, org_id, status)',
+    )
+    .eq('project.org_id', resolvedOrgId)
+    .neq('project.status', 'archived')
+    .ilike('title', `%${sanitized}%`)
+    .limit(LIMIT_PER_TYPE)
+
   // Get org ticket prefix for display
   const prefixPromise = supabase
     .from('org_settings')
@@ -92,9 +124,10 @@ export const globalSearch = async (
     .eq('org_id', resolvedOrgId)
     .single()
 
-  const [projectsResult, ticketsResult, prefixResult] = await Promise.all([
+  const [projectsResult, ticketsResult, formsResult, prefixResult] = await Promise.all([
     projectsPromise,
     ticketsPromise,
+    formsPromise,
     prefixPromise,
   ])
 
@@ -127,6 +160,29 @@ export const globalSearch = async (
     }
   })
 
+  // Map forms to search results
+  const formResults: SearchResult[] = (formsResult.data ?? []).map((f) => {
+    const rawProject = f.project as unknown
+    const projectData = Array.isArray(rawProject)
+      ? ((rawProject[0] as { id: string; title: string } | undefined) ?? null)
+      : (rawProject as { id: string; title: string } | null)
+    const formTypeLabel =
+      FORM_TYPE_LABELS[f.form_type as string] ??
+      (f.form_type as string)
+        .split('_')
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ')
+    const subtitle = projectData ? `${formTypeLabel} · ${projectData.title}` : formTypeLabel
+    const projectId = (projectData?.id ?? (f.project_id as string)) as string
+    return {
+      id: f.id as string,
+      type: 'form' as const,
+      title: (f.title as string) || formTypeLabel,
+      subtitle,
+      url: `/projects/${projectId}/steps/${f.step as string}/forms/${f.form_type as string}`,
+    }
+  })
+
   const groups: SearchResultGroup[] = []
 
   if (projectResults.length > 0) {
@@ -141,7 +197,11 @@ export const globalSearch = async (
     groups.push({ type: 'ticket', label: 'Tickets', results: ticketResults })
   }
 
-  const total = projectResults.length + ticketResults.length
+  if (formResults.length > 0) {
+    groups.push({ type: 'form', label: 'Forms', results: formResults })
+  }
+
+  const total = projectResults.length + ticketResults.length + formResults.length
 
   trackServerEvent('search.executed', {
     query_text: trimmed.slice(0, 100),

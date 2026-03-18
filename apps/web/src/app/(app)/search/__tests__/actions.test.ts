@@ -6,8 +6,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockSelect = vi.fn()
 const mockEq = vi.fn()
+const mockNeq = vi.fn()
 const mockIs = vi.fn()
 const mockOr = vi.fn()
+const mockIlike = vi.fn()
 const mockLimit = vi.fn()
 const mockTextSearch = vi.fn()
 const mockSingle = vi.fn()
@@ -15,8 +17,10 @@ const mockSingle = vi.fn()
 const buildChain = () => ({
   select: mockSelect,
   eq: mockEq,
+  neq: mockNeq,
   is: mockIs,
   or: mockOr,
+  ilike: mockIlike,
   limit: mockLimit,
   textSearch: mockTextSearch,
   single: mockSingle,
@@ -52,11 +56,13 @@ describe('globalSearch', () => {
     // Set up chaining for each call: from().select().eq()...
     mockSelect.mockReturnThis()
     mockEq.mockReturnThis()
+    mockNeq.mockReturnThis()
     mockIs.mockReturnThis()
     mockOr.mockReturnThis()
+    mockIlike.mockReturnThis()
     mockTextSearch.mockReturnThis()
 
-    // Default: limit resolves the promise (projects and tickets)
+    // Default: limit resolves the promise (projects, tickets, and forms)
     mockLimit.mockResolvedValue({ data: [] })
 
     // single resolves for org_settings and org_members
@@ -77,6 +83,7 @@ describe('globalSearch', () => {
 
   it('returns grouped results for valid query', async () => {
     // Configure mockLimit to return different data based on call order
+    // Order: projects, tickets, forms (3 parallel queries)
     mockLimit
       .mockResolvedValueOnce({
         data: [{ id: 'proj-1', title: 'Defect Reduction', current_step: 1, status: 'active' }],
@@ -92,6 +99,7 @@ describe('globalSearch', () => {
           },
         ],
       })
+      .mockResolvedValueOnce({ data: [] }) // forms — empty
 
     const { globalSearch } = await importActions()
     const result = await globalSearch('defect', 'org-1')
@@ -115,9 +123,8 @@ describe('globalSearch', () => {
       .mockResolvedValueOnce({
         data: [{ id: 'proj-1', title: 'Test Project', current_step: 2, status: 'active' }],
       })
-      .mockResolvedValueOnce({
-        data: [],
-      })
+      .mockResolvedValueOnce({ data: [] }) // tickets — empty
+      .mockResolvedValueOnce({ data: [] }) // forms — empty
 
     const { globalSearch } = await importActions()
     const result = await globalSearch('test', 'org-1')
@@ -125,5 +132,35 @@ describe('globalSearch', () => {
     expect(result.total).toBe(1)
     expect(result.groups).toHaveLength(1)
     expect(result.groups[0]?.type).toBe('project')
+  })
+
+  it('returns form group when form title matches', async () => {
+    mockLimit
+      .mockResolvedValueOnce({ data: [] }) // projects — empty
+      .mockResolvedValueOnce({ data: [] }) // tickets — empty
+      .mockResolvedValueOnce({
+        data: [
+          {
+            id: 'form-1',
+            form_type: 'fishbone',
+            step: '2',
+            title: 'Root cause fishbone',
+            project_id: 'proj-1',
+            project: { id: 'proj-1', title: 'Defect Reduction', org_id: 'org-1', status: 'active' },
+          },
+        ],
+      })
+
+    const { globalSearch } = await importActions()
+    const result = await globalSearch('fishbone', 'org-1')
+
+    expect(result.total).toBe(1)
+    expect(result.groups).toHaveLength(1)
+
+    const formGroup = result.groups.find((g) => g.type === 'form')
+    expect(formGroup).toBeDefined()
+    expect(formGroup?.label).toBe('Forms')
+    expect(formGroup?.results[0]?.title).toBe('Root cause fishbone')
+    expect(formGroup?.results[0]?.url).toBe('/projects/proj-1/steps/2/forms/fishbone')
   })
 })

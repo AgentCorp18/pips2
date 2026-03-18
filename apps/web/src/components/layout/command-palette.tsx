@@ -16,6 +16,7 @@ import {
   Users,
   MessageSquare,
   Settings,
+  ClipboardList,
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
@@ -120,6 +121,7 @@ const QUICK_ACTIONS = [
 const RESULT_TYPE_ICONS = {
   project: FolderKanban,
   ticket: Ticket,
+  form: ClipboardList,
 } as const
 
 type CommandPaletteProps = {
@@ -198,7 +200,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
             <Command.Input
               value={query}
               onValueChange={handleSearch}
-              placeholder="Search projects, tickets..."
+              placeholder="Search projects, tickets, forms..."
               className="flex h-11 w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-text-tertiary)]"
             />
             <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-tertiary)] sm:inline-block">
