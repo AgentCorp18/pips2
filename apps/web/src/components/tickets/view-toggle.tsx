@@ -1,9 +1,10 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Columns3, LayoutGrid, TableProperties } from 'lucide-react'
+import { Columns3, GanttChart, LayoutGrid, TableProperties, Users } from 'lucide-react'
 
 /* ============================================================
    Types
@@ -65,6 +66,32 @@ export const ViewToggle = ({ current, basePath = '/tickets' }: ViewToggleProps) 
       >
         <Columns3 size={14} />
         Board
+      </Button>
+      <Button
+        variant="ghost"
+        size="xs"
+        className="gap-1"
+        aria-label="Timeline view"
+        data-testid="view-toggle-timeline"
+        asChild
+      >
+        <Link href="/tickets/timeline">
+          <GanttChart size={14} />
+          Timeline
+        </Link>
+      </Button>
+      <Button
+        variant="ghost"
+        size="xs"
+        className="gap-1"
+        aria-label="Workload view"
+        data-testid="view-toggle-workload"
+        asChild
+      >
+        <Link href="/tickets/workload">
+          <Users size={14} />
+          Workload
+        </Link>
       </Button>
     </div>
   )

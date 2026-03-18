@@ -5,19 +5,19 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { getTicketsForCalendar } from './actions'
-import { TicketCalendar } from '@/components/tickets/ticket-calendar'
+import { getWorkloadData } from './actions'
+import { TeamWorkload } from '@/components/tickets/team-workload'
 
 export const metadata: Metadata = {
-  title: 'Calendar',
-  description: 'View tickets on a monthly calendar by due date',
+  title: 'Team Workload',
+  description: 'View ticket distribution across team members',
 }
 
-type CalendarPageProps = {
+type WorkloadPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-const CalendarPage = async ({ searchParams }: CalendarPageProps) => {
+const WorkloadPage = async ({ searchParams }: WorkloadPageProps) => {
   const params = await searchParams
   const supabase = await createClient()
 
@@ -35,27 +35,14 @@ const CalendarPage = async ({ searchParams }: CalendarPageProps) => {
     redirect('/onboarding')
   }
 
-  // Parse year/month from search params, default to current
-  const now = new Date()
-  const year = typeof params.year === 'string' ? parseInt(params.year, 10) : now.getFullYear()
-  const month = typeof params.month === 'string' ? parseInt(params.month, 10) : now.getMonth() + 1
-
-  // Validate year/month
-  const safeYear = year >= 2020 && year <= 2100 ? year : now.getFullYear()
-  const safeMonth = month >= 1 && month <= 12 ? month : now.getMonth() + 1
-
   // Parse optional filters
   const filters: {
-    assignee_id?: string
     project_id?: string
-    priority?: string[]
+    include_done?: boolean
   } = {}
 
-  if (typeof params.assignee_id === 'string') filters.assignee_id = params.assignee_id
   if (typeof params.project_id === 'string') filters.project_id = params.project_id
-  if (params.priority) {
-    filters.priority = Array.isArray(params.priority) ? params.priority : [params.priority]
-  }
+  if (params.include_done === 'true') filters.include_done = true
 
   // Get ticket prefix
   const { data: orgSettings } = await supabase
@@ -66,7 +53,7 @@ const CalendarPage = async ({ searchParams }: CalendarPageProps) => {
 
   const prefix = orgSettings?.ticket_prefix ?? 'TKT'
 
-  const tickets = await getTicketsForCalendar(currentOrg.orgId, safeYear, safeMonth, filters)
+  const { members, unassignedCount } = await getWorkloadData(currentOrg.orgId, filters)
 
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
@@ -76,16 +63,16 @@ const CalendarPage = async ({ searchParams }: CalendarPageProps) => {
           <h1
             className="text-2xl font-semibold"
             style={{ color: 'var(--color-text-primary)' }}
-            data-testid="calendar-page-heading"
+            data-testid="workload-page-heading"
           >
-            Calendar
+            Team Workload
           </h1>
           <p
             className="mt-1 text-sm"
             style={{ color: 'var(--color-text-secondary)' }}
-            data-testid="calendar-page-description"
+            data-testid="workload-page-description"
           >
-            Tickets displayed by their due date
+            Ticket distribution and capacity across team members
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -96,12 +83,12 @@ const CalendarPage = async ({ searchParams }: CalendarPageProps) => {
             <Link href="/tickets/board">Board</Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/tickets/timeline">Timeline</Link>
+            <Link href="/tickets/calendar">Calendar</Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/tickets/workload">Workload</Link>
+            <Link href="/tickets/timeline">Timeline</Link>
           </Button>
-          <Button asChild className="gap-2" data-testid="calendar-new-ticket-button">
+          <Button asChild className="gap-2" data-testid="workload-new-ticket-button">
             <Link href="/tickets/new">
               <Plus size={16} />
               New Ticket
@@ -113,10 +100,10 @@ const CalendarPage = async ({ searchParams }: CalendarPageProps) => {
       {/* Step stripe */}
       <div className="step-gradient-stripe mb-6 rounded-full" />
 
-      {/* Calendar */}
-      <TicketCalendar tickets={tickets} year={safeYear} month={safeMonth} prefix={prefix} />
+      {/* Workload */}
+      <TeamWorkload members={members} unassignedCount={unassignedCount} prefix={prefix} />
     </div>
   )
 }
 
-export default CalendarPage
+export default WorkloadPage
