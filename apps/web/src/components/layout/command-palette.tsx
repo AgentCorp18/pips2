@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Settings,
   ClipboardList,
+  Keyboard,
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
@@ -284,6 +285,42 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
               </>
             )}
           </Command.List>
+
+          {/* Keyboard shortcuts (shown when no query) */}
+          {!hasQuery && (
+            <div className="border-t border-[var(--color-border)] px-4 py-2.5">
+              <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-tertiary)]">
+                <Keyboard size={12} />
+                Keyboard Shortcuts
+              </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-[var(--color-text-secondary)]">
+                <div className="flex items-center justify-between">
+                  <span>Command palette</span>
+                  <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-[10px]">
+                    ⌘K
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Submit comment</span>
+                  <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-[10px]">
+                    ⌘↵
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Close dialog</span>
+                  <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-[10px]">
+                    Esc
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Navigate results</span>
+                  <kbd className="rounded border border-[var(--color-border)] px-1 py-0.5 text-[10px]">
+                    ↑↓
+                  </kbd>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="flex items-center justify-between border-t border-[var(--color-border)] px-3 py-2">
