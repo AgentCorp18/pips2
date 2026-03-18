@@ -18,7 +18,7 @@ CREATE POLICY "Users can upload to their org folder"
   TO authenticated
   WITH CHECK (
     bucket_id = 'attachments'
-    AND (storage.foldername(name))[1]::uuid IN (SELECT unnest(user_org_ids()))
+    AND (storage.foldername(name))[1]::uuid IN (SELECT user_org_ids())
   );
 
 -- Allow org members to read files from their org's folder
@@ -27,7 +27,7 @@ CREATE POLICY "Org members can read their org attachments"
   TO authenticated
   USING (
     bucket_id = 'attachments'
-    AND (storage.foldername(name))[1]::uuid IN (SELECT unnest(user_org_ids()))
+    AND (storage.foldername(name))[1]::uuid IN (SELECT user_org_ids())
   );
 
 -- Allow org members to delete files from their org's folder
@@ -36,5 +36,5 @@ CREATE POLICY "Org members can delete their org attachments"
   TO authenticated
   USING (
     bucket_id = 'attachments'
-    AND (storage.foldername(name))[1]::uuid IN (SELECT unnest(user_org_ids()))
+    AND (storage.foldername(name))[1]::uuid IN (SELECT user_org_ids())
   );
