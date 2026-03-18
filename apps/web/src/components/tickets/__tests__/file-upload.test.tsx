@@ -30,7 +30,7 @@ describe('FileUpload', () => {
   it('renders the dropzone', () => {
     render(<FileUpload ticketId="ticket-1" />)
     expect(screen.getByTestId('file-upload-dropzone')).toBeInTheDocument()
-    expect(screen.getByText(/drop a file here/i)).toBeInTheDocument()
+    expect(screen.getByText(/drop files here/i)).toBeInTheDocument()
   })
 
   it('opens file picker on click', async () => {
@@ -75,6 +75,20 @@ describe('FileUpload', () => {
     expect(mockUploadAttachment).not.toHaveBeenCalled()
   })
 
+  it('validates all files before uploading any', async () => {
+    const user = userEvent.setup()
+    render(<FileUpload ticketId="ticket-1" />)
+
+    const input = screen.getByTestId('file-upload-input')
+    const goodFile = new File(['a'], 'doc.txt', { type: 'text/plain' })
+    const badFile = new File(['MZ'], 'virus.exe', { type: 'application/octet-stream' })
+
+    await user.upload(input, [goodFile, badFile])
+
+    // Neither file should be uploaded when one fails validation
+    expect(mockUploadAttachment).not.toHaveBeenCalled()
+  })
+
   it('calls uploadAttachment for valid files', async () => {
     const onComplete = vi.fn()
     const user = userEvent.setup()
@@ -89,7 +103,7 @@ describe('FileUpload', () => {
     expect(onComplete).toHaveBeenCalled()
   })
 
-  it('shows error from server action', async () => {
+  it('shows error status for failed server upload', async () => {
     mockUploadAttachment.mockResolvedValue({ error: 'Server error' })
     const user = userEvent.setup()
     render(<FileUpload ticketId="ticket-1" />)
@@ -100,6 +114,23 @@ describe('FileUpload', () => {
     await user.upload(input, file)
 
     expect(screen.getByText('Server error')).toBeInTheDocument()
+  })
+
+  it('supports multiple file selection', async () => {
+    const onComplete = vi.fn()
+    const user = userEvent.setup()
+    render(<FileUpload ticketId="ticket-1" onUploadComplete={onComplete} />)
+
+    const input = screen.getByTestId('file-upload-input') as HTMLInputElement
+    expect(input.multiple).toBe(true)
+
+    const file1 = new File(['a'], 'doc1.txt', { type: 'text/plain' })
+    const file2 = new File(['b'], 'doc2.txt', { type: 'text/plain' })
+
+    await user.upload(input, [file1, file2])
+
+    expect(mockUploadAttachment).toHaveBeenCalledTimes(2)
+    expect(onComplete).toHaveBeenCalled()
   })
 
   it('is disabled when disabled prop is true', () => {

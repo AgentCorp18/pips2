@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import { Upload, Loader2, X } from 'lucide-react'
+import { Upload, Loader2, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { uploadAttachment } from '@/app/(app)/tickets/[ticketId]/attachment-actions'
@@ -47,6 +47,12 @@ type FileUploadProps = {
   disabled?: boolean
 }
 
+type UploadStatus = {
+  fileName: string
+  state: 'uploading' | 'done' | 'error'
+  error?: string
+}
+
 /* ============================================================
    Component
    ============================================================ */
@@ -56,6 +62,7 @@ export const FileUpload = ({ ticketId, onUploadComplete, disabled = false }: Fil
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [uploadStatuses, setUploadStatuses] = useState<UploadStatus[]>([])
 
   const validateFile = useCallback((file: File): string | null => {
     if (file.size > MAX_FILE_SIZE) {
@@ -68,45 +75,71 @@ export const FileUpload = ({ ticketId, onUploadComplete, disabled = false }: Fil
     return null
   }, [])
 
-  const handleUpload = useCallback(
-    async (file: File) => {
-      const validationError = validateFile(file)
-      if (validationError) {
-        setError(validationError)
-        return
+  const handleUploadFiles = useCallback(
+    async (files: File[]) => {
+      // Validate all files first
+      for (const file of files) {
+        const validationError = validateFile(file)
+        if (validationError) {
+          setError(`${file.name}: ${validationError}`)
+          return
+        }
       }
 
       setError(null)
       setIsUploading(true)
+      setUploadStatuses(files.map((f) => ({ fileName: f.name, state: 'uploading' })))
 
-      try {
-        const formData = new FormData()
-        formData.append('file', file)
-        const result = await uploadAttachment(ticketId, formData)
+      let anySuccess = false
 
-        if (result.error) {
-          setError(result.error)
-        } else {
-          onUploadComplete?.()
-        }
-      } catch {
-        setError('Failed to upload file. Please try again.')
-      } finally {
-        setIsUploading(false)
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ''
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]!
+        try {
+          const formData = new FormData()
+          formData.append('file', file)
+          const result = await uploadAttachment(ticketId, formData)
+
+          setUploadStatuses((prev) =>
+            prev.map((s, idx) =>
+              idx === i
+                ? result.error
+                  ? { ...s, state: 'error' as const, error: result.error }
+                  : { ...s, state: 'done' as const }
+                : s,
+            ),
+          )
+
+          if (!result.error) anySuccess = true
+        } catch {
+          setUploadStatuses((prev) =>
+            prev.map((s, idx) =>
+              idx === i ? { ...s, state: 'error' as const, error: 'Upload failed' } : s,
+            ),
+          )
         }
       }
+
+      if (anySuccess) {
+        onUploadComplete?.()
+      }
+
+      setIsUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+
+      // Clear statuses after a delay
+      setTimeout(() => setUploadStatuses([]), 3000)
     },
     [ticketId, onUploadComplete, validateFile],
   )
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (file) void handleUpload(file)
+      const files = Array.from(e.target.files ?? [])
+      if (files.length > 0) void handleUploadFiles(files)
     },
-    [handleUpload],
+    [handleUploadFiles],
   )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -127,10 +160,10 @@ export const FileUpload = ({ ticketId, onUploadComplete, disabled = false }: Fil
       e.stopPropagation()
       setIsDragging(false)
 
-      const file = e.dataTransfer.files[0]
-      if (file) void handleUpload(file)
+      const files = Array.from(e.dataTransfer.files)
+      if (files.length > 0) void handleUploadFiles(files)
     },
-    [handleUpload],
+    [handleUploadFiles],
   )
 
   return (
@@ -156,7 +189,7 @@ export const FileUpload = ({ ticketId, onUploadComplete, disabled = false }: Fil
             : 'border-[var(--color-border)] hover:border-[var(--color-primary-light)]',
           (disabled || isUploading) && 'cursor-not-allowed opacity-50',
         )}
-        aria-label="Upload file"
+        aria-label="Upload files"
       >
         {isUploading ? (
           <>
@@ -166,17 +199,17 @@ export const FileUpload = ({ ticketId, onUploadComplete, disabled = false }: Fil
               style={{ color: 'var(--color-primary)' }}
             />
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              Uploading...
+              Uploading {uploadStatuses.length} file{uploadStatuses.length !== 1 ? 's' : ''}...
             </p>
           </>
         ) : (
           <>
             <Upload size={24} className="mb-2" style={{ color: 'var(--color-text-tertiary)' }} />
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              Drop a file here or click to browse
+              Drop files here or click to browse
             </p>
             <p className="mt-1 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Max 50 MB
+              Max 50 MB per file
             </p>
           </>
         )}
@@ -185,11 +218,62 @@ export const FileUpload = ({ ticketId, onUploadComplete, disabled = false }: Fil
       <input
         ref={fileInputRef}
         type="file"
+        multiple
         onChange={handleFileSelect}
         className="hidden"
         aria-hidden="true"
         data-testid="file-upload-input"
       />
+
+      {/* Upload progress / status */}
+      {uploadStatuses.length > 0 && (
+        <div className="space-y-1" data-testid="upload-statuses">
+          {uploadStatuses.map((status, idx) => (
+            <div
+              key={`${status.fileName}-${idx}`}
+              className="flex items-center gap-2 rounded-md px-3 py-1.5 text-xs"
+              style={{
+                backgroundColor:
+                  status.state === 'error'
+                    ? 'var(--color-error-subtle, #fef2f2)'
+                    : status.state === 'done'
+                      ? 'var(--color-success-subtle, #f0fdf4)'
+                      : 'var(--color-surface)',
+              }}
+            >
+              {status.state === 'uploading' && (
+                <Loader2
+                  size={12}
+                  className="shrink-0 animate-spin"
+                  style={{ color: 'var(--color-primary)' }}
+                />
+              )}
+              {status.state === 'done' && (
+                <CheckCircle2
+                  size={12}
+                  className="shrink-0"
+                  style={{ color: 'var(--color-success, #16a34a)' }}
+                />
+              )}
+              {status.state === 'error' && (
+                <AlertCircle
+                  size={12}
+                  className="shrink-0"
+                  style={{ color: 'var(--color-error)' }}
+                />
+              )}
+              <span className="truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                {status.fileName}
+              </span>
+              {status.error && (
+                <span className="ml-auto shrink-0" style={{ color: 'var(--color-error)' }}>
+                  {status.error}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {error && (
         <div
