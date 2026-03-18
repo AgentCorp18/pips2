@@ -68,6 +68,9 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
+const mockFetch = vi.fn()
+vi.stubGlobal('fetch', mockFetch)
+
 // Admin client shares the same from() index pool so test sequences are contiguous
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: vi.fn(() => ({
@@ -93,6 +96,7 @@ import {
   createChannel,
   archiveChannel,
   markChannelRead,
+  generateSummary,
   addMembers,
   removeMember,
   getOrgMembers,
@@ -1380,5 +1384,279 @@ describe('sendMessage (threading)', () => {
     const result = await sendMessage('ch-1', 'Thread reply', 'msg-parent')
     expect(result.error).toBeUndefined()
     expect(result.data?.reply_to_id).toBe('msg-parent')
+  })
+})
+
+/* ============================================================
+   generateSummary
+   ============================================================ */
+
+describe('generateSummary', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    fromCallIndex = 0
+    fromResults = []
+    mockGetCurrentOrg.mockResolvedValue({ orgId: 'org-1', orgName: 'Test Org', role: 'owner' })
+    mockRequirePermission.mockResolvedValue('member')
+    // Reset env var between tests
+    delete process.env.ANTHROPIC_API_KEY
+  })
+
+  it('returns error when user is not authenticated', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'Not authenticated' })
+  })
+
+  it('returns error when user has no organization', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockGetCurrentOrg.mockResolvedValue(null)
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'No organization context' })
+  })
+
+  it('returns error when channel is not found', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — channel not found or wrong org
+      { data: null, error: null },
+    ]
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'Channel not found' })
+  })
+
+  it('returns error when user lacks chat.send permission', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+    ]
+    mockRequirePermission.mockRejectedValue(
+      new Error('Insufficient permissions: requires chat.send'),
+    )
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'Insufficient permissions' })
+  })
+
+  it('returns error when there are no messages to summarize', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+      // chat_messages — empty
+      { data: [], error: null },
+    ]
+    process.env.ANTHROPIC_API_KEY = 'test-key'
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'No messages to summarize' })
+  })
+
+  it('returns error when message fetch errors', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+      // chat_messages — fetch error
+      { data: null, error: { message: 'DB error' } },
+    ]
+    process.env.ANTHROPIC_API_KEY = 'test-key'
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'No messages to summarize' })
+  })
+
+  it('returns error when ANTHROPIC_API_KEY is not configured', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+      // chat_messages — 2 messages
+      {
+        data: [
+          { body: 'Hello', created_at: '2026-01-01T10:00:00Z' },
+          { body: 'World', created_at: '2026-01-01T10:01:00Z' },
+        ],
+        error: null,
+      },
+    ]
+    // ANTHROPIC_API_KEY is not set (deleted in beforeEach)
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'AI summarization is not configured' })
+  })
+
+  it('returns error when Anthropic API call fails with non-ok response', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+      // chat_messages
+      {
+        data: [
+          { body: 'Hello', created_at: '2026-01-01T10:00:00Z' },
+          { body: 'World', created_at: '2026-01-01T10:01:00Z' },
+        ],
+        error: null,
+      },
+    ]
+    process.env.ANTHROPIC_API_KEY = 'test-key'
+    mockFetch.mockResolvedValue({ ok: false, status: 500 })
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'Failed to generate summary' })
+  })
+
+  it('returns error when fetch throws (network error)', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+      // chat_messages
+      {
+        data: [
+          { body: 'Hello', created_at: '2026-01-01T10:00:00Z' },
+          { body: 'World', created_at: '2026-01-01T10:01:00Z' },
+        ],
+        error: null,
+      },
+    ]
+    process.env.ANTHROPIC_API_KEY = 'test-key'
+    mockFetch.mockRejectedValue(new Error('Network error'))
+
+    const result = await generateSummary('ch-1')
+    expect(result).toEqual({ error: 'Failed to generate summary' })
+  })
+
+  it('generates summary and saves it successfully', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const savedSummary = {
+      id: 'sum-1',
+      channel_id: 'ch-1',
+      summary: '• Point 1\n• Point 2',
+      from_message_id: 'msg-first',
+      to_message_id: 'msg-last',
+      created_at: '2026-01-01T10:05:00Z',
+    }
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+      // chat_messages
+      {
+        data: [
+          { body: 'Hello', created_at: '2026-01-01T10:00:00Z' },
+          { body: 'World', created_at: '2026-01-01T10:01:00Z' },
+        ],
+        error: null,
+      },
+      // chat_messages — lookup first message ID
+      { data: { id: 'msg-first' }, error: null },
+      // chat_messages — lookup last message ID
+      { data: { id: 'msg-last' }, error: null },
+      // chat_summaries insert
+      { data: savedSummary, error: null },
+    ]
+    process.env.ANTHROPIC_API_KEY = 'test-key'
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        content: [{ text: '• Point 1\n• Point 2' }],
+      }),
+    })
+
+    const result = await generateSummary('ch-1')
+    expect(result.error).toBeUndefined()
+    expect(result.data?.id).toBe('sum-1')
+    expect(result.data?.summary).toBe('• Point 1\n• Point 2')
+    expect(result.data?.from_message_id).toBe('msg-first')
+    expect(result.data?.to_message_id).toBe('msg-last')
+  })
+
+  it('returns temp summary when save fails after successful AI call', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channels — found
+      { data: { org_id: 'org-1' }, error: null },
+      // chat_messages
+      {
+        data: [
+          { body: 'Hello', created_at: '2026-01-01T10:00:00Z' },
+          { body: 'World', created_at: '2026-01-01T10:01:00Z' },
+        ],
+        error: null,
+      },
+      // chat_messages — first message ID lookup
+      { data: { id: 'msg-first' }, error: null },
+      // chat_messages — last message ID lookup
+      { data: { id: 'msg-last' }, error: null },
+      // chat_summaries insert — fails
+      { data: null, error: { message: 'Insert failed' } },
+    ]
+    process.env.ANTHROPIC_API_KEY = 'test-key'
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        content: [{ text: 'AI generated summary' }],
+      }),
+    })
+
+    const result = await generateSummary('ch-1')
+    // Returns a temp summary even if save fails
+    expect(result.error).toBeUndefined()
+    expect(result.data?.id).toBe('temp')
+    expect(result.data?.summary).toBe('AI generated summary')
+    expect(result.data?.channel_id).toBe('ch-1')
+    expect(result.data?.from_message_id).toBeNull()
+    expect(result.data?.to_message_id).toBeNull()
+  })
+
+  it('calls Anthropic API with correct headers and model', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      { data: { org_id: 'org-1' }, error: null },
+      {
+        data: [{ body: 'Decision: use Vitest', created_at: '2026-01-01T10:00:00Z' }],
+        error: null,
+      },
+      { data: { id: 'msg-1' }, error: null },
+      { data: { id: 'msg-1' }, error: null },
+      {
+        data: {
+          id: 'sum-1',
+          channel_id: 'ch-1',
+          summary: 'Summary',
+          from_message_id: 'msg-1',
+          to_message_id: 'msg-1',
+          created_at: '2026-01-01',
+        },
+        error: null,
+      },
+    ]
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key'
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ content: [{ text: 'Summary' }] }),
+    })
+
+    await generateSummary('ch-1')
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://api.anthropic.com/v1/messages',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'x-api-key': 'sk-ant-test-key',
+          'anthropic-version': '2023-06-01',
+        }),
+      }),
+    )
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body as string)
+    expect(callBody.model).toBe('claude-haiku-4-5-20251001')
+    expect(callBody.max_tokens).toBe(500)
   })
 })
