@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react'
    Mocks
    ============================================================ */
 
-vi.mock('@/app/(app)/forms/actions', () => ({
+vi.mock('@/lib/form-utils', () => ({
   getFormDisplayName: vi.fn((formType: string) => {
     const names: Record<string, string> = {
       fishbone: 'Fishbone Diagram',
@@ -75,16 +75,16 @@ describe('FormStatsBar', () => {
     expect(screen.getByText('—')).toBeTruthy()
   })
 
-  it('shows form types used count as fraction of 24', () => {
+  it('shows form types used count as fraction of total', () => {
     render(<FormStatsBar {...baseStats} />)
-    // byFormType has 2 entries → "2/24"
-    expect(screen.getByText('2/24')).toBeTruthy()
+    // byFormType has 2 entries → "2/N" where N is total form types from STEP_CONTENT
+    expect(screen.getByText(/^2\/\d+$/)).toBeTruthy()
   })
 
   it('handles empty stats — 0 total and no most used', () => {
     render(<FormStatsBar total={0} byFormType={[]} recentCount={0} />)
     expect(screen.getAllByText('0')).toHaveLength(2)
     expect(screen.getByText('—')).toBeTruthy()
-    expect(screen.getByText('0/24')).toBeTruthy()
+    expect(screen.getByText(/^0\/\d+$/)).toBeTruthy()
   })
 })

@@ -1,6 +1,14 @@
 'use client'
 
-import { getFormDisplayName } from '@/app/(app)/forms/actions'
+import { getFormDisplayName } from '@/lib/form-utils'
+import { STEP_CONTENT } from '@pips/shared'
+import type { PipsStepNumber } from '@pips/shared'
+
+/** Total number of form types defined across all PIPS steps */
+const TOTAL_FORM_TYPES = Array.from(
+  { length: 6 },
+  (_, i) => STEP_CONTENT[(i + 1) as PipsStepNumber].forms.length,
+).reduce((a, b) => a + b, 0)
 
 type FormStatsBarProps = {
   total: number
@@ -31,7 +39,7 @@ export const FormStatsBar = ({ total, byFormType, recentCount }: FormStatsBarPro
     },
     {
       label: 'Form Types Used',
-      value: `${uniqueFormTypes}/24`,
+      value: `${uniqueFormTypes}/${TOTAL_FORM_TYPES}`,
       color: '#4338CA',
     },
   ]

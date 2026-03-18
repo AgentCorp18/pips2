@@ -49,7 +49,8 @@ vi.mock('@/lib/permissions', () => ({
    Import after mocks
    ============================================================ */
 
-import { getOrgForms, getFormStats, getFormDisplayName } from '../actions'
+import { getOrgForms, getFormStats } from '../actions'
+import { getFormDisplayName } from '@/lib/form-utils'
 import { requirePermission } from '@/lib/permissions'
 
 /* ============================================================

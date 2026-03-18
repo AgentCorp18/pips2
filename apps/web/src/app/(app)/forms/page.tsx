@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { FileText, BookOpen } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { PIPS_STEPS, STEP_CONTENT } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { stepEnumToNumber } from '@pips/shared'
-import { getOrgForms, getFormStats, getFormDisplayName } from './actions'
+import { getOrgForms, getFormStats } from './actions'
+import { getFormDisplayName } from '@/lib/form-utils'
 import { FormStatsBar } from '@/components/forms/form-stats-bar'
 import { FormListTable } from '@/components/forms/form-list-table'
 import type { FormRow } from '@/components/forms/form-list-table'
@@ -273,20 +274,9 @@ const SandboxView = () => (
                           <p className="text-sm font-medium group-hover:text-[var(--color-primary)]">
                             {form.name}
                           </p>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <Badge variant="outline" className="text-[9px]">
-                              Sandbox
-                            </Badge>
-                            <Link
-                              href={`/knowledge/guide/tools/${toUrlSlug(form.type)}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="rounded p-0.5 hover:bg-[var(--color-surface)] transition-colors"
-                              title="View knowledge guide"
-                              aria-label={`Knowledge guide for ${form.name}`}
-                            >
-                              <BookOpen size={12} style={{ color: 'var(--color-text-tertiary)' }} />
-                            </Link>
-                          </div>
+                          <Badge variant="outline" className="text-[9px] shrink-0">
+                            Sandbox
+                          </Badge>
                         </div>
                         <p
                           className="mt-1 text-xs leading-relaxed"

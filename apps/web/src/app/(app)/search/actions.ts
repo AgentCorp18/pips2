@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { trackServerEvent } from '@/lib/analytics'
+import { getFormDisplayName } from '@/lib/form-utils'
+import { stepEnumToNumber } from '@pips/shared'
 import type { SearchResult, SearchResultGroup, GlobalSearchResponse } from '@/types/search'
 
 const LIMIT_PER_TYPE = 5
@@ -13,27 +15,6 @@ const PIPS_STEP_LABELS: Record<number, string> = {
   4: 'Select & Plan',
   5: 'Implement',
   6: 'Evaluate',
-}
-
-const FORM_TYPE_LABELS: Record<string, string> = {
-  problem_statement: 'Problem Statement',
-  impact_assessment: 'Impact Assessment',
-  fishbone: 'Fishbone Diagram',
-  five_why: '5-Why Analysis',
-  force_field: 'Force Field Analysis',
-  checksheet: 'Checksheet',
-  brainstorming: 'Brainstorming',
-  brainwriting: 'Brainwriting',
-  paired_comparisons: 'Paired Comparisons',
-  criteria_matrix: 'Criteria Matrix',
-  balance_sheet: 'Balance Sheet',
-  raci: 'RACI Chart',
-  implementation_plan: 'Implementation Plan',
-  implementation_checklist: 'Implementation Checklist',
-  milestone_tracker: 'Milestone Tracker',
-  before_after: 'Before/After Comparison',
-  evaluation: 'Evaluation Summary',
-  lessons_learned: 'Lessons Learned',
 }
 
 /**
@@ -166,20 +147,17 @@ export const globalSearch = async (
     const projectData = Array.isArray(rawProject)
       ? ((rawProject[0] as { id: string; title: string } | undefined) ?? null)
       : (rawProject as { id: string; title: string } | null)
-    const formTypeLabel =
-      FORM_TYPE_LABELS[f.form_type as string] ??
-      (f.form_type as string)
-        .split('_')
-        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ')
+    const formTypeLabel = getFormDisplayName(f.form_type as string)
     const subtitle = projectData ? `${formTypeLabel} · ${projectData.title}` : formTypeLabel
     const projectId = (projectData?.id ?? (f.project_id as string)) as string
+    const stepNumber = stepEnumToNumber(f.step as string)
+    const formSlug = (f.form_type as string).replace(/_/g, '-')
     return {
       id: f.id as string,
       type: 'form' as const,
       title: (f.title as string) || formTypeLabel,
       subtitle,
-      url: `/projects/${projectId}/steps/${f.step as string}/forms/${f.form_type as string}`,
+      url: `/projects/${projectId}/steps/${stepNumber}/forms/${formSlug}`,
     }
   })
 

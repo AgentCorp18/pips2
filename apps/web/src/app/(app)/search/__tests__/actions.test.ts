@@ -143,7 +143,7 @@ describe('globalSearch', () => {
           {
             id: 'form-1',
             form_type: 'fishbone',
-            step: '2',
+            step: 'analyze',
             title: 'Root cause fishbone',
             project_id: 'proj-1',
             project: { id: 'proj-1', title: 'Defect Reduction', org_id: 'org-1', status: 'active' },

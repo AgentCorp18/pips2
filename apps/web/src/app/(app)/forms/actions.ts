@@ -3,8 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { formFiltersSchema } from '@/lib/validations'
-import { STEP_CONTENT } from '@pips/shared'
-import type { PipsStepNumber } from '@pips/shared'
 
 /* ============================================================
    getOrgForms
@@ -17,7 +15,11 @@ export const getOrgForms = async (orgId: string, rawFilters?: Record<string, unk
     return { forms: [], total: 0 }
   }
 
-  const filters = formFiltersSchema.parse(rawFilters ?? {})
+  const parsed = formFiltersSchema.safeParse(rawFilters ?? {})
+  if (!parsed.success) {
+    return { forms: [], total: 0 }
+  }
+  const filters = parsed.data
   const supabase = await createClient()
 
   // project_forms doesn't have org_id — we must join through projects
@@ -142,22 +144,4 @@ export const getFormStats = async (orgId: string) => {
     byStep,
     recentCount,
   }
-}
-
-/* ============================================================
-   getFormDisplayName
-   ============================================================ */
-
-/** Resolve a form_type string to its human-readable name from STEP_CONTENT */
-export const getFormDisplayName = (formType: string): string => {
-  for (let step = 1; step <= 6; step++) {
-    const content = STEP_CONTENT[step as PipsStepNumber]
-    const found = content.forms.find((f) => f.type === formType)
-    if (found) return found.name
-  }
-  // Fallback: convert underscores to title case
-  return formType
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
 }
