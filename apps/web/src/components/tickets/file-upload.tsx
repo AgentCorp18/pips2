@@ -5,37 +5,7 @@ import { Upload, Loader2, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { uploadAttachment } from '@/app/(app)/tickets/[ticketId]/attachment-actions'
-
-/* ============================================================
-   Constants
-   ============================================================ */
-
-const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
-const BLOCKED_EXTENSIONS = new Set([
-  'exe',
-  'bat',
-  'cmd',
-  'com',
-  'msi',
-  'scr',
-  'pif',
-  'vbs',
-  'vbe',
-  'js',
-  'jse',
-  'wsf',
-  'wsh',
-  'ps1',
-  'ps2',
-  'psc1',
-  'psc2',
-  'reg',
-  'inf',
-  'hta',
-  'cpl',
-  'msp',
-  'mst',
-])
+import { validateUploadFile } from '@/lib/upload-constants'
 
 /* ============================================================
    Types
@@ -65,14 +35,7 @@ export const FileUpload = ({ ticketId, onUploadComplete, disabled = false }: Fil
   const [uploadStatuses, setUploadStatuses] = useState<UploadStatus[]>([])
 
   const validateFile = useCallback((file: File): string | null => {
-    if (file.size > MAX_FILE_SIZE) {
-      return 'File must be 50 MB or smaller'
-    }
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-    if (BLOCKED_EXTENSIONS.has(ext)) {
-      return 'This file type is not allowed for security reasons'
-    }
-    return null
+    return validateUploadFile(file)
   }, [])
 
   const handleUploadFiles = useCallback(

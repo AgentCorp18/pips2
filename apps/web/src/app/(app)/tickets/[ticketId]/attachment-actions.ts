@@ -3,41 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
+import { MAX_FILE_SIZE, BLOCKED_EXTENSIONS } from '@/lib/upload-constants'
 import type { FileAttachment } from '@/types/attachments'
 
 /* ============================================================
    Constants
    ============================================================ */
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB (matches Supabase bucket config)
 const BUCKET = 'attachments'
-
-/** Dangerous executable file extensions that should be blocked */
-const BLOCKED_EXTENSIONS = new Set([
-  'exe',
-  'bat',
-  'cmd',
-  'com',
-  'msi',
-  'scr',
-  'pif',
-  'vbs',
-  'vbe',
-  'js',
-  'jse',
-  'wsf',
-  'wsh',
-  'ps1',
-  'ps2',
-  'psc1',
-  'psc2',
-  'reg',
-  'inf',
-  'hta',
-  'cpl',
-  'msp',
-  'mst',
-])
 
 /* ============================================================
    Types
