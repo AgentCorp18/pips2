@@ -26,7 +26,7 @@ import {
   Layers,
 } from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
-import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { RichTextEditorLazy as RichTextEditor } from '@/components/ui/rich-text-editor-lazy'
 import { InlineMarkdown } from '@/components/ui/inline-markdown'
 import { CycleTimeBadge } from './cycle-time-badge'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'

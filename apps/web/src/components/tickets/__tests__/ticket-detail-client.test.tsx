@@ -6,6 +6,14 @@ vi.mock('@/app/(app)/tickets/actions', () => ({
   updateTicket: vi.fn().mockResolvedValue({ success: true }),
 }))
 
+vi.mock('@/components/ui/rich-text-editor-lazy', () => ({
+  RichTextEditorLazy: (props: { 'data-testid'?: string; onChange?: (v: string) => void }) => (
+    <div data-testid={props['data-testid'] ?? 'rich-text-editor'}>
+      <textarea onChange={(e) => props.onChange?.(e.target.value)} />
+    </div>
+  ),
+}))
+
 vi.mock('@/components/ui/formatted-date', () => ({
   FormattedDate: ({ date, fallback }: { date: string; fallback?: string }) => (
     <span>{date || fallback || '...'}</span>

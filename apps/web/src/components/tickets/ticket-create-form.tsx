@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { RichTextEditorLazy as RichTextEditor } from '@/components/ui/rich-text-editor-lazy'
 import { Label } from '@/components/ui/label'
 import { AiAssistButton } from '@/components/ui/ai-assist-button'
 import {

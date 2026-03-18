@@ -35,6 +35,17 @@ vi.mock('@/components/ui/ai-assist-button', () => ({
   AiAssistButton: () => <button data-testid="ai-assist-mock">AI</button>,
 }))
 
+vi.mock('@/components/ui/rich-text-editor-lazy', () => ({
+  RichTextEditorLazy: (props: { 'data-testid'?: string; onChange?: (v: string) => void }) => (
+    <div data-testid={props['data-testid'] ?? 'rich-text-editor'}>
+      <textarea
+        data-testid="rich-text-editor-textarea"
+        onChange={(e) => props.onChange?.(e.target.value)}
+      />
+    </div>
+  ),
+}))
+
 /* ============================================================
    Helpers
    ============================================================ */

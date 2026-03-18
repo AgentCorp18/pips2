@@ -96,9 +96,9 @@ export const saveFormData = async (
     }
   }
 
-  // Check permission — saving form data requires data.view (member+)
+  // Check permission — saving form data requires project.create (member+, excludes viewers)
   try {
-    await requirePermission(project.org_id, 'data.view')
+    await requirePermission(project.org_id, 'project.create')
   } catch {
     return { success: false, error: 'Insufficient permissions to save form data' }
   }
@@ -258,6 +258,13 @@ export const copyFormFromProject = async (
   const allInOrg = projects?.length === 2 && projects.every((p) => p.org_id === orgId)
   if (!allInOrg) {
     return { success: false, error: 'Projects not found or not in your organization' }
+  }
+
+  // Check permission — copying form data requires project.create (member+)
+  try {
+    await requirePermission(orgId, 'project.create')
+  } catch {
+    return { success: false, error: 'Insufficient permissions to copy form data' }
   }
 
   // Load source form data
