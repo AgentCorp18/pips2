@@ -48,6 +48,22 @@ IMPORTANT: After every change, run in this order:
 - For brand colors/typography: see .claude/rules/brand.md
 - For multi-agent coordination: see .claude/rules/multi-agent.md
 
+## Route Scaffolding Checklist
+
+Every new route segment MUST include:
+
+1. `page.tsx` — the page component (Server Component by default)
+2. `loading.tsx` — skeleton loading state using `<Skeleton>` from shadcn/ui
+3. `error.tsx` — error boundary using `ErrorBoundaryCard` from `@/components/layout/error-boundary`
+
+Server Action Security Checklist (every `'use server'` file):
+
+1. `getAuthContext()` or `createClient()` + `getUser()` — verify authentication
+2. `requirePermission(orgId, permission)` — verify authorization
+3. Verify entity belongs to user's org (defense-in-depth)
+4. Zod schema validation on all user input
+5. Return structured `{ error: string }` on failure, not throw
+
 ## Don'ts
 
 - Don't edit .env files — use Vercel env vars for production
