@@ -467,19 +467,53 @@ const StatusBadge = ({
 }: {
   status: 'not_started' | 'in_progress' | 'completed' | 'skipped'
 }) => {
-  const variants: Record<string, { label: string; variant: 'secondary' | 'default' | 'outline' }> =
+  const variants: Record<
+    string,
     {
-      not_started: { label: 'Not Started', variant: 'secondary' },
-      in_progress: { label: 'In Progress', variant: 'default' },
-      completed: { label: 'Completed', variant: 'outline' },
-      skipped: { label: 'Skipped', variant: 'outline' },
+      label: string
+      variant: 'secondary' | 'default' | 'outline'
+      icon: typeof CheckCircle2
+      iconColor: string
     }
+  > = {
+    not_started: {
+      label: 'Not Started',
+      variant: 'secondary',
+      icon: Circle,
+      iconColor: 'var(--color-text-tertiary)',
+    },
+    in_progress: {
+      label: 'In Progress',
+      variant: 'default',
+      icon: Clock,
+      iconColor: 'var(--color-primary)',
+    },
+    completed: {
+      label: 'Completed',
+      variant: 'outline',
+      icon: CheckCircle2,
+      iconColor: 'var(--color-success)',
+    },
+    skipped: {
+      label: 'Skipped',
+      variant: 'outline',
+      icon: SkipForward,
+      iconColor: 'var(--color-text-tertiary)',
+    },
+  }
 
-  const fallback = { label: 'Not Started', variant: 'secondary' as const }
+  const fallback = {
+    label: 'Not Started',
+    variant: 'secondary' as const,
+    icon: Circle,
+    iconColor: 'var(--color-text-tertiary)',
+  }
   const config = variants[status] ?? fallback
+  const StatusIcon = config.icon
 
   return (
-    <Badge variant={config.variant} className="mt-1 text-xs" data-testid="step-status-badge">
+    <Badge variant={config.variant} className="mt-1 gap-1 text-xs" data-testid="step-status-badge">
+      <StatusIcon size={12} style={{ color: config.iconColor }} aria-hidden="true" />
       {config.label}
     </Badge>
   )

@@ -1,5 +1,7 @@
 'use client'
 
+import { useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   BarChart,
   Bar,
@@ -13,12 +15,32 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { StepDistribution } from '@/app/(app)/dashboard/actions'
 
+const STEP_SLUG_MAP: Record<string, string> = {
+  identify: 'identify',
+  analyze: 'analyze',
+  generate: 'generate',
+  select_and_plan: 'select_and_plan',
+  implement: 'implement',
+  evaluate: 'evaluate',
+}
+
 type ProjectsByStepChartProps = {
   data: StepDistribution[]
 }
 
 export const ProjectsByStepChart = ({ data }: ProjectsByStepChartProps) => {
+  const router = useRouter()
   const hasData = data.some((d) => d.count > 0)
+
+  const handleBarClick = useCallback(
+    (entry: StepDistribution) => {
+      const stepSlug = STEP_SLUG_MAP[entry.step]
+      if (stepSlug) {
+        router.push(`/projects?current_step=${stepSlug}`)
+      }
+    },
+    [router],
+  )
 
   return (
     <Card>
@@ -26,6 +48,9 @@ export const ProjectsByStepChart = ({ data }: ProjectsByStepChartProps) => {
         <CardTitle className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           Projects by Step
         </CardTitle>
+        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+          Click a bar to view projects in that step
+        </p>
       </CardHeader>
       <CardContent>
         {!hasData ? (
@@ -65,8 +90,15 @@ export const ProjectsByStepChart = ({ data }: ProjectsByStepChartProps) => {
                 }}
                 labelStyle={{ color: 'var(--color-text-primary)', fontWeight: 600 }}
                 itemStyle={{ color: 'var(--color-text-secondary)' }}
+                cursor={{ fill: 'var(--color-surface-secondary)', opacity: 0.5 }}
               />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={48}>
+              <Bar
+                dataKey="count"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={48}
+                onClick={(entry) => handleBarClick(entry as unknown as StepDistribution)}
+                style={{ cursor: 'pointer' }}
+              >
                 {data.map((entry) => (
                   <Cell key={entry.step} fill={entry.color} />
                 ))}

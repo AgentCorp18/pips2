@@ -3,6 +3,10 @@ import { render, screen } from '@testing-library/react'
 import { ProjectsByStepChart } from '../projects-by-step-chart'
 import type { StepDistribution } from '@/app/(app)/dashboard/actions'
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}))
+
 // Mock recharts to avoid rendering SVG in jsdom
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
