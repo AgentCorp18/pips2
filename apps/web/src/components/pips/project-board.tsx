@@ -68,7 +68,7 @@ const ColumnView = ({ projects }: { projects: BoardProject[] }) => {
         return (
           <div
             key={col.id}
-            className="flex min-w-[200px] flex-1 flex-col sm:min-w-[250px]"
+            className="flex min-w-[160px] flex-1 flex-col sm:min-w-[200px] md:min-w-[250px]"
             role="group"
             data-testid={`project-board-column-${col.id}`}
             aria-label={`${col.label} column, ${columnProjects.length} project${columnProjects.length !== 1 ? 's' : ''}`}

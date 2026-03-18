@@ -293,7 +293,7 @@ const PairedComparisonsFields = ({
         {data.results.length > 0 && (
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Rankings</h3>
-            <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)]">
+            <div className="overflow-x-auto rounded-[var(--radius-md)] border border-[var(--color-border)]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-[var(--color-surface-secondary)]">

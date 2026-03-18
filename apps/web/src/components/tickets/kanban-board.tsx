@@ -185,7 +185,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
           return (
             <div
               key={col.id}
-              className={`flex flex-shrink-0 flex-col ${isExpanded ? 'min-w-[200px] flex-1' : 'w-[280px]'}`}
+              className={`flex flex-shrink-0 flex-col ${isExpanded ? 'min-w-[200px] flex-1' : 'w-[240px] sm:w-[280px]'}`}
               role="group"
               data-testid={`kanban-column-${col.id}`}
               aria-label={`${col.label} column, ${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`}
