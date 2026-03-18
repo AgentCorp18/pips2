@@ -142,10 +142,10 @@ describe('TicketCreateForm', () => {
     expect(screen.getByLabelText(/^Title/)).toBeRequired()
   })
 
-  it('renders the description textarea', () => {
+  it('renders the description editor', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    expect(screen.getByLabelText('Description')).toBeInTheDocument()
+    expect(screen.getByTestId('ticket-description-input')).toBeInTheDocument()
   })
 
   it('renders the due date input', () => {
@@ -268,10 +268,10 @@ describe('TicketCreateForm', () => {
 
   /* ---- Placeholders ---- */
 
-  it('shows placeholder text for description', () => {
+  it('renders description editor', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    expect(screen.getByPlaceholderText('Detailed description...')).toBeInTheDocument()
+    expect(screen.getByTestId('ticket-description-input')).toBeInTheDocument()
   })
 
   it('shows placeholder text for tags', () => {
@@ -289,11 +289,12 @@ describe('TicketCreateForm', () => {
     expect(input).toHaveAttribute('name', 'title')
   })
 
-  it('description textarea has correct name attribute', () => {
+  it('description hidden input has correct name attribute', () => {
     render(<TicketCreateForm {...defaultProps} />)
     expandFullForm()
-    const textarea = screen.getByLabelText('Description')
-    expect(textarea).toHaveAttribute('name', 'description')
+    const input = document.querySelector('input[name="description"]')
+    expect(input).toBeInTheDocument()
+    expect(input).toHaveAttribute('name', 'description')
   })
 
   /* ---- aria-required ---- */

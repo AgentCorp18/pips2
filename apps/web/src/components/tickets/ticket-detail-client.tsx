@@ -1,10 +1,9 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -27,7 +26,7 @@ import {
   Layers,
 } from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
-import { MarkdownToolbar } from '@/components/ui/markdown-toolbar'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { InlineMarkdown } from '@/components/ui/inline-markdown'
 import { CycleTimeBadge } from './cycle-time-badge'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
@@ -147,7 +146,6 @@ export const TicketDetailClient = ({
   parentTicket,
 }: TicketDetailClientProps) => {
   const [isPending, startTransition] = useTransition()
-  const descTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Inline editing states
   const [editingTitle, setEditingTitle] = useState(false)
@@ -302,22 +300,13 @@ export const TicketDetailClient = ({
           </h2>
           {editingDesc ? (
             <div className="space-y-2">
-              <div>
-                <MarkdownToolbar
-                  textareaRef={descTextareaRef}
-                  onChange={setDescDraft}
-                  disabled={isPending}
-                />
-                <Textarea
-                  ref={descTextareaRef}
-                  value={descDraft}
-                  onChange={(e) => setDescDraft(e.target.value)}
-                  rows={6}
-                  autoFocus
-                  className="rounded-t-none"
-                  placeholder="Supports **bold**, _italic_, `code`, lists, and more..."
-                />
-              </div>
+              <RichTextEditor
+                content={descDraft}
+                onChange={setDescDraft}
+                placeholder="Add a description..."
+                disabled={isPending}
+                data-testid="ticket-description-editor"
+              />
               <div className="flex gap-2">
                 <Button size="sm" onClick={saveDescription} disabled={isPending}>
                   Save

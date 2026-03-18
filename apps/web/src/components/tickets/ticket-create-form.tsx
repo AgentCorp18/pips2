@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { Label } from '@/components/ui/label'
 import { AiAssistButton } from '@/components/ui/ai-assist-button'
 import {
@@ -153,7 +153,9 @@ export const TicketCreateForm = ({
 
           {/* Title */}
           <div className="space-y-1.5">
-            <Label htmlFor="title" required>Title</Label>
+            <Label htmlFor="title" required>
+              Title
+            </Label>
             <Input
               id="title"
               name="title"
@@ -181,16 +183,22 @@ export const TicketCreateForm = ({
                 onAccept={handleDescriptionAccept}
               />
             </div>
-            <Textarea
+            <input type="hidden" id="description" name="description" value={descriptionValue} />
+            {/* Hidden textarea for AiAssistButton to read current value */}
+            <textarea
               ref={descriptionRef}
-              id="description"
-              name="description"
-              data-testid="ticket-description-input"
-              placeholder="Detailed description..."
-              aria-describedby={state.fieldErrors?.description ? 'description-error' : undefined}
-              rows={4}
               value={descriptionValue}
-              onChange={(e) => setDescriptionValue(e.target.value)}
+              readOnly
+              className="hidden"
+              aria-hidden="true"
+              tabIndex={-1}
+              onChange={() => {}}
+            />
+            <RichTextEditor
+              content={descriptionValue}
+              onChange={setDescriptionValue}
+              placeholder="Detailed description..."
+              data-testid="ticket-description-input"
             />
             {state.fieldErrors?.description && (
               <p id="description-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
