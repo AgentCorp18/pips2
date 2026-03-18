@@ -139,4 +139,45 @@ describe('AttachmentsList', () => {
 
     expect(screen.getByText(/Marc/)).toBeInTheDocument()
   })
+
+  it('shows preview button for image attachments', () => {
+    render(
+      <AttachmentsList
+        attachments={[
+          makeAttachment({ id: 'att-img', mime_type: 'image/png', file_name: 'photo.png' }),
+        ]}
+        currentUserId="user-1"
+      />,
+    )
+
+    expect(screen.getByTestId('preview-attachment-att-img')).toBeInTheDocument()
+    expect(screen.getByLabelText('Preview photo.png')).toBeInTheDocument()
+  })
+
+  it('does not show preview button for non-image attachments', () => {
+    render(
+      <AttachmentsList
+        attachments={[makeAttachment({ id: 'att-pdf', mime_type: 'application/pdf' })]}
+        currentUserId="user-1"
+      />,
+    )
+
+    expect(screen.queryByTestId('preview-attachment-att-pdf')).not.toBeInTheDocument()
+  })
+
+  it('opens image preview dialog on preview click', async () => {
+    const user = userEvent.setup()
+    render(
+      <AttachmentsList
+        attachments={[
+          makeAttachment({ id: 'att-img', mime_type: 'image/jpeg', file_name: 'photo.jpg' }),
+        ]}
+        currentUserId="user-1"
+      />,
+    )
+
+    await user.click(screen.getByTestId('preview-attachment-att-img'))
+
+    expect(screen.getByTestId('image-preview-dialog')).toBeInTheDocument()
+  })
 })

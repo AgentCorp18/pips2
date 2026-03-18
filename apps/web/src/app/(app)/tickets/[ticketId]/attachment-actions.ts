@@ -238,6 +238,148 @@ export const deleteAttachment = async (attachmentId: string): Promise<Attachment
 }
 
 /* ============================================================
+   getCommentAttachments — list attachments for a comment
+   ============================================================ */
+
+export const getCommentAttachments = async (commentId: string) => {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('file_attachments')
+    .select(
+      `
+      *,
+      uploader:profiles!file_attachments_uploaded_by_fkey ( id, display_name, avatar_url )
+    `,
+    )
+    .eq('comment_id', commentId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Failed to fetch comment attachments:', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
+/* ============================================================
+   getTicketCommentAttachments — all comment attachments for a ticket (batch)
+   ============================================================ */
+
+export const getTicketCommentAttachments = async (ticketId: string) => {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('file_attachments')
+    .select(
+      `
+      *,
+      uploader:profiles!file_attachments_uploaded_by_fkey ( id, display_name, avatar_url )
+    `,
+    )
+    .eq('ticket_id', ticketId)
+    .not('comment_id', 'is', null)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Failed to fetch ticket comment attachments:', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
+/* ============================================================
+   uploadCommentAttachment — upload a file to a comment
+   ============================================================ */
+
+export const uploadCommentAttachment = async (
+  commentId: string,
+  ticketId: string,
+  formData: FormData,
+): Promise<AttachmentActionState> => {
+  const file = formData.get('file') as File | null
+  if (!file || file.size === 0) {
+    return { error: 'No file provided' }
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return { error: 'File must be 50 MB or smaller' }
+  }
+
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  if (BLOCKED_EXTENSIONS.has(ext)) {
+    return { error: 'This file type is not allowed for security reasons' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'You must be signed in to upload files' }
+  }
+
+  // Verify comment exists and get org_id via the ticket
+  const { data: comment } = await supabase
+    .from('comments')
+    .select('org_id, ticket_id')
+    .eq('id', commentId)
+    .single()
+
+  if (!comment) {
+    return { error: 'Comment not found' }
+  }
+
+  try {
+    await requirePermission(comment.org_id, 'ticket.comment')
+  } catch {
+    return { error: 'You do not have permission to upload files' }
+  }
+
+  const timestamp = Date.now()
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const storagePath = `${comment.org_id}/${ticketId}/comments/${commentId}/${timestamp}-${sanitizedName}`
+
+  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, file, {
+    cacheControl: '3600',
+    upsert: false,
+  })
+
+  if (uploadError) {
+    console.error('Storage upload failed:', uploadError.message)
+    return { error: 'Failed to upload file. Please try again.' }
+  }
+
+  const { data: attachment, error: insertError } = await supabase
+    .from('file_attachments')
+    .insert({
+      org_id: comment.org_id,
+      ticket_id: ticketId,
+      comment_id: commentId,
+      file_name: file.name,
+      file_size: file.size,
+      mime_type: file.type || 'application/octet-stream',
+      storage_path: storagePath,
+      storage_bucket: BUCKET,
+      uploaded_by: user.id,
+    })
+    .select()
+    .single()
+
+  if (insertError) {
+    console.error('Failed to save attachment metadata:', insertError.message)
+    await supabase.storage.from(BUCKET).remove([storagePath])
+    return { error: 'Failed to save attachment. Please try again.' }
+  }
+
+  revalidatePath(`/tickets/${ticketId}`)
+  return { attachment }
+}
+
+/* ============================================================
    getAttachmentUrl — create a signed URL for download
    ============================================================ */
 

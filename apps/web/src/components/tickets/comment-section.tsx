@@ -16,14 +16,32 @@ import {
   updateComment,
   deleteComment,
 } from '@/app/(app)/tickets/[ticketId]/comment-actions'
+import { uploadCommentAttachment } from '@/app/(app)/tickets/[ticketId]/attachment-actions'
 import { MoreHorizontal, Pencil, Trash2, User } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { AiAssistButton } from '@/components/ui/ai-assist-button'
 import { InlineMarkdown } from '@/components/ui/inline-markdown'
+import { AttachmentsList } from '@/components/tickets/attachments-list'
+import { CommentFileUpload } from '@/components/tickets/comment-file-upload'
 
 /* ============================================================
    Types
    ============================================================ */
+
+type CommentAttachment = {
+  id: string
+  file_name: string
+  file_size: number
+  mime_type: string
+  uploaded_by: string
+  created_at: string
+  comment_id: string | null
+  uploader: {
+    id: string
+    display_name: string
+    avatar_url: string | null
+  } | null
+}
 
 type CommentData = {
   id: string
@@ -48,6 +66,7 @@ type CommentSectionProps = {
   comments: CommentData[]
   currentUserId: string
   members: MemberOption[]
+  commentAttachments?: CommentAttachment[]
 }
 
 /* ============================================================
@@ -59,19 +78,43 @@ export const CommentSection = ({
   comments,
   currentUserId,
   members,
+  commentAttachments = [],
 }: CommentSectionProps) => {
   const [newBody, setNewBody] = useState('')
   const [isPending, startTransition] = useTransition()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editBody, setEditBody] = useState('')
   const [showMentions, setShowMentions] = useState(false)
+  const [stagedFiles, setStagedFiles] = useState<File[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // Group attachments by comment_id for efficient lookup
+  const attachmentsByComment = commentAttachments.reduce<Record<string, CommentAttachment[]>>(
+    (acc, att) => {
+      if (att.comment_id) {
+        const list = acc[att.comment_id] ?? []
+        list.push(att)
+        acc[att.comment_id] = list
+      }
+      return acc
+    },
+    {},
+  )
+
   const handleSubmit = () => {
-    if (!newBody.trim()) return
+    if (!newBody.trim() && stagedFiles.length === 0) return
     startTransition(async () => {
-      await addComment(ticketId, newBody.trim())
+      const result = await addComment(ticketId, newBody.trim())
+      if (result.commentId && stagedFiles.length > 0) {
+        // Upload staged files to the new comment
+        for (const file of stagedFiles) {
+          const formData = new FormData()
+          formData.append('file', file)
+          await uploadCommentAttachment(result.commentId, ticketId, formData)
+        }
+      }
       setNewBody('')
+      setStagedFiles([])
     })
   }
 
@@ -134,6 +177,8 @@ export const CommentSection = ({
             isEditing={editingId === comment.id}
             editBody={editBody}
             isPending={isPending}
+            attachments={attachmentsByComment[comment.id] ?? []}
+            currentUserId={currentUserId}
             onStartEdit={() => {
               setEditingId(comment.id)
               setEditBody(comment.body)
@@ -203,6 +248,12 @@ export const CommentSection = ({
           </div>
         )}
 
+        <CommentFileUpload
+          stagedFiles={stagedFiles}
+          onFilesChange={setStagedFiles}
+          disabled={isPending}
+        />
+
         <div className="flex items-center justify-between">
           <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
             Ctrl+Enter to submit
@@ -210,7 +261,7 @@ export const CommentSection = ({
           <Button
             size="sm"
             onClick={handleSubmit}
-            disabled={isPending || !newBody.trim()}
+            disabled={isPending || (!newBody.trim() && stagedFiles.length === 0)}
             data-testid="comment-submit-button"
           >
             {isPending ? 'Posting...' : 'Comment'}
@@ -231,6 +282,8 @@ type CommentItemProps = {
   isEditing: boolean
   editBody: string
   isPending: boolean
+  attachments: CommentAttachment[]
+  currentUserId: string
   onStartEdit: () => void
   onCancelEdit: () => void
   onSaveEdit: () => void
@@ -244,6 +297,8 @@ const CommentItem = ({
   isEditing,
   editBody,
   isPending,
+  attachments,
+  currentUserId,
   onStartEdit,
   onCancelEdit,
   onSaveEdit,
@@ -325,6 +380,12 @@ const CommentItem = ({
         </div>
       ) : (
         <InlineMarkdown content={comment.body} />
+      )}
+
+      {attachments.length > 0 && (
+        <div className="mt-3">
+          <AttachmentsList attachments={attachments} currentUserId={currentUserId} />
+        </div>
       )}
     </div>
   )

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getTicket, getChildTickets, getParentTicket } from '../actions'
 import { getComments } from './comment-actions'
 import { getTicketAuditLog } from './audit-log-actions'
-import { getAttachments } from './attachment-actions'
+import { getAttachments, getTicketCommentAttachments } from './attachment-actions'
 import { TicketDetailClient } from '@/components/tickets/ticket-detail-client'
 import { CommentSection } from '@/components/tickets/comment-section'
 import { TicketAttachments } from '@/components/tickets/ticket-attachments'
@@ -115,11 +115,12 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         .then((r) => r.data ?? [])
     : []
 
-  // Fetch comments, audit log, and attachments in parallel
-  const [commentsRaw, auditEntries, attachmentsRaw] = await Promise.all([
+  // Fetch comments, audit log, attachments, and comment attachments in parallel
+  const [commentsRaw, auditEntries, attachmentsRaw, commentAttachmentsRaw] = await Promise.all([
     getComments(ticketId),
     getTicketAuditLog(ticketId),
     getAttachments(ticketId),
+    getTicketCommentAttachments(ticketId),
   ])
   const comments = commentsRaw.map((c) => {
     const author = c.author as unknown as {
@@ -332,6 +333,20 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         comments={comments}
         currentUserId={user.id}
         members={members}
+        commentAttachments={commentAttachmentsRaw.map((a) => ({
+          id: a.id,
+          file_name: a.file_name,
+          file_size: a.file_size,
+          mime_type: a.mime_type,
+          uploaded_by: a.uploaded_by,
+          created_at: a.created_at,
+          comment_id: a.comment_id,
+          uploader: a.uploader as {
+            id: string
+            display_name: string
+            avatar_url: string | null
+          } | null,
+        }))}
       />
 
       <Separator className="my-8" />

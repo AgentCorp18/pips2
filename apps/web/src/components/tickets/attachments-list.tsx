@@ -11,6 +11,7 @@ import {
   Music,
   Archive,
   File,
+  Eye,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FormattedDate } from '@/components/ui/formatted-date'
@@ -18,6 +19,7 @@ import {
   deleteAttachment,
   getAttachmentUrl,
 } from '@/app/(app)/tickets/[ticketId]/attachment-actions'
+import { ImagePreviewDialog } from '@/components/tickets/image-preview-dialog'
 
 /* ============================================================
    Types
@@ -78,6 +80,10 @@ export const AttachmentsList = ({
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [previewAttachment, setPreviewAttachment] = useState<{
+    id: string
+    fileName: string
+  } | null>(null)
 
   if (attachments.length === 0) return null
 
@@ -106,6 +112,7 @@ export const AttachmentsList = ({
     <div className="space-y-2" data-testid="attachments-list">
       {attachments.map((attachment) => {
         const IconComponent = getFileIcon(attachment.mime_type)
+        const isImage = attachment.mime_type.startsWith('image/')
         const canDelete = attachment.uploaded_by === currentUserId
 
         return (
@@ -138,6 +145,21 @@ export const AttachmentsList = ({
             </div>
 
             <div className="flex shrink-0 gap-1">
+              {isImage && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() =>
+                    setPreviewAttachment({ id: attachment.id, fileName: attachment.file_name })
+                  }
+                  aria-label={`Preview ${attachment.file_name}`}
+                  data-testid={`preview-attachment-${attachment.id}`}
+                >
+                  <Eye size={14} />
+                </Button>
+              )}
+
               <Button
                 type="button"
                 variant="ghost"
@@ -168,6 +190,17 @@ export const AttachmentsList = ({
           </div>
         )
       })}
+
+      {previewAttachment && (
+        <ImagePreviewDialog
+          attachmentId={previewAttachment.id}
+          fileName={previewAttachment.fileName}
+          open={!!previewAttachment}
+          onOpenChange={(open) => {
+            if (!open) setPreviewAttachment(null)
+          }}
+        />
+      )}
     </div>
   )
 }

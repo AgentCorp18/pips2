@@ -14,6 +14,7 @@ import type { OrgRole } from '@pips/shared'
 export type CommentActionState = {
   error?: string
   fieldErrors?: Record<string, string>
+  commentId?: string
 }
 
 /* ============================================================
@@ -72,21 +73,25 @@ export const addComment = async (ticketId: string, body: string): Promise<Commen
 
   const mentions = extractMentions(result.data.body)
 
-  const { error: insertError } = await supabase.from('comments').insert({
-    org_id: ticket.org_id,
-    ticket_id: ticketId,
-    author_id: user.id,
-    body: result.data.body,
-    mentions,
-  })
+  const { data: inserted, error: insertError } = await supabase
+    .from('comments')
+    .insert({
+      org_id: ticket.org_id,
+      ticket_id: ticketId,
+      author_id: user.id,
+      body: result.data.body,
+      mentions,
+    })
+    .select('id')
+    .single()
 
-  if (insertError) {
-    console.error('Failed to add comment:', insertError.message)
+  if (insertError || !inserted) {
+    console.error('Failed to add comment:', insertError?.message)
     return { error: 'Failed to add comment. Please try again.' }
   }
 
   revalidatePath(`/tickets/${ticketId}`)
-  return {}
+  return { commentId: inserted.id }
 }
 
 /* ============================================================

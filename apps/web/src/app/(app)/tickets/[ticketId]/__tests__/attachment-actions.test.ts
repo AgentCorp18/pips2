@@ -68,6 +68,9 @@ import {
   uploadAttachment,
   deleteAttachment,
   getAttachmentUrl,
+  getCommentAttachments,
+  getTicketCommentAttachments,
+  uploadCommentAttachment,
 } from '../attachment-actions'
 
 /* ============================================================
@@ -287,6 +290,180 @@ describe('deleteAttachment', () => {
 
     const result = await deleteAttachment('att-1')
     expect(result.error).toBe('You can only delete your own attachments')
+  })
+})
+
+/* ============================================================
+   getAttachmentUrl
+   ============================================================ */
+
+/* ============================================================
+   getCommentAttachments
+   ============================================================ */
+
+describe('getCommentAttachments', () => {
+  it('returns attachments for a comment', async () => {
+    fromResults = [
+      {
+        data: [
+          {
+            id: 'att-c1',
+            file_name: 'screenshot.png',
+            file_size: 2048,
+            mime_type: 'image/png',
+            uploaded_by: 'user-1',
+            comment_id: 'comment-1',
+            created_at: '2026-01-01',
+            uploader: { id: 'user-1', display_name: 'Marc', avatar_url: null },
+          },
+        ],
+        error: null,
+      },
+    ]
+
+    const result = await getCommentAttachments('comment-1')
+    expect(result).toHaveLength(1)
+    expect(result[0].file_name).toBe('screenshot.png')
+  })
+
+  it('returns empty array on error', async () => {
+    fromResults = [{ data: null, error: { message: 'DB error' } }]
+    const result = await getCommentAttachments('comment-1')
+    expect(result).toEqual([])
+  })
+})
+
+/* ============================================================
+   getTicketCommentAttachments
+   ============================================================ */
+
+describe('getTicketCommentAttachments', () => {
+  it('returns all comment attachments for a ticket', async () => {
+    fromResults = [
+      {
+        data: [
+          { id: 'att-c1', comment_id: 'c1', file_name: 'a.png' },
+          { id: 'att-c2', comment_id: 'c2', file_name: 'b.pdf' },
+        ],
+        error: null,
+      },
+    ]
+
+    const result = await getTicketCommentAttachments('ticket-1')
+    expect(result).toHaveLength(2)
+  })
+
+  it('returns empty array on error', async () => {
+    fromResults = [{ data: null, error: { message: 'DB error' } }]
+    const result = await getTicketCommentAttachments('ticket-1')
+    expect(result).toEqual([])
+  })
+})
+
+/* ============================================================
+   uploadCommentAttachment
+   ============================================================ */
+
+describe('uploadCommentAttachment', () => {
+  it('returns error when no file is provided', async () => {
+    const formData = new FormData()
+    const result = await uploadCommentAttachment('comment-1', 'ticket-1', formData)
+    expect(result.error).toBe('No file provided')
+  })
+
+  it('returns error when file is too large', async () => {
+    const formData = new FormData()
+    const file = new File(['x'], 'big.zip', { type: 'application/zip' })
+    Object.defineProperty(file, 'size', { value: 60 * 1024 * 1024 })
+    formData.append('file', file)
+
+    const result = await uploadCommentAttachment('comment-1', 'ticket-1', formData)
+    expect(result.error).toBe('File must be 50 MB or smaller')
+  })
+
+  it('blocks dangerous file extensions', async () => {
+    const formData = new FormData()
+    const file = new File(['MZ'], 'malware.exe', { type: 'application/octet-stream' })
+    formData.append('file', file)
+
+    const result = await uploadCommentAttachment('comment-1', 'ticket-1', formData)
+    expect(result.error).toBe('This file type is not allowed for security reasons')
+  })
+
+  it('returns error when user is not signed in', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const formData = new FormData()
+    const file = new File(['hello'], 'doc.txt', { type: 'text/plain' })
+    formData.append('file', file)
+
+    const result = await uploadCommentAttachment('comment-1', 'ticket-1', formData)
+    expect(result.error).toBe('You must be signed in to upload files')
+  })
+
+  it('returns error when comment is not found', async () => {
+    fromResults = [{ data: null, error: null }]
+
+    const formData = new FormData()
+    const file = new File(['hello'], 'doc.txt', { type: 'text/plain' })
+    formData.append('file', file)
+
+    const result = await uploadCommentAttachment('comment-1', 'ticket-1', formData)
+    expect(result.error).toBe('Comment not found')
+  })
+
+  it('uploads file and creates comment attachment record', async () => {
+    fromResults = [
+      // comments lookup
+      { data: { org_id: 'org-1', ticket_id: 'ticket-1' }, error: null },
+      // file_attachments insert
+      {
+        data: {
+          id: 'att-c-new',
+          org_id: 'org-1',
+          ticket_id: 'ticket-1',
+          comment_id: 'comment-1',
+          file_name: 'doc.txt',
+          file_size: 5,
+          mime_type: 'text/plain',
+          storage_path: 'org-1/ticket-1/comments/comment-1/123-doc.txt',
+          storage_bucket: 'attachments',
+          uploaded_by: 'user-1',
+          created_at: '2026-01-01',
+        },
+        error: null,
+      },
+    ]
+    mockUpload.mockResolvedValue({ error: null })
+
+    const formData = new FormData()
+    const file = new File(['hello'], 'doc.txt', { type: 'text/plain' })
+    formData.append('file', file)
+
+    const result = await uploadCommentAttachment('comment-1', 'ticket-1', formData)
+    expect(result.error).toBeUndefined()
+    expect(result.attachment?.id).toBe('att-c-new')
+    expect(result.attachment?.comment_id).toBe('comment-1')
+    expect(mockUpload).toHaveBeenCalled()
+  })
+
+  it('cleans up storage when DB insert fails', async () => {
+    fromResults = [
+      // comments lookup
+      { data: { org_id: 'org-1', ticket_id: 'ticket-1' }, error: null },
+      // file_attachments insert fails
+      { data: null, error: { message: 'Insert failed' } },
+    ]
+    mockUpload.mockResolvedValue({ error: null })
+    mockRemove.mockResolvedValue({ error: null })
+
+    const formData = new FormData()
+    const file = new File(['hello'], 'doc.txt', { type: 'text/plain' })
+    formData.append('file', file)
+
+    const result = await uploadCommentAttachment('comment-1', 'ticket-1', formData)
+    expect(result.error).toBe('Failed to save attachment. Please try again.')
+    expect(mockRemove).toHaveBeenCalled()
   })
 })
 
