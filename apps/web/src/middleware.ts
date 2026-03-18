@@ -20,6 +20,7 @@ const PROTECTED_PATHS = [
   '/training',
   '/reports',
   '/export',
+  '/forms',
   '/tools',
   '/admin',
 ]

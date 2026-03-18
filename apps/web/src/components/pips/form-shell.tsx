@@ -274,15 +274,15 @@ export const FormShell = (props: FormShellProps) => {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           {isSandbox ? (
             <GuardedLink
-              href="/tools"
+              href="/forms"
               className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-              data-testid="back-to-tools-link"
+              data-testid="back-to-forms-link"
               isDirty={hasPendingChanges}
               guardNavigation={guardNavigation}
               router={router}
             >
               <ArrowLeft size={14} />
-              Back to tools
+              Back to forms
             </GuardedLink>
           ) : projectId ? (
             <nav aria-label="Breadcrumb" data-testid="form-breadcrumb" className="min-w-0">

@@ -102,6 +102,13 @@ const QUICK_ACTIONS = [
     group: 'Navigate',
   },
   {
+    id: 'go-forms',
+    label: 'Go to Forms',
+    icon: FileText,
+    href: '/forms',
+    group: 'Navigate',
+  },
+  {
     id: 'go-settings',
     label: 'Go to Settings',
     icon: Settings,
