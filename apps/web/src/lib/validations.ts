@@ -218,6 +218,21 @@ export const ticketFiltersSchema = z.object({
   sort_order: z.enum(['asc', 'desc']).default('desc'),
 })
 
+export const formFiltersSchema = z.object({
+  form_type: z.array(z.string()).optional(),
+  step: z.array(z.string()).optional(),
+  project_id: z.string().uuid().optional(),
+  created_by: z.string().uuid().optional(),
+  search: z.string().max(200).optional(),
+  include_archived: z.coerce.boolean().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  per_page: z.coerce.number().int().min(1).max(100).default(25),
+  sort_by: z.enum(['created_at', 'updated_at', 'form_type', 'step']).default('updated_at'),
+  sort_order: z.enum(['asc', 'desc']).default('desc'),
+})
+
+export type FormFiltersInput = z.infer<typeof formFiltersSchema>
+
 /* ============================================================
    Initiative Schemas
    ============================================================ */
