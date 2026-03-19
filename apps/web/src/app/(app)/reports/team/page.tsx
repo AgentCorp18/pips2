@@ -5,8 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { KpiCard } from '@/components/reports/kpi-card'
-import { TeamContributionsChart } from '@/components/reports/team-contributions-chart'
-import { ActivityTimelineChart } from '@/components/reports/activity-timeline-chart'
+import {
+  LazyTeamContributionsChart as TeamContributionsChart,
+  LazyActivityTimelineChart as ActivityTimelineChart,
+} from '@/components/reports/lazy-charts'
 import { TeamMembersTable } from '@/components/reports/team-members-table'
 import { Users, UserCheck, TicketCheck, Clock, ArrowLeft } from 'lucide-react'
 import {

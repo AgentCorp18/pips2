@@ -14,10 +14,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { KpiCard } from '@/components/reports/kpi-card'
-import { StepProgressChart } from '@/components/reports/step-progress-chart'
-import { TicketVelocityChart } from '@/components/reports/ticket-velocity-chart'
-import { StepFunnelChart } from '@/components/reports/step-funnel-chart'
-import { CycleTimeTrendChart } from '@/components/reports/cycle-time-trend-chart'
+import {
+  LazyStepProgressChart as StepProgressChart,
+  LazyTicketVelocityChart as TicketVelocityChart,
+  LazyStepFunnelChart as StepFunnelChart,
+  LazyCycleTimeTrendChart as CycleTimeTrendChart,
+} from '@/components/reports/lazy-charts'
 import {
   FolderKanban,
   TrendingUp,

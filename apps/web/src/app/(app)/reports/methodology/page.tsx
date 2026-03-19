@@ -5,9 +5,11 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { KpiCard } from '@/components/reports/kpi-card'
-import { FormCompletionChart } from '@/components/reports/form-completion-chart'
-import { StepDurationChart } from '@/components/reports/step-duration-chart'
-import { ToolPopularityChart } from '@/components/reports/tool-popularity-chart'
+import {
+  LazyFormCompletionChart as FormCompletionChart,
+  LazyStepDurationChart as StepDurationChart,
+  LazyToolPopularityChart as ToolPopularityChart,
+} from '@/components/reports/lazy-charts'
 import { StepBreakdownTable } from '@/components/reports/step-breakdown-table'
 import { BookOpen, Clock, Wrench, TrendingUp, ArrowLeft } from 'lucide-react'
 import {

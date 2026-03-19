@@ -6,7 +6,7 @@ import { getCurrentOrg } from '@/lib/get-current-org'
 import { Card, CardContent } from '@/components/ui/card'
 import { KpiCard } from '@/components/reports/kpi-card'
 import { MethodologyCorrelation } from '@/components/reports/methodology-correlation'
-import { RoiTrendChart } from '@/components/reports/roi-trend-chart'
+import { LazyRoiTrendChart as RoiTrendChart } from '@/components/reports/lazy-charts'
 import {
   ArrowLeft,
   DollarSign,

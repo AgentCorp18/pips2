@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/permissions'
+import { checkPermission } from '@/lib/action-utils'
 
 /* ============================================================
    Types
@@ -39,11 +39,8 @@ export const getTicketsForTimeline = async (
     status?: string[]
   },
 ): Promise<TimelineTicket[]> => {
-  try {
-    await requirePermission(orgId, 'data.view')
-  } catch {
-    return []
-  }
+  const permError = await checkPermission(orgId, 'data.view')
+  if (permError) return []
 
   const supabase = await createClient()
 

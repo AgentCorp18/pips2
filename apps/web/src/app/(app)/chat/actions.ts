@@ -1,8 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getAuthContext } from '@/lib/auth-context'
-import { requirePermission } from '@/lib/permissions'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
 
 /* ============================================================
@@ -24,6 +23,7 @@ const extractMentions = (body: string): string[] => {
    Types
    ============================================================ */
 
+export type { ActionResult } from '@/lib/action-utils'
 type ActionResult<T = void> = { data?: T; error?: string }
 
 type ChannelWithUnread = ChatChannel & { unread_count: number }
@@ -37,9 +37,9 @@ type MessageWithAuthor = ChatMessage & {
    ============================================================ */
 
 export const getChannels = async (): Promise<ActionResult<ChannelWithUnread[]>> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization selected' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
   // Get channels the user is a member of
   const { data: memberships, error: memberError } = await supabase
@@ -62,7 +62,7 @@ export const getChannels = async (): Promise<ActionResult<ChannelWithUnread[]>> 
   // Fetch channels — scoped to current org
   const { data: channels, error: channelError } = await supabase
     .from('chat_channels')
-    .select('*')
+    .select('id, name, type, org_id, entity_id, topic, created_by, archived_at, created_at')
     .in('id', channelIds)
     .eq('org_id', orgId)
     .is('archived_at', null)
@@ -129,13 +129,13 @@ type ChannelMember = {
 export const getChannel = async (
   channelId: string,
 ): Promise<ActionResult<{ channel: ChatChannel; members: ChannelMember[] }>> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization selected' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
   const { data: channel, error: chError } = await supabase
     .from('chat_channels')
-    .select('*')
+    .select('id, name, type, org_id, entity_id, topic, created_by, archived_at, created_at')
     .eq('id', channelId)
     .eq('org_id', orgId)
     .single()
@@ -179,8 +179,9 @@ export const getMessages = async (
   limit = 50,
   parentMessageId?: string,
 ): Promise<ActionResult<{ messages: MessageWithAuthor[]; hasMore: boolean }>> => {
-  const { supabase, user } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase } = auth.ctx
 
   let query = supabase
     .from('chat_messages')
@@ -261,15 +262,12 @@ export const sendMessage = async (
   body: string,
   replyToId?: string,
 ): Promise<ActionResult<ChatMessage>> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  try {
-    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
-  } catch {
-    return { error: 'Insufficient permissions to send messages' }
-  }
+  const permError = await checkPermission(orgId, 'chat.send', { supabase, userId: user.id })
+  if (permError) return { error: 'Insufficient permissions to send messages' }
 
   const trimmedBody = body.trim()
   if (!trimmedBody) return { error: 'Message cannot be empty' }
@@ -303,15 +301,12 @@ export const sendMessage = async (
    ============================================================ */
 
 export const editMessage = async (messageId: string, body: string): Promise<ActionResult> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  try {
-    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
-  } catch {
-    return { error: 'Insufficient permissions to edit messages' }
-  }
+  const permError = await checkPermission(orgId, 'chat.send', { supabase, userId: user.id })
+  if (permError) return { error: 'Insufficient permissions to edit messages' }
 
   const trimmedBody = body.trim()
   const mentions = extractMentions(trimmedBody)
@@ -336,15 +331,12 @@ export const editMessage = async (messageId: string, body: string): Promise<Acti
    ============================================================ */
 
 export const deleteMessage = async (messageId: string): Promise<ActionResult> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  try {
-    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
-  } catch {
-    return { error: 'Insufficient permissions to delete messages' }
-  }
+  const permError = await checkPermission(orgId, 'chat.send', { supabase, userId: user.id })
+  if (permError) return { error: 'Insufficient permissions to delete messages' }
 
   const { error } = await supabase
     .from('chat_messages')
@@ -371,15 +363,12 @@ export const createChannel = async (
   memberIds?: string[],
   entityId?: string,
 ): Promise<ActionResult<ChatChannel>> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  try {
-    await requirePermission(orgId, 'chat.manage', { supabase, userId: user.id })
-  } catch {
-    return { error: 'Insufficient permissions to create channels' }
-  }
+  const permError = await checkPermission(orgId, 'chat.manage', { supabase, userId: user.id })
+  if (permError) return { error: 'Insufficient permissions to create channels' }
 
   let admin: ReturnType<typeof createAdminClient>
   try {
@@ -537,15 +526,12 @@ export const createChannel = async (
    ============================================================ */
 
 export const archiveChannel = async (channelId: string): Promise<ActionResult> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization selected' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  try {
-    await requirePermission(orgId, 'chat.manage', { supabase, userId: user.id })
-  } catch {
-    return { error: 'Insufficient permissions to archive channels' }
-  }
+  const permError = await checkPermission(orgId, 'chat.manage', { supabase, userId: user.id })
+  if (permError) return { error: 'Insufficient permissions to archive channels' }
 
   const { error } = await supabase
     .from('chat_channels')
@@ -566,15 +552,12 @@ export const archiveChannel = async (channelId: string): Promise<ActionResult> =
    ============================================================ */
 
 export const addMembers = async (channelId: string, userIds: string[]): Promise<ActionResult> => {
-  const { user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { orgId } = auth.ctx
 
-  try {
-    await requirePermission(orgId, 'chat.manage')
-  } catch {
-    return { error: 'Insufficient permissions to manage channel members' }
-  }
+  const permError = await checkPermission(orgId, 'chat.manage')
+  if (permError) return { error: 'Insufficient permissions to manage channel members' }
 
   let admin: ReturnType<typeof createAdminClient>
   try {
@@ -615,8 +598,9 @@ export const addMembers = async (channelId: string, userIds: string[]): Promise<
    ============================================================ */
 
 export const markChannelRead = async (channelId: string): Promise<ActionResult> => {
-  const { supabase, user } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user } = auth.ctx
 
   const { error } = await supabase
     .from('chat_channel_members')
@@ -637,9 +621,9 @@ export const markChannelRead = async (channelId: string): Promise<ActionResult> 
    ============================================================ */
 
 export const generateSummary = async (channelId: string): Promise<ActionResult<ChatSummary>> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
   // Verify channel belongs to caller's org
   const { data: channel } = await supabase
@@ -651,11 +635,8 @@ export const generateSummary = async (channelId: string): Promise<ActionResult<C
 
   if (!channel) return { error: 'Channel not found' }
 
-  try {
-    await requirePermission(orgId, 'chat.send', { supabase, userId: user.id })
-  } catch {
-    return { error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'chat.send', { supabase, userId: user.id })
+  if (permError) return { error: 'Insufficient permissions' }
 
   // Fetch recent messages
   const { data: messages, error: msgError } = await supabase
@@ -770,9 +751,9 @@ export const generateSummary = async (channelId: string): Promise<ActionResult<C
    ============================================================ */
 
 export const removeMember = async (channelId: string, userId: string): Promise<ActionResult> => {
-  const { user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { orgId } = auth.ctx
 
   let admin: ReturnType<typeof createAdminClient>
   try {
@@ -817,9 +798,9 @@ export type OrgMemberInfo = {
 }
 
 export const getOrgMembers = async (): Promise<ActionResult<OrgMemberInfo[]>> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { error: 'Not authenticated' }
-  if (!orgId) return { error: 'No organization context' }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
   const { data: members } = await supabase.from('org_members').select('user_id').eq('org_id', orgId)
 

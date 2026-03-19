@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/permissions'
+import { checkPermission } from '@/lib/action-utils'
 
 /* ============================================================
    Types
@@ -37,11 +37,8 @@ export const getWorkloadData = async (
     include_done?: boolean
   },
 ): Promise<{ members: WorkloadMember[]; unassignedCount: number }> => {
-  try {
-    await requirePermission(orgId, 'data.view')
-  } catch {
-    return { members: [], unassignedCount: 0 }
-  }
+  const permError = await checkPermission(orgId, 'data.view')
+  if (permError) return { members: [], unassignedCount: 0 }
 
   const supabase = await createClient()
 
