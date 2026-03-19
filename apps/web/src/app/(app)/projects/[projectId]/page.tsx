@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { stepEnumToNumber, PIPS_STEPS } from '@pips/shared'
+import type { HealthScore } from '@pips/shared'
 import { RecentItemTracker } from '@/components/layout/recent-item-tracker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +17,8 @@ import {
   getProjectValueNarrative,
 } from './overview-actions'
 import { ProjectValueCard } from '@/components/pips/project-value-card'
+import { HealthBadge } from '@/components/pips/health-badge'
+import { getProjectHealth } from './health-actions'
 import { OverviewStats } from './overview-stats'
 import { ActivityFeed } from './activity-feed'
 import { MembersList } from './members-list'
@@ -23,7 +26,7 @@ import { ExportPDFButton } from '@/components/export-pdf-button'
 import { ExportOnePagerButton } from '@/components/pips/export-one-pager-button'
 import { Button } from '@/components/ui/button'
 import { StepSummaryCard } from '@/components/pips/step-summary-card'
-import { Calendar, User, BarChart3, ClipboardList } from 'lucide-react'
+import { Calendar, User, BarChart3, ClipboardList, HeartPulse } from 'lucide-react'
 import { StartHereCard } from '@/components/pips/start-here-card'
 import { formatDateTime, formatDateOnly } from '@/lib/format-date'
 
@@ -72,14 +75,16 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     step_number: stepEnumToNumber(s.step),
   }))
 
-  const [stats, members, activity, stepSummaries, progress, valueNarrative] = await Promise.all([
-    getProjectStats(projectId),
-    getProjectMembers(projectId),
-    getProjectActivity(projectId),
-    getStepSummaries(projectId),
-    getProjectProgress(projectId),
-    getProjectValueNarrative(projectId),
-  ])
+  const [stats, members, activity, stepSummaries, progress, valueNarrative, health] =
+    await Promise.all([
+      getProjectStats(projectId),
+      getProjectMembers(projectId),
+      getProjectActivity(projectId),
+      getStepSummaries(projectId),
+      getProjectProgress(projectId),
+      getProjectValueNarrative(projectId),
+      getProjectHealth(projectId),
+    ])
 
   const profilesRaw = project.profiles as unknown
   const ownerProfile = Array.isArray(profilesRaw)
@@ -125,6 +130,9 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       {currentStepNum === 1 && progress.formsStarted === 0 && (
         <StartHereCard projectId={projectId} />
       )}
+
+      {/* Project Health Score */}
+      {health !== null && <ProjectHealthCard health={health} />}
 
       {/* Phase 0B: Value Narrative — below header, above step list, only when forms exist */}
       {valueNarrative !== null && <ProjectValueCard data={valueNarrative} />}
@@ -282,5 +290,72 @@ const ProjectProgressBar = ({
     </CardContent>
   </Card>
 )
+
+/** Project Health Score card for the detail page */
+const ProjectHealthCard = ({ health }: { health: HealthScore }) => {
+  const factorRows: { label: string; value: string; weight: string }[] = [
+    {
+      label: 'Methodology depth',
+      value: `${health.factors.methodologyDepthPercent}%`,
+      weight: '30%',
+    },
+    {
+      label: 'Activity freshness',
+      value:
+        health.factors.daysSinceLastActivity === 0
+          ? 'Today'
+          : health.factors.daysSinceLastActivity === 1
+            ? '1 day ago'
+            : `${health.factors.daysSinceLastActivity} days ago`,
+      weight: '25%',
+    },
+    {
+      label: 'Ticket completion',
+      value: `${health.factors.ticketCompletionPercent}%`,
+      weight: '25%',
+    },
+    {
+      label: 'Form coverage',
+      value: `${health.factors.formsCompletedPercent}%`,
+      weight: '20%',
+    },
+  ]
+
+  return (
+    <Card data-testid="project-health-card">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <HeartPulse size={16} className="text-[var(--color-text-tertiary)]" />
+          Project Health
+          <span
+            className="ml-auto text-sm font-semibold"
+            style={{ color: health.color }}
+            data-testid="health-score-value"
+          >
+            {health.score}/100 — {health.label}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-6">
+          {/* Health ring */}
+          <HealthBadge health={health} />
+          {/* Factor breakdown table */}
+          <div className="flex-1 space-y-2">
+            {factorRows.map((row) => (
+              <div key={row.label} className="flex items-center justify-between text-xs">
+                <span className="text-[var(--color-text-tertiary)]">
+                  {row.label}
+                  <span className="ml-1 opacity-60">({row.weight})</span>
+                </span>
+                <span className="font-medium text-[var(--color-text-primary)]">{row.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default ProjectDetailPage

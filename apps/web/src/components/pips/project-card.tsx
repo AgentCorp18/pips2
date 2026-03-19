@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import { ArrowRight, Calendar, User } from 'lucide-react'
 import { MethodologyDepthBadge } from '@/components/pips/methodology-depth-badge'
+import { HealthBadge } from '@/components/pips/health-badge'
+import type { HealthScore } from '@pips/shared'
 
 type ProjectCardProps = {
   id: string
@@ -19,6 +21,8 @@ type ProjectCardProps = {
   targetDate: string | null
   /** Completed form types for methodology depth badge */
   completedFormTypes?: Set<string>
+  /** Pre-calculated health score to show as a compact ring in the card header */
+  health?: HealthScore
 }
 
 const STATUS_CONFIG: Record<
@@ -41,6 +45,7 @@ export const ProjectCard = ({
   stepsCompleted,
   targetDate,
   completedFormTypes,
+  health,
 }: ProjectCardProps) => {
   const currentPipsStep = PIPS_STEPS.find((s) => s.number === currentStep)
   const fallback = { label: 'Active', variant: 'default' as const }
@@ -55,7 +60,8 @@ export const ProjectCard = ({
               {name}
             </CardTitle>
             <div className="flex items-center gap-2">
-              {completedFormTypes && completedFormTypes.size > 0 && (
+              {health && <HealthBadge health={health} compact />}
+              {!health && completedFormTypes && completedFormTypes.size > 0 && (
                 <MethodologyDepthBadge completedFormTypes={completedFormTypes} compact />
               )}
               <Badge variant={statusConfig.variant} className="shrink-0 text-xs">

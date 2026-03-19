@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
-import { stepEnumToNumber } from '@pips/shared'
+import { stepEnumToNumber, calculateProjectHealth } from '@pips/shared'
+import type { HealthScore } from '@pips/shared'
 import { Button } from '@/components/ui/button'
 import { ProjectCard } from '@/components/pips/project-card'
 import { ProjectListTable } from '@/components/pips/project-list-table'
@@ -25,6 +26,8 @@ export const metadata: Metadata = {
 type ProjectsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
+
+const TOTAL_FORM_TYPES = 25
 
 const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
   const params = await searchParams
@@ -68,18 +71,45 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
 
   const projectList = projects ?? []
 
-  // Fetch completed form types per project (for methodology depth badge)
+  // Batch fetch form and ticket data for all projects (health + depth badges)
   const projectIds = projectList.map((p) => p.id)
-  const { data: allForms } =
-    projectIds.length > 0
-      ? await supabase
-          .from('project_forms')
-          .select('project_id, form_type, data')
-          .in('project_id', projectIds)
-      : { data: [] }
 
+  const [allFormsRes, ticketCountsRes, ticketDoneCountsRes] = await Promise.all([
+    projectIds.length > 0
+      ? supabase
+          .from('project_forms')
+          .select('project_id, form_type, updated_at, data')
+          .in('project_id', projectIds)
+      : Promise.resolve({
+          data: [] as Array<{
+            project_id: string
+            form_type: string
+            updated_at: string
+            data: Record<string, unknown> | null
+          }>,
+        }),
+    projectIds.length > 0
+      ? supabase
+          .from('tickets')
+          .select('project_id')
+          .in('project_id', projectIds)
+          .eq('org_id', currentOrg.orgId)
+      : Promise.resolve({ data: [] as Array<{ project_id: string }> }),
+    projectIds.length > 0
+      ? supabase
+          .from('tickets')
+          .select('project_id')
+          .in('project_id', projectIds)
+          .eq('org_id', currentOrg.orgId)
+          .eq('status', 'done')
+      : Promise.resolve({ data: [] as Array<{ project_id: string }> }),
+  ])
+
+  // Build per-project maps from the batch results
   const formsByProject = new Map<string, Set<string>>()
-  for (const f of allForms ?? []) {
+  const latestFormActivityByProject = new Map<string, string>()
+
+  for (const f of allFormsRes.data ?? []) {
     const data = f.data as Record<string, unknown> | null
     if (data && Object.keys(data).length > 0) {
       if (!formsByProject.has(f.project_id)) {
@@ -87,6 +117,51 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       }
       formsByProject.get(f.project_id)!.add(f.form_type)
     }
+    // Track latest form activity date
+    const existing = latestFormActivityByProject.get(f.project_id)
+    if (!existing || f.updated_at > existing) {
+      latestFormActivityByProject.set(f.project_id, f.updated_at)
+    }
+  }
+
+  // Count tickets per project
+  const ticketTotalByProject = new Map<string, number>()
+  for (const t of ticketCountsRes.data ?? []) {
+    ticketTotalByProject.set(t.project_id, (ticketTotalByProject.get(t.project_id) ?? 0) + 1)
+  }
+  const ticketDoneByProject = new Map<string, number>()
+  for (const t of ticketDoneCountsRes.data ?? []) {
+    ticketDoneByProject.set(t.project_id, (ticketDoneByProject.get(t.project_id) ?? 0) + 1)
+  }
+
+  // Calculate health scores per project
+  const healthByProject = new Map<string, HealthScore>()
+  const now = Date.now()
+  for (const project of projectList) {
+    const formSet = formsByProject.get(project.id) ?? new Set<string>()
+    const distinctForms = formSet.size
+    const formsCompletedPercent = Math.round((distinctForms / TOTAL_FORM_TYPES) * 100)
+
+    const totalTickets = ticketTotalByProject.get(project.id) ?? 0
+    const doneTickets = ticketDoneByProject.get(project.id) ?? 0
+    const ticketCompletionPercent =
+      totalTickets > 0 ? Math.round((doneTickets / totalTickets) * 100) : 0
+
+    const latestFormDate = latestFormActivityByProject.get(project.id)
+    const activityTimestamps = [new Date(project.created_at).getTime()]
+    if (latestFormDate) activityTimestamps.push(new Date(latestFormDate).getTime())
+    const lastActivityMs = Math.max(...activityTimestamps)
+    const daysSinceLastActivity = Math.floor((now - lastActivityMs) / (1000 * 60 * 60 * 24))
+
+    healthByProject.set(
+      project.id,
+      calculateProjectHealth({
+        methodologyDepthPercent: formsCompletedPercent,
+        daysSinceLastActivity,
+        ticketCompletionPercent,
+        formsCompletedPercent,
+      }),
+    )
   }
 
   // View mode
@@ -200,6 +275,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
                 stepsCompleted={project.stepsCompleted}
                 targetDate={project.targetDate}
                 completedFormTypes={formsByProject.get(project.id) ?? new Set()}
+                health={healthByProject.get(project.id)}
               />
             ))}
           </div>
