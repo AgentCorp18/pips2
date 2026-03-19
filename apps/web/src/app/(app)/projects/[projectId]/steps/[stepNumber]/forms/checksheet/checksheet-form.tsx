@@ -398,6 +398,18 @@ const ChecksheetFields = ({
         placeholder="Observations about the data collected..."
         helperText="Record any patterns, anomalies, or insights you notice in the data."
         rows={4}
+        aiFieldType="checksheet_notes"
+        aiContext={`Problem statement: ${problemStatementFromStep1 || 'not set'}. Check sheet title: ${data.title || 'untitled'}. Categories: ${
+          data.categories
+            .map((c) => c.label)
+            .filter(Boolean)
+            .join(', ') || 'none'
+        }. Time periods: ${
+          data.timePeriods
+            .map((t) => t.label)
+            .filter(Boolean)
+            .join(', ') || 'none'
+        }. Grand total: ${grandTotal}.`}
       />
     </div>
   )

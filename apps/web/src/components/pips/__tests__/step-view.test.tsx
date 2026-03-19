@@ -284,4 +284,39 @@ describe('StepView', () => {
     fireEvent.click(screen.getByText('Facilitation Guide'))
     expect(screen.getByText(/Gather the team for a 60-minute session/)).toBeTruthy()
   })
+
+  /* ---- Accessible Step Indicators ---- */
+
+  it('status badge includes icon for accessibility (not color-only)', () => {
+    render(<StepView {...defaultProps} status="in_progress" />)
+    const badge = screen.getByTestId('step-status-badge')
+    // Badge should contain both text and an SVG icon
+    expect(badge.textContent).toContain('In Progress')
+    const svg = badge.querySelector('svg')
+    expect(svg).toBeTruthy()
+  })
+
+  it('completed status badge includes checkmark icon', () => {
+    render(<StepView {...defaultProps} status="completed" />)
+    const badge = screen.getByTestId('step-status-badge')
+    expect(badge.textContent).toContain('Completed')
+    const svg = badge.querySelector('svg')
+    expect(svg).toBeTruthy()
+  })
+
+  it('not_started status badge includes circle icon', () => {
+    render(<StepView {...defaultProps} status="not_started" />)
+    const badge = screen.getByTestId('step-status-badge')
+    expect(badge.textContent).toContain('Not Started')
+    const svg = badge.querySelector('svg')
+    expect(svg).toBeTruthy()
+  })
+
+  it('skipped status badge includes skip icon', () => {
+    render(<StepView {...defaultProps} status="skipped" />)
+    const badge = screen.getByTestId('step-status-badge')
+    expect(badge.textContent).toContain('Skipped')
+    const svg = badge.querySelector('svg')
+    expect(svg).toBeTruthy()
+  })
 })

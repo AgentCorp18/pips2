@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormShell } from '@/components/pips/form-shell'
+import { FormTextarea } from '@/components/pips/form-textarea'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import type { ParetoData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
@@ -264,20 +265,22 @@ const ParetoFields = ({
       {eightyPctCategories.length > 0 && <EightyTwentyNote categories={eightyPctCategories} />}
 
       {/* Notes */}
-      <div className="space-y-1.5">
-        <Label htmlFor="paretoNotes">Notes</Label>
-        <p className="text-xs text-muted-foreground">
-          Observations, next steps, or context for this analysis.
-        </p>
-        <textarea
-          id="paretoNotes"
-          value={data.notes}
-          onChange={(e) => update({ ...data, notes: e.target.value })}
-          placeholder="e.g. The top 2 categories account for 78% of defects. Recommend focusing improvement efforts on..."
-          rows={3}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        />
-      </div>
+      <FormTextarea
+        id="paretoNotes"
+        label="Notes"
+        value={data.notes}
+        onChange={(v) => update({ ...data, notes: v })}
+        placeholder="e.g. The top 2 categories account for 78% of defects. Recommend focusing improvement efforts on..."
+        helperText="Observations, next steps, or context for this analysis."
+        rows={3}
+        aiFieldType="pareto_notes"
+        aiContext={`Analysis title: ${data.title || 'untitled'}. Categories (sorted by count): ${data.categories
+          .filter((c) => c.name)
+          .map((c) => `${c.name}: ${c.count} (${c.percentage}%, cumulative ${c.cumulative}%)`)
+          .join(
+            ', ',
+          )}. 80/20 vital few: ${getEightyPercentCategories(data.categories).join(', ') || 'not enough data'}.`}
+      />
     </div>
   )
 }

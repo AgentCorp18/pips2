@@ -8,7 +8,15 @@ import { ProjectsByStepChart } from '@/components/dashboard/projects-by-step-cha
 import { RecentActivity } from '@/components/dashboard/recent-activity'
 import { AgingTicketsAlert } from '@/components/dashboard/aging-tickets-alert'
 import { CreateSampleProject } from './create-sample-project'
-import { getDashboardStats, getProjectsByStep, getRecentActivity, getAgingTickets } from './actions'
+import {
+  getDashboardStats,
+  getProjectsByStep,
+  getRecentActivity,
+  getAgingTickets,
+  getDashboardMetrics,
+} from './actions'
+import { MetricsWidgets } from '@/components/dashboard/metrics-widgets'
+import type { DashboardMetrics } from './actions'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { WelcomeCards } from '@/components/dashboard/welcome-cards'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
@@ -59,13 +67,21 @@ const DashboardPage = async () => {
   let stepData: Awaited<ReturnType<typeof getProjectsByStep>> = []
   let activity: Awaited<ReturnType<typeof getRecentActivity>> = []
   let agingTickets: Awaited<ReturnType<typeof getAgingTickets>> = []
+  let metrics: DashboardMetrics = {
+    completionRate: 0,
+    avgCycleTimeDays: null,
+    ticketsClosedThisWeek: 0,
+    ticketsCreatedThisWeek: 0,
+    formsCompletedCount: 0,
+  }
 
   try {
-    ;[stats, stepData, activity, agingTickets] = await Promise.all([
+    ;[stats, stepData, activity, agingTickets, metrics] = await Promise.all([
       getDashboardStats(orgId),
       getProjectsByStep(orgId),
       getRecentActivity(orgId, 10),
       getAgingTickets(orgId),
+      getDashboardMetrics(orgId),
     ])
   } catch (err) {
     console.error('[DashboardPage] Error fetching data:', err)
@@ -127,6 +143,11 @@ const DashboardPage = async () => {
         <>
           {/* Stats cards */}
           <StatCards stats={stats} />
+
+          {/* Metrics widgets — completion rate, cycle time, velocity, forms */}
+          <div className="mt-6">
+            <MetricsWidgets metrics={metrics} />
+          </div>
 
           {/* Sample project CTA — shown when user has no projects */}
           {stats.activeProjects === 0 && (

@@ -28,19 +28,53 @@ import { OrgSwitcher } from '@/components/layout/org-switcher'
 import { useMounted } from '@/hooks/use-mounted'
 import type { UserOrg } from '@/app/(app)/actions'
 
-const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Initiatives', href: '/initiatives', icon: Target },
-  { label: 'Projects', href: '/projects', icon: FolderKanban },
-  { label: 'Tickets', href: '/tickets', icon: Ticket },
-  { label: 'Knowledge', href: '/knowledge', icon: BookOpen },
-  { label: 'Training', href: '/training', icon: GraduationCap },
-  { label: 'Forms', href: '/forms', icon: FileText },
-  { label: 'Chat', href: '/chat', icon: MessageSquare },
-  { label: 'Reports', href: '/reports', icon: BarChart3 },
-  { label: 'Teams', href: '/teams', icon: Users },
-  { label: 'Settings', href: '/settings', icon: Settings },
+type NavItem = { label: string; href: string; icon: typeof LayoutDashboard; shortcut?: string }
+type NavGroup = { section: string; items: NavItem[] }
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    section: 'Work',
+    items: [
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, shortcut: 'g d' },
+      { label: 'Initiatives', href: '/initiatives', icon: Target, shortcut: 'g i' },
+      { label: 'Projects', href: '/projects', icon: FolderKanban, shortcut: 'g p' },
+      { label: 'Tickets', href: '/tickets', icon: Ticket, shortcut: 'g t' },
+    ],
+  },
+  {
+    section: 'Learn',
+    items: [
+      { label: 'Knowledge', href: '/knowledge', icon: BookOpen, shortcut: 'g k' },
+      { label: 'Training', href: '/training', icon: GraduationCap },
+    ],
+  },
+  {
+    section: 'Collaborate',
+    items: [
+      { label: 'Chat', href: '/chat', icon: MessageSquare, shortcut: 'g c' },
+      { label: 'Forms', href: '/forms', icon: FileText },
+      { label: 'Teams', href: '/teams', icon: Users },
+    ],
+  },
+  {
+    section: 'Admin',
+    items: [
+      { label: 'Reports', href: '/reports', icon: BarChart3 },
+      { label: 'Settings', href: '/settings', icon: Settings },
+    ],
+  },
 ]
+
+// Shortcut map for keyboard navigation
+const SHORTCUT_MAP: Record<string, string> = {}
+for (const group of NAV_GROUPS) {
+  for (const item of group.items) {
+    if (item.shortcut) {
+      const key = item.shortcut.split(' ')[1]!
+      SHORTCUT_MAP[key] = item.href
+    }
+  }
+}
 
 const MOBILE_BREAKPOINT = 768
 
@@ -72,17 +106,56 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Global Cmd+K / Ctrl+K shortcut
+  // Keyboard shortcuts: Cmd+K for search, g+<key> for navigation
+  const [gKeyPending, setGKeyPending] = useState(false)
+
   useEffect(() => {
+    let gTimeout: ReturnType<typeof setTimeout> | null = null
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't fire shortcuts when typing in inputs
+      const target = e.target as HTMLElement
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      ) {
+        return
+      }
+
+      // Cmd+K / Ctrl+K → search
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         setCommandOpen((prev) => !prev)
+        return
+      }
+
+      // g+<key> navigation shortcuts
+      if (gKeyPending && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const dest = SHORTCUT_MAP[e.key]
+        if (dest) {
+          e.preventDefault()
+          window.location.href = dest
+        }
+        setGKeyPending(false)
+        if (gTimeout) clearTimeout(gTimeout)
+        return
+      }
+
+      if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        setGKeyPending(true)
+        if (gTimeout) clearTimeout(gTimeout)
+        gTimeout = setTimeout(() => setGKeyPending(false), 1500)
       }
     }
+
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      if (gTimeout) clearTimeout(gTimeout)
+    }
+  }, [gKeyPending])
 
   const openCommandPalette = useCallback(() => {
     setCommandOpen(true)
@@ -166,28 +239,60 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
           <OrgSwitcher orgs={orgs} currentOrgId={currentOrgId} />
         </div>
 
-        {/* Navigation */}
-        <nav aria-label="Main navigation" className="flex-1 space-y-1 px-3 py-2">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-            return (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={mounted && isMobile ? closeSidebar : undefined}
-                aria-current={isActive ? 'page' : undefined}
-                data-testid={`nav-link-${item.label.toLowerCase()}`}
-                className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 ${
-                  isActive ? 'bg-[var(--sidebar-accent)] opacity-100' : 'opacity-70'
-                }`}
+        {/* Navigation — grouped by section */}
+        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-3 py-2">
+          {NAV_GROUPS.map((group, groupIdx) => (
+            <div key={group.section} className={groupIdx > 0 ? 'mt-4' : ''}>
+              <p
+                className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--sidebar-foreground)', opacity: 0.45 }}
+                data-testid={`nav-group-${group.section.toLowerCase()}`}
               >
-                <Icon size={20} aria-hidden="true" />
-                {item.label}
-              </a>
-            )
-          })}
+                {group.section}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={mounted && isMobile ? closeSidebar : undefined}
+                      aria-current={isActive ? 'page' : undefined}
+                      data-testid={`nav-link-${item.label.toLowerCase()}`}
+                      className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 ${
+                        isActive ? 'bg-[var(--sidebar-accent)] opacity-100' : 'opacity-70'
+                      }`}
+                    >
+                      <Icon size={20} aria-hidden="true" />
+                      <span className="flex-1">{item.label}</span>
+                      {item.shortcut && (
+                        <kbd className="hidden text-[10px] opacity-40 lg:inline" aria-hidden="true">
+                          {item.shortcut}
+                        </kbd>
+                      )}
+                    </a>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
+
+        {/* Keyboard shortcut overlay */}
+        {gKeyPending && (
+          <div
+            className="mx-3 mb-2 rounded-[var(--radius-md)] border border-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 py-2 text-center text-xs"
+            style={{ color: 'var(--sidebar-foreground)' }}
+            data-testid="shortcut-overlay"
+            aria-live="polite"
+          >
+            Press a key: <strong>d</strong>=Dashboard <strong>p</strong>=Projects <strong>t</strong>
+            =Tickets <strong>i</strong>=Initiatives <strong>k</strong>=Knowledge <strong>c</strong>
+            =Chat
+          </div>
+        )}
 
         {/* Admin link — only shown to system admins */}
         {isAdmin && (

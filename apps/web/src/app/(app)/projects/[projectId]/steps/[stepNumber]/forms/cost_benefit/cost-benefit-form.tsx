@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormShell } from '@/components/pips/form-shell'
+import { FormTextarea } from '@/components/pips/form-textarea'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import type { CostBenefitData } from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
@@ -338,20 +339,33 @@ const CostBenefitFields = ({
       </div>
 
       {/* Recommendation */}
-      <div className="space-y-1.5">
-        <Label htmlFor="recommendation">Recommendation</Label>
-        <p className="text-xs text-muted-foreground">
-          Based on this analysis, what do you recommend?
-        </p>
-        <textarea
-          id="recommendation"
-          value={data.recommendation}
-          onChange={(e) => update({ ...data, recommendation: e.target.value })}
-          placeholder="e.g. Proceed with implementation. The 3:1 benefit-to-cost ratio and 18-month payback period make this solution financially viable..."
-          rows={3}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        />
-      </div>
+      <FormTextarea
+        id="recommendation"
+        label="Recommendation"
+        value={data.recommendation}
+        onChange={(v) => update({ ...data, recommendation: v })}
+        placeholder="e.g. Proceed with implementation. The 3:1 benefit-to-cost ratio and 18-month payback period make this solution financially viable..."
+        helperText="Based on this analysis, what do you recommend?"
+        rows={3}
+        aiFieldType="cost_benefit_recommendation"
+        aiContext={`Solution: ${data.solutionName || 'not set'}. Total annual costs: ${formatCurrency(totalCosts)}. Total annual benefits: ${formatCurrency(totalBenefits)}. Net annual benefit: ${formatCurrency(net)}. Payback period: ${data.paybackPeriod || 'not set'}. Cost items: ${
+          data.costs
+            .filter((c) => c.description)
+            .map(
+              (c) =>
+                `${c.description} (${formatCurrency(c.amount)} ${FREQUENCY_LABELS[c.frequency]})`,
+            )
+            .join(', ') || 'none'
+        }. Benefit items: ${
+          data.benefits
+            .filter((b) => b.description)
+            .map(
+              (b) =>
+                `${b.description} (${formatCurrency(b.amount)} ${FREQUENCY_LABELS[b.frequency]})`,
+            )
+            .join(', ') || 'none'
+        }.`}
+      />
     </div>
   )
 }

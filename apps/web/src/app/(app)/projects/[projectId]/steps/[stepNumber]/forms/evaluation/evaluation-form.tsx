@@ -6,6 +6,7 @@ import { CheckCircle2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { FormShell } from '@/components/pips/form-shell'
+import { FormTextarea } from '@/components/pips/form-textarea'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import { FormFieldView } from '@/components/pips/form-field-view'
 import { saveFormData } from '../actions'
@@ -178,12 +179,15 @@ const EvaluationFields = ({ data, update }: EvaluationFieldsProps) => {
             No
           </Button>
         </div>
-        <textarea
+        <FormTextarea
+          id="goalDetails"
+          label="Details"
           value={data.goalDetails}
-          onChange={(e) => update({ ...data, goalDetails: e.target.value })}
+          onChange={(v) => update({ ...data, goalDetails: v })}
           placeholder="Explain what goals were met, partially met, or missed..."
           rows={3}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          aiFieldType="goal_details"
+          aiContext={`Goals achieved: ${data.goalsAchieved ? 'Yes' : 'No'}. Effectiveness rating: ${data.effectivenessRating}/5 (${ratingLabels[data.effectivenessRating]}). Sustainability rating: ${data.sustainabilityRating}/5. Team satisfaction: ${data.teamSatisfactionRating}/5.`}
         />
       </div>
 
@@ -212,47 +216,41 @@ const EvaluationFields = ({ data, update }: EvaluationFieldsProps) => {
 
       {/* Text areas */}
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Unexpected Outcomes</Label>
-          <p className="text-xs text-muted-foreground">
-            Were there any positive or negative outcomes that weren&apos;t anticipated?
-          </p>
-          <textarea
-            value={data.unexpectedOutcomes}
-            onChange={(e) => update({ ...data, unexpectedOutcomes: e.target.value })}
-            placeholder="Describe any surprises, side effects, or unintended consequences..."
-            rows={3}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
-        </div>
+        <FormTextarea
+          id="unexpectedOutcomes"
+          label="Unexpected Outcomes"
+          value={data.unexpectedOutcomes}
+          onChange={(v) => update({ ...data, unexpectedOutcomes: v })}
+          placeholder="Describe any surprises, side effects, or unintended consequences..."
+          helperText="Were there any positive or negative outcomes that weren't anticipated?"
+          rows={3}
+          aiFieldType="unexpected_outcomes"
+          aiContext={`Goals achieved: ${data.goalsAchieved ? 'Yes' : 'No'}. Goal details: ${data.goalDetails || 'not provided'}. Effectiveness: ${data.effectivenessRating}/5. Sustainability: ${data.sustainabilityRating}/5. Team satisfaction: ${data.teamSatisfactionRating}/5.`}
+        />
 
-        <div className="space-y-2">
-          <Label>Recommendations</Label>
-          <p className="text-xs text-muted-foreground">
-            What would you recommend to others undertaking a similar project?
-          </p>
-          <textarea
-            value={data.recommendations}
-            onChange={(e) => update({ ...data, recommendations: e.target.value })}
-            placeholder="Share advice, best practices, or things to watch out for..."
-            rows={3}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
-        </div>
+        <FormTextarea
+          id="recommendations"
+          label="Recommendations"
+          value={data.recommendations}
+          onChange={(v) => update({ ...data, recommendations: v })}
+          placeholder="Share advice, best practices, or things to watch out for..."
+          helperText="What would you recommend to others undertaking a similar project?"
+          rows={3}
+          aiFieldType="evaluation_recommendations"
+          aiContext={`Goals achieved: ${data.goalsAchieved ? 'Yes' : 'No'}. Goal details: ${data.goalDetails || 'not provided'}. Unexpected outcomes: ${data.unexpectedOutcomes || 'none noted'}. Effectiveness: ${data.effectivenessRating}/5. Sustainability: ${data.sustainabilityRating}/5.`}
+        />
 
-        <div className="space-y-2">
-          <Label>Next Steps</Label>
-          <p className="text-xs text-muted-foreground">
-            Should we standardize, iterate, or start a new PIPS cycle?
-          </p>
-          <textarea
-            value={data.nextSteps}
-            onChange={(e) => update({ ...data, nextSteps: e.target.value })}
-            placeholder="Outline the path forward: standardize this change, continue improving, or identify a new problem..."
-            rows={3}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
-        </div>
+        <FormTextarea
+          id="nextSteps"
+          label="Next Steps"
+          value={data.nextSteps}
+          onChange={(v) => update({ ...data, nextSteps: v })}
+          placeholder="Outline the path forward: standardize this change, continue improving, or identify a new problem..."
+          helperText="Should we standardize, iterate, or start a new PIPS cycle?"
+          rows={3}
+          aiFieldType="evaluation_next_steps"
+          aiContext={`Goals achieved: ${data.goalsAchieved ? 'Yes' : 'No'}. Goal details: ${data.goalDetails || 'not provided'}. Recommendations: ${data.recommendations || 'not provided'}. Unexpected outcomes: ${data.unexpectedOutcomes || 'none noted'}. Effectiveness: ${data.effectivenessRating}/5. Sustainability: ${data.sustainabilityRating}/5. Team satisfaction: ${data.teamSatisfactionRating}/5.`}
+        />
       </div>
     </div>
   )

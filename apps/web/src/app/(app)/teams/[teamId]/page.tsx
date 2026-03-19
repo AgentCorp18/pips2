@@ -4,10 +4,11 @@ import { ArrowLeft } from 'lucide-react'
 import { getUserOrg } from '@/lib/permissions'
 import { createClient } from '@/lib/supabase/server'
 import { hasPermission, type OrgRole } from '@pips/shared'
-import { getTeamDetail } from '../actions'
+import { getTeamDetail, getTeamWorkload } from '../actions'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import { TeamMembersList } from './team-members-list'
 import { DeleteTeamButton } from './delete-team-button'
+import { TeamWorkload } from '@/components/teams/team-workload'
 
 interface TeamDetailPageProps {
   params: Promise<{ teamId: string }>
@@ -25,6 +26,8 @@ const TeamDetailPage = async ({ params }: TeamDetailPageProps) => {
 
   const team = await getTeamDetail(teamId)
   if (!team) notFound()
+
+  const workload = await getTeamWorkload(teamId)
 
   // Fetch org members who are NOT already in this team (for the add-member dialog)
   const supabase = await createClient()
@@ -85,6 +88,9 @@ const TeamDetailPage = async ({ params }: TeamDetailPageProps) => {
 
       {/* Step stripe */}
       <div className="step-gradient-stripe rounded-full" />
+
+      {/* Workload heatmap */}
+      <TeamWorkload members={workload} />
 
       {/* Members section */}
       <TeamMembersList

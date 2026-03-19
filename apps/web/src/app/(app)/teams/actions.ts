@@ -268,6 +268,110 @@ export const addTeamMember = async (teamId: string, userId: string): Promise<Act
   }
 }
 
+/* ============================================================
+   getTeamWorkload — ticket counts per member for workload heatmap
+   ============================================================ */
+
+export type TeamWorkloadMember = {
+  user_id: string
+  name: string
+  avatar_url: string | null
+  open_tickets: number
+  in_progress: number
+  completed: number
+  overdue: number
+}
+
+export const getTeamWorkload = async (teamId: string): Promise<TeamWorkloadMember[]> => {
+  const supabase = await createClient()
+
+  const membership = await getUserOrg()
+  if (!membership) return []
+
+  const orgId = membership.org_id as string
+
+  // Verify team belongs to org
+  const { data: team } = await supabase
+    .from('teams')
+    .select('id')
+    .eq('id', teamId)
+    .eq('org_id', orgId)
+    .single()
+
+  if (!team) return []
+
+  // Get team members
+  const { data: members } = await supabase
+    .from('team_members')
+    .select('user_id, profiles(full_name, display_name, avatar_url)')
+    .eq('team_id', teamId)
+
+  if (!members || members.length === 0) return []
+
+  const userIds = members.map((m) => m.user_id as string)
+
+  // Get all tickets assigned to team members in this org
+  const today = new Date().toISOString().split('T')[0] ?? ''
+
+  const { data: tickets } = await supabase
+    .from('tickets')
+    .select('assignee_id, status, due_date')
+    .eq('org_id', orgId)
+    .in('assignee_id', userIds)
+
+  // Build workload map
+  const workloadMap = new Map<
+    string,
+    { open: number; in_progress: number; completed: number; overdue: number }
+  >()
+
+  for (const uid of userIds) {
+    workloadMap.set(uid, { open: 0, in_progress: 0, completed: 0, overdue: 0 })
+  }
+
+  if (tickets) {
+    for (const t of tickets) {
+      if (!t.assignee_id) continue
+      const entry = workloadMap.get(t.assignee_id as string)
+      if (!entry) continue
+
+      const status = t.status as string
+      if (status === 'done' || status === 'cancelled') {
+        entry.completed += 1
+      } else {
+        entry.open += 1
+        if (status === 'in_progress' || status === 'in_review') {
+          entry.in_progress += 1
+        }
+        if (t.due_date && (t.due_date as string) < today) {
+          entry.overdue += 1
+        }
+      }
+    }
+  }
+
+  return members.map((m) => {
+    const profile = (Array.isArray(m.profiles) ? m.profiles[0] : m.profiles) as {
+      full_name: string
+      display_name: string | null
+      avatar_url: string | null
+    } | null
+
+    const uid = m.user_id as string
+    const workload = workloadMap.get(uid) ?? { open: 0, in_progress: 0, completed: 0, overdue: 0 }
+
+    return {
+      user_id: uid,
+      name: profile?.display_name ?? profile?.full_name ?? 'Unknown',
+      avatar_url: profile?.avatar_url ?? null,
+      open_tickets: workload.open,
+      in_progress: workload.in_progress,
+      completed: workload.completed,
+      overdue: workload.overdue,
+    }
+  })
+}
+
 export const removeTeamMember = async (teamId: string, userId: string): Promise<ActionResult> => {
   try {
     const membership = await getUserOrg()

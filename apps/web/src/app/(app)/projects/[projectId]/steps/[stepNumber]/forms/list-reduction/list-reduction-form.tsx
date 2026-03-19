@@ -1,7 +1,8 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { FormShell } from '@/components/pips/form-shell'
+import { FormTextarea } from '@/components/pips/form-textarea'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -21,9 +22,15 @@ type Props = {
   projectId: string
   stepNumber: number
   initialData: Record<string, unknown> | null
+  problemStatementContext?: Record<string, unknown> | null
 }
 
-export const ListReductionForm = ({ projectId, stepNumber, initialData }: Props) => {
+export const ListReductionForm = ({
+  projectId,
+  stepNumber,
+  initialData,
+  problemStatementContext,
+}: Props) => {
   const [data, setData] = useState<ListReductionData>({
     ...DEFAULTS,
     ...(initialData as Partial<ListReductionData>),
@@ -71,6 +78,23 @@ export const ListReductionForm = ({ projectId, stepNumber, initialData }: Props)
   const keptItems = data.items.filter((i) => i.kept)
   const eliminatedItems = data.items.filter((i) => !i.kept)
 
+  // Build cross-form context from the problem statement
+  const psCtx = problemStatementContext as {
+    problemStatement?: string
+    problemArea?: string
+    asIs?: string
+  } | null
+
+  const aiBaseContext = useMemo(() => {
+    const parts = [
+      psCtx?.problemStatement && `Problem statement: ${psCtx.problemStatement}`,
+      psCtx?.problemArea && `Problem area: ${psCtx.problemArea}`,
+      psCtx?.asIs && `Current state: ${psCtx.asIs}`,
+      data.items.length > 0 && `Items in list: ${data.items.map((i) => i.text).join(', ')}`,
+    ]
+    return parts.filter(Boolean).join('. ')
+  }, [psCtx, data.items])
+
   return (
     <FormShell
       projectId={projectId}
@@ -91,6 +115,7 @@ export const ListReductionForm = ({ projectId, stepNumber, initialData }: Props)
         toggleKept={toggleKept}
         updateReason={updateReason}
         updateCriteria={updateCriteria}
+        aiBaseContext={aiBaseContext}
       />
     </FormShell>
   )
@@ -108,6 +133,7 @@ type ListReductionFieldsProps = {
   toggleKept: (id: string) => void
   updateReason: (id: string, reason: string) => void
   updateCriteria: (value: string) => void
+  aiBaseContext: string
 }
 
 const ListReductionFields = ({
@@ -120,6 +146,7 @@ const ListReductionFields = ({
   toggleKept,
   updateReason,
   updateCriteria,
+  aiBaseContext,
 }: ListReductionFieldsProps) => {
   const mode = useFormViewMode()
   const isView = mode === 'view'
@@ -210,17 +237,18 @@ const ListReductionFields = ({
   return (
     <div className="space-y-6">
       {/* Elimination Criteria */}
-      <Card>
-        <CardContent className="space-y-3 pt-6">
-          <Label htmlFor="elimination-criteria">Elimination Criteria</Label>
-          <Input
-            id="elimination-criteria"
-            value={data.criteria}
-            onChange={(e) => updateCriteria(e.target.value)}
-            placeholder="e.g. Must be achievable within 3 months with current resources"
-          />
-        </CardContent>
-      </Card>
+      <FormTextarea
+        id="elimination-criteria"
+        label="Elimination Criteria"
+        value={data.criteria}
+        onChange={updateCriteria}
+        placeholder="e.g. Must be achievable within 3 months with current resources, estimated cost < $50k"
+        helperText="Define objective criteria for eliminating items. Items that fail these criteria will be removed."
+        rows={2}
+        maxLength={1000}
+        aiFieldType="elimination_criteria"
+        aiContext={aiBaseContext}
+      />
 
       {/* Add Item */}
       <Card>

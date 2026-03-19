@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { Plus, Trash2, ArrowRight, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -15,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { FormShell } from '@/components/pips/form-shell'
+import { FormTextarea } from '@/components/pips/form-textarea'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import { FormFieldView, FormInlineView } from '@/components/pips/form-field-view'
 import { saveFormData } from '../actions'
@@ -297,19 +297,25 @@ const BeforeAfterFields = ({
           helperText="Overall improvement and key takeaways from the data."
         />
       ) : (
-        <div className="space-y-2">
-          <Label>Summary</Label>
-          <p className="text-xs text-muted-foreground">
-            Summarize the overall improvement and key takeaways from the data.
-          </p>
-          <textarea
-            value={data.summary}
-            onChange={(e) => update({ ...data, summary: e.target.value })}
-            placeholder="Describe the overall results and what the data shows..."
-            rows={4}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
-        </div>
+        <FormTextarea
+          id="summary"
+          label="Summary"
+          value={data.summary}
+          onChange={(v) => update({ ...data, summary: v })}
+          placeholder="Describe the overall results and what the data shows..."
+          helperText="Summarize the overall improvement and key takeaways from the data."
+          rows={4}
+          aiFieldType="before_after_summary"
+          aiContext={`Metrics comparison: ${
+            data.metrics
+              .filter((m) => m.name)
+              .map(
+                (m) =>
+                  `${m.name}: before=${m.before}${m.unit ? ' ' + m.unit : ''}, after=${m.after}${m.unit ? ' ' + m.unit : ''}, improvement=${m.improvement}`,
+              )
+              .join('; ') || 'no metrics defined'
+          }.`}
+        />
       )}
     </div>
   )

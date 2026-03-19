@@ -32,6 +32,7 @@ const CARDS: CardDef[] = [
     icon: TicketCheck,
     color: 'var(--color-step-2)',
     testId: 'stat-open-tickets',
+    href: '/tickets?status=todo&status=in_progress&status=in_review&status=blocked',
   },
   {
     key: 'overdueTickets',
@@ -48,6 +49,7 @@ const CARDS: CardDef[] = [
     icon: CheckCircle2,
     color: 'var(--color-step-3)',
     testId: 'stat-completed',
+    href: '/tickets?status=done',
   },
   {
     key: 'teamMembers',

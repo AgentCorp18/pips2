@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormShell } from '@/components/pips/form-shell'
+import { FormTextarea } from '@/components/pips/form-textarea'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import { FormFieldView } from '@/components/pips/form-field-view'
 import { saveFormData } from '../actions'
@@ -495,19 +496,32 @@ const BalanceSheetFields = ({
       </SectionCard>
 
       {/* ---- Summary ---- */}
-      <div className="space-y-2">
-        <Label>Overall Assessment</Label>
-        <p className="text-xs text-muted-foreground">
-          Summarize the balance of gains vs. losses and what it means for the project.
-        </p>
-        <textarea
-          value={data.summary}
-          onChange={(e) => update({ ...data, summary: e.target.value })}
-          placeholder="Describe the overall balance of outcomes, key takeaways, and what the findings suggest..."
-          rows={4}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        />
-      </div>
+      <FormTextarea
+        id="summary"
+        label="Overall Assessment"
+        value={data.summary}
+        onChange={(v) => update({ ...data, summary: v })}
+        placeholder="Describe the overall balance of outcomes, key takeaways, and what the findings suggest..."
+        helperText="Summarize the balance of gains vs. losses and what it means for the project."
+        rows={4}
+        aiFieldType="balance_sheet_assessment"
+        aiContext={`Gains (${data.gains.filter((g) => g.description).length}): ${
+          data.gains
+            .filter((g) => g.description)
+            .map((g) => `${g.description} (${g.impact} impact)`)
+            .join('; ') || 'none'
+        }. Losses (${data.losses.filter((l) => l.description).length}): ${
+          data.losses
+            .filter((l) => l.description)
+            .map((l) => `${l.description} (${l.impact} impact)`)
+            .join('; ') || 'none'
+        }. Observations: ${
+          data.observations
+            .filter((o) => o.description)
+            .map((o) => o.description)
+            .join('; ') || 'none'
+        }.`}
+      />
 
       {/* ---- Recommendation ---- */}
       <div className="space-y-2">

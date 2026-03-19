@@ -23,9 +23,15 @@ type Props = {
   projectId: string
   stepNumber: number
   initialData: Record<string, unknown> | null
+  problemStatementContext?: Record<string, unknown> | null
 }
 
-export const ImpactAssessmentForm = ({ projectId, stepNumber, initialData }: Props) => {
+export const ImpactAssessmentForm = ({
+  projectId,
+  stepNumber,
+  initialData,
+  problemStatementContext,
+}: Props) => {
   const [data, setData] = useState<ImpactAssessmentData>(() => {
     const merged = { ...DEFAULTS, ...(initialData as Partial<ImpactAssessmentData>) }
     merged.riskPriorityNumber =
@@ -43,6 +49,44 @@ export const ImpactAssessmentForm = ({ projectId, stepNumber, initialData }: Pro
     },
     [],
   )
+
+  // Build cross-form context from the problem statement (if available)
+  const psCtx = problemStatementContext as {
+    problemStatement?: string
+    asIs?: string
+    desired?: string
+    gap?: string
+    problemArea?: string
+  } | null
+
+  const baseContext = [
+    psCtx?.problemStatement && `Problem statement: ${psCtx.problemStatement}`,
+    psCtx?.problemArea && `Problem area: ${psCtx.problemArea}`,
+    psCtx?.asIs && `Current state: ${psCtx.asIs}`,
+    psCtx?.gap && `Gap: ${psCtx.gap}`,
+  ]
+    .filter(Boolean)
+    .join('. ')
+
+  const buildAiContext = (fieldLabel: string, otherImpacts: string) => {
+    const parts = [baseContext]
+    if (otherImpacts) parts.push(`Other impact dimensions already captured: ${otherImpacts}`)
+    return parts.filter(Boolean).join('. ') || `Impact assessment — ${fieldLabel}`
+  }
+
+  // Gather already-filled impact fields for cross-field context
+  const otherImpactsFor = (exclude: keyof ImpactAssessmentData) => {
+    const fields: Array<[keyof ImpactAssessmentData, string]> = [
+      ['financialImpact', 'Financial'],
+      ['customerImpact', 'Customer'],
+      ['employeeImpact', 'Employee'],
+      ['processImpact', 'Process'],
+    ]
+    return fields
+      .filter(([key]) => key !== exclude && data[key])
+      .map(([key, label]) => `${label}: ${data[key]}`)
+      .join('; ')
+  }
 
   return (
     <FormShell
@@ -63,6 +107,8 @@ export const ImpactAssessmentForm = ({ projectId, stepNumber, initialData }: Pro
           placeholder="e.g. $50,000/year in rework costs..."
           helperText="Estimate the cost of this problem in dollars or other financial metrics."
           rows={2}
+          aiFieldType="financial_impact"
+          aiContext={buildAiContext('Financial Impact', otherImpactsFor('financialImpact'))}
         />
 
         <FormTextarea
@@ -73,6 +119,8 @@ export const ImpactAssessmentForm = ({ projectId, stepNumber, initialData }: Pro
           placeholder="e.g. 15% of customers report delays..."
           helperText="How are external or internal customers affected?"
           rows={2}
+          aiFieldType="customer_impact"
+          aiContext={buildAiContext('Customer Impact', otherImpactsFor('customerImpact'))}
         />
 
         <FormTextarea
@@ -83,6 +131,8 @@ export const ImpactAssessmentForm = ({ projectId, stepNumber, initialData }: Pro
           placeholder="e.g. Staff spending 30% of time on workarounds..."
           helperText="How are team members or employees affected?"
           rows={2}
+          aiFieldType="employee_impact"
+          aiContext={buildAiContext('Employee Impact', otherImpactsFor('employeeImpact'))}
         />
 
         <FormTextarea
@@ -93,6 +143,8 @@ export const ImpactAssessmentForm = ({ projectId, stepNumber, initialData }: Pro
           placeholder="e.g. 3 downstream processes are delayed..."
           helperText="Which processes are affected or disrupted?"
           rows={2}
+          aiFieldType="process_impact"
+          aiContext={buildAiContext('Process Impact', otherImpactsFor('processImpact'))}
         />
 
         {/* Risk Priority Number */}

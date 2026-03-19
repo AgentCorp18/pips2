@@ -96,4 +96,38 @@ describe('StatCards', () => {
     const link = teamCard.closest('a')
     expect(link).toHaveAttribute('href', '/settings/members')
   })
+
+  it('renders open tickets card as a link to filtered tickets', () => {
+    render(<StatCards stats={defaultStats} />)
+    const openCard = screen.getByTestId('stat-open-tickets')
+    const link = openCard.closest('a')
+    expect(link).toHaveAttribute(
+      'href',
+      '/tickets?status=todo&status=in_progress&status=in_review&status=blocked',
+    )
+  })
+
+  it('renders completed this month card as a link', () => {
+    render(<StatCards stats={defaultStats} />)
+    const completedCard = screen.getByTestId('stat-completed')
+    const link = completedCard.closest('a')
+    expect(link).toHaveAttribute('href', '/tickets?status=done')
+  })
+
+  it('all stat cards are wrapped in links (actionable dashboard)', () => {
+    render(<StatCards stats={defaultStats} />)
+    const cards = [
+      'stat-total-projects',
+      'stat-open-tickets',
+      'stat-overdue',
+      'stat-completed',
+      'stat-team-members',
+    ]
+    for (const testId of cards) {
+      const card = screen.getByTestId(testId)
+      const link = card.closest('a')
+      expect(link).toBeTruthy()
+      expect(link).toHaveAttribute('href')
+    }
+  })
 })

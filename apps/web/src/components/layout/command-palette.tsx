@@ -18,6 +18,7 @@ import {
   Settings,
   ClipboardList,
   Keyboard,
+  CalendarDays,
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
@@ -73,6 +74,13 @@ const QUICK_ACTIONS = [
     label: 'Go to Tickets',
     icon: Ticket,
     href: '/tickets',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-calendar',
+    label: 'Go to Calendar',
+    icon: CalendarDays,
+    href: '/tickets/calendar',
     group: 'Navigate',
   },
   {

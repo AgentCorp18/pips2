@@ -20,9 +20,19 @@ const ImpactAssessmentPage = async ({
 
   if (!user) redirect('/login')
 
-  const saved = await loadFormData(projectId, stepNumber, 'impact_assessment')
+  const [saved, problemStatementData] = await Promise.all([
+    loadFormData(projectId, stepNumber, 'impact_assessment'),
+    loadFormData(projectId, stepNumber, 'problem_statement'),
+  ])
 
-  return <ImpactAssessmentForm projectId={projectId} stepNumber={stepNumber} initialData={saved} />
+  return (
+    <ImpactAssessmentForm
+      projectId={projectId}
+      stepNumber={stepNumber}
+      initialData={saved}
+      problemStatementContext={problemStatementData}
+    />
+  )
 }
 
 export default ImpactAssessmentPage

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
@@ -17,8 +18,9 @@ import { ActivityFeed } from './activity-feed'
 import { MembersList } from './members-list'
 import { ExportPDFButton } from '@/components/export-pdf-button'
 import { ExportOnePagerButton } from '@/components/pips/export-one-pager-button'
+import { Button } from '@/components/ui/button'
 import { StepSummaryCard } from '@/components/pips/step-summary-card'
-import { Calendar, User, BarChart3 } from 'lucide-react'
+import { Calendar, User, BarChart3, ClipboardList } from 'lucide-react'
 import { StartHereCard } from '@/components/pips/start-here-card'
 import { formatDateTime, formatDateOnly } from '@/lib/format-date'
 
@@ -115,6 +117,18 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       )}
 
       <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="gap-2"
+          data-testid="view-summary-button"
+        >
+          <Link href={`/projects/${project.id}/summary`}>
+            <ClipboardList size={14} />
+            View Summary
+          </Link>
+        </Button>
         <ExportOnePagerButton projectId={project.id} projectName={project.title as string} />
         <ExportPDFButton projectId={project.id} projectName={project.title as string} />
       </div>
