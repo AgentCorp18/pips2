@@ -16,7 +16,8 @@ import {
   ChevronRight,
   PlusCircle,
 } from 'lucide-react'
-import { getROIDashboardData, getMethodologyCorrelation } from './actions'
+import { TeamPerformanceTable } from '@/components/reports/team-performance-table'
+import { getROIDashboardData, getMethodologyCorrelation, getTeamPerformance } from './actions'
 
 export const metadata: Metadata = {
   title: 'ROI Dashboard',
@@ -64,9 +65,10 @@ const ROIDashboardPage = async () => {
 
   const orgId = currentOrg.orgId
 
-  const [roiData, correlation] = await Promise.all([
+  const [roiData, correlation, teamPerformance] = await Promise.all([
     getROIDashboardData(orgId),
     getMethodologyCorrelation(orgId),
+    getTeamPerformance(orgId),
   ])
 
   const noRoiData = roiData.projectsWithRoiData === 0
@@ -262,6 +264,16 @@ const ROIDashboardPage = async () => {
         </h2>
         <RoiTrendChart data={roiData.monthlyTrend} />
       </section>
+
+      {/* Team Performance */}
+      {teamPerformance.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-4 text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Team Performance
+          </h2>
+          <TeamPerformanceTable data={teamPerformance} />
+        </section>
+      )}
 
       {/* Call to action — shown if little/no ROI data */}
       {noRoiData && (

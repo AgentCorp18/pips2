@@ -479,3 +479,450 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
     monthlyTrend,
   }
 }
+
+/* ============================================================
+   getTeamPerformance
+   ============================================================ */
+
+export type TeamPerformance = {
+  teamId: string
+  teamName: string
+  memberCount: number
+  projectsCompleted: number
+  ticketsResolved: number
+  avgMethodologyDepth: number
+  avgCycleTimeDays: number | null
+  totalSavings: number
+  formsCompleted: number
+}
+
+export const getTeamPerformance = async (orgId: string): Promise<TeamPerformance[]> => {
+  await requirePermission(orgId, 'data.view')
+
+  const supabase = await createClient()
+
+  // Fetch all teams for the org with their members
+  const { data: teams } = await supabase
+    .from('teams')
+    .select('id, name')
+    .eq('org_id', orgId)
+    .order('name', { ascending: true })
+
+  if (!teams || teams.length === 0) return []
+
+  const teamIds = teams.map((t) => t.id)
+
+  // Fetch all team members
+  const { data: teamMembers } = await supabase
+    .from('team_members')
+    .select('team_id, user_id')
+    .in('team_id', teamIds)
+
+  if (!teamMembers || teamMembers.length === 0) {
+    return teams.map((team) => ({
+      teamId: team.id,
+      teamName: team.name,
+      memberCount: 0,
+      projectsCompleted: 0,
+      ticketsResolved: 0,
+      avgMethodologyDepth: 0,
+      avgCycleTimeDays: null,
+      totalSavings: 0,
+      formsCompleted: 0,
+    }))
+  }
+
+  // Build map: team → member user IDs
+  const membersByTeam = new Map<string, Set<string>>()
+  for (const tm of teamMembers) {
+    const existing = membersByTeam.get(tm.team_id) ?? new Set<string>()
+    existing.add(tm.user_id)
+    membersByTeam.set(tm.team_id, existing)
+  }
+
+  // All user IDs across all teams (for fetching projects/tickets)
+  const allUserIds = Array.from(new Set(teamMembers.map((tm) => tm.user_id)))
+
+  // Fetch projects created by any team member
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, created_by, status, created_at, completed_at')
+    .eq('org_id', orgId)
+    .in('created_by', allUserIds)
+    .in('status', ['completed', 'active', 'draft'])
+    .limit(1000)
+
+  // Fetch tickets assigned to any team member
+  const { data: tickets } = await supabase
+    .from('tickets')
+    .select('assignee_id, status, project_id')
+    .eq('org_id', orgId)
+    .in('assignee_id', allUserIds)
+    .limit(5000)
+
+  // Fetch forms for projects relevant to team members
+  const projectIds = (projects ?? []).map((p) => p.id)
+
+  const [formsRes, resultsFormsRes] =
+    projectIds.length > 0
+      ? await Promise.all([
+          supabase
+            .from('project_forms')
+            .select('project_id, form_type')
+            .in('project_id', projectIds)
+            .limit(5000),
+          supabase
+            .from('project_forms')
+            .select('project_id, form_type, data')
+            .in('project_id', projectIds)
+            .eq('form_type', 'results_metrics')
+            .limit(1000),
+        ])
+      : [{ data: [] }, { data: [] }]
+
+  // Index distinct form types per project
+  const formTypesByProject = new Map<string, Set<string>>()
+  for (const f of formsRes.data ?? []) {
+    if (!f.project_id) continue
+    const existing = formTypesByProject.get(f.project_id) ?? new Set<string>()
+    existing.add(f.form_type)
+    formTypesByProject.set(f.project_id, existing)
+  }
+
+  // Total form count per project
+  const formCountByProject = new Map<string, number>()
+  for (const f of formsRes.data ?? []) {
+    if (!f.project_id) continue
+    formCountByProject.set(f.project_id, (formCountByProject.get(f.project_id) ?? 0) + 1)
+  }
+
+  // Savings per project from results_metrics
+  const savingsByProject = new Map<string, number>()
+  for (const f of resultsFormsRes.data ?? []) {
+    if (!f.project_id) continue
+    const d = f.data as ResultsMetricsData
+    savingsByProject.set(f.project_id, d.financialSavingsAnnual ?? 0)
+  }
+
+  // Build per-team performance
+  return teams.map((team) => {
+    const memberUserIds = membersByTeam.get(team.id) ?? new Set<string>()
+    const memberCount = memberUserIds.size
+
+    // Projects owned by team members
+    const teamProjects = (projects ?? []).filter(
+      (p) => p.created_by && memberUserIds.has(p.created_by),
+    )
+    const completedProjects = teamProjects.filter((p) => p.status === 'completed')
+    const projectsCompleted = completedProjects.length
+
+    // Tickets resolved by team members
+    const teamTickets = (tickets ?? []).filter(
+      (t) => t.assignee_id && memberUserIds.has(t.assignee_id),
+    )
+    const ticketsResolved = teamTickets.filter((t) => t.status === 'done').length
+
+    // Avg methodology depth across team's projects
+    const depthValues = teamProjects.map((p) => {
+      const distinctTypes = formTypesByProject.get(p.id)?.size ?? 0
+      return Math.round((distinctTypes / TOTAL_FORM_TYPES) * 100)
+    })
+    const avgMethodologyDepth =
+      depthValues.length > 0
+        ? Math.round(depthValues.reduce((a, b) => a + b, 0) / depthValues.length)
+        : 0
+
+    // Avg cycle time for completed team projects
+    const cycleTimes = completedProjects
+      .map((p) => {
+        if (!p.completed_at) return null
+        const start = new Date(p.created_at).getTime()
+        const end = new Date(p.completed_at).getTime()
+        return Math.round(((end - start) / (1000 * 60 * 60 * 24)) * 10) / 10
+      })
+      .filter((d): d is number => d !== null)
+    const avgCycleTimeDays =
+      cycleTimes.length > 0
+        ? Math.round((cycleTimes.reduce((a, b) => a + b, 0) / cycleTimes.length) * 10) / 10
+        : null
+
+    // Total savings from results_metrics across team's projects
+    const totalSavings = teamProjects.reduce((sum, p) => sum + (savingsByProject.get(p.id) ?? 0), 0)
+
+    // Total forms completed across team's projects
+    const formsCompleted = teamProjects.reduce(
+      (sum, p) => sum + (formCountByProject.get(p.id) ?? 0),
+      0,
+    )
+
+    return {
+      teamId: team.id,
+      teamName: team.name,
+      memberCount,
+      projectsCompleted,
+      ticketsResolved,
+      avgMethodologyDepth,
+      avgCycleTimeDays,
+      totalSavings,
+      formsCompleted,
+    }
+  })
+}
+
+/* ============================================================
+   getExecutiveSummaryData
+   ============================================================ */
+
+export type ExecutiveSummaryProject = {
+  id: string
+  title: string
+  annualSavings: number
+  roiPercent: number
+  depthPercent: number
+  narrative: string | null
+}
+
+export type ExecutiveSummaryData = {
+  orgName: string
+  periodLabel: string
+  projectsCompleted: number
+  ticketsResolved: number
+  totalAnnualSavings: number
+  totalWeeklyHoursSaved: number
+  avgRoiPercent: number | null
+  avgMethodologyDepth: number
+  formsPerProject: number
+  topProjects: ExecutiveSummaryProject[]
+  multiplier: number | null
+  avgRoiHighDepth: number | null
+  avgRoiLowDepth: number | null
+  monthlyCompletions: Array<{ month: string; count: number }>
+}
+
+const getCurrentQuarterLabel = (): { label: string; start: Date; end: Date } => {
+  const now = new Date()
+  const quarter = Math.floor(now.getMonth() / 3) + 1
+  const year = now.getFullYear()
+  const quarterStart = new Date(year, (quarter - 1) * 3, 1)
+  const quarterEnd = new Date(year, quarter * 3, 0, 23, 59, 59)
+  return {
+    label: `Q${quarter} ${year}`,
+    start: quarterStart,
+    end: quarterEnd,
+  }
+}
+
+export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveSummaryData> => {
+  await requirePermission(orgId, 'data.view')
+
+  const supabase = await createClient()
+
+  // Get org name
+  const { data: org } = await supabase.from('organizations').select('name').eq('id', orgId).single()
+
+  const orgName = org?.name ?? 'Your Organization'
+
+  const { label: periodLabel, start: periodStart } = getCurrentQuarterLabel()
+
+  // Fetch all org projects (all time for methodology stats, filter by period for KPIs)
+  const { data: allProjects } = await supabase
+    .from('projects')
+    .select('id, title, status, created_at, completed_at')
+    .eq('org_id', orgId)
+    .in('status', ['completed', 'active', 'draft'])
+    .order('completed_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(500)
+
+  if (!allProjects || allProjects.length === 0) {
+    return {
+      orgName,
+      periodLabel,
+      projectsCompleted: 0,
+      ticketsResolved: 0,
+      totalAnnualSavings: 0,
+      totalWeeklyHoursSaved: 0,
+      avgRoiPercent: null,
+      avgMethodologyDepth: 0,
+      formsPerProject: 0,
+      topProjects: [],
+      multiplier: null,
+      avgRoiHighDepth: null,
+      avgRoiLowDepth: null,
+      monthlyCompletions: [],
+    }
+  }
+
+  const allProjectIds = allProjects.map((p) => p.id)
+
+  // Period-filtered projects (completed in the current quarter)
+  const periodProjects = allProjects.filter(
+    (p) => p.status === 'completed' && p.completed_at && new Date(p.completed_at) >= periodStart,
+  )
+
+  // Fetch tickets resolved in the period
+  const { data: periodTickets } = await supabase
+    .from('tickets')
+    .select('id')
+    .eq('org_id', orgId)
+    .eq('status', 'done')
+    .gte('resolved_at', periodStart.toISOString())
+    .limit(5000)
+
+  const ticketsResolved = periodTickets?.length ?? 0
+
+  // Fetch all forms for all projects (for methodology and ROI stats)
+  const [allFormsRes, resultsFormsRes] = await Promise.all([
+    supabase
+      .from('project_forms')
+      .select('project_id, form_type')
+      .in('project_id', allProjectIds)
+      .limit(5000),
+    supabase
+      .from('project_forms')
+      .select('project_id, form_type, data')
+      .in('project_id', allProjectIds)
+      .eq('form_type', 'results_metrics')
+      .limit(1000),
+  ])
+
+  // Index distinct form types per project (for depth)
+  const formTypesByProject = new Map<string, Set<string>>()
+  const formCountByProject = new Map<string, number>()
+  for (const f of allFormsRes.data ?? []) {
+    if (!f.project_id) continue
+    const existing = formTypesByProject.get(f.project_id) ?? new Set<string>()
+    existing.add(f.form_type)
+    formTypesByProject.set(f.project_id, existing)
+    formCountByProject.set(f.project_id, (formCountByProject.get(f.project_id) ?? 0) + 1)
+  }
+
+  // Index results_metrics by project
+  const resultsByProject = new Map<
+    string,
+    { annualSavings: number; weeklyHoursSaved: number; roiPercent: number }
+  >()
+  for (const f of resultsFormsRes.data ?? []) {
+    if (!f.project_id) continue
+    const d = f.data as ResultsMetricsData
+    resultsByProject.set(f.project_id, {
+      annualSavings: d.financialSavingsAnnual ?? 0,
+      weeklyHoursSaved: d.timeSavedWeeklyHours ?? 0,
+      roiPercent: d.roiPercent ?? 0,
+    })
+  }
+
+  // Aggregate savings/hours/roi (all projects with data)
+  let totalAnnualSavings = 0
+  let totalWeeklyHoursSaved = 0
+  const roiValues: number[] = []
+  for (const [, entry] of resultsByProject) {
+    totalAnnualSavings += entry.annualSavings
+    totalWeeklyHoursSaved += entry.weeklyHoursSaved
+    if (entry.roiPercent > 0) roiValues.push(entry.roiPercent)
+  }
+  const avgRoiPercent =
+    roiValues.length > 0
+      ? Math.round((roiValues.reduce((a, b) => a + b, 0) / roiValues.length) * 10) / 10
+      : null
+
+  // Avg methodology depth across all projects
+  const depthValues = allProjects.map((p) => {
+    const distinctTypes = formTypesByProject.get(p.id)?.size ?? 0
+    return Math.round((distinctTypes / TOTAL_FORM_TYPES) * 100)
+  })
+  const avgMethodologyDepth =
+    depthValues.length > 0
+      ? Math.round(depthValues.reduce((a, b) => a + b, 0) / depthValues.length)
+      : 0
+
+  // Avg forms per project
+  const totalForms = Array.from(formCountByProject.values()).reduce((a, b) => a + b, 0)
+  const formsPerProject =
+    allProjects.length > 0 ? Math.round((totalForms / allProjects.length) * 10) / 10 : 0
+
+  // ROI multiplier (high depth >60% vs low depth)
+  const highDepthProjects = allProjects.filter((p) => {
+    const distinctTypes = formTypesByProject.get(p.id)?.size ?? 0
+    return Math.round((distinctTypes / TOTAL_FORM_TYPES) * 100) > 60
+  })
+  const lowDepthProjects = allProjects.filter((p) => {
+    const distinctTypes = formTypesByProject.get(p.id)?.size ?? 0
+    return Math.round((distinctTypes / TOTAL_FORM_TYPES) * 100) <= 60
+  })
+
+  const avgRoiForGroup = (group: typeof allProjects): number | null => {
+    const withRoi = group.filter((p) => {
+      const r = resultsByProject.get(p.id)
+      return r !== undefined && r.roiPercent > 0
+    })
+    if (withRoi.length === 0) return null
+    const sum = withRoi.reduce((s, p) => s + (resultsByProject.get(p.id)?.roiPercent ?? 0), 0)
+    return Math.round((sum / withRoi.length) * 10) / 10
+  }
+
+  const avgRoiHighDepth = avgRoiForGroup(highDepthProjects)
+  const avgRoiLowDepth = avgRoiForGroup(lowDepthProjects)
+  const multiplier =
+    avgRoiHighDepth !== null && avgRoiLowDepth !== null && avgRoiLowDepth > 0
+      ? Math.round((avgRoiHighDepth / avgRoiLowDepth) * 10) / 10
+      : null
+
+  // Top 5 projects by impact (savings first, then depth)
+  const hasFinancialData = allProjects.some(
+    (p) => (resultsByProject.get(p.id)?.annualSavings ?? 0) > 0,
+  )
+  const topProjects: ExecutiveSummaryProject[] = allProjects
+    .map((p) => {
+      const results = resultsByProject.get(p.id)
+      const distinctTypes = formTypesByProject.get(p.id)?.size ?? 0
+      const depthPercent = Math.round((distinctTypes / TOTAL_FORM_TYPES) * 100)
+      return {
+        id: p.id,
+        title: p.title,
+        annualSavings: results?.annualSavings ?? 0,
+        roiPercent: results?.roiPercent ?? 0,
+        depthPercent,
+        narrative: null,
+      }
+    })
+    .sort((a, b) =>
+      hasFinancialData ? b.annualSavings - a.annualSavings : b.depthPercent - a.depthPercent,
+    )
+    .slice(0, 5)
+
+  // Monthly completions (last 6 months)
+  const monthlyMap = new Map<string, number>()
+  const now = new Date()
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = toYearMonth(d)
+    monthlyMap.set(key, 0)
+  }
+  for (const p of allProjects.filter((p) => p.status === 'completed' && p.completed_at)) {
+    const key = toYearMonth(new Date(p.completed_at!))
+    if (monthlyMap.has(key)) {
+      monthlyMap.set(key, (monthlyMap.get(key) ?? 0) + 1)
+    }
+  }
+  const monthlyCompletions = Array.from(monthlyMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, count]) => ({ month: formatMonth(month), count }))
+
+  return {
+    orgName,
+    periodLabel,
+    projectsCompleted: periodProjects.length,
+    ticketsResolved,
+    totalAnnualSavings,
+    totalWeeklyHoursSaved,
+    avgRoiPercent,
+    avgMethodologyDepth,
+    formsPerProject,
+    topProjects,
+    multiplier,
+    avgRoiHighDepth,
+    avgRoiLowDepth,
+    monthlyCompletions,
+  }
+}

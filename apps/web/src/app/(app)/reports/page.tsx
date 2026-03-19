@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { FolderKanban, Users, BookOpen, ArrowRight, DollarSign } from 'lucide-react'
+import { FolderKanban, Users, BookOpen, ArrowRight, DollarSign, FileText } from 'lucide-react'
 import { getReportsHubStats } from './actions'
 
 export const metadata: Metadata = {
@@ -50,6 +50,16 @@ const REPORT_CARDS = [
     color: '#F59E0B',
     metricKey: 'formsCompleted' as const,
     metricLabel: 'forms with impact data',
+  },
+  {
+    title: 'Executive Summary',
+    description:
+      'Print-ready executive report with hero KPIs, top projects, and PIPS methodology insights.',
+    href: '/reports/executive-summary',
+    icon: FileText,
+    color: '#0891B2',
+    metricKey: 'activeProjects' as const,
+    metricLabel: 'projects tracked',
   },
 ]
 
@@ -157,7 +167,7 @@ const ReportsPage = async () => {
       </div>
 
       {/* Report cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {REPORT_CARDS.map((card) => {
           const Icon = card.icon
           const metricValue = stats[card.metricKey]
