@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { LazyTimeSavingsChart } from '@/components/reports/lazy-charts'
 import { Clock, DollarSign, Settings } from 'lucide-react'
 import type { TimeSavingsData, ProjectTimeSavings } from './actions'
+import { CsvExportButton } from '@/components/reports/csv-export-button'
 
 /* ============================================================
    Helpers
@@ -188,12 +189,29 @@ export const TimeSavingsClient = ({ initialData }: TimeSavingsClientProps) => {
       {/* By project breakdown */}
       {hasData ? (
         <div>
-          <h2
-            className="mb-4 text-base font-semibold"
-            style={{ color: 'var(--color-text-primary)' }}
-          >
-            By Project
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              By Project
+            </h2>
+            <CsvExportButton
+              data={byProject.map((p) => ({
+                project: p.projectTitle,
+                hoursPerYear: p.hoursPerYear,
+                laborValue: p.laborValue,
+                measurables: p.measurables.map((m) => `${m.metric}: ${m.hoursSaved}h`).join('; '),
+              }))}
+              filename="time-savings"
+              columns={[
+                { key: 'project', label: 'Project' },
+                { key: 'hoursPerYear', label: 'Hours Saved/Year' },
+                {
+                  key: 'laborValue',
+                  label: `Labor Value ($) at $${Math.round(hourlyRate)}/hr`,
+                },
+                { key: 'measurables', label: 'Measurables' },
+              ]}
+            />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {byProject.map((p) => (
               <Card key={p.projectId} className="flex flex-col">

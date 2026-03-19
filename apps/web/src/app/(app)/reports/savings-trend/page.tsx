@@ -8,6 +8,7 @@ import { KpiCard } from '@/components/reports/kpi-card'
 import { LazySavingsTrendChart } from '@/components/reports/lazy-charts'
 import { ArrowLeft, TrendingUp, DollarSign, Clock, Target, CheckCircle2 } from 'lucide-react'
 import { getSavingsTrend } from './actions'
+import { CsvExportButton } from '@/components/reports/csv-export-button'
 
 export const metadata: Metadata = {
   title: 'Savings Trend Report',
@@ -123,16 +124,37 @@ const SavingsTrendPage = async ({ searchParams }: SavingsTrendPageProps) => {
           <ArrowLeft size={14} />
           Back to Reports
         </Link>
-        <h1
-          className="text-2xl font-semibold"
-          style={{ color: 'var(--color-text-primary)' }}
-          data-testid="savings-trend-heading"
-        >
-          Savings Trend Report
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          Monthly view of projected vs actual savings from your PIPS improvement projects.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1
+              className="text-2xl font-semibold"
+              style={{ color: 'var(--color-text-primary)' }}
+              data-testid="savings-trend-heading"
+            >
+              Savings Trend Report
+            </h1>
+            <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Monthly view of projected vs actual savings from your PIPS improvement projects.
+            </p>
+          </div>
+          <CsvExportButton
+            data={data.monthly.map((row) => ({
+              month: row.monthLabel,
+              projected: row.projectedSavings,
+              actual: row.actualSavings,
+              delta: row.actualSavings - row.projectedSavings,
+              projectsCompleted: row.projectsCompleted,
+            }))}
+            filename="savings-trend"
+            columns={[
+              { key: 'month', label: 'Month' },
+              { key: 'projected', label: 'Projected Savings ($)' },
+              { key: 'actual', label: 'Actual Savings ($)' },
+              { key: 'delta', label: 'Delta ($)' },
+              { key: 'projectsCompleted', label: 'Projects Completed' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Step stripe */}

@@ -42,6 +42,38 @@ const ReportsLoading = () => {
         ))}
       </div>
 
+      {/* Recent Achievements skeleton */}
+      <div className="mb-8">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-5 w-40" />
+              </div>
+              <Skeleton className="h-4 w-12" />
+            </div>
+            <Skeleton className="mt-1 h-3 w-48" />
+          </CardHeader>
+          <CardContent className="p-0">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 border-b px-6 py-4 last:border-0"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                <Skeleton className="h-12 w-10 rounded-[var(--radius-md)]" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-64" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Report categories */}
       <div className="space-y-8">
         {Array.from({ length: 2 }).map((_, sectionIdx) => (

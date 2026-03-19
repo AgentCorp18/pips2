@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { TeamPerformanceTable } from '@/components/reports/team-performance-table'
 import { getROIDashboardData, getMethodologyCorrelation, getTeamPerformance } from './actions'
+import { CsvExportButton } from '@/components/reports/csv-export-button'
 
 export const metadata: Metadata = {
   title: 'ROI Dashboard',
@@ -86,17 +87,38 @@ const ROIDashboardPage = async () => {
           <ArrowLeft size={14} />
           Back to Reports
         </Link>
-        <h1
-          className="text-2xl font-semibold"
-          style={{ color: 'var(--color-text-primary)' }}
-          data-testid="roi-dashboard-heading"
-        >
-          ROI Dashboard
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          Executive view of financial impact, time savings, and the relationship between methodology
-          depth and outcomes.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1
+              className="text-2xl font-semibold"
+              style={{ color: 'var(--color-text-primary)' }}
+              data-testid="roi-dashboard-heading"
+            >
+              ROI Dashboard
+            </h1>
+            <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Executive view of financial impact, time savings, and the relationship between
+              methodology depth and outcomes.
+            </p>
+          </div>
+          <CsvExportButton
+            data={roiData.topProjectsByImpact.map((p) => ({
+              title: p.title,
+              annualSavings: p.annualSavings,
+              roiPercent: p.roiPercent,
+              methodologyDepth: `${p.depthPercent}%`,
+              cycleTimeDays: p.cycleTimeDays ?? '',
+            }))}
+            filename="roi-dashboard"
+            columns={[
+              { key: 'title', label: 'Project' },
+              { key: 'annualSavings', label: 'Annual Savings ($)' },
+              { key: 'roiPercent', label: 'ROI (%)' },
+              { key: 'methodologyDepth', label: 'Methodology Depth' },
+              { key: 'cycleTimeDays', label: 'Cycle Time (Days)' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Step stripe */}

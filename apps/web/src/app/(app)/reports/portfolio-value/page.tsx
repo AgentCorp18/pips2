@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { KpiCard } from '@/components/reports/kpi-card'
 import {
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { getPortfolioValue } from './actions'
 import type { PortfolioProject } from './actions'
+import { CsvExportButton } from '@/components/reports/csv-export-button'
 
 export const metadata: Metadata = {
   title: 'Portfolio Value Report',
@@ -100,7 +101,10 @@ const FilterLink = ({
     style={
       active
         ? { backgroundColor: 'var(--color-primary)', color: '#fff' }
-        : { color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-surface-secondary)' }
+        : {
+            color: 'var(--color-text-secondary)',
+            backgroundColor: 'var(--color-surface-secondary)',
+          }
     }
   >
     {children}
@@ -165,7 +169,10 @@ const ProjectCard = ({ project }: { project: PortfolioProject }) => {
             <span className="text-lg font-bold" style={{ color: depth.color }}>
               {project.methodologyDepthPercent}%
             </span>
-            <span className="mt-0.5 text-center text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            <span
+              className="mt-0.5 text-center text-xs"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
               Depth
             </span>
           </div>
@@ -178,7 +185,10 @@ const ProjectCard = ({ project }: { project: PortfolioProject }) => {
             <span className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
               {project.cycleTimeDays !== null ? `${project.cycleTimeDays}d` : '--'}
             </span>
-            <span className="mt-0.5 text-center text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            <span
+              className="mt-0.5 text-center text-xs"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
               Cycle
             </span>
           </div>
@@ -191,15 +201,23 @@ const ProjectCard = ({ project }: { project: PortfolioProject }) => {
             <span className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
               {project.formsCompleted}/25
             </span>
-            <span className="mt-0.5 text-center text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            <span
+              className="mt-0.5 text-center text-xs"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
               Forms
             </span>
           </div>
         </div>
 
         {/* Secondary stats */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-          <span>{project.ticketsCompleted}/{project.ticketCount} tickets</span>
+        <div
+          className="flex flex-wrap gap-x-4 gap-y-1 text-xs"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          <span>
+            {project.ticketsCompleted}/{project.ticketCount} tickets
+          </span>
           {project.rootCausesCount > 0 && <span>{project.rootCausesCount} root causes</span>}
           {project.ideasGenerated > 0 && <span>{project.ideasGenerated} ideas</span>}
           {project.lessonsCount > 0 && <span>{project.lessonsCount} lessons</span>}
@@ -261,9 +279,7 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
   }
 
   const params = await searchParams
-  const statusFilter = parseStatus(
-    typeof params.status === 'string' ? params.status : undefined,
-  )
+  const statusFilter = parseStatus(typeof params.status === 'string' ? params.status : undefined)
   const sortKey = parseSortKey(typeof params.sort === 'string' ? params.sort : undefined)
 
   const summary = await getPortfolioValue(currentOrg.orgId)
@@ -294,16 +310,50 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
           <ArrowLeft size={14} />
           Back to Reports
         </Link>
-        <h1
-          className="text-2xl font-semibold"
-          style={{ color: 'var(--color-text-primary)' }}
-          data-testid="portfolio-value-heading"
-        >
-          Portfolio Value Report
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          Executive view of all PIPS projects — methodology depth, cycle times, and aggregate impact.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1
+              className="text-2xl font-semibold"
+              style={{ color: 'var(--color-text-primary)' }}
+              data-testid="portfolio-value-heading"
+            >
+              Portfolio Value Report
+            </h1>
+            <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Executive view of all PIPS projects — methodology depth, cycle times, and aggregate
+              impact.
+            </p>
+          </div>
+          <CsvExportButton
+            data={summary.projects.map((p) => ({
+              title: p.title,
+              status: p.status,
+              completedAt: p.completedAt ?? '',
+              methodologyDepth: `${p.methodologyDepthPercent}%`,
+              cycleTimeDays: p.cycleTimeDays ?? '',
+              formsCompleted: p.formsCompleted,
+              ticketsCompleted: `${p.ticketsCompleted}/${p.ticketCount}`,
+              rootCauses: p.rootCausesCount,
+              ideasGenerated: p.ideasGenerated,
+              lessons: p.lessonsCount,
+              narrative: p.narrative ?? '',
+            }))}
+            filename="portfolio-value"
+            columns={[
+              { key: 'title', label: 'Project' },
+              { key: 'status', label: 'Status' },
+              { key: 'completedAt', label: 'Completed At' },
+              { key: 'methodologyDepth', label: 'Methodology Depth' },
+              { key: 'cycleTimeDays', label: 'Cycle Time (Days)' },
+              { key: 'formsCompleted', label: 'Forms Completed' },
+              { key: 'ticketsCompleted', label: 'Tickets (Done/Total)' },
+              { key: 'rootCauses', label: 'Root Causes' },
+              { key: 'ideasGenerated', label: 'Ideas Generated' },
+              { key: 'lessons', label: 'Lessons Documented' },
+              { key: 'narrative', label: 'Narrative' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Step stripe */}
@@ -341,7 +391,9 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
           value={summary.avgCycleTimeDays !== null ? `${summary.avgCycleTimeDays}d` : '--'}
           icon={Clock}
           color="#F59E0B"
-          subtitle={summary.avgCycleTimeDays !== null ? 'days per project' : 'No completed projects'}
+          subtitle={
+            summary.avgCycleTimeDays !== null ? 'days per project' : 'No completed projects'
+          }
         />
         <KpiCard
           title="Root Causes Found"
@@ -380,7 +432,10 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
             <FilterLink href={buildUrl({ status: 'all' })} active={statusFilter === 'all'}>
               All
             </FilterLink>
-            <FilterLink href={buildUrl({ status: 'completed' })} active={statusFilter === 'completed'}>
+            <FilterLink
+              href={buildUrl({ status: 'completed' })}
+              active={statusFilter === 'completed'}
+            >
               Completed
             </FilterLink>
             <FilterLink href={buildUrl({ status: 'active' })} active={statusFilter === 'active'}>
