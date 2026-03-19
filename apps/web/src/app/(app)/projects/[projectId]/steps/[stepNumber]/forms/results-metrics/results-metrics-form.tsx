@@ -19,7 +19,12 @@ import { Badge } from '@/components/ui/badge'
 import { FormShell } from '@/components/pips/form-shell'
 import { useFormViewMode } from '@/components/pips/form-view-context'
 import { FormFieldView } from '@/components/pips/form-field-view'
-import type { ImpactMetricsData, ResultsMetricsData } from '@/lib/form-schemas'
+import type {
+  ImpactMetricsData,
+  ResultsMetricsData,
+  ProblemStatementData,
+  MeasurableRow,
+} from '@/lib/form-schemas'
 import { cn } from '@/lib/utils'
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -41,13 +46,17 @@ const DEFAULTS: ResultsMetricsData = {
   paybackPeriodMonths: null,
   projectCostEstimate: 0,
   notes: '',
+  actualMeasurables: [],
 }
+
+type ActualMeasurable = ResultsMetricsData['actualMeasurables'][number]
 
 type Props = {
   projectId: string
   stepNumber: number
   initialData: Record<string, unknown> | null
   impactMetricsData: Record<string, unknown> | null
+  problemStatementData: Record<string, unknown> | null
 }
 
 /** Derive the ROI-related calculated fields from user inputs + baseline */
@@ -92,21 +101,46 @@ const deriveCalculations = (
   }
 }
 
+/** Seed actualMeasurables from problem statement measurables (first time only) */
+const seedActualMeasurables = (
+  existing: ActualMeasurable[],
+  problemMeasurables: MeasurableRow[],
+): ActualMeasurable[] => {
+  if (existing.length > 0) return existing
+  return problemMeasurables.map((m) => ({
+    id: m.id,
+    metric: m.metric,
+    unit: m.unit,
+    direction: m.direction,
+    targetValue: m.targetValue,
+    actualValue: 0,
+  }))
+}
+
 export const ResultsMetricsForm = ({
   projectId,
   stepNumber,
   initialData,
   impactMetricsData,
+  problemStatementData,
 }: Props) => {
   const baseline = impactMetricsData as ImpactMetricsData | null
   const currencySymbol = CURRENCY_SYMBOLS[baseline?.financialCostUnit ?? 'usd'] ?? ''
+
+  const problemStatement = problemStatementData as ProblemStatementData | null
+  const problemMeasurables: MeasurableRow[] = problemStatement?.measurables ?? []
+  const hourlyRate = problemStatement?.hourlyRate ?? 75
 
   const [data, setData] = useState<ResultsMetricsData>(() => {
     const merged: ResultsMetricsData = {
       ...DEFAULTS,
       ...(initialData as Partial<ResultsMetricsData>),
     }
-    return deriveCalculations(merged, baseline)
+    const seeded = {
+      ...merged,
+      actualMeasurables: seedActualMeasurables(merged.actualMeasurables, problemMeasurables),
+    }
+    return deriveCalculations(seeded, baseline)
   })
 
   const update = <K extends keyof ResultsMetricsData>(key: K, value: ResultsMetricsData[K]) => {
@@ -118,6 +152,20 @@ export const ResultsMetricsForm = ({
     if (data.roiPercent === 0) return 'neutral'
     return 'negative'
   }, [data.roiPercent])
+
+  const updateActualValue = (id: string, actualValue: number) => {
+    setData((prev) =>
+      deriveCalculations(
+        {
+          ...prev,
+          actualMeasurables: prev.actualMeasurables.map((m) =>
+            m.id === id ? { ...m, actualValue } : m,
+          ),
+        },
+        baseline,
+      ),
+    )
+  }
 
   return (
     <FormShell
@@ -134,6 +182,9 @@ export const ResultsMetricsForm = ({
         baseline={baseline}
         currencySymbol={currencySymbol}
         roiStatus={roiStatus}
+        problemMeasurables={problemMeasurables}
+        hourlyRate={hourlyRate}
+        updateActualValue={updateActualValue}
       />
     </FormShell>
   )
@@ -147,6 +198,9 @@ type FieldsProps = {
   baseline: ImpactMetricsData | null
   currencySymbol: string
   roiStatus: 'positive' | 'neutral' | 'negative'
+  problemMeasurables: MeasurableRow[]
+  hourlyRate: number
+  updateActualValue: (id: string, actualValue: number) => void
 }
 
 const ResultsMetricsFields = ({
@@ -155,6 +209,9 @@ const ResultsMetricsFields = ({
   baseline,
   currencySymbol,
   roiStatus,
+  problemMeasurables,
+  hourlyRate,
+  updateActualValue,
 }: FieldsProps) => {
   const mode = useFormViewMode()
   const isView = mode === 'view'
@@ -168,6 +225,16 @@ const ResultsMetricsFields = ({
           currencySymbol={currencySymbol}
           roiStatus={roiStatus}
         />
+
+        {data.actualMeasurables.length > 0 && (
+          <ActualMeasurablesSection
+            actualMeasurables={data.actualMeasurables}
+            problemMeasurables={problemMeasurables}
+            hourlyRate={hourlyRate}
+            isView
+            updateActualValue={updateActualValue}
+          />
+        )}
 
         <Section icon={<DollarSign className="size-4" />} title="Financial">
           {baseline && (
@@ -234,6 +301,15 @@ const ResultsMetricsFields = ({
         baseline={baseline}
         currencySymbol={currencySymbol}
         roiStatus={roiStatus}
+      />
+
+      {/* Actual vs Target Measurables */}
+      <ActualMeasurablesSection
+        actualMeasurables={data.actualMeasurables}
+        problemMeasurables={problemMeasurables}
+        hourlyRate={hourlyRate}
+        isView={false}
+        updateActualValue={updateActualValue}
       />
 
       {/* Financial */}
@@ -370,6 +446,316 @@ const ResultsMetricsFields = ({
         </div>
       </Section>
     </div>
+  )
+}
+
+/* ---- Actual Measurables Section ---- */
+
+type ActualMeasurablesSectionProps = {
+  actualMeasurables: ActualMeasurable[]
+  problemMeasurables: MeasurableRow[]
+  hourlyRate: number
+  isView: boolean
+  updateActualValue: (id: string, actualValue: number) => void
+}
+
+const ActualMeasurablesSection = ({
+  actualMeasurables,
+  problemMeasurables,
+  hourlyRate,
+  isView,
+  updateActualValue,
+}: ActualMeasurablesSectionProps) => {
+  if (problemMeasurables.length === 0 && actualMeasurables.length === 0) {
+    return (
+      <Section icon={<Target className="size-4" />} title="Actual Results vs Targets">
+        <p className="text-sm text-[var(--color-text-tertiary)] italic">
+          Add measurables to your Problem Statement (Step 1) to track actual results here.
+        </p>
+      </Section>
+    )
+  }
+
+  // Use actualMeasurables if seeded, otherwise fall back to problem measurables structure
+  const rows = actualMeasurables.length > 0 ? actualMeasurables : []
+
+  if (rows.length === 0) return null
+
+  // Compute overall achievement
+  const achievements = rows.map((row) => computeAchievement(row))
+  const achievedCount = achievements.filter((a) => a >= 100).length
+  const overallAvg =
+    achievements.length > 0 ? achievements.reduce((sum, a) => sum + a, 0) / achievements.length : 0
+
+  // Compute actual savings summary
+  const actualSavings = computeActualSavings(rows, hourlyRate)
+
+  return (
+    <Section icon={<Target className="size-4" />} title="Actual Results vs Targets">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px] text-sm">
+          <thead>
+            <tr className="border-b border-[var(--color-border)]">
+              <th className="pb-2 pr-2 text-left text-xs font-medium text-[var(--color-text-tertiary)]">
+                Metric
+              </th>
+              <th className="pb-2 pr-2 text-left text-xs font-medium text-[var(--color-text-tertiary)]">
+                Unit
+              </th>
+              <th className="pb-2 pr-2 text-right text-xs font-medium text-[var(--color-text-tertiary)]">
+                Target
+              </th>
+              <th className="pb-2 pr-2 text-right text-xs font-medium text-[var(--color-text-tertiary)]">
+                Actual
+              </th>
+              <th className="pb-2 pr-2 text-right text-xs font-medium text-[var(--color-text-tertiary)]">
+                Delta
+              </th>
+              <th className="pb-2 text-right text-xs font-medium text-[var(--color-text-tertiary)]">
+                Achievement
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, idx) => {
+              const achievement = computeAchievement(row)
+              const delta = row.actualValue - row.targetValue
+              const { label: achievementLabel, colorClass } = getAchievementStyle(achievement)
+
+              return (
+                <tr
+                  key={row.id}
+                  className={cn(
+                    'border-b border-[var(--color-border)] last:border-0',
+                    idx % 2 === 0 ? 'bg-transparent' : 'bg-[var(--color-surface-secondary)]/50',
+                  )}
+                >
+                  <td className="py-2 pr-2 font-medium">{row.metric || '—'}</td>
+                  <td className="py-2 pr-2 text-[var(--color-text-secondary)]">{row.unit}</td>
+                  <td className="py-2 pr-2 text-right text-[var(--color-text-secondary)]">
+                    {row.targetValue}
+                  </td>
+                  <td className="py-2 pr-2 text-right">
+                    {isView ? (
+                      <span className="font-medium">{row.actualValue}</span>
+                    ) : (
+                      <Input
+                        type="number"
+                        value={row.actualValue}
+                        onChange={(e) => updateActualValue(row.id, parseFloat(e.target.value) || 0)}
+                        className="h-8 w-20 text-right text-sm"
+                      />
+                    )}
+                  </td>
+                  <td className="py-2 pr-2 text-right">
+                    <span
+                      className={cn(
+                        'font-medium',
+                        isDeltaGood(row, delta)
+                          ? 'text-[var(--color-success)]'
+                          : 'text-[var(--color-error)]',
+                      )}
+                    >
+                      {delta >= 0 ? '+' : ''}
+                      {delta.toFixed(1)}
+                    </span>
+                  </td>
+                  <td className="py-2 text-right">
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
+                        colorClass,
+                      )}
+                    >
+                      {achievement.toFixed(0)}% {achievementLabel}
+                    </span>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Achievement Summary Card */}
+      <AchievementSummaryCard
+        overallAvg={overallAvg}
+        achievedCount={achievedCount}
+        totalCount={rows.length}
+        actualSavings={actualSavings}
+        hourlyRate={hourlyRate}
+      />
+    </Section>
+  )
+}
+
+/* ---- Achievement computation helpers ---- */
+
+/** Returns % achievement: 100 = exactly hit target, >100 = exceeded, <100 = missed */
+const computeAchievement = (row: ActualMeasurable): number => {
+  if (row.targetValue === 0 && row.actualValue === 0) return 100
+  if (row.targetValue === 0) return row.actualValue > 0 ? 200 : 0
+
+  if (row.direction === 'decrease') {
+    // Target is a reduction: lower actual = better
+    // Achievement = (target / actual) * 100 if actual > 0
+    if (row.actualValue <= 0) return 200
+    return (row.targetValue / row.actualValue) * 100
+  } else {
+    // Target is an increase: higher actual = better
+    if (row.actualValue <= 0) return 0
+    return (row.actualValue / row.targetValue) * 100
+  }
+}
+
+const isDeltaGood = (row: ActualMeasurable, delta: number): boolean => {
+  if (row.direction === 'decrease') return delta <= 0
+  return delta >= 0
+}
+
+type AchievementStyle = {
+  label: string
+  colorClass: string
+}
+
+const getAchievementStyle = (achievement: number): AchievementStyle => {
+  if (achievement >= 100) {
+    return {
+      label: 'EXCEEDED',
+      colorClass: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+    }
+  }
+  if (achievement >= 75) {
+    return {
+      label: 'CLOSE',
+      colorClass: 'bg-amber-100 text-amber-700',
+    }
+  }
+  return {
+    label: 'MISSED',
+    colorClass: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
+  }
+}
+
+/* ---- Actual savings computation ---- */
+
+type ActualSavingsResult = {
+  hoursPerWeek: number
+  laborValueAnnual: number
+  costSavingsAnnual: number
+  totalAnnual: number
+}
+
+const computeActualSavings = (
+  rows: ActualMeasurable[],
+  hourlyRate: number,
+): ActualSavingsResult => {
+  let hoursPerWeek = 0
+  let costSavingsAnnual = 0
+
+  for (const row of rows) {
+    // Compute improvement: how much actual improved vs as-is (we use target as a proxy here,
+    // but what we really want is: if direction=decrease, improvement = how much less actual is vs target)
+    const improvement =
+      row.direction === 'decrease'
+        ? row.targetValue - row.actualValue // negative = didn't reach, positive = better than target
+        : row.actualValue - row.targetValue
+
+    if (row.unit === 'hours/week') {
+      hoursPerWeek += Math.max(0, improvement)
+    } else if (row.unit === 'hours/month') {
+      hoursPerWeek += Math.max(0, improvement) / 4.33
+    } else if (row.unit === 'hours/day') {
+      hoursPerWeek += Math.max(0, improvement) * 5
+    } else if (row.unit === '$/year') {
+      costSavingsAnnual += Math.max(0, improvement)
+    } else if (row.unit === '$/month') {
+      costSavingsAnnual += Math.max(0, improvement) * 12
+    } else if (row.unit === '$/quarter') {
+      costSavingsAnnual += Math.max(0, improvement) * 4
+    }
+  }
+
+  const laborValueAnnual = hoursPerWeek * 52 * hourlyRate
+  const totalAnnual = laborValueAnnual + costSavingsAnnual
+
+  return { hoursPerWeek, laborValueAnnual, costSavingsAnnual, totalAnnual }
+}
+
+/* ---- Achievement Summary Card ---- */
+
+type AchievementSummaryCardProps = {
+  overallAvg: number
+  achievedCount: number
+  totalCount: number
+  actualSavings: ActualSavingsResult
+  hourlyRate: number
+}
+
+const AchievementSummaryCard = ({
+  overallAvg,
+  achievedCount,
+  totalCount,
+  actualSavings,
+  hourlyRate,
+}: AchievementSummaryCardProps) => {
+  const trafficLight =
+    overallAvg >= 100
+      ? {
+          borderClass: 'border-[var(--color-success)]/30 bg-[var(--color-success)]/5',
+          textClass: 'text-[var(--color-success)]',
+          icon: <CheckCircle2 className="size-4" />,
+          label: 'On Target',
+        }
+      : overallAvg >= 75
+        ? {
+            borderClass: 'border-amber-300 bg-amber-50',
+            textClass: 'text-amber-700',
+            icon: <Minus className="size-4" />,
+            label: 'Mostly On Track',
+          }
+        : {
+            borderClass: 'border-[var(--color-error)]/30 bg-[var(--color-error)]/5',
+            textClass: 'text-[var(--color-error)]',
+            icon: <AlertCircle className="size-4" />,
+            label: 'Below Target',
+          }
+
+  const fmt = (n: number) =>
+    n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+
+  return (
+    <Card className={cn('border-2', trafficLight.borderClass)}>
+      <CardContent className="pt-4 pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className={trafficLight.textClass}>{trafficLight.icon}</span>
+            <div>
+              <p className={cn('text-lg font-bold', trafficLight.textClass)}>
+                {overallAvg.toFixed(0)}% Overall Achievement
+              </p>
+              <p className="text-xs text-[var(--color-text-tertiary)]">
+                {achievedCount} of {totalCount} metrics met or exceeded — {trafficLight.label}
+              </p>
+            </div>
+          </div>
+
+          {actualSavings.totalAnnual > 0 && (
+            <div className="text-right">
+              <p className="text-xs text-[var(--color-text-tertiary)]">Actual Annual Savings</p>
+              <p className="text-lg font-bold text-[var(--color-success)]">
+                ${fmt(actualSavings.totalAnnual)}/yr
+              </p>
+              {hourlyRate > 0 && actualSavings.hoursPerWeek > 0 && (
+                <p className="text-xs text-[var(--color-text-tertiary)]">
+                  {actualSavings.hoursPerWeek.toFixed(1)} hrs/wk × ${hourlyRate}/hr
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

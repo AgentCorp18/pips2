@@ -20,9 +20,10 @@ const ResultsMetricsPage = async ({
 
   if (!user) redirect('/login')
 
-  const [saved, impactMetricsData] = await Promise.all([
+  const [saved, impactMetricsData, problemStatementData] = await Promise.all([
     loadFormData(projectId, stepNumber, 'results_metrics'),
     loadFormData(projectId, 1, 'impact_metrics'),
+    loadFormData(projectId, 1, 'problem_statement'),
   ])
 
   return (
@@ -31,6 +32,7 @@ const ResultsMetricsPage = async ({
       stepNumber={stepNumber}
       initialData={saved}
       impactMetricsData={impactMetricsData}
+      problemStatementData={problemStatementData}
     />
   )
 }

@@ -4,6 +4,17 @@ import { z } from 'zod'
    Step 1 — Identify
    ============================================================ */
 
+const measurableSchema = z.object({
+  id: z.string(),
+  metric: z.string().default(''),
+  unit: z.string().default('hours/week'),
+  direction: z.enum(['decrease', 'increase']).default('decrease'),
+  asIsValue: z.number().default(0),
+  targetValue: z.number().default(0),
+})
+
+export type MeasurableRow = z.infer<typeof measurableSchema>
+
 export const problemStatementSchema = z.object({
   asIs: z.string().default(''),
   desired: z.string().default(''),
@@ -12,6 +23,8 @@ export const problemStatementSchema = z.object({
   teamMembers: z.array(z.string()).default([]),
   problemArea: z.string().default(''),
   dataSources: z.array(z.string()).default([]),
+  measurables: z.array(measurableSchema).default([]),
+  hourlyRate: z.number().min(0).default(75),
 })
 
 export type ProblemStatementData = z.infer<typeof problemStatementSchema>
@@ -519,6 +532,18 @@ export const resultsMetricsSchema = z.object({
   paybackPeriodMonths: z.number().nullable().default(null),
   projectCostEstimate: z.number().min(0).default(0),
   notes: z.string().default(''),
+  actualMeasurables: z
+    .array(
+      z.object({
+        id: z.string(),
+        metric: z.string(),
+        unit: z.string(),
+        direction: z.enum(['decrease', 'increase']),
+        targetValue: z.number(),
+        actualValue: z.number().default(0),
+      }),
+    )
+    .default([]),
 })
 export type ResultsMetricsData = z.infer<typeof resultsMetricsSchema>
 
