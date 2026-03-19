@@ -19,6 +19,8 @@ import {
   ClipboardList,
   Keyboard,
   CalendarDays,
+  TrendingUp,
+  Briefcase,
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
@@ -99,9 +101,30 @@ const QUICK_ACTIONS = [
   },
   {
     id: 'go-reports',
-    label: 'Go to Reports',
+    label: 'Go to Reports Hub',
     icon: BarChart3,
     href: '/reports',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-roi-dashboard',
+    label: 'Go to ROI Dashboard',
+    icon: TrendingUp,
+    href: '/reports/roi-dashboard',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-portfolio-value',
+    label: 'Go to Portfolio Value',
+    icon: Briefcase,
+    href: '/reports/portfolio-value',
+    group: 'Navigate',
+  },
+  {
+    id: 'go-executive-summary',
+    label: 'Go to Executive Summary',
+    icon: FileText,
+    href: '/reports/executive-summary',
     group: 'Navigate',
   },
   {

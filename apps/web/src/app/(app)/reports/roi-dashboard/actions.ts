@@ -2,7 +2,11 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
-import type { ResultsMetricsData, ImpactMetricsData } from '@/lib/form-schemas'
+import type {
+  ResultsMetricsData,
+  ImpactMetricsData,
+  ProblemStatementData,
+} from '@/lib/form-schemas'
 
 /* ============================================================
    Types
@@ -50,6 +54,10 @@ export type ROIDashboardData = {
     cumulativeSavings: number
     projectsCompleted: number
   }>
+  totalProjectedSavings: number
+  totalProjectedHoursSaved: number
+  measurablesCount: number
+  projectsWithMeasurables: number
 }
 
 /* ============================================================
@@ -308,13 +316,17 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
       projectsWithRoiData: 0,
       topProjectsByImpact: [],
       monthlyTrend: [],
+      totalProjectedSavings: 0,
+      totalProjectedHoursSaved: 0,
+      measurablesCount: 0,
+      projectsWithMeasurables: 0,
     }
   }
 
   const projectIds = projects.map((p) => p.id)
 
-  // Fetch results_metrics and impact_metrics forms + distinct form counts for depth
-  const [resultsFormsRes, impactFormsRes, allFormsRes] = await Promise.all([
+  // Fetch results_metrics, impact_metrics, problem_statement forms + distinct form counts for depth
+  const [resultsFormsRes, impactFormsRes, problemStmtFormsRes, allFormsRes] = await Promise.all([
     supabase
       .from('project_forms')
       .select('project_id, form_type, data')
@@ -327,6 +339,13 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
       .select('project_id, form_type, data')
       .in('project_id', projectIds)
       .eq('form_type', 'impact_metrics')
+      .limit(1000),
+
+    supabase
+      .from('project_forms')
+      .select('project_id, form_type, data')
+      .in('project_id', projectIds)
+      .eq('form_type', 'problem_statement')
       .limit(1000),
 
     supabase
@@ -387,6 +406,57 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
     roiValues.length > 0
       ? Math.round((roiValues.reduce((a, b) => a + b, 0) / roiValues.length) * 10) / 10
       : null
+
+  // Compute projected savings + hours from problem_statement measurables
+  let totalProjectedSavings = 0
+  let totalProjectedHoursSaved = 0
+  let measurablesCount = 0
+  const projectsWithMeasurablesSet = new Set<string>()
+
+  for (const f of problemStmtFormsRes.data ?? []) {
+    if (!f.project_id) continue
+    const d = f.data as ProblemStatementData
+    const measurables = d.measurables ?? []
+    const hourlyRate = d.hourlyRate ?? 75
+
+    for (const m of measurables) {
+      const improvement = Math.abs(m.targetValue - m.asIsValue)
+      if (improvement <= 0) continue
+
+      measurablesCount++
+      projectsWithMeasurablesSet.add(f.project_id)
+
+      const unitLower = (m.unit ?? '').toLowerCase()
+
+      if (unitLower.includes('hour') || unitLower.includes('hr')) {
+        // Convert to annual hours based on the time period in the unit
+        let annualHours = improvement
+        if (unitLower.includes('/week') || unitLower.includes('week')) {
+          annualHours = improvement * 52
+        } else if (unitLower.includes('/day') || unitLower.includes('day')) {
+          annualHours = improvement * 260
+        } else if (unitLower.includes('/month') || unitLower.includes('month')) {
+          annualHours = improvement * 12
+        }
+        // default: assume annual if no period specified
+        totalProjectedHoursSaved += annualHours
+        totalProjectedSavings += annualHours * hourlyRate
+      } else if (
+        unitLower.startsWith('$') ||
+        unitLower.includes('dollar') ||
+        unitLower.includes('cost') ||
+        unitLower.includes('usd')
+      ) {
+        // Direct cost saving — assume annual
+        totalProjectedSavings += improvement
+      }
+      // For other units (%, items, defects, etc.) we track count but not dollar value
+    }
+  }
+
+  totalProjectedSavings = Math.round(totalProjectedSavings)
+  totalProjectedHoursSaved = Math.round(totalProjectedHoursSaved * 10) / 10
+  const projectsWithMeasurables = projectsWithMeasurablesSet.size
 
   // Build top projects by impact (by annual savings, or by depth if no financial data)
   type ImpactProject = {
@@ -477,6 +547,10 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
     projectsWithRoiData,
     topProjectsByImpact,
     monthlyTrend,
+    totalProjectedSavings,
+    totalProjectedHoursSaved,
+    measurablesCount,
+    projectsWithMeasurables,
   }
 }
 
@@ -682,6 +756,14 @@ export type ExecutiveSummaryProject = {
   narrative: string | null
 }
 
+export type TopMeasurable = {
+  projectTitle: string
+  metric: string
+  unit: string
+  projectedAnnualSavings: number
+  projectedAnnualHours: number
+}
+
 export type ExecutiveSummaryData = {
   orgName: string
   periodLabel: string
@@ -697,6 +779,10 @@ export type ExecutiveSummaryData = {
   avgRoiHighDepth: number | null
   avgRoiLowDepth: number | null
   monthlyCompletions: Array<{ month: string; count: number }>
+  totalProjectedSavings: number
+  totalProjectedHoursSaved: number
+  measurablesCount: number
+  topMeasurables: TopMeasurable[]
 }
 
 const getCurrentQuarterLabel = (): { label: string; start: Date; end: Date } => {
@@ -750,6 +836,10 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
       avgRoiHighDepth: null,
       avgRoiLowDepth: null,
       monthlyCompletions: [],
+      totalProjectedSavings: 0,
+      totalProjectedHoursSaved: 0,
+      measurablesCount: 0,
+      topMeasurables: [],
     }
   }
 
@@ -771,8 +861,8 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
 
   const ticketsResolved = periodTickets?.length ?? 0
 
-  // Fetch all forms for all projects (for methodology and ROI stats)
-  const [allFormsRes, resultsFormsRes] = await Promise.all([
+  // Fetch all forms for all projects (for methodology, ROI, and measurables stats)
+  const [allFormsRes, resultsFormsRes, problemStmtFormsRes] = await Promise.all([
     supabase
       .from('project_forms')
       .select('project_id, form_type')
@@ -783,6 +873,12 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
       .select('project_id, form_type, data')
       .in('project_id', allProjectIds)
       .eq('form_type', 'results_metrics')
+      .limit(1000),
+    supabase
+      .from('project_forms')
+      .select('project_id, form_type, data')
+      .in('project_id', allProjectIds)
+      .eq('form_type', 'problem_statement')
       .limit(1000),
   ])
 
@@ -909,6 +1005,86 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, count]) => ({ month: formatMonth(month), count }))
 
+  // Build projected savings from problem_statement measurables
+  // Map projectId → title for measurables attribution
+  const projectTitleById = new Map(allProjects.map((p) => [p.id, p.title]))
+
+  let execTotalProjectedSavings = 0
+  let execTotalProjectedHoursSaved = 0
+  let execMeasurablesCount = 0
+
+  type MeasurableWithImpact = {
+    projectTitle: string
+    metric: string
+    unit: string
+    projectedAnnualSavings: number
+    projectedAnnualHours: number
+  }
+  const allMeasurablesWithImpact: MeasurableWithImpact[] = []
+
+  for (const f of problemStmtFormsRes.data ?? []) {
+    if (!f.project_id) continue
+    const d = f.data as ProblemStatementData
+    const measurables = d.measurables ?? []
+    const hourlyRate = d.hourlyRate ?? 75
+    const projTitle = projectTitleById.get(f.project_id) ?? 'Unknown Project'
+
+    for (const m of measurables) {
+      const improvement = Math.abs(m.targetValue - m.asIsValue)
+      if (improvement <= 0) continue
+
+      execMeasurablesCount++
+      const unitLower = (m.unit ?? '').toLowerCase()
+      let projectedAnnualHours = 0
+      let projectedAnnualSavings = 0
+
+      if (unitLower.includes('hour') || unitLower.includes('hr')) {
+        let annualHours = improvement
+        if (unitLower.includes('/week') || unitLower.includes('week')) {
+          annualHours = improvement * 52
+        } else if (unitLower.includes('/day') || unitLower.includes('day')) {
+          annualHours = improvement * 260
+        } else if (unitLower.includes('/month') || unitLower.includes('month')) {
+          annualHours = improvement * 12
+        }
+        projectedAnnualHours = annualHours
+        projectedAnnualSavings = annualHours * hourlyRate
+      } else if (
+        unitLower.startsWith('$') ||
+        unitLower.includes('dollar') ||
+        unitLower.includes('cost') ||
+        unitLower.includes('usd')
+      ) {
+        projectedAnnualSavings = improvement
+      }
+
+      execTotalProjectedSavings += projectedAnnualSavings
+      execTotalProjectedHoursSaved += projectedAnnualHours
+
+      if (projectedAnnualSavings > 0 || projectedAnnualHours > 0) {
+        allMeasurablesWithImpact.push({
+          projectTitle: projTitle,
+          metric: m.metric,
+          unit: m.unit,
+          projectedAnnualSavings: Math.round(projectedAnnualSavings),
+          projectedAnnualHours: Math.round(projectedAnnualHours * 10) / 10,
+        })
+      }
+    }
+  }
+
+  execTotalProjectedSavings = Math.round(execTotalProjectedSavings)
+  execTotalProjectedHoursSaved = Math.round(execTotalProjectedHoursSaved * 10) / 10
+
+  // Top 3 measurables by projected impact (savings first, then hours)
+  const topMeasurables: TopMeasurable[] = allMeasurablesWithImpact
+    .sort(
+      (a, b) =>
+        b.projectedAnnualSavings - a.projectedAnnualSavings ||
+        b.projectedAnnualHours - a.projectedAnnualHours,
+    )
+    .slice(0, 3)
+
   return {
     orgName,
     periodLabel,
@@ -924,5 +1100,9 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
     avgRoiHighDepth,
     avgRoiLowDepth,
     monthlyCompletions,
+    totalProjectedSavings: execTotalProjectedSavings,
+    totalProjectedHoursSaved: execTotalProjectedHoursSaved,
+    measurablesCount: execMeasurablesCount,
+    topMeasurables,
   }
 }

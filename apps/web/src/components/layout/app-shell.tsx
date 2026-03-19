@@ -19,6 +19,8 @@ import {
   MessageSquare,
   Target,
   Shield,
+  TrendingUp,
+  Briefcase,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
@@ -28,7 +30,13 @@ import { OrgSwitcher } from '@/components/layout/org-switcher'
 import { useMounted } from '@/hooks/use-mounted'
 import type { UserOrg } from '@/app/(app)/actions'
 
-type NavItem = { label: string; href: string; icon: typeof LayoutDashboard; shortcut?: string }
+type NavItem = {
+  label: string
+  href: string
+  icon: typeof LayoutDashboard
+  shortcut?: string
+  exactMatch?: boolean
+}
 type NavGroup = { section: string; items: NavItem[] }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -57,11 +65,17 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    section: 'Admin',
+    section: 'Reports',
     items: [
-      { label: 'Reports', href: '/reports', icon: BarChart3 },
-      { label: 'Settings', href: '/settings', icon: Settings },
+      { label: 'Reports Hub', href: '/reports', icon: BarChart3, exactMatch: true },
+      { label: 'ROI Dashboard', href: '/reports/roi-dashboard', icon: TrendingUp },
+      { label: 'Portfolio Value', href: '/reports/portfolio-value', icon: Briefcase },
+      { label: 'Executive Summary', href: '/reports/executive-summary', icon: FileText },
     ],
+  },
+  {
+    section: 'Admin',
+    items: [{ label: 'Settings', href: '/settings', icon: Settings }],
   },
 ]
 
@@ -253,7 +267,9 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const Icon = item.icon
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  const isActive = item.exactMatch
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(item.href + '/')
                   return (
                     <a
                       key={item.href}

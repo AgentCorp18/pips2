@@ -266,6 +266,131 @@ const ExecutiveSummaryPage = async () => {
           </div>
         </section>
 
+        {/* Projected Savings — from measurables */}
+        {(data.measurablesCount > 0 || data.totalProjectedSavings > 0) && (
+          <section className="mb-8" data-print-card>
+            <h2
+              className="mb-4 text-sm font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              Projected Savings from Improvement Portfolio
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {/* Projected annual savings */}
+              <div
+                className="rounded-xl border p-4"
+                style={{
+                  borderColor: 'var(--color-border)',
+                  backgroundColor: 'var(--color-surface)',
+                }}
+              >
+                <p className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Projected Annual Savings
+                </p>
+                <p className="mt-2 text-2xl font-bold" style={{ color: '#059669' }} data-kpi-value>
+                  {formatCurrency(data.totalProjectedSavings)}
+                </p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  {data.totalProjectedSavings === 0
+                    ? 'Set cost targets in problem statement forms'
+                    : 'from measurables targets across all projects'}
+                </p>
+              </div>
+
+              {/* Projected annual hours */}
+              <div
+                className="rounded-xl border p-4"
+                style={{
+                  borderColor: 'var(--color-border)',
+                  backgroundColor: 'var(--color-surface)',
+                }}
+              >
+                <p className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Time Savings Identified
+                </p>
+                <p className="mt-2 text-2xl font-bold" style={{ color: '#0891B2' }} data-kpi-value>
+                  {data.totalProjectedHoursSaved > 0
+                    ? `${data.totalProjectedHoursSaved.toLocaleString()}h/yr`
+                    : '—'}
+                </p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  {data.totalProjectedHoursSaved === 0
+                    ? 'Set time targets in problem statement forms'
+                    : 'hours saved annually from time measurables'}
+                </p>
+              </div>
+
+              {/* Measurables count */}
+              <div
+                className="rounded-xl border p-4"
+                style={{
+                  borderColor: 'var(--color-border)',
+                  backgroundColor: 'var(--color-surface)',
+                }}
+              >
+                <p className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Measurables Tracked
+                </p>
+                <p className="mt-2 text-2xl font-bold" style={{ color: '#4338CA' }} data-kpi-value>
+                  {data.measurablesCount}
+                </p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  {data.measurablesCount === 0
+                    ? 'Add measurables in Step 1 problem statement'
+                    : 'improvement metrics defined across projects'}
+                </p>
+              </div>
+            </div>
+
+            {/* Top 3 measurables by impact */}
+            {data.topMeasurables.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <p
+                  className="text-xs font-medium uppercase tracking-wide"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                >
+                  Top Measurables by Impact
+                </p>
+                {data.topMeasurables.map((m, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between rounded-lg border px-4 py-3"
+                    style={{ borderColor: 'var(--color-border)' }}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="truncate text-sm font-medium"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        {m.metric || 'Unnamed metric'}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                        {m.projectTitle} &bull; {m.unit}
+                      </p>
+                    </div>
+                    <div className="ml-4 shrink-0 text-right">
+                      {m.projectedAnnualSavings > 0 && (
+                        <p
+                          className="text-sm font-semibold"
+                          style={{ color: '#059669' }}
+                          data-kpi-value
+                        >
+                          {formatCurrency(m.projectedAnnualSavings)}/yr
+                        </p>
+                      )}
+                      {m.projectedAnnualHours > 0 && (
+                        <p className="text-xs" style={{ color: '#0891B2' }}>
+                          {m.projectedAnnualHours.toLocaleString()}h/yr
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         {/* Highlights — Top Projects */}
         {data.topProjects.length > 0 && (
           <section className="mb-8" data-print-card>

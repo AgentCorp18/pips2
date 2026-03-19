@@ -15,6 +15,7 @@ import {
   BarChart2,
   ChevronRight,
   PlusCircle,
+  ListChecks,
 } from 'lucide-react'
 import { TeamPerformanceTable } from '@/components/reports/team-performance-table'
 import { getROIDashboardData, getMethodologyCorrelation, getTeamPerformance } from './actions'
@@ -150,6 +151,59 @@ const ROIDashboardPage = async () => {
           }
         />
       </div>
+
+      {/* Measurables-based projected savings */}
+      {(roiData.measurablesCount > 0 || roiData.totalProjectedSavings > 0) && (
+        <section className="mb-8">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Projected Savings from Measurables
+            </h2>
+            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+              Based on problem statement targets
+            </span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <KpiCard
+              title="Projected Annual Savings"
+              value={formatCurrency(roiData.totalProjectedSavings)}
+              icon={DollarSign}
+              color="#059669"
+              subtitle={
+                roiData.totalProjectedSavings === 0
+                  ? 'No cost measurables set'
+                  : 'from measurables targets'
+              }
+            />
+            <KpiCard
+              title="Hours Saved Annually"
+              value={
+                roiData.totalProjectedHoursSaved > 0
+                  ? `${roiData.totalProjectedHoursSaved.toLocaleString()}h`
+                  : '--'
+              }
+              icon={Clock}
+              color="#0891B2"
+              subtitle={
+                roiData.totalProjectedHoursSaved === 0
+                  ? 'No time measurables set'
+                  : 'per year from time targets'
+              }
+            />
+            <KpiCard
+              title="Measurables Tracked"
+              value={roiData.measurablesCount}
+              icon={ListChecks}
+              color="#4338CA"
+              subtitle={
+                roiData.projectsWithMeasurables === 0
+                  ? 'Add measurables in Step 1'
+                  : `across ${roiData.projectsWithMeasurables} project${roiData.projectsWithMeasurables !== 1 ? 's' : ''}`
+              }
+            />
+          </div>
+        </section>
+      )}
 
       {/* Methodology-Outcome Correlation */}
       <section className="mb-8">
