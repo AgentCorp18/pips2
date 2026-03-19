@@ -2,9 +2,44 @@
 
 import { useMemo } from 'react'
 import { NotificationItem } from './notification-item'
+import { NotificationGroup } from './notification-group'
 import { NOTIFICATION_FILTERS } from './notification-filter-bar'
 import type { NotificationFilterKey } from './notification-filter-bar'
-import type { Notification } from '@/types/notifications'
+import type { Notification, NotificationType } from '@/types/notifications'
+
+/* ============================================================
+   Urgency grouping — applied when filter is 'all'
+   ============================================================ */
+
+/** Notification types that require immediate action from the user. */
+const ACTION_NEEDED_TYPES = new Set<NotificationType>(['ticket_assigned', 'invitation'])
+
+/** Notification types that represent a direct mention. */
+const MENTION_TYPES = new Set<NotificationType>(['mention', 'chat_mention'])
+
+type GroupedNotifications = {
+  actionNeeded: Notification[]
+  mentions: Notification[]
+  updates: Notification[]
+}
+
+const groupByUrgency = (notifications: Notification[]): GroupedNotifications => {
+  const actionNeeded: Notification[] = []
+  const mentions: Notification[] = []
+  const updates: Notification[] = []
+
+  for (const n of notifications) {
+    if (ACTION_NEEDED_TYPES.has(n.type) && !n.read_at) {
+      actionNeeded.push(n)
+    } else if (MENTION_TYPES.has(n.type)) {
+      mentions.push(n)
+    } else {
+      updates.push(n)
+    }
+  }
+
+  return { actionNeeded, mentions, updates }
+}
 
 /* ============================================================
    NotificationFilteredList
@@ -28,6 +63,35 @@ export const NotificationFilteredList = ({
     return notifications.filter((n) => filterDef.types.includes(n.type))
   }, [notifications, activeFilter])
 
+  // Grouped view for 'all' filter
+  if (activeFilter === 'all') {
+    const { actionNeeded, mentions, updates } = groupByUrgency(filteredNotifications)
+
+    return (
+      <div className="space-y-6" data-testid="notification-grouped-view">
+        <NotificationGroup
+          label="Action Needed"
+          badgeColor="red"
+          notifications={actionNeeded}
+          emptyMessage="No action items — you're all caught up!"
+        />
+        <NotificationGroup
+          label="Mentions"
+          badgeColor="blue"
+          notifications={mentions}
+          emptyMessage="No new mentions."
+        />
+        <NotificationGroup
+          label="Updates"
+          badgeColor="gray"
+          notifications={updates}
+          emptyMessage="No recent updates."
+        />
+      </div>
+    )
+  }
+
+  // Flat list for specific filters
   if (filteredNotifications.length === 0) {
     return (
       <p

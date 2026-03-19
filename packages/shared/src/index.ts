@@ -32,7 +32,13 @@ export {
 export type { Permission } from './permissions'
 
 export { STEP_CONTENT, getStepForms, getRequiredForms, ALL_FORM_TYPES } from './step-content'
-export type { StepFormDef, StepContent, StepMethodology } from './step-content'
+export type {
+  StepFormDef,
+  StepContent,
+  StepMethodology,
+  FormDifficulty,
+  FormActivityType,
+} from './step-content'
 
 export {
   calculateMethodologyDepth,
@@ -46,6 +52,9 @@ export type {
   MethodologyDepthResult,
   StepDepth,
 } from './methodology-depth'
+
+export { calculateProjectHealth } from './project-health'
+export type { HealthFactors, HealthLabel, HealthScore } from './project-health'
 
 export { PROJECT_TEMPLATES, getProjectTemplate } from './project-templates'
 export type {

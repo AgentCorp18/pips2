@@ -23,6 +23,8 @@ import {
   ChevronRight,
   Users,
   Home,
+  HelpCircle,
+  User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
@@ -82,6 +84,11 @@ export const StepView = ({
   // 1.3: Split forms into required and optional
   const requiredForms = content.forms.filter((f) => f.required)
   const optionalForms = content.forms.filter((f) => !f.required)
+
+  // Step completion progress
+  const totalForms = content.forms.length
+  const completedFormsCount = formStatuses.filter((fs) => fs.started).length
+  const progressPercent = totalForms > 0 ? Math.round((completedFormsCount / totalForms) * 100) : 0
 
   // Build set of completed form types for StepAdvisor
   const completedFormTypes = new Set(
@@ -147,6 +154,14 @@ export const StepView = ({
         </CardContent>
       </Card>
 
+      {/* Step completion progress */}
+      <StepProgressBar
+        completed={completedFormsCount}
+        total={totalForms}
+        percent={progressPercent}
+        stepNumber={stepNumber}
+      />
+
       {/* 1.1: Step Context Banner — why this step matters + time + top pitfall */}
       <StepContextBanner
         timeEstimate={content.timeEstimate}
@@ -205,6 +220,7 @@ export const StepView = ({
                   stepNumber={stepNumber}
                   started={formStatuses.some((fs) => fs.form_type === form.type && fs.started)}
                   recommended={RECOMMENDED_FORMS[stepNumber]?.has(form.type) ?? false}
+                  isFirst={form.recommendedOrder === 1}
                 />
               ))}
             </div>
@@ -233,6 +249,7 @@ export const StepView = ({
                   stepNumber={stepNumber}
                   started={formStatuses.some((fs) => fs.form_type === form.type && fs.started)}
                   recommended={RECOMMENDED_FORMS[stepNumber]?.has(form.type) ?? false}
+                  isFirst={false}
                 />
               ))}
             </div>
@@ -388,6 +405,51 @@ const StepNavigation = ({
 
 /* ---- Sub-components ---- */
 
+/** Step completion progress bar */
+const StepProgressBar = ({
+  completed,
+  total,
+  percent,
+  stepNumber,
+}: {
+  completed: number
+  total: number
+  percent: number
+  stepNumber: PipsStepNumber
+}) => (
+  <div className="space-y-1.5" data-testid="step-progress-bar">
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-[var(--color-text-secondary)]">
+        <span className="font-medium">{completed}</span> of{' '}
+        <span className="font-medium">{total}</span> forms completed
+      </span>
+      <span
+        className="text-xs font-semibold"
+        style={{ color: `var(--color-step-${stepNumber})` }}
+        data-testid="step-progress-percent"
+      >
+        {percent}%
+      </span>
+    </div>
+    <div
+      className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-secondary)]"
+      role="progressbar"
+      aria-valuenow={percent}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Step ${stepNumber} progress: ${percent}%`}
+    >
+      <div
+        className="h-full rounded-full transition-all duration-300"
+        style={{
+          width: `${percent}%`,
+          backgroundColor: `var(--color-step-${stepNumber})`,
+        }}
+      />
+    </div>
+  </div>
+)
+
 /** 1.1: Compact context banner — time estimate, top pitfall */
 const StepContextBanner = ({
   timeEstimate,
@@ -519,69 +581,153 @@ const StatusBadge = ({
   )
 }
 
+/* ---- Difficulty badge styles ---- */
+
+const DIFFICULTY_STYLES: Record<string, string> = {
+  Beginner: 'border-green-200 text-green-700 bg-green-50',
+  Intermediate: 'border-yellow-200 text-yellow-700 bg-yellow-50',
+  Advanced: 'border-red-200 text-red-700 bg-red-50',
+}
+
 type FormRowProps = {
   form: StepFormDef
   projectId: string
   stepNumber: PipsStepNumber
   started: boolean
   recommended: boolean
+  isFirst: boolean
 }
 
-const FormRow = ({ form, projectId, stepNumber, started, recommended }: FormRowProps) => (
-  <Link
-    href={`/projects/${projectId}/steps/${stepNumber}/forms/${form.slug ?? form.type}`}
-    data-testid={`form-link-${form.type}`}
-    className={cn(
-      'flex items-center justify-between rounded-[var(--radius-md)] border px-4 py-3 transition-all hover:bg-[var(--color-surface-secondary)]',
-      started
-        ? 'border-[var(--color-success)] bg-[var(--color-success-subtle)]'
-        : 'border-[var(--color-border)]',
-      form.required && !started && 'border-l-4',
-    )}
-    style={
-      form.required && !started ? { borderLeftColor: `var(--color-step-${stepNumber})` } : undefined
-    }
-  >
-    <div className="flex items-center gap-3">
-      {started ? (
-        <CheckCircle2 size={18} className="text-[var(--color-success)]" />
-      ) : (
-        <Circle size={18} className="text-[var(--color-text-tertiary)]" />
-      )}
-      <div>
-        <span className="text-sm font-medium text-[var(--color-text-primary)]">{form.name}</span>
-        <p className="text-xs text-[var(--color-text-tertiary)]">{form.description}</p>
-      </div>
-    </div>
-    <div className="flex items-center gap-2">
-      {/* 1.2: Time estimate badge */}
-      {form.timeEstimate && (
-        <Badge
-          variant="outline"
-          className="gap-1 text-[10px] text-[var(--color-text-tertiary)]"
-          data-testid={`time-badge-${form.type}`}
+const FormRow = ({ form, projectId, stepNumber, started, recommended, isFirst }: FormRowProps) => {
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+
+  return (
+    <div className="relative">
+      {/* "Start here" indicator above the first recommended form */}
+      {isFirst && !started && (
+        <div
+          className="mb-1 flex items-center gap-1 text-[11px] font-medium"
+          style={{ color: `var(--color-step-${stepNumber})` }}
+          data-testid={`start-here-${form.type}`}
         >
-          <Clock size={10} />
-          {form.timeEstimate}
-        </Badge>
+          <ArrowRight size={11} />
+          Start here
+        </div>
       )}
-      {recommended && (
-        <Badge
-          variant="outline"
-          className="gap-1 text-[10px]"
-          style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
-          data-testid={`recommended-badge-${form.type}`}
+
+      <Link
+        href={`/projects/${projectId}/steps/${stepNumber}/forms/${form.slug ?? form.type}`}
+        data-testid={`form-link-${form.type}`}
+        className={cn(
+          'flex items-start justify-between rounded-[var(--radius-md)] border px-4 py-3 transition-all hover:bg-[var(--color-surface-secondary)]',
+          started
+            ? 'border-[var(--color-success)] bg-[var(--color-success-subtle)]'
+            : 'border-[var(--color-border)]',
+          form.required && !started && 'border-l-4',
+        )}
+        style={
+          form.required && !started
+            ? { borderLeftColor: `var(--color-step-${stepNumber})` }
+            : undefined
+        }
+      >
+        <div className="flex items-start gap-3">
+          {started ? (
+            <CheckCircle2 size={18} className="mt-0.5 text-[var(--color-success)]" />
+          ) : (
+            <Circle size={18} className="mt-0.5 text-[var(--color-text-tertiary)]" />
+          )}
+          <div className="space-y-1.5">
+            <span className="text-sm font-medium text-[var(--color-text-primary)]">
+              {form.name}
+            </span>
+            <p className="text-xs text-[var(--color-text-tertiary)]">{form.description}</p>
+
+            {/* Metadata badges row */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {/* 1.2: Time estimate badge */}
+              {form.timeEstimate && (
+                <Badge
+                  variant="outline"
+                  className="gap-1 text-[10px] text-[var(--color-text-tertiary)]"
+                  data-testid={`time-badge-${form.type}`}
+                >
+                  <Clock size={10} />
+                  {form.timeEstimate}
+                </Badge>
+              )}
+              {/* Difficulty badge */}
+              {form.difficulty && (
+                <Badge
+                  variant="outline"
+                  className={cn('text-[10px]', DIFFICULTY_STYLES[form.difficulty] ?? '')}
+                  data-testid={`difficulty-badge-${form.type}`}
+                >
+                  {form.difficulty}
+                </Badge>
+              )}
+              {/* Activity type badge */}
+              {form.activityType && (
+                <Badge
+                  variant="outline"
+                  className="gap-1 text-[10px] text-[var(--color-text-tertiary)]"
+                  data-testid={`activity-badge-${form.type}`}
+                >
+                  {form.activityType === 'Individual' ? <User size={10} /> : <Users size={10} />}
+                  {form.activityType}
+                </Badge>
+              )}
+              {recommended && (
+                <Badge
+                  variant="outline"
+                  className="gap-1 text-[10px]"
+                  style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
+                  data-testid={`recommended-badge-${form.type}`}
+                >
+                  <Star size={10} />
+                  Recommended
+                </Badge>
+              )}
+              {form.required && (
+                <Badge variant="secondary" className="text-[10px]">
+                  Required
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="ml-2 flex shrink-0 items-center gap-2">
+          {/* "Why this form?" tooltip trigger */}
+          {form.whyThisForm && (
+            <button
+              type="button"
+              aria-label="Why this form?"
+              data-testid={`why-form-${form.type}`}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setTooltipOpen((v) => !v)
+              }}
+              className="rounded p-0.5 text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)] focus:outline-none"
+            >
+              <HelpCircle size={15} />
+            </button>
+          )}
+          <ArrowRight size={14} className="text-[var(--color-text-tertiary)]" />
+        </div>
+      </Link>
+
+      {/* Tooltip popover */}
+      {tooltipOpen && form.whyThisForm && (
+        <div
+          className="z-10 mt-1 rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-xs leading-relaxed shadow-md text-[var(--color-text-secondary)]"
+          data-testid={`why-form-tooltip-${form.type}`}
+          role="tooltip"
         >
-          <Star size={10} />
-          Recommended
-        </Badge>
+          {form.whyThisForm}
+        </div>
       )}
-      {form.required && (
-        <Badge variant="secondary" className="text-[10px]">
-          Required
-        </Badge>
-      )}
-      <ArrowRight size={14} className="text-[var(--color-text-tertiary)]" />
     </div>
-  </Link>
-)
+  )
+}

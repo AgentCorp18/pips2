@@ -2,11 +2,21 @@
 
 import { useCallback, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell, Ticket, FolderKanban, AtSign, Info, Check, MessageSquare } from 'lucide-react'
+import {
+  Bell,
+  Ticket,
+  FolderKanban,
+  AtSign,
+  Info,
+  Check,
+  MessageSquare,
+  Eye,
+  Archive,
+} from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { markAsRead } from './actions'
+import { markAsRead, archiveNotification } from './actions'
 import type { Notification, NotificationType } from '@/types/notifications'
 
 /* ============================================================
@@ -60,9 +70,11 @@ const formatTimeAgo = (dateStr: string): string => {
 
 type NotificationItemProps = {
   notification: Notification
+  /** When true the item hides itself after being archived */
+  onArchived?: (id: string) => void
 }
 
-export const NotificationItem = ({ notification }: NotificationItemProps) => {
+export const NotificationItem = ({ notification, onArchived }: NotificationItemProps) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isRead, setIsRead] = useState(!!notification.read_at)
@@ -70,7 +82,7 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
   const Icon = NOTIFICATION_ICONS[notification.type] ?? Info
   const isUnread = !isRead
 
-  const handleClick = useCallback(() => {
+  const handleView = useCallback(() => {
     if (isUnread) {
       setIsRead(true)
       startTransition(async () => {
@@ -93,20 +105,23 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
     [isUnread, notification.id],
   )
 
+  const handleArchive = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      startTransition(async () => {
+        await archiveNotification(notification.id)
+        onArchived?.(notification.id)
+      })
+    },
+    [notification.id, onArchived],
+  )
+
   return (
     <Card
-      className={`cursor-pointer transition-shadow hover:shadow-md ${
+      data-testid={`notification-item-${notification.id}`}
+      className={`transition-shadow hover:shadow-md ${
         isUnread ? 'border-[var(--color-primary)]/30 bg-[var(--color-primary-subtle)]/30' : ''
       } ${isPending ? 'opacity-70' : ''}`}
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleClick()
-        }
-      }}
     >
       <CardContent className="flex items-start gap-3 py-3">
         {/* Icon */}
@@ -146,9 +161,37 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
               {notification.body}
             </p>
           )}
+
+          {/* Inline action buttons */}
+          <div className="mt-2 flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 gap-1 px-2 text-[10px]"
+              onClick={handleView}
+              disabled={isPending}
+              aria-label="View notification"
+              data-testid={`notification-view-${notification.id}`}
+            >
+              <Eye size={10} />
+              View
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-2 text-[10px] text-[var(--color-text-tertiary)]"
+              onClick={handleArchive}
+              disabled={isPending}
+              aria-label="Archive notification"
+              data-testid={`notification-archive-${notification.id}`}
+            >
+              <Archive size={10} />
+              Archive
+            </Button>
+          </div>
         </div>
 
-        {/* Mark as read button */}
+        {/* Mark as read button (unread indicator) */}
         {isUnread && (
           <Button
             variant="ghost"

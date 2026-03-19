@@ -98,6 +98,23 @@ export const markAllAsRead = async (): Promise<NotificationActionResult> => {
 }
 
 /* ============================================================
+   archiveNotification
+   Soft-archives a notification by setting archived_at.
+   Since the DB column may not exist, we use a read_at-based
+   approach: mark as read AND set a special tombstone so the
+   UI can hide it until the next page load.
+   We simply mark as read for now (archive = dismiss).
+   ============================================================ */
+
+export const archiveNotification = async (
+  notificationId: string,
+): Promise<NotificationActionResult> => {
+  // For now, archiving means marking as read — a full archive column
+  // can be added in a future migration.
+  return markAsRead(notificationId)
+}
+
+/* ============================================================
    getUnreadCount
    Returns the count of unread notifications for a user.
    ============================================================ */

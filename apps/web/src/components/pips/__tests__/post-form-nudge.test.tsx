@@ -43,12 +43,13 @@ describe('PostFormNudge', () => {
       'impact_assessment',
       'list_reduction',
       'weighted_voting',
+      'impact_metrics',
     ])
     render(
       <PostFormNudge
         {...defaultProps}
         completedFormTypes={allComplete}
-        justCompletedType="weighted_voting"
+        justCompletedType="impact_metrics"
       />,
     )
     expect(screen.queryByTestId('post-form-nudge')).not.toBeInTheDocument()

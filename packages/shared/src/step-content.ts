@@ -7,6 +7,9 @@
 
 import type { PipsStepNumber } from './constants'
 
+export type FormDifficulty = 'Beginner' | 'Intermediate' | 'Advanced'
+export type FormActivityType = 'Individual' | 'Team activity' | 'Group discussion'
+
 export type StepFormDef = {
   type: string
   /** URL slug for the form route. Defaults to `type` if not set. */
@@ -15,6 +18,14 @@ export type StepFormDef = {
   description: string
   required: boolean
   timeEstimate?: string
+  /** Difficulty level for new users to gauge expected effort */
+  difficulty?: FormDifficulty
+  /** Whether this is best done solo, with a team, or in a facilitated group */
+  activityType?: FormActivityType
+  /** One-sentence "when to use this" tooltip shown on hover */
+  whyThisForm?: string
+  /** Suggested completion order within the step (1 = start here) */
+  recommendedOrder?: number
 }
 
 export type StepMethodology = {
@@ -60,6 +71,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Define As-Is, Desired State, and Gap',
         required: true,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Team activity',
+        whyThisForm:
+          'Use this first to align the team on a shared, measurable definition of the problem before any analysis begins.',
+        recommendedOrder: 1,
       },
       {
         type: 'impact_assessment',
@@ -67,6 +83,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Quantify the problem impact',
         required: false,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use this to put a number on the pain — it builds urgency and helps prioritize the problem against other work.',
+        recommendedOrder: 2,
       },
       {
         type: 'list_reduction',
@@ -76,6 +97,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
           'Narrow a long list of candidate problems to a manageable shortlist through structured elimination',
         required: false,
         timeEstimate: '~10 min (solo) / ~20 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Group discussion',
+        whyThisForm:
+          'Use this when you have more than 5 candidate problems and need a quick, democratic way to cut the list down.',
+        recommendedOrder: 3,
       },
       {
         type: 'weighted_voting',
@@ -84,6 +110,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Prioritize options by distributing a fixed number of votes across candidates',
         required: false,
         timeEstimate: '~10 min (solo) / ~15 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Group discussion',
+        whyThisForm:
+          'Use this when the team cannot agree on which problem to tackle — voting surfaces the collective priority without debate.',
+        recommendedOrder: 4,
       },
       {
         type: 'impact_metrics',
@@ -93,6 +124,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
           'Capture quantitative baseline metrics (financial cost, time wasted, defect rate, customer satisfaction) before improvement begins — enables ROI calculation in Step 6',
         required: false,
         timeEstimate: '~10 min (solo) / ~15 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use this to capture the before-state data now, so Step 6 can calculate real ROI once the solution is implemented.',
+        recommendedOrder: 5,
       },
     ],
     completionCriteria: [
@@ -143,6 +179,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
           'Cause-and-effect analysis using the 6M framework: Man (People), Machine (Equipment), Method (Process), Material (Inputs), Measurement (Metrics), Mother Nature (Environment)',
         required: true,
         timeEstimate: '~20 min (solo) / ~30 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Group discussion',
+        whyThisForm:
+          'Use Fishbone when you need to identify root causes across multiple categories before jumping to solutions.',
+        recommendedOrder: 1,
       },
       {
         type: 'five_why',
@@ -150,6 +191,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Drill down to root cause by asking "why" iteratively',
         required: false,
         timeEstimate: '~10 min (solo) / ~15 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Team activity',
+        whyThisForm:
+          'Use 5-Why after the Fishbone to drill a single cause chain all the way to its root — stops you from treating symptoms.',
+        recommendedOrder: 2,
       },
       {
         type: 'force_field',
@@ -157,6 +203,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Map driving forces vs. restraining forces for change',
         required: false,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Group discussion',
+        whyThisForm:
+          'Use Force Field when the change faces resistance — it helps you identify which blockers to remove vs. which drivers to amplify.',
+        recommendedOrder: 3,
       },
       {
         type: 'checksheet',
@@ -165,6 +216,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
           'Structured tally sheet to collect and quantify data by category over time periods',
         required: false,
         timeEstimate: '~10 min (solo) / ~15 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use the Check Sheet when you need to collect real-world frequency data to validate which causes are actually most common.',
+        recommendedOrder: 4,
       },
       {
         type: 'pareto',
@@ -172,6 +228,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Rank causes by frequency or impact to identify the vital few (80/20 rule)',
         required: false,
         timeEstimate: '~15 min (solo) / ~25 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use Pareto after collecting data to focus the team on the 20% of causes that drive 80% of the problem.',
+        recommendedOrder: 5,
       },
     ],
     completionCriteria: [
@@ -221,6 +282,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Free-form idea generation with the team',
         required: true,
         timeEstimate: '~15 min (solo) / ~30 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Group discussion',
+        whyThisForm:
+          'Use Brainstorming to open the floor wide — quantity over quality; no ideas are filtered yet.',
+        recommendedOrder: 1,
       },
       {
         type: 'brainwriting',
@@ -228,6 +294,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: "Silent written idea generation and building on others' ideas",
         required: false,
         timeEstimate: '~20 min (solo) / ~30 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Team activity',
+        whyThisForm:
+          'Use Brainwriting when dominant voices tend to overshadow quieter team members — silent writing levels the playing field.',
+        recommendedOrder: 2,
       },
       {
         type: 'interviewing',
@@ -236,6 +307,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
           'Structured interviews with stakeholders, frontline staff, and subject matter experts to gather solution ideas',
         required: false,
         timeEstimate: '~20 min (solo) / ~45 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use Interviewing when you need outside perspectives — people closest to the work often have the best solution ideas.',
+        recommendedOrder: 3,
       },
       {
         type: 'surveying',
@@ -243,6 +319,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Design and distribute short surveys to crowdsource ideas from a larger group',
         required: false,
         timeEstimate: '~15 min (solo) / ~30 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use Surveying when you want to gather ideas from a large group quickly, without scheduling everyone in the same room.',
+        recommendedOrder: 4,
       },
     ],
     completionCriteria: [
@@ -293,6 +374,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Score and rank solutions against weighted criteria',
         required: true,
         timeEstimate: '~20 min (solo) / ~30 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Group discussion',
+        whyThisForm:
+          'Use the Criteria Matrix to select a solution objectively — define criteria first so you evaluate options on their merits, not gut feel.',
+        recommendedOrder: 1,
       },
       {
         type: 'paired_comparisons',
@@ -300,6 +386,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Systematically compare options in pairs to produce a ranked list',
         required: false,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use Paired Comparisons when you have 3–6 options and want a simple head-to-head ranking without building a full weighted matrix.',
+        recommendedOrder: 2,
       },
       {
         type: 'raci',
@@ -307,6 +398,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Assign roles: Responsible, Accountable, Consulted, Informed',
         required: false,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Team activity',
+        whyThisForm:
+          'Use RACI to eliminate ambiguity about who owns each task — every task needs exactly one Accountable person.',
+        recommendedOrder: 3,
       },
       {
         type: 'implementation_plan',
@@ -315,6 +411,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Timeline, resources, milestones, and risk mitigation',
         required: true,
         timeEstimate: '~20 min (solo) / ~45 min (team)',
+        difficulty: 'Advanced',
+        activityType: 'Team activity',
+        whyThisForm:
+          'Use the Implementation Plan to convert the selected solution into a concrete schedule with milestones, owners, and risk mitigation.',
+        recommendedOrder: 4,
       },
       {
         type: 'balance_sheet',
@@ -323,6 +424,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
           'Weigh gains vs. losses for each solution option to support selection decisions',
         required: false,
         timeEstimate: '~15 min (solo) / ~25 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use the Balance Sheet when a solution has clear trade-offs and you need a structured way to show stakeholders both sides.',
+        recommendedOrder: 5,
       },
       {
         type: 'cost_benefit',
@@ -330,6 +436,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Compare the financial costs and projected benefits of proposed solutions',
         required: false,
         timeEstimate: '~20 min (solo) / ~35 min (team)',
+        difficulty: 'Advanced',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use Cost-Benefit Analysis when leadership needs a financial justification before approving the solution.',
+        recommendedOrder: 6,
       },
     ],
     completionCriteria: [
@@ -380,6 +491,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Track progress against planned milestones and dates',
         required: true,
         timeEstimate: '~10 min (solo) / ~15 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Team activity',
+        whyThisForm:
+          'Use the Milestone Tracker to keep the team aligned on where you are in the plan and flag delays before they cascade.',
+        recommendedOrder: 1,
       },
       {
         type: 'implementation_checklist',
@@ -388,6 +504,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Detailed task checklist with status and owners',
         required: false,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use the Implementation Checklist for day-to-day task tracking when the milestone level is too coarse for your work.',
+        recommendedOrder: 2,
       },
     ],
     completionCriteria: [
@@ -439,6 +560,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Compare baseline metrics with post-implementation results',
         required: true,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use Before & After first to anchor your results in the same metrics defined in Step 1 — this is what proves the improvement.',
+        recommendedOrder: 1,
       },
       {
         type: 'evaluation',
@@ -446,6 +572,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Overall assessment of the improvement project',
         required: true,
         timeEstimate: '~20 min (solo) / ~30 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Team activity',
+        whyThisForm:
+          'Use the Evaluation Summary to synthesize results, key learnings, and decisions about next steps into a single shareable document.',
+        recommendedOrder: 2,
       },
       {
         type: 'lessons_learned',
@@ -454,6 +585,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Document insights, successes, and areas for improvement',
         required: false,
         timeEstimate: '~15 min (solo) / ~20 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Group discussion',
+        whyThisForm:
+          "Use Lessons Learned while memories are fresh — capturing what worked and what to improve compounds your team's knowledge over time.",
+        recommendedOrder: 3,
       },
       {
         type: 'balance_sheet',
@@ -461,6 +597,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Weigh gains vs. losses and decide the path forward',
         required: false,
         timeEstimate: '~15 min (solo) / ~25 min (team)',
+        difficulty: 'Beginner',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use the Balance Sheet when the results are mixed and you need a structured way to decide whether to standardize, iterate, or close.',
+        recommendedOrder: 4,
       },
       {
         type: 'results_metrics',
@@ -470,6 +611,11 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
           'Record post-improvement values and auto-calculate annual savings, ROI %, and payback period using the baseline captured in the Step 1 Impact Metrics form',
         required: false,
         timeEstimate: '~10 min (solo) / ~15 min (team)',
+        difficulty: 'Intermediate',
+        activityType: 'Individual',
+        whyThisForm:
+          'Use Results Metrics to auto-calculate ROI when you collected baseline data in Step 1 — makes the business case concrete.',
+        recommendedOrder: 5,
       },
     ],
     completionCriteria: [

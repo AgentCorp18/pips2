@@ -81,8 +81,12 @@ describe('NotificationFilteredList', () => {
     expect(screen.getByText('No notifications match this filter.')).toBeTruthy()
   })
 
-  it('shows empty message when notifications array is empty', () => {
+  it('shows grouped empty states when notifications array is empty with "all" filter', () => {
     render(<NotificationFilteredList notifications={[]} activeFilter="all" />)
-    expect(screen.getByTestId('notification-filter-empty')).toBeTruthy()
+    // With the grouped view, each group shows its own empty state
+    expect(screen.getByTestId('notification-grouped-view')).toBeTruthy()
+    expect(screen.getByText(/you're all caught up/i)).toBeTruthy()
+    expect(screen.getByText('No new mentions.')).toBeTruthy()
+    expect(screen.getByText('No recent updates.')).toBeTruthy()
   })
 })
