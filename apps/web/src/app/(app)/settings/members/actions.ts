@@ -213,17 +213,10 @@ export const inviteMember = async (
     } = await supabase.auth.getUser()
     if (!user) return { success: false, error: 'Not authenticated' }
 
-    const { data: inviterProfile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', user.id)
-      .single()
-
-    const { data: org } = await supabase
-      .from('organizations')
-      .select('name')
-      .eq('id', orgId)
-      .single()
+    const [{ data: inviterProfile }, { data: org }] = await Promise.all([
+      supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+      supabase.from('organizations').select('name').eq('id', orgId).single(),
+    ])
 
     // Create the invitation record
     const { data: invitation, error } = await supabase

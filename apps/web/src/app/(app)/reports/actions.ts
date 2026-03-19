@@ -280,18 +280,29 @@ export const getCycleTimeKpis = async (orgId: string): Promise<CycleTimeKpis> =>
 
   const supabase = await createClient()
 
-  // Completed tickets with both timestamps (last 90 days)
+  // Completed tickets with both timestamps (last 90 days) + longest open ticket, in parallel
   const ninetyDaysAgo = new Date()
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
-  const { data: completed } = await supabase
-    .from('tickets')
-    .select('started_at, resolved_at')
-    .eq('org_id', orgId)
-    .not('started_at', 'is', null)
-    .not('resolved_at', 'is', null)
-    .in('status', ['done', 'cancelled'])
-    .gte('resolved_at', ninetyDaysAgo.toISOString())
+  const [{ data: completed }, { data: openTickets }] = await Promise.all([
+    supabase
+      .from('tickets')
+      .select('started_at, resolved_at')
+      .eq('org_id', orgId)
+      .not('started_at', 'is', null)
+      .not('resolved_at', 'is', null)
+      .in('status', ['done', 'cancelled'])
+      .gte('resolved_at', ninetyDaysAgo.toISOString()),
+
+    supabase
+      .from('tickets')
+      .select('title, started_at')
+      .eq('org_id', orgId)
+      .not('started_at', 'is', null)
+      .in('status', ['in_progress', 'in_review', 'blocked'])
+      .order('started_at', { ascending: true })
+      .limit(1),
+  ])
 
   let avgCycleTimeDays: number | null = null
   let medianCycleTimeDays: number | null = null
@@ -316,16 +327,6 @@ export const getCycleTimeKpis = async (orgId: string): Promise<CycleTimeKpis> =>
           : Math.round(cycleTimes[mid]! * 10) / 10
     }
   }
-
-  // Longest open in-progress ticket
-  const { data: openTickets } = await supabase
-    .from('tickets')
-    .select('title, started_at')
-    .eq('org_id', orgId)
-    .not('started_at', 'is', null)
-    .in('status', ['in_progress', 'in_review', 'blocked'])
-    .order('started_at', { ascending: true })
-    .limit(1)
 
   let longestOpenDays: number | null = null
   let longestOpenTitle: string | null = null
@@ -522,7 +523,7 @@ export const getTeamActivityKpis = async (orgId: string): Promise<TeamActivityKp
   const now = new Date()
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-  const [membersRes, completedRes] = await Promise.all([
+  const [membersRes, completedRes, activeLogsRes] = await Promise.all([
     supabase.from('org_members').select('id, user_id', { count: 'exact' }).eq('org_id', orgId),
 
     supabase
@@ -531,14 +532,16 @@ export const getTeamActivityKpis = async (orgId: string): Promise<TeamActivityKp
       .eq('org_id', orgId)
       .eq('status', 'done')
       .gte('resolved_at', weekAgo.toISOString()),
+
+    // Count active members this week from audit_log (independent — runs in parallel)
+    supabase
+      .from('audit_log')
+      .select('user_id')
+      .eq('org_id', orgId)
+      .gte('created_at', weekAgo.toISOString()),
   ])
 
-  // Count active members this week from audit_log
-  const { data: activeLogs } = await supabase
-    .from('audit_log')
-    .select('user_id')
-    .eq('org_id', orgId)
-    .gte('created_at', weekAgo.toISOString())
+  const { data: activeLogs } = activeLogsRes
 
   const activeUserIds = new Set<string>()
   if (activeLogs) {
@@ -579,10 +582,16 @@ export const getTeamContributions = async (orgId: string): Promise<TeamContribut
 
   const userIds = members.map((m) => m.user_id)
 
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('id, full_name, display_name')
-    .in('id', userIds)
+  const [{ data: profiles }, { data: completedTickets }] = await Promise.all([
+    supabase.from('profiles').select('id, full_name, display_name').in('id', userIds),
+
+    supabase
+      .from('tickets')
+      .select('assignee_id')
+      .eq('org_id', orgId)
+      .eq('status', 'done')
+      .in('assignee_id', userIds),
+  ])
 
   const profileMap = new Map<string, string>()
   if (profiles) {
@@ -590,13 +599,6 @@ export const getTeamContributions = async (orgId: string): Promise<TeamContribut
       profileMap.set(p.id, p.display_name || p.full_name || 'Unknown')
     }
   }
-
-  const { data: completedTickets } = await supabase
-    .from('tickets')
-    .select('assignee_id')
-    .eq('org_id', orgId)
-    .eq('status', 'done')
-    .in('assignee_id', userIds)
 
   const countByUser = new Map<string, number>()
   if (completedTickets) {
@@ -672,10 +674,22 @@ export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[
 
   const userIds = members.map((m) => m.user_id)
 
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('id, full_name, display_name')
-    .in('id', userIds)
+  const [{ data: profiles }, { data: assignedTickets }, { data: latestLogs }] = await Promise.all([
+    supabase.from('profiles').select('id, full_name, display_name').in('id', userIds),
+
+    supabase
+      .from('tickets')
+      .select('assignee_id, status')
+      .eq('org_id', orgId)
+      .in('assignee_id', userIds),
+
+    supabase
+      .from('audit_log')
+      .select('user_id, created_at')
+      .eq('org_id', orgId)
+      .in('user_id', userIds)
+      .order('created_at', { ascending: false }),
+  ])
 
   const profileMap = new Map<string, string>()
   if (profiles) {
@@ -683,12 +697,6 @@ export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[
       profileMap.set(p.id, p.display_name || p.full_name || 'Unknown')
     }
   }
-
-  const { data: assignedTickets } = await supabase
-    .from('tickets')
-    .select('assignee_id, status')
-    .eq('org_id', orgId)
-    .in('assignee_id', userIds)
 
   const assignedByUser = new Map<string, number>()
   const completedByUser = new Map<string, number>()
@@ -702,13 +710,6 @@ export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[
       }
     }
   }
-
-  const { data: latestLogs } = await supabase
-    .from('audit_log')
-    .select('user_id, created_at')
-    .eq('org_id', orgId)
-    .in('user_id', userIds)
-    .order('created_at', { ascending: false })
 
   const lastActiveByUser = new Map<string, string>()
   if (latestLogs) {

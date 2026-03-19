@@ -171,29 +171,27 @@ export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingT
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  const { data } = await supabase
-    .from('tickets')
-    .select(
-      `
+  const [{ data }, { data: orgRow }] = await Promise.all([
+    supabase
+      .from('tickets')
+      .select(
+        `
       id, title, sequence_number, started_at,
       assignee:profiles!tickets_assignee_id_fkey ( display_name, full_name )
     `,
-    )
-    .eq('org_id', orgId)
-    .in('status', ['in_progress', 'in_review', 'blocked'])
-    .not('started_at', 'is', null)
-    .lt('started_at', sevenDaysAgo.toISOString())
-    .order('started_at', { ascending: true })
-    .limit(limit)
+      )
+      .eq('org_id', orgId)
+      .in('status', ['in_progress', 'in_review', 'blocked'])
+      .not('started_at', 'is', null)
+      .lt('started_at', sevenDaysAgo.toISOString())
+      .order('started_at', { ascending: true })
+      .limit(limit),
+
+    // Fetch org prefix for sequence IDs in parallel with ticket data
+    supabase.from('org_settings').select('ticket_prefix').eq('org_id', orgId).single(),
+  ])
 
   if (!data) return []
-
-  // Get org prefix for sequence IDs
-  const { data: orgRow } = await supabase
-    .from('org_settings')
-    .select('ticket_prefix')
-    .eq('org_id', orgId)
-    .single()
 
   const prefix = (orgRow?.ticket_prefix as string) ?? 'TKT'
 
