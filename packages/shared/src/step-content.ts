@@ -85,6 +85,15 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         required: false,
         timeEstimate: '~10 min (solo) / ~15 min (team)',
       },
+      {
+        type: 'impact_metrics',
+        slug: 'impact-metrics',
+        name: 'Impact Metrics',
+        description:
+          'Capture quantitative baseline metrics (financial cost, time wasted, defect rate, customer satisfaction) before improvement begins — enables ROI calculation in Step 6',
+        required: false,
+        timeEstimate: '~10 min (solo) / ~15 min (team)',
+      },
     ],
     completionCriteria: [
       'Problem statement is written with As-Is, Desired, and Gap',
@@ -452,6 +461,15 @@ export const STEP_CONTENT: Record<PipsStepNumber, StepContent> = {
         description: 'Weigh gains vs. losses and decide the path forward',
         required: false,
         timeEstimate: '~15 min (solo) / ~25 min (team)',
+      },
+      {
+        type: 'results_metrics',
+        slug: 'results-metrics',
+        name: 'Results Metrics',
+        description:
+          'Record post-improvement values and auto-calculate annual savings, ROI %, and payback period using the baseline captured in the Step 1 Impact Metrics form',
+        required: false,
+        timeEstimate: '~10 min (solo) / ~15 min (team)',
       },
     ],
     completionCriteria: [

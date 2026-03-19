@@ -490,6 +490,39 @@ export const costBenefitSchema = z.object({
 export type CostBenefitData = z.infer<typeof costBenefitSchema>
 
 /* ============================================================
+   ROI Metrics — Step 1 (Impact) + Step 6 (Results)
+   ============================================================ */
+
+// Impact Metrics (Step 1) — captures "before" baseline for ROI calculation
+export const impactMetricsSchema = z.object({
+  financialCostAnnual: z.number().min(0).default(0),
+  financialCostUnit: z.enum(['usd', 'eur', 'gbp', 'other']).default('usd'),
+  timeWastedWeeklyHours: z.number().min(0).default(0),
+  qualityDefectRate: z.number().min(0).max(100).default(0),
+  qualityDefectUnit: z.string().default('% defect rate'),
+  customerSatisfactionBefore: z.number().min(0).max(10).default(0),
+  employeesAffected: z.number().min(0).default(0),
+  notes: z.string().default(''),
+})
+export type ImpactMetricsData = z.infer<typeof impactMetricsSchema>
+
+// Results Metrics (Step 6) — captures "after" values and auto-calculated deltas
+export const resultsMetricsSchema = z.object({
+  financialCostAfter: z.number().min(0).default(0),
+  financialSavingsAnnual: z.number().default(0),
+  timeWeeklyHoursAfter: z.number().min(0).default(0),
+  timeSavedWeeklyHours: z.number().default(0),
+  qualityDefectRateAfter: z.number().min(0).max(100).default(0),
+  qualityImprovement: z.number().default(0),
+  customerSatisfactionAfter: z.number().min(0).max(10).default(0),
+  roiPercent: z.number().default(0),
+  paybackPeriodMonths: z.number().nullable().default(null),
+  projectCostEstimate: z.number().min(0).default(0),
+  notes: z.string().default(''),
+})
+export type ResultsMetricsData = z.infer<typeof resultsMetricsSchema>
+
+/* ============================================================
    Schema Map — for dynamic lookup by form_type
    ============================================================ */
 
@@ -518,4 +551,6 @@ export const FORM_SCHEMAS: Record<string, z.ZodType> = {
   before_after: beforeAfterSchema,
   evaluation: evaluationSchema,
   lessons_learned: lessonsLearnedSchema,
+  impact_metrics: impactMetricsSchema,
+  results_metrics: resultsMetricsSchema,
 }
