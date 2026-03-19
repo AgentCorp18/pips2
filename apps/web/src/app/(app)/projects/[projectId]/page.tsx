@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { stepEnumToNumber, PIPS_STEPS } from '@pips/shared'
+import { RecentItemTracker } from '@/components/layout/recent-item-tracker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProjectOverviewClient } from './project-overview-client'
@@ -91,6 +92,12 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
 
   return (
     <div className="mx-auto max-w-[var(--content-max-width)] space-y-6">
+      <RecentItemTracker
+        id={project.id}
+        title={project.title as string}
+        type="project"
+        path={`/projects/${project.id}`}
+      />
       <ProjectOverviewClient
         projectId={project.id}
         currentStep={currentStepNum}

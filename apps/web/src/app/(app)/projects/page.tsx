@@ -12,9 +12,10 @@ import { ProjectBoard } from '@/components/pips/project-board'
 import type { BoardProject } from '@/components/pips/project-board'
 import { ViewToggle } from '@/components/tickets/view-toggle'
 import type { ViewMode } from '@/components/tickets/view-toggle'
-import { Plus, FolderKanban, Sparkles, Columns3, Rows3, LayoutTemplate } from 'lucide-react'
+import { Plus, Columns3, Rows3, LayoutTemplate } from 'lucide-react'
 import { ExportProjectsButton } from '@/components/pips/export-projects-button'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
+import { ProjectsEmptyState } from '@/components/pips/projects-empty-state'
 
 export const metadata: Metadata = {
   title: 'Projects',
@@ -204,64 +205,13 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
           </div>
         )
       ) : (
-        <EmptyState />
+        <ProjectsEmptyState />
       )}
 
       <QuickCreateFab />
     </div>
   )
 }
-
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] py-16">
-    <div
-      className="mb-6 flex h-20 w-20 items-center justify-center rounded-full"
-      style={{ backgroundColor: 'var(--color-primary-subtle)' }}
-    >
-      <FolderKanban size={36} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
-    </div>
-    <h3
-      className="mb-2 text-xl font-semibold"
-      style={{ color: 'var(--color-text-primary)' }}
-      data-testid="projects-empty-title"
-    >
-      Start your first improvement project
-    </h3>
-    <p
-      className="mb-2 max-w-md text-center text-sm"
-      style={{ color: 'var(--color-text-secondary)' }}
-    >
-      PIPS walks you through a proven 6-step methodology to identify, analyze, and solve process
-      problems.
-    </p>
-    <p
-      className="mb-8 max-w-sm text-center text-xs"
-      style={{ color: 'var(--color-text-tertiary)' }}
-    >
-      It only takes a minute to get started — just give your project a name and description.
-    </p>
-    <div className="flex flex-wrap items-center justify-center gap-3">
-      <Button asChild className="gap-2" data-testid="empty-create-project-button">
-        <Link href="/projects/new">
-          <Plus size={16} />
-          Create Your First Project
-        </Link>
-      </Button>
-      <Button asChild variant="outline" className="gap-2" data-testid="empty-browse-templates-link">
-        <Link href="/projects/templates">
-          <LayoutTemplate size={16} />
-          Browse Templates
-        </Link>
-      </Button>
-      <Button asChild variant="outline" className="gap-2" data-testid="empty-sample-project-link">
-        <Link href="/dashboard">
-          <Sparkles size={16} />
-          Create a sample project
-        </Link>
-      </Button>
-    </div>
-  </div>
-)
 
 const BoardLayoutToggle = ({ currentLayout }: { currentLayout: 'columns' | 'swimlanes' }) => (
   <div className="mb-3 flex items-center justify-end gap-1">

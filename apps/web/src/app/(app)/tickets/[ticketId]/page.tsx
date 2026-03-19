@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { RecentItemTracker } from '@/components/layout/recent-item-tracker'
 import { createClient } from '@/lib/supabase/server'
 import { getTicket, getChildTickets, getParentTicket } from '../actions'
 import { getComments } from './comment-actions'
@@ -250,6 +251,12 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
 
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
+      <RecentItemTracker
+        id={ticket.id}
+        title={ticket.title}
+        type="ticket"
+        path={`/tickets/${ticket.id}`}
+      />
       {parentData && parentSequenceId ? (
         <ParentTicketLink
           parentId={parentData.id}

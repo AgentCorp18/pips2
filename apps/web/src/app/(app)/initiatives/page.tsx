@@ -6,8 +6,9 @@ import { getCurrentOrg } from '@/lib/get-current-org'
 import { Button } from '@/components/ui/button'
 import { InitiativeCard } from '@/components/initiatives/initiative-card'
 import { InitiativesFilters } from '@/components/initiatives/initiatives-filters'
-import { Plus, Target } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import type { InitiativeStatus } from '@/types/initiatives'
+import { InitiativesEmptyState } from '@/components/initiatives/initiatives-empty-state'
 
 export const metadata: Metadata = {
   title: 'Initiatives',
@@ -139,38 +140,7 @@ const InitiativesPage = async ({ searchParams }: InitiativesPageProps) => {
       <InitiativesFilters />
 
       {sorted.length === 0 ? (
-        <div
-          className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed p-12"
-          style={{ borderColor: 'var(--color-border)' }}
-        >
-          <div
-            className="mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-            style={{ backgroundColor: 'var(--color-surface)' }}
-          >
-            <Target size={24} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
-          </div>
-          <h3 className="mb-1 text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {searchQuery || statusFilter
-              ? 'No initiatives match your filters'
-              : 'No initiatives yet'}
-          </h3>
-          <p
-            className="mb-4 max-w-sm text-center text-sm"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
-            {searchQuery || statusFilter
-              ? 'Try adjusting your search or filter to find what you are looking for.'
-              : 'Create an initiative to group related projects under a strategic goal and track aggregated progress.'}
-          </p>
-          {!searchQuery && !statusFilter && (
-            <Link href="/initiatives/new">
-              <Button>
-                <Plus size={16} className="mr-1.5" />
-                Create your first initiative
-              </Button>
-            </Link>
-          )}
-        </div>
+        <InitiativesEmptyState isFiltered={!!(searchQuery || statusFilter)} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map((initiative) => (

@@ -21,10 +21,12 @@ import {
   CalendarDays,
   TrendingUp,
   Briefcase,
+  Clock,
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
 import type { SearchResultGroup } from '@/types/search'
+import { getRecentItems, type RecentItem } from '@/lib/recent-items'
 
 const DEBOUNCE_MS = 300
 
@@ -156,6 +158,30 @@ const RESULT_TYPE_ICONS = {
   form: ClipboardList,
 } as const
 
+/** Colored pill badges for search result types */
+const TYPE_BADGE_STYLES: Record<string, string> = {
+  project:
+    'bg-[color-mix(in_srgb,#4F46E5_12%,transparent)] text-[#4F46E5] border border-[color-mix(in_srgb,#4F46E5_25%,transparent)]',
+  ticket:
+    'bg-[color-mix(in_srgb,#059669_12%,transparent)] text-[#059669] border border-[color-mix(in_srgb,#059669_25%,transparent)]',
+  initiative:
+    'bg-[color-mix(in_srgb,#D97706_12%,transparent)] text-[#D97706] border border-[color-mix(in_srgb,#D97706_25%,transparent)]',
+  form: 'bg-[color-mix(in_srgb,#0891B2_12%,transparent)] text-[#0891B2] border border-[color-mix(in_srgb,#0891B2_25%,transparent)]',
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  project: 'Project',
+  ticket: 'Ticket',
+  initiative: 'Initiative',
+  form: 'Form',
+}
+
+const RECENT_ITEM_ICONS: Record<string, typeof FolderKanban> = {
+  project: FolderKanban,
+  ticket: Ticket,
+  initiative: Target,
+}
+
 type CommandPaletteProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -166,7 +192,15 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
   const [query, setQuery] = useState('')
   const [groups, setGroups] = useState<SearchResultGroup[]>([])
   const [isPending, startTransition] = useTransition()
+  const [recentItems, setRecentItems] = useState<RecentItem[]>([])
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Load recent items from localStorage when palette opens
+  useEffect(() => {
+    if (open) {
+      setRecentItems(getRecentItems())
+    }
+  }, [open])
 
   // Reset state when dialog closes
   const handleOpenChange = useCallback(
@@ -221,6 +255,13 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
   const hasQuery = query.trim().length > 0
   const hasResults = groups.length > 0
   const showEmptyState = hasQuery && !hasResults && !isPending
+  const hasRecentItems = recentItems.length > 0
+
+  const GROUP_HEADING_CLASS =
+    '[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--color-text-tertiary)]'
+
+  const ITEM_CLASS =
+    'flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 text-sm aria-selected:bg-[var(--color-primary-subtle)] [&[aria-selected]]:text-[var(--color-text-primary)]'
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -241,7 +282,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
           </div>
 
           {/* Results list */}
-          <Command.List className="max-h-72 overflow-y-auto p-2">
+          <Command.List className="max-h-80 overflow-y-auto p-2">
             {/* Loading indicator */}
             {isPending && hasQuery && (
               <div className="px-3 py-6 text-center text-sm text-[var(--color-text-tertiary)]">
@@ -261,17 +302,19 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
               groups.map((group) => (
                 <Command.Group
                   key={group.type}
-                  heading={group.label}
-                  className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--color-text-tertiary)]"
+                  heading={`${group.label} (${group.results.length})`}
+                  className={GROUP_HEADING_CLASS}
                 >
                   {group.results.map((result) => {
                     const Icon = RESULT_TYPE_ICONS[result.type]
+                    const badgeClass = TYPE_BADGE_STYLES[result.type] ?? ''
+                    const badgeLabel = TYPE_LABELS[result.type] ?? result.type
                     return (
                       <Command.Item
                         key={result.id}
                         value={result.id}
                         onSelect={() => handleSelect(result.url)}
-                        className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 text-sm aria-selected:bg-[var(--color-primary-subtle)] [&[aria-selected]]:text-[var(--color-text-primary)]"
+                        className={ITEM_CLASS}
                       >
                         <Icon size={16} className="shrink-0 text-[var(--color-text-tertiary)]" />
                         <div className="flex min-w-0 flex-1 flex-col">
@@ -282,21 +325,57 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                             {result.subtitle}
                           </span>
                         </div>
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeClass}`}
+                        >
+                          {badgeLabel}
+                        </span>
                       </Command.Item>
                     )
                   })}
                 </Command.Group>
               ))}
 
-            {/* Quick actions (shown when no search query) */}
+            {/* No-query view: Recent items + quick actions */}
             {!hasQuery && (
               <>
+                {/* Recent Items */}
+                {hasRecentItems && (
+                  <Command.Group heading="Recent" className={GROUP_HEADING_CLASS}>
+                    {recentItems.map((item) => {
+                      const Icon = RECENT_ITEM_ICONS[item.type] ?? FileText
+                      const badgeClass = TYPE_BADGE_STYLES[item.type] ?? ''
+                      const badgeLabel = TYPE_LABELS[item.type] ?? item.type
+                      return (
+                        <Command.Item
+                          key={`recent-${item.id}`}
+                          value={`recent-${item.id}`}
+                          onSelect={() => handleSelect(item.path)}
+                          className={ITEM_CLASS}
+                        >
+                          <Icon size={16} className="shrink-0 text-[var(--color-text-tertiary)]" />
+                          <span className="min-w-0 flex-1 truncate text-[var(--color-text-primary)]">
+                            {item.title}
+                          </span>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeClass}`}
+                          >
+                            {badgeLabel}
+                          </span>
+                          <Clock
+                            size={12}
+                            className="shrink-0 text-[var(--color-text-tertiary)]"
+                            aria-hidden="true"
+                          />
+                        </Command.Item>
+                      )
+                    })}
+                  </Command.Group>
+                )}
+
+                {/* Quick actions */}
                 {(['Create', 'Navigate'] as const).map((group) => (
-                  <Command.Group
-                    key={group}
-                    heading={group}
-                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--color-text-tertiary)]"
-                  >
+                  <Command.Group key={group} heading={group} className={GROUP_HEADING_CLASS}>
                     {QUICK_ACTIONS.filter((a) => a.group === group).map((action) => {
                       const Icon = action.icon
                       return (
@@ -304,7 +383,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                           key={action.id}
                           value={action.id}
                           onSelect={() => handleSelect(action.href)}
-                          className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-2 py-2 text-sm aria-selected:bg-[var(--color-primary-subtle)] [&[aria-selected]]:text-[var(--color-text-primary)]"
+                          className={ITEM_CLASS}
                         >
                           <Icon size={16} className="shrink-0 text-[var(--color-text-tertiary)]" />
                           <span className="text-[var(--color-text-primary)]">{action.label}</span>
