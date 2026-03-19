@@ -54,7 +54,8 @@ const getEightyPercentCategories = (categories: Category[]): string[] => {
 export const ParetoForm = ({ projectId, stepNumber, initialData }: Props) => {
   const [data, setData] = useState<ParetoData>(() => {
     const d = initialData ?? createDefaultData()
-    return { ...d, categories: recalculate(d.categories) }
+    const cats = Array.isArray(d.categories) ? d.categories : createDefaultData().categories
+    return { ...d, categories: recalculate(cats) }
   })
 
   const update = useCallback((next: ParetoData) => {

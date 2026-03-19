@@ -11,8 +11,8 @@ import { ChatSummaryPanel } from '@/components/chat/chat-summary-panel'
 import { ThreadPanel } from '@/components/chat/thread-panel'
 import { useChatRealtime, useMembershipRealtime } from '@/hooks/use-chat-realtime'
 import { useChatStore } from '@/stores/chat-store'
-import { useOrgStore } from '@/stores/org-store'
 import { usePermissions } from '@/hooks/use-permissions'
+import type { OrgRole } from '@/stores/org-store'
 import {
   sendMessage,
   editMessage,
@@ -40,6 +40,8 @@ type Props = {
   initialChannels: (ChatChannel & { unread_count?: number })[]
   /** Resolved server-side so the thread renders immediately without a client-side async load. */
   currentUserId: string | null
+  /** User's org role, resolved server-side for permission checks */
+  userRole: OrgRole | null
 }
 
 export const ChannelViewClient = ({
@@ -49,10 +51,10 @@ export const ChannelViewClient = ({
   initialHasMore,
   initialChannels,
   currentUserId,
+  userRole,
 }: Props) => {
   const { messages, setMessages, setActiveChannel, clearUnread, setActiveThread } = useChatStore()
-  const org = useOrgStore((s) => s.org)
-  const { can } = usePermissions(org?.role ?? null)
+  const { can } = usePermissions(userRole)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [summary, setSummary] = useState<ChatSummary | null>(null)
   const [members, setMembers] = useState<ChannelMember[]>(initialMembers)

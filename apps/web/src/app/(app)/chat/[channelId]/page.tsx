@@ -1,4 +1,6 @@
 import { getAuthContext } from '@/lib/auth-context'
+import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/get-current-org'
 import { getChannel, getChannels, getMessages } from '../actions'
 import { ChannelViewClient } from './channel-view-client'
 
@@ -14,6 +16,9 @@ export default async function ChannelPage({ params }: Props) {
     getMessages(channelId),
     getChannels(),
   ])
+
+  const supabase = await createClient()
+  const currentOrg = user ? await getCurrentOrg(supabase, user.id) : null
 
   if (channelResult.error || !channelResult.data) {
     return (
@@ -34,6 +39,7 @@ export default async function ChannelPage({ params }: Props) {
         initialHasMore={messagesResult.data?.hasMore ?? false}
         initialChannels={channelsResult.data ?? []}
         currentUserId={user?.id ?? null}
+        userRole={currentOrg?.role ?? null}
       />
     </div>
   )

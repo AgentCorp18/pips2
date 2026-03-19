@@ -32,10 +32,12 @@ export const ChecksheetForm = ({
   initialData,
   problemStatementFromStep1,
 }: Props) => {
-  const [data, setData] = useState<ChecksheetData>(() => ({
-    ...DEFAULTS,
-    ...(initialData as Partial<ChecksheetData>),
-  }))
+  const [data, setData] = useState<ChecksheetData>(() => {
+    const merged = { ...DEFAULTS, ...(initialData as Partial<ChecksheetData>) }
+    if (!Array.isArray(merged.categories)) merged.categories = []
+    if (!Array.isArray(merged.timePeriods)) merged.timePeriods = []
+    return merged
+  })
 
   const addCategory = useCallback(() => {
     setData((prev) => ({

@@ -24,6 +24,24 @@ const DEFAULTS: FishboneData = {
   categories: DEFAULT_CATEGORIES,
 }
 
+/** Normalize categories from object format {"People": [...]} to array format [{name, causes}] */
+const normalizeCategories = (raw: unknown): FishboneData['categories'] => {
+  if (Array.isArray(raw)) return raw
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    return Object.entries(raw as Record<string, unknown[]>).map(([name, causes]) => ({
+      name,
+      causes: Array.isArray(causes)
+        ? causes.map((c) =>
+            typeof c === 'string'
+              ? { text: c, subCauses: [] }
+              : (c as { text: string; subCauses: string[] }),
+          )
+        : [],
+    }))
+  }
+  return DEFAULT_CATEGORIES
+}
+
 type Props = {
   projectId: string
   stepNumber: number
@@ -42,7 +60,8 @@ export const FishboneForm = ({
     if (!merged.problemStatement && problemStatementFromStep1) {
       merged.problemStatement = problemStatementFromStep1
     }
-    if (!merged.categories || merged.categories.length === 0) {
+    merged.categories = normalizeCategories(merged.categories)
+    if (merged.categories.length === 0) {
       merged.categories = DEFAULT_CATEGORIES
     }
     return merged
