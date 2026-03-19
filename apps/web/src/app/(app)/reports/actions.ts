@@ -1,8 +1,9 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { PIPS_STEPS, PIPS_STEP_ENUMS } from '@pips/shared'
+import { PIPS_STEPS, PIPS_STEP_ENUMS, STEP_CONTENT } from '@pips/shared'
 import { requirePermission } from '@/lib/permissions'
+import { calculateMethodologyDepth } from '@pips/shared'
 import type { StepProgressData } from '@/components/reports/step-progress-chart'
 import type { TicketVelocityData } from '@/components/reports/ticket-velocity-chart'
 import type { StepFunnelData } from '@/components/reports/step-funnel-chart'
@@ -12,6 +13,7 @@ import type { FormCompletionData } from '@/components/reports/form-completion-ch
 import type { StepDurationData } from '@/components/reports/step-duration-chart'
 import type { ToolPopularityData } from '@/components/reports/tool-popularity-chart'
 import type { CycleTimeTrendData } from '@/components/reports/cycle-time-trend-chart'
+import type { ProblemStatementData } from '@/lib/form-schemas'
 
 /* ============================================================
    Shared helpers
@@ -1223,4 +1225,468 @@ export const getStepBreakdownTable = async (orgId: string): Promise<StepBreakdow
       color: pipsStep.color,
     }
   })
+}
+
+/* ============================================================
+   Recent Achievements — last 5 completed projects (last 30 days)
+   ============================================================ */
+
+export type RecentAchievement = {
+  id: string
+  title: string
+  completedAt: string
+  methodologyDepthPercent: number
+  narrativeSnippet: string | null
+}
+
+export const getRecentAchievements = async (orgId: string): Promise<RecentAchievement[]> => {
+  if (!(await checkViewPermission(orgId))) return []
+
+  const supabase = await createClient()
+
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+  const TOTAL_FORM_TYPES = 25
+
+  // Fetch 5 most recently completed projects in the last 30 days
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, title, completed_at')
+    .eq('org_id', orgId)
+    .eq('status', 'completed')
+    .gte('completed_at', thirtyDaysAgo.toISOString())
+    .order('completed_at', { ascending: false })
+    .limit(5)
+
+  if (!projects || projects.length === 0) return []
+
+  const projectIds = projects.map((p) => p.id)
+
+  // Fetch all forms (for depth) + problem_statement forms (for narrative)
+  const [allFormsRes, problemFormsRes] = await Promise.all([
+    supabase
+      .from('project_forms')
+      .select('project_id, form_type')
+      .in('project_id', projectIds)
+      .limit(5000),
+
+    supabase
+      .from('project_forms')
+      .select('project_id, data')
+      .in('project_id', projectIds)
+      .eq('form_type', 'problem_statement')
+      .limit(100),
+  ])
+
+  // Distinct form types per project for depth
+  const formTypesByProject = new Map<string, Set<string>>()
+  for (const f of allFormsRes.data ?? []) {
+    if (!f.project_id) continue
+    const existing = formTypesByProject.get(f.project_id) ?? new Set<string>()
+    existing.add(f.form_type)
+    formTypesByProject.set(f.project_id, existing)
+  }
+
+  // Narrative snippet from problem_statement
+  const narrativeByProject = new Map<string, string>()
+  for (const f of problemFormsRes.data ?? []) {
+    if (!f.project_id) continue
+    const d = f.data as ProblemStatementData
+    const statement = d.problemStatement ?? ''
+    if (statement.trim().length > 0) {
+      narrativeByProject.set(f.project_id, statement.slice(0, 100))
+    }
+  }
+
+  return projects.map((p) => {
+    const distinctTypes = formTypesByProject.get(p.id) ?? new Set<string>()
+    const methodologyDepthPercent = Math.round((distinctTypes.size / TOTAL_FORM_TYPES) * 100)
+    return {
+      id: p.id,
+      title: p.title,
+      completedAt: p.completed_at,
+      methodologyDepthPercent,
+      narrativeSnippet: narrativeByProject.get(p.id) ?? null,
+    }
+  })
+}
+
+/* ============================================================
+   Methodology Adoption Report
+   ============================================================ */
+
+export type MethodologyAdoption = {
+  avgDepthScore: number
+  depthTrend: Array<{ month: string; avgDepth: number; projectCount: number }>
+  formUsageHeatmap: Array<{
+    formType: string
+    displayName: string
+    usageCount: number
+    stepNumber: number
+  }>
+  stepCompletionFunnel: Array<{
+    step: number
+    stepName: string
+    projectsReached: number
+    completionRate: number
+  }>
+  topToolsByEffectiveness: Array<{
+    formType: string
+    displayName: string
+    avgProjectDepth: number
+    projectCount: number
+  }>
+}
+
+export const getMethodologyAdoption = async (orgId: string): Promise<MethodologyAdoption> => {
+  const empty: MethodologyAdoption = {
+    avgDepthScore: 0,
+    depthTrend: [],
+    formUsageHeatmap: [],
+    stepCompletionFunnel: [],
+    topToolsByEffectiveness: [],
+  }
+
+  if (!(await checkViewPermission(orgId))) return empty
+
+  const supabase = await createClient()
+
+  // Fetch all org projects (last 12 months for trend, all for funnel)
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, created_at, status, current_step')
+    .eq('org_id', orgId)
+    .in('status', ['active', 'draft', 'completed'])
+    .limit(500)
+
+  if (!projects || projects.length === 0) return empty
+
+  const projectIds = projects.map((p) => p.id)
+
+  // Fetch all project_forms with step info
+  const { data: forms } = await supabase
+    .from('project_forms')
+    .select('project_id, form_type, step, created_at')
+    .in('project_id', projectIds)
+    .limit(20000)
+
+  const allForms = forms ?? []
+
+  // --- Avg depth score (using calculateMethodologyDepth) ---
+  const formTypesByProject = new Map<string, Set<string>>()
+  for (const f of allForms) {
+    if (!f.project_id) continue
+    const s = formTypesByProject.get(f.project_id) ?? new Set<string>()
+    s.add(f.form_type)
+    formTypesByProject.set(f.project_id, s)
+  }
+
+  const depthScores = projects.map((p) => {
+    const types = formTypesByProject.get(p.id) ?? new Set<string>()
+    return calculateMethodologyDepth(types).score
+  })
+
+  const avgDepthScore =
+    depthScores.length > 0
+      ? Math.round(depthScores.reduce((a, b) => a + b, 0) / depthScores.length)
+      : 0
+
+  // --- Depth trend (monthly, last 12 months) ---
+  const now = new Date()
+  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1)
+
+  // Group projects into creation-month buckets
+  const monthBuckets = new Map<string, { totalDepth: number; count: number }>()
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(twelveMonthsAgo.getFullYear(), twelveMonthsAgo.getMonth() + i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    monthBuckets.set(key, { totalDepth: 0, count: 0 })
+  }
+
+  for (let i = 0; i < projects.length; i++) {
+    const p = projects[i]!
+    const d = new Date(p.created_at)
+    if (d < twelveMonthsAgo) continue
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const bucket = monthBuckets.get(key)
+    if (bucket) {
+      bucket.totalDepth += depthScores[i] ?? 0
+      bucket.count += 1
+    }
+  }
+
+  const depthTrend = Array.from(monthBuckets.entries()).map(([key, bucket]) => {
+    const [year, month] = key.split('-')
+    const d = new Date(Number(year), Number(month) - 1, 1)
+    return {
+      month: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+      avgDepth: bucket.count > 0 ? Math.round(bucket.totalDepth / bucket.count) : 0,
+      projectCount: bucket.count,
+    }
+  })
+
+  // --- Form usage heatmap (all form types × their step number) ---
+  // Build a master list of all form types from STEP_CONTENT
+  type FormEntry = { formType: string; displayName: string; stepNumber: number }
+  const allFormDefs: FormEntry[] = []
+  for (let s = 1; s <= 6; s++) {
+    const stepContent = STEP_CONTENT[s as 1 | 2 | 3 | 4 | 5 | 6]
+    for (const form of stepContent.forms) {
+      allFormDefs.push({ formType: form.type, displayName: form.name, stepNumber: s })
+    }
+  }
+
+  // Count usage across all projects
+  const usageCounts = new Map<string, number>()
+  for (const f of allForms) {
+    usageCounts.set(f.form_type, (usageCounts.get(f.form_type) ?? 0) + 1)
+  }
+
+  const formUsageHeatmap = allFormDefs.map((def) => ({
+    formType: def.formType,
+    displayName: def.displayName,
+    usageCount: usageCounts.get(def.formType) ?? 0,
+    stepNumber: def.stepNumber,
+  }))
+
+  // --- Step completion funnel ---
+  const total = projects.length
+  const stepCompletionFunnel = PIPS_STEPS.map((step, idx) => {
+    const reached = projects.filter((p) => {
+      if (p.status === 'completed') return true
+      const projectIdx = STEP_ENUM_TO_INDEX[p.current_step] ?? 0
+      return projectIdx >= idx
+    }).length
+
+    return {
+      step: idx + 1,
+      stepName: step.name,
+      projectsReached: reached,
+      completionRate: total > 0 ? Math.round((reached / total) * 100) : 0,
+    }
+  })
+
+  // --- Top tools by effectiveness ---
+  // For each form type, find projects that used it and compute avg depth score
+  type ToolStat = { totalDepth: number; projectCount: number }
+  const toolStats = new Map<string, ToolStat>()
+
+  for (const [projectId, formTypes] of formTypesByProject) {
+    const pIdx = projectIds.indexOf(projectId)
+    const depth = depthScores[pIdx] ?? 0
+    for (const formType of formTypes) {
+      const stat = toolStats.get(formType) ?? { totalDepth: 0, projectCount: 0 }
+      stat.totalDepth += depth
+      stat.projectCount += 1
+      toolStats.set(formType, stat)
+    }
+  }
+
+  // Map to display names
+  const formTypeToName = new Map<string, string>()
+  for (const def of allFormDefs) {
+    formTypeToName.set(def.formType, def.displayName)
+  }
+
+  const topToolsByEffectiveness = Array.from(toolStats.entries())
+    .filter(([, stat]) => stat.projectCount >= 1)
+    .map(([formType, stat]) => ({
+      formType,
+      displayName:
+        formTypeToName.get(formType) ??
+        formType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      avgProjectDepth: Math.round(stat.totalDepth / stat.projectCount),
+      projectCount: stat.projectCount,
+    }))
+    .sort((a, b) => b.avgProjectDepth - a.avgProjectDepth)
+    .slice(0, 10)
+
+  return {
+    avgDepthScore,
+    depthTrend,
+    formUsageHeatmap,
+    stepCompletionFunnel,
+    topToolsByEffectiveness,
+  }
+}
+
+/* ============================================================
+   Project Comparison Report
+   ============================================================ */
+
+export type ProjectComparisonItem = {
+  id: string
+  title: string
+  status: string
+  createdAt: string
+  cycleTimeDays: number | null
+  methodologyDepth: number
+  ticketsCreated: number
+  ticketsResolved: number
+  formsCompleted: number
+  measurablesCount: number
+  projectedSavings: number
+}
+
+export type ProjectComparisonData = {
+  projects: ProjectComparisonItem[]
+}
+
+export const getProjectComparison = async (
+  orgId: string,
+  projectIds: string[],
+): Promise<ProjectComparisonData> => {
+  if (!(await checkViewPermission(orgId))) return { projects: [] }
+  if (projectIds.length === 0) return { projects: [] }
+
+  const supabase = await createClient()
+
+  // Validate all projects belong to this org (defense-in-depth)
+  const { data: orgProjects } = await supabase
+    .from('projects')
+    .select('id, title, status, created_at, completed_at')
+    .eq('org_id', orgId)
+    .in('id', projectIds)
+    .limit(5)
+
+  if (!orgProjects || orgProjects.length === 0) return { projects: [] }
+
+  const validIds = orgProjects.map((p) => p.id)
+
+  // Fetch all data in parallel
+  const [formsRes, ticketsRes] = await Promise.all([
+    supabase
+      .from('project_forms')
+      .select('project_id, form_type, data')
+      .in('project_id', validIds)
+      .limit(5000),
+
+    supabase.from('tickets').select('project_id, status').in('project_id', validIds).limit(5000),
+  ])
+
+  const allForms = formsRes.data ?? []
+  const allTickets = ticketsRes.data ?? []
+
+  // Build per-project maps
+  const formTypesByProject = new Map<string, Set<string>>()
+  const formDataByProject = new Map<string, Array<{ form_type: string; data: unknown }>>()
+
+  for (const f of allForms) {
+    if (!f.project_id) continue
+    const types = formTypesByProject.get(f.project_id) ?? new Set<string>()
+    types.add(f.form_type)
+    formTypesByProject.set(f.project_id, types)
+
+    const dataArr = formDataByProject.get(f.project_id) ?? []
+    dataArr.push({ form_type: f.form_type, data: f.data })
+    formDataByProject.set(f.project_id, dataArr)
+  }
+
+  const ticketsByProject = new Map<string, { created: number; resolved: number }>()
+  for (const t of allTickets) {
+    if (!t.project_id) continue
+    const entry = ticketsByProject.get(t.project_id) ?? { created: 0, resolved: 0 }
+    entry.created += 1
+    if (t.status === 'done') entry.resolved += 1
+    ticketsByProject.set(t.project_id, entry)
+  }
+
+  type ProblemFormData = {
+    measurables?: Array<{ asIsValue: number; targetValue: number; unit?: string }>
+    hourlyRate?: number
+  }
+
+  const projects: ProjectComparisonItem[] = orgProjects.map((p) => {
+    const formTypes = formTypesByProject.get(p.id) ?? new Set<string>()
+    const depth = calculateMethodologyDepth(formTypes).score
+    const tickets = ticketsByProject.get(p.id) ?? { created: 0, resolved: 0 }
+
+    // Cycle time
+    let cycleTimeDays: number | null = null
+    if (p.status === 'completed' && p.completed_at && p.created_at) {
+      const ms = new Date(p.completed_at).getTime() - new Date(p.created_at).getTime()
+      cycleTimeDays = Math.round((ms / (1000 * 60 * 60 * 24)) * 10) / 10
+    }
+
+    // Projected savings + measurables from problem_statement
+    let projectedSavings = 0
+    let measurablesCount = 0
+    const projectForms = formDataByProject.get(p.id) ?? []
+    for (const f of projectForms) {
+      if (f.form_type !== 'problem_statement') continue
+      const d = f.data as ProblemFormData
+      const hourlyRate = d.hourlyRate ?? 75
+      for (const m of d.measurables ?? []) {
+        const improvement = Math.abs((m.targetValue ?? 0) - (m.asIsValue ?? 0))
+        if (improvement <= 0) continue
+        measurablesCount++
+        const unitLower = (m.unit ?? '').toLowerCase()
+        if (unitLower.includes('hour') || unitLower.includes('hr')) {
+          let annualHours = improvement
+          if (unitLower.includes('/week') || unitLower.includes('week'))
+            annualHours = improvement * 52
+          else if (unitLower.includes('/day') || unitLower.includes('day'))
+            annualHours = improvement * 260
+          else if (unitLower.includes('/month') || unitLower.includes('month'))
+            annualHours = improvement * 12
+          projectedSavings += annualHours * hourlyRate
+        } else if (
+          unitLower.startsWith('$') ||
+          unitLower.includes('dollar') ||
+          unitLower.includes('cost') ||
+          unitLower.includes('usd')
+        ) {
+          projectedSavings += improvement
+        }
+      }
+    }
+
+    return {
+      id: p.id,
+      title: p.title,
+      status: p.status,
+      createdAt: p.created_at,
+      cycleTimeDays,
+      methodologyDepth: depth,
+      ticketsCreated: tickets.created,
+      ticketsResolved: tickets.resolved,
+      formsCompleted: formTypes.size,
+      measurablesCount,
+      projectedSavings: Math.round(projectedSavings),
+    }
+  })
+
+  // Preserve the order of the requested projectIds
+  const orderedProjects = projectIds
+    .map((id) => projects.find((p) => p.id === id))
+    .filter((p): p is ProjectComparisonItem => p !== undefined)
+
+  return { projects: orderedProjects }
+}
+
+export type ProjectListItem = {
+  id: string
+  title: string
+  status: string
+}
+
+export const getProjectListForComparison = async (orgId: string): Promise<ProjectListItem[]> => {
+  if (!(await checkViewPermission(orgId))) return []
+
+  const supabase = await createClient()
+
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, title, status')
+    .eq('org_id', orgId)
+    .in('status', ['active', 'draft', 'completed'])
+    .order('title', { ascending: true })
+    .limit(200)
+
+  return (projects ?? []).map((p) => ({
+    id: p.id,
+    title: p.title,
+    status: p.status as string,
+  }))
 }

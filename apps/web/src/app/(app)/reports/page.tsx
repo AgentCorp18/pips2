@@ -17,8 +17,10 @@ import {
   Clock,
   CheckCircle2,
   Layers,
+  GitCompare,
 } from 'lucide-react'
-import { getReportsHubData } from './actions'
+import { getReportsHubData, getRecentAchievements } from './actions'
+import { RecentAchievements } from '@/components/reports/recent-achievements'
 
 export const metadata: Metadata = {
   title: 'Reports',
@@ -71,7 +73,10 @@ const ReportsPage = async () => {
     redirect('/onboarding')
   }
 
-  const data = await getReportsHubData(currentOrg.orgId)
+  const [data, recentAchievements] = await Promise.all([
+    getReportsHubData(currentOrg.orgId),
+    getRecentAchievements(currentOrg.orgId),
+  ])
 
   const depthColor =
     data.avgMethodologyDepth >= 70
@@ -181,6 +186,18 @@ const ReportsPage = async () => {
             data.avgCycleTimeDays !== null
               ? `${data.avgCycleTimeDays}d avg cycle time`
               : `${data.activeProjects} active projects`,
+        },
+        {
+          title: 'Project Comparison',
+          description: 'Compare 2–5 projects side-by-side: cycle time, depth, tickets, and ROI.',
+          href: '/reports/project-comparison',
+          icon: GitCompare,
+          iconColor: '#4F46E5',
+          iconBg: 'rgba(79, 70, 229, 0.12)',
+          preview:
+            data.totalProjectsCompleted + data.activeProjects >= 2
+              ? `${data.totalProjectsCompleted + data.activeProjects} projects to compare`
+              : 'Compare projects head-to-head',
         },
       ],
     },
@@ -336,6 +353,11 @@ const ReportsPage = async () => {
             </span>
           </div>
         </Card>
+      </div>
+
+      {/* Recent Achievements feed */}
+      <div className="mb-8">
+        <RecentAchievements achievements={recentAchievements} />
       </div>
 
       {/* Report categories */}

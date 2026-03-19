@@ -129,6 +129,22 @@ export const LazyTimeSavingsChart = dynamic(
   { ssr: false, loading: () => <ChartSkeleton /> },
 )
 
+export const LazyDepthTrendChart = dynamic(
+  () =>
+    import('@/components/reports/depth-trend-chart').then((mod) => ({
+      default: mod.DepthTrendChart,
+    })),
+  { ssr: false, loading: () => <ChartSkeleton /> },
+)
+
+export const LazyToolEffectivenessChart = dynamic(
+  () =>
+    import('@/components/reports/tool-effectiveness-chart').then((mod) => ({
+      default: mod.ToolEffectivenessChart,
+    })),
+  { ssr: false, loading: () => <ChartSkeleton /> },
+)
+
 /* ============================================================
    Type re-exports — callers keep the same import source
    ============================================================ */
@@ -143,3 +159,5 @@ export type { StepProgressData } from '@/components/reports/step-progress-chart'
 export type { TeamContributionData } from '@/components/reports/team-contributions-chart'
 export type { ActivityTimelineData } from '@/components/reports/activity-timeline-chart'
 export type { FormCompletionData } from '@/components/reports/form-completion-chart'
+export type { DepthTrendDataPoint } from '@/components/reports/depth-trend-chart'
+export type { ToolEffectivenessItem } from '@/components/reports/tool-effectiveness-chart'
