@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { CheckCircle2, Circle, ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

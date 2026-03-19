@@ -1,5 +1,3 @@
-'use client'
-
 type TrainingProgressRingProps = {
   progress: number // 0 to 1
   size?: number

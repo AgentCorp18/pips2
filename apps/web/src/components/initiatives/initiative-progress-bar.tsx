@@ -1,5 +1,3 @@
-'use client'
-
 import type { InitiativeProgress } from '@/types/initiatives'
 
 type InitiativeProgressBarProps = {

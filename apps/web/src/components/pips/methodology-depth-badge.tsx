@@ -1,5 +1,3 @@
-'use client'
-
 import { calculateMethodologyDepth, type MethodologyDepthResult } from '@pips/shared'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 

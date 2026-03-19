@@ -1,5 +1,3 @@
-'use client'
-
 import { Clock, Timer, AlertTriangle } from 'lucide-react'
 import {
   getCycleTime,

@@ -1,5 +1,3 @@
-'use client'
-
 import { getFormDisplayName } from '@/lib/form-utils'
 import { STEP_CONTENT } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'

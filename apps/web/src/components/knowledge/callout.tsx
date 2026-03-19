@@ -1,5 +1,3 @@
-'use client'
-
 import type { ReactNode } from 'react'
 import { Lightbulb, AlertTriangle, Info, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
