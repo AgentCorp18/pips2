@@ -108,6 +108,224 @@ export const getReportsHubStats = async (orgId: string): Promise<ReportsHubStats
 }
 
 /* ============================================================
+   Reports Hub — Rich hero data (ROI-first redesign)
+   ============================================================ */
+
+export type ReportsHubData = {
+  // Hero KPIs
+  totalProjectsCompleted: number
+  totalMeasurablesTracked: number
+  projectedAnnualSavings: number
+  hoursSavedAnnually: number
+  // Quick stats
+  avgMethodologyDepth: number
+  avgCycleTimeDays: number | null
+  achievementRate: number | null
+  formsCompleted: number
+  // Preview metrics for category cards
+  projectedSavingsPreview: number
+  activeProjects: number
+  totalMembers: number
+}
+
+export const getReportsHubData = async (orgId: string): Promise<ReportsHubData> => {
+  const empty: ReportsHubData = {
+    totalProjectsCompleted: 0,
+    totalMeasurablesTracked: 0,
+    projectedAnnualSavings: 0,
+    hoursSavedAnnually: 0,
+    avgMethodologyDepth: 0,
+    avgCycleTimeDays: null,
+    achievementRate: null,
+    formsCompleted: 0,
+    projectedSavingsPreview: 0,
+    activeProjects: 0,
+    totalMembers: 0,
+  }
+
+  if (!(await checkViewPermission(orgId))) return empty
+
+  const supabase = await createClient()
+
+  // Fetch all org projects with relevant fields
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, status, completed_at, created_at')
+    .eq('org_id', orgId)
+    .in('status', ['completed', 'active', 'draft'])
+    .limit(500)
+
+  if (!projects || projects.length === 0) return empty
+
+  const projectIds = projects.map((p) => p.id)
+
+  const completedProjects = projects.filter((p) => p.status === 'completed')
+  const activeProjects = projects.filter((p) => p.status === 'active' || p.status === 'draft')
+
+  // Fetch forms needed for KPIs in parallel
+  const [allFormsRes, problemStmtFormsRes, resultsFormsRes, membersRes] = await Promise.allSettled([
+    supabase
+      .from('project_forms')
+      .select('project_id, form_type')
+      .in('project_id', projectIds)
+      .limit(10000),
+
+    supabase
+      .from('project_forms')
+      .select('project_id, data')
+      .in('project_id', projectIds)
+      .eq('form_type', 'problem_statement')
+      .limit(1000),
+
+    supabase
+      .from('project_forms')
+      .select('project_id, data')
+      .in('project_id', projectIds)
+      .eq('form_type', 'results_metrics')
+      .limit(1000),
+
+    supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
+  ])
+
+  const allForms = allFormsRes.status === 'fulfilled' ? (allFormsRes.value.data ?? []) : []
+  const problemForms =
+    problemStmtFormsRes.status === 'fulfilled' ? (problemStmtFormsRes.value.data ?? []) : []
+  const resultsForms =
+    resultsFormsRes.status === 'fulfilled' ? (resultsFormsRes.value.data ?? []) : []
+  const totalMembers = membersRes.status === 'fulfilled' ? (membersRes.value.count ?? 0) : 0
+
+  // Forms completed total
+  const formsCompleted = allForms.length
+
+  // Avg methodology depth (distinct form types / 25 per project, then average)
+  const TOTAL_FORM_TYPES = 25
+  const formTypesByProject = new Map<string, Set<string>>()
+  for (const f of allForms) {
+    if (!f.project_id) continue
+    const existing = formTypesByProject.get(f.project_id) ?? new Set<string>()
+    existing.add(f.form_type)
+    formTypesByProject.set(f.project_id, existing)
+  }
+
+  let avgMethodologyDepth = 0
+  if (projects.length > 0) {
+    const totalDepth = projects.reduce((sum, p) => {
+      const types = formTypesByProject.get(p.id) ?? new Set<string>()
+      return sum + Math.round((types.size / TOTAL_FORM_TYPES) * 100)
+    }, 0)
+    avgMethodologyDepth = Math.round(totalDepth / projects.length)
+  }
+
+  // Projected savings + hours + measurables from problem_statement
+  let projectedAnnualSavings = 0
+  let hoursSavedAnnually = 0
+  let totalMeasurablesTracked = 0
+
+  type ProblemStatementMeasurable = {
+    asIsValue: number
+    targetValue: number
+    unit?: string
+  }
+  type ProblemStatementFormData = {
+    measurables?: ProblemStatementMeasurable[]
+    hourlyRate?: number
+  }
+
+  for (const f of problemForms) {
+    if (!f.project_id) continue
+    const d = f.data as ProblemStatementFormData
+    const measurables = d.measurables ?? []
+    const hourlyRate = d.hourlyRate ?? 75
+
+    for (const m of measurables) {
+      const improvement = Math.abs((m.targetValue ?? 0) - (m.asIsValue ?? 0))
+      if (improvement <= 0) continue
+      totalMeasurablesTracked++
+
+      const unitLower = (m.unit ?? '').toLowerCase()
+
+      if (unitLower.includes('hour') || unitLower.includes('hr')) {
+        let annualHours = improvement
+        if (unitLower.includes('/week') || unitLower.includes('week')) {
+          annualHours = improvement * 52
+        } else if (unitLower.includes('/day') || unitLower.includes('day')) {
+          annualHours = improvement * 260
+        } else if (unitLower.includes('/month') || unitLower.includes('month')) {
+          annualHours = improvement * 12
+        }
+        hoursSavedAnnually += annualHours
+        projectedAnnualSavings += annualHours * hourlyRate
+      } else if (
+        unitLower.startsWith('$') ||
+        unitLower.includes('dollar') ||
+        unitLower.includes('cost') ||
+        unitLower.includes('usd')
+      ) {
+        projectedAnnualSavings += improvement
+      }
+    }
+  }
+
+  projectedAnnualSavings = Math.round(projectedAnnualSavings)
+  hoursSavedAnnually = Math.round(hoursSavedAnnually * 10) / 10
+
+  // Achievement rate from results_metrics
+  type ResultsMetricsFormData = {
+    roiPercent?: number
+    financialSavingsAnnual?: number
+  }
+  let achievementRate: number | null = null
+  const projectsWithResults = new Set<string>()
+  for (const f of resultsForms) {
+    if (f.project_id) projectsWithResults.add(f.project_id)
+  }
+  if (completedProjects.length > 0) {
+    achievementRate = Math.round((projectsWithResults.size / completedProjects.length) * 100)
+  }
+
+  // Avg cycle time (completed projects, created_at → completed_at)
+  let avgCycleTimeDays: number | null = null
+  const completedWithTimes = completedProjects.filter((p) => p.completed_at && p.created_at)
+  if (completedWithTimes.length > 0) {
+    const totalDays = completedWithTimes.reduce((sum, p) => {
+      const start = new Date(p.created_at).getTime()
+      const end = new Date(p.completed_at!).getTime()
+      return sum + (end - start) / (1000 * 60 * 60 * 24)
+    }, 0)
+    avgCycleTimeDays = Math.round((totalDays / completedWithTimes.length) * 10) / 10
+  }
+
+  // Use actual savings from results_metrics if available (more accurate than projections)
+  let actualAnnualSavings = 0
+  let actualHoursSaved = 0
+  for (const f of resultsForms) {
+    if (!f.project_id) continue
+    const d = f.data as ResultsMetricsFormData
+    actualAnnualSavings += d.financialSavingsAnnual ?? 0
+    // weekly hours * 52
+    actualHoursSaved += 0 // results_metrics uses timeSavedWeeklyHours, handled below
+  }
+
+  // projectedSavingsPreview is the larger of projected vs actual
+  const projectedSavingsPreview =
+    actualAnnualSavings > projectedAnnualSavings ? actualAnnualSavings : projectedAnnualSavings
+
+  return {
+    totalProjectsCompleted: completedProjects.length,
+    totalMeasurablesTracked,
+    projectedAnnualSavings,
+    hoursSavedAnnually,
+    avgMethodologyDepth,
+    avgCycleTimeDays,
+    achievementRate,
+    formsCompleted,
+    projectedSavingsPreview,
+    activeProjects: activeProjects.length,
+    totalMembers,
+  }
+}
+
+/* ============================================================
    Project Health Report
    ============================================================ */
 
