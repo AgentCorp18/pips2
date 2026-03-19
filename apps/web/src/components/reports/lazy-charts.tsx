@@ -113,6 +113,22 @@ export const LazyFormCompletionChart = dynamic(
   { ssr: false, loading: () => <ChartSkeleton /> },
 )
 
+export const LazySavingsTrendChart = dynamic(
+  () =>
+    import('@/components/reports/savings-trend-chart').then((mod) => ({
+      default: mod.SavingsTrendChart,
+    })),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[300px]" /> },
+)
+
+export const LazyTimeSavingsChart = dynamic(
+  () =>
+    import('@/components/reports/time-savings-chart').then((mod) => ({
+      default: mod.TimeSavingsChart,
+    })),
+  { ssr: false, loading: () => <ChartSkeleton /> },
+)
+
 /* ============================================================
    Type re-exports — callers keep the same import source
    ============================================================ */
