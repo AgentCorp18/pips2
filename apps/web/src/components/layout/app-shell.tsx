@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Search,
@@ -87,6 +87,7 @@ type AppShellProps = {
 
 export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProps) => {
   const pathname = usePathname()
+  const router = useRouter()
   const mounted = useMounted()
   const [commandOpen, setCommandOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -108,10 +109,9 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
 
   // Keyboard shortcuts: Cmd+K for search, g+<key> for navigation
   const [gKeyPending, setGKeyPending] = useState(false)
+  const gTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    let gTimeout: ReturnType<typeof setTimeout> | null = null
-
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't fire shortcuts when typing in inputs
       const target = e.target as HTMLElement
@@ -136,26 +136,26 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
         const dest = SHORTCUT_MAP[e.key]
         if (dest) {
           e.preventDefault()
-          window.location.href = dest
+          router.push(dest)
         }
         setGKeyPending(false)
-        if (gTimeout) clearTimeout(gTimeout)
+        if (gTimeoutRef.current) clearTimeout(gTimeoutRef.current)
         return
       }
 
       if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
         setGKeyPending(true)
-        if (gTimeout) clearTimeout(gTimeout)
-        gTimeout = setTimeout(() => setGKeyPending(false), 1500)
+        if (gTimeoutRef.current) clearTimeout(gTimeoutRef.current)
+        gTimeoutRef.current = setTimeout(() => setGKeyPending(false), 1500)
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
-      if (gTimeout) clearTimeout(gTimeout)
+      if (gTimeoutRef.current) clearTimeout(gTimeoutRef.current)
     }
-  }, [gKeyPending])
+  }, [gKeyPending, router])
 
   const openCommandPalette = useCallback(() => {
     setCommandOpen(true)

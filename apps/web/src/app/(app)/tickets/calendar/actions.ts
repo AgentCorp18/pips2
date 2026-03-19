@@ -43,7 +43,7 @@ export const getTicketsForCalendar = async (
 
   // Query from 7 days before month start to 7 days after month end
   // to catch tickets visible on adjacent calendar cells
-  const startDate = new Date(year, month - 1, -6) // 7 days before 1st
+  const startDate = new Date(year, month - 1, 1 - 7) // 7 days before 1st
   const endDate = new Date(year, month, 7) // 7 days after last day
 
   const startStr = startDate.toISOString().split('T')[0]!

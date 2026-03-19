@@ -318,6 +318,7 @@ export const getTeamWorkload = async (teamId: string): Promise<TeamWorkloadMembe
     .select('assignee_id, status, due_date')
     .eq('org_id', orgId)
     .in('assignee_id', userIds)
+    .limit(500)
 
   // Build workload map
   const workloadMap = new Map<

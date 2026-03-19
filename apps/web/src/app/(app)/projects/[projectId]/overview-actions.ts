@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getUserOrg } from '@/lib/permissions'
 import {
   stepEnumToNumber,
   STEP_CONTENT,
@@ -61,19 +62,25 @@ export type StepSummary = {
    ============================================================ */
 
 export const getProjectStats = async (projectId: string): Promise<ProjectStats> => {
+  const membership = await getUserOrg()
+  if (!membership) return { ticketsCreated: 0, ticketsCompleted: 0, daysActive: 1 }
+
+  const orgId = membership.org_id as string
   const supabase = await createClient()
 
   const [createdRes, completedRes, projectRes] = await Promise.all([
     supabase
       .from('tickets')
       .select('id', { count: 'exact', head: true })
-      .eq('project_id', projectId),
+      .eq('project_id', projectId)
+      .eq('org_id', orgId),
     supabase
       .from('tickets')
       .select('id', { count: 'exact', head: true })
       .eq('project_id', projectId)
+      .eq('org_id', orgId)
       .eq('status', 'done'),
-    supabase.from('projects').select('created_at').eq('id', projectId).single(),
+    supabase.from('projects').select('created_at').eq('id', projectId).eq('org_id', orgId).single(),
   ])
 
   if (createdRes.error || completedRes.error || projectRes.error) {
@@ -103,7 +110,21 @@ export const getProjectStats = async (projectId: string): Promise<ProjectStats> 
    ============================================================ */
 
 export const getProjectMembers = async (projectId: string): Promise<ProjectMember[]> => {
+  const membership = await getUserOrg()
+  if (!membership) return []
+
+  const orgId = membership.org_id as string
   const supabase = await createClient()
+
+  // Verify the project belongs to the user's org before returning members
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('id', projectId)
+    .eq('org_id', orgId)
+    .maybeSingle()
+
+  if (!project) return []
 
   const { data: members } = await supabase
     .from('project_members')
@@ -425,7 +446,21 @@ const STEP_EXTRACTORS: Record<number, (forms: FormRow[]) => StepHighlight[]> = {
 }
 
 export const getStepSummaries = async (projectId: string): Promise<Record<number, StepSummary>> => {
+  const membership = await getUserOrg()
+  if (!membership) return {}
+
+  const orgId = membership.org_id as string
   const supabase = await createClient()
+
+  // Verify the project belongs to the user's org before returning form data
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('id', projectId)
+    .eq('org_id', orgId)
+    .maybeSingle()
+
+  if (!project) return {}
 
   const { data: forms } = await supabase
     .from('project_forms')
