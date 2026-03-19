@@ -14,9 +14,11 @@ import {
   getRecentActivity,
   getAgingTickets,
   getDashboardMetrics,
+  getOrgImpactSummary,
 } from './actions'
 import { MetricsWidgets } from '@/components/dashboard/metrics-widgets'
-import type { DashboardMetrics } from './actions'
+import type { DashboardMetrics, OrgImpactSummary } from './actions'
+import { OrgImpactSummary as OrgImpactSummaryWidget } from '@/components/dashboard/org-impact-summary'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { WelcomeCards } from '@/components/dashboard/welcome-cards'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
@@ -74,14 +76,25 @@ const DashboardPage = async () => {
     ticketsCreatedThisWeek: 0,
     formsCompletedCount: 0,
   }
+  let impactSummary: OrgImpactSummary = {
+    projectsCompleted: 0,
+    ticketsResolved: 0,
+    formsCompleted: 0,
+    avgMethodologyDepth: null,
+    avgCycleTimeDays: null,
+    rootCausesIdentified: 0,
+    solutionsEvaluated: 0,
+    lessonsDocumented: 0,
+  }
 
   try {
-    ;[stats, stepData, activity, agingTickets, metrics] = await Promise.all([
+    ;[stats, stepData, activity, agingTickets, metrics, impactSummary] = await Promise.all([
       getDashboardStats(orgId),
       getProjectsByStep(orgId),
       getRecentActivity(orgId, 10),
       getAgingTickets(orgId),
       getDashboardMetrics(orgId),
+      getOrgImpactSummary(orgId),
     ])
   } catch (err) {
     console.error('[DashboardPage] Error fetching data:', err)
@@ -147,6 +160,11 @@ const DashboardPage = async () => {
           {/* Metrics widgets — completion rate, cycle time, velocity, forms */}
           <div className="mt-6">
             <MetricsWidgets metrics={metrics} />
+          </div>
+
+          {/* Org Impact Summary — Phase 0A ROI Visibility */}
+          <div className="mt-8">
+            <OrgImpactSummaryWidget data={impactSummary} />
           </div>
 
           {/* Sample project CTA — shown when user has no projects */}

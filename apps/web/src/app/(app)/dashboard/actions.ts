@@ -338,6 +338,152 @@ export const getDashboardMetrics = async (orgId: string): Promise<DashboardMetri
 }
 
 /* ============================================================
+   getOrgImpactSummary — Phase 0A ROI Visibility
+   ============================================================ */
+
+export type OrgImpactSummary = {
+  projectsCompleted: number
+  ticketsResolved: number
+  formsCompleted: number
+  avgMethodologyDepth: number | null // 0-100
+  avgCycleTimeDays: number | null
+  rootCausesIdentified: number // count of fishbone + five_why forms
+  solutionsEvaluated: number // count of brainstorming + criteria_matrix forms
+  lessonsDocumented: number // count of evaluation + lessons_learned + before_after forms
+}
+
+export const getOrgImpactSummary = async (orgId: string): Promise<OrgImpactSummary> => {
+  const empty: OrgImpactSummary = {
+    projectsCompleted: 0,
+    ticketsResolved: 0,
+    formsCompleted: 0,
+    avgMethodologyDepth: null,
+    avgCycleTimeDays: null,
+    rootCausesIdentified: 0,
+    solutionsEvaluated: 0,
+    lessonsDocumented: 0,
+  }
+
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return empty
+  }
+
+  const supabase = await createClient()
+
+  // Fetch org project IDs first — project_forms has no org_id column
+  const { data: orgProjectsData } = await supabase.from('projects').select('id').eq('org_id', orgId)
+
+  const projectIds = (orgProjectsData ?? []).map((p) => p.id)
+
+  const [completedProjectsRes, resolvedTicketsRes, cycleTimeTicketsRes, formsRes] =
+    await Promise.all([
+      supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('status', 'completed'),
+
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('status', 'done'),
+
+      supabase
+        .from('tickets')
+        .select('created_at, resolved_at')
+        .eq('org_id', orgId)
+        .eq('status', 'done')
+        .not('resolved_at', 'is', null),
+
+      projectIds.length > 0
+        ? supabase
+            .from('project_forms')
+            .select('project_id, form_type')
+            .in('project_id', projectIds)
+        : Promise.resolve({
+            data: [] as Array<{ project_id: string; form_type: string }>,
+            error: null,
+          }),
+    ])
+
+  const forms = formsRes.data ?? []
+
+  // Total forms completed
+  const formsCompleted = forms.length
+
+  // Root causes: fishbone + five_why forms
+  const rootCausesIdentified = forms.filter(
+    (f) => f.form_type === 'fishbone' || f.form_type === 'five_why',
+  ).length
+
+  // Solutions evaluated: brainstorming + criteria_matrix forms
+  const solutionsEvaluated = forms.filter(
+    (f) => f.form_type === 'brainstorming' || f.form_type === 'criteria_matrix',
+  ).length
+
+  // Lessons documented: evaluation + lessons_learned + before_after forms
+  const lessonsDocumented = forms.filter(
+    (f) =>
+      f.form_type === 'evaluation' ||
+      f.form_type === 'lessons_learned' ||
+      f.form_type === 'before_after',
+  ).length
+
+  // Avg methodology depth — per project: count of distinct form_types / total possible, scaled 0-100
+  let avgMethodologyDepth: number | null = null
+  if (projectIds.length > 0 && forms.length > 0) {
+    // Total possible form types across all steps (matches calculateMethodologyDepth totalCount)
+    // Computed from STEP_CONTENT in @pips/shared — 25 form types total
+    const TOTAL_FORM_TYPES = 25
+    const formsByProject = new Map<string, Set<string>>()
+    for (const f of forms) {
+      const existing = formsByProject.get(f.project_id) ?? new Set<string>()
+      existing.add(f.form_type)
+      formsByProject.set(f.project_id, existing)
+    }
+    const depthScores: number[] = []
+    for (const [, formTypes] of formsByProject) {
+      depthScores.push(Math.round((formTypes.size / TOTAL_FORM_TYPES) * 100))
+    }
+    if (depthScores.length > 0) {
+      avgMethodologyDepth = Math.round(depthScores.reduce((a, b) => a + b, 0) / depthScores.length)
+    }
+  }
+
+  // Avg cycle time: (resolved_at - created_at) on done tickets
+  let avgCycleTimeDays: number | null = null
+  const cycleTickets = cycleTimeTicketsRes.data ?? []
+  if (cycleTickets.length > 0) {
+    const cycleTimes = cycleTickets
+      .map((t) => {
+        const start = new Date(t.created_at).getTime()
+        const end = new Date(t.resolved_at!).getTime()
+        return (end - start) / (1000 * 60 * 60 * 24)
+      })
+      .filter((d) => d >= 0)
+
+    if (cycleTimes.length > 0) {
+      avgCycleTimeDays =
+        Math.round((cycleTimes.reduce((a, b) => a + b, 0) / cycleTimes.length) * 10) / 10
+    }
+  }
+
+  return {
+    projectsCompleted: completedProjectsRes.count ?? 0,
+    ticketsResolved: resolvedTicketsRes.count ?? 0,
+    formsCompleted,
+    avgMethodologyDepth,
+    avgCycleTimeDays,
+    rootCausesIdentified,
+    solutionsEvaluated,
+    lessonsDocumented,
+  }
+}
+
+/* ============================================================
    getRecentActivity
    ============================================================ */
 

@@ -12,7 +12,9 @@ import {
   getProjectActivity,
   getStepSummaries,
   getProjectProgress,
+  getProjectValueNarrative,
 } from './overview-actions'
+import { ProjectValueCard } from '@/components/pips/project-value-card'
 import { OverviewStats } from './overview-stats'
 import { ActivityFeed } from './activity-feed'
 import { MembersList } from './members-list'
@@ -69,12 +71,13 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     step_number: stepEnumToNumber(s.step),
   }))
 
-  const [stats, members, activity, stepSummaries, progress] = await Promise.all([
+  const [stats, members, activity, stepSummaries, progress, valueNarrative] = await Promise.all([
     getProjectStats(projectId),
     getProjectMembers(projectId),
     getProjectActivity(projectId),
     getStepSummaries(projectId),
     getProjectProgress(projectId),
+    getProjectValueNarrative(projectId),
   ])
 
   const profilesRaw = project.profiles as unknown
@@ -115,6 +118,9 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       {currentStepNum === 1 && progress.formsStarted === 0 && (
         <StartHereCard projectId={projectId} />
       )}
+
+      {/* Phase 0B: Value Narrative — below header, above step list, only when forms exist */}
+      {valueNarrative !== null && <ProjectValueCard data={valueNarrative} />}
 
       <div className="flex items-center justify-end gap-2">
         <Button

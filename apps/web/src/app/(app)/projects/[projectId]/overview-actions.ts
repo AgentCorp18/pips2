@@ -445,6 +445,249 @@ const STEP_EXTRACTORS: Record<number, (forms: FormRow[]) => StepHighlight[]> = {
   6: extractStep6,
 }
 
+/* ============================================================
+   getProjectValueNarrative — Phase 0B ROI Visibility
+   ============================================================ */
+
+export type ProjectValueNarrative = {
+  narrative: string
+  problemStatement: string | null
+  rootCausesCount: number
+  toolsUsed: string[] // e.g., ["Fishbone Diagram", "5-Why Analysis"]
+  ideasGenerated: number
+  solutionSelected: string | null
+  outcome: string | null
+  lessonsCount: number
+  formsCompleted: number
+  totalFormTypes: number // out of 25
+  methodologyDepthPercent: number
+}
+
+const TOOL_DISPLAY_NAMES: Record<string, string> = {
+  problem_statement: 'Problem Statement',
+  impact_assessment: 'Impact Assessment',
+  list_reduction: 'List Reduction',
+  weighted_voting: 'Weighted Voting',
+  fishbone: 'Fishbone Diagram',
+  five_why: '5-Why Analysis',
+  force_field: 'Force Field Analysis',
+  checksheet: 'Check Sheet',
+  pareto: 'Pareto Chart',
+  brainstorming: 'Brainstorming',
+  brainwriting: 'Brainwriting',
+  interviewing: 'Stakeholder Interviews',
+  surveying: 'Survey',
+  criteria_matrix: 'Criteria Matrix',
+  paired_comparisons: 'Paired Comparisons',
+  raci: 'RACI Chart',
+  implementation_plan: 'Implementation Plan',
+  balance_sheet: 'Balance Sheet',
+  cost_benefit: 'Cost-Benefit Analysis',
+  milestone_tracker: 'Milestone Tracker',
+  implementation_checklist: 'Implementation Checklist',
+  before_after: 'Before & After Comparison',
+  evaluation: 'Evaluation',
+  lessons_learned: 'Lessons Learned',
+  brainwriting_605: 'Brainwriting 6-3-5',
+}
+
+export const getProjectValueNarrative = async (
+  projectId: string,
+): Promise<ProjectValueNarrative | null> => {
+  const membership = await getUserOrg()
+  if (!membership) return null
+
+  const orgId = membership.org_id as string
+  const supabase = await createClient()
+
+  // Defense-in-depth: verify project belongs to user's org
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id, status')
+    .eq('id', projectId)
+    .eq('org_id', orgId)
+    .maybeSingle()
+
+  if (!project) return null
+
+  // Only show for active or completed projects with forms
+  if (project.status !== 'active' && project.status !== 'completed') return null
+
+  const { data: formsRaw } = await supabase
+    .from('project_forms')
+    .select('form_type, data')
+    .eq('project_id', projectId)
+
+  const forms = (formsRaw ?? []) as Array<{ form_type: string; data: Record<string, unknown> }>
+
+  if (forms.length === 0) return null
+
+  const TOTAL_FORM_TYPES = 25
+
+  // --- Extract data from forms ---
+
+  // Problem statement
+  const psForm = forms.find((f) => f.form_type === 'problem_statement')
+  const psData = psForm?.data as ProblemStatementData | undefined
+  const problemStatement = psData?.problemStatement?.trim() || null
+
+  // Root causes: fishbone causes count + five_why
+  let rootCausesCount = 0
+  const fishboneForm = forms.find((f) => f.form_type === 'fishbone')
+  if (fishboneForm) {
+    const d = fishboneForm.data as FishboneData
+    const cats = Array.isArray(d.categories) ? d.categories : []
+    rootCausesCount += cats.reduce(
+      (sum, cat) =>
+        sum + (Array.isArray(cat.causes) ? cat.causes.filter((c) => c.text?.trim()).length : 0),
+      0,
+    )
+  }
+  const fiveWhyForm = forms.find((f) => f.form_type === 'five_why')
+  if (fiveWhyForm) {
+    const d = fiveWhyForm.data as FiveWhyData
+    const answeredWhys = Array.isArray(d.whys) ? d.whys.filter((w) => w.answer?.trim()).length : 0
+    // Only add if fishbone didn't already capture root causes
+    if (!fishboneForm && answeredWhys > 0) {
+      rootCausesCount += answeredWhys
+    } else if (!fishboneForm) {
+      rootCausesCount = answeredWhys
+    }
+  }
+
+  // Ideas generated from brainstorming
+  let ideasGenerated = 0
+  const brainstormForm = forms.find((f) => f.form_type === 'brainstorming')
+  if (brainstormForm) {
+    const d = brainstormForm.data as BrainstormingData
+    ideasGenerated = Array.isArray(d.ideas) ? d.ideas.length : 0
+  }
+
+  // Solution selected — from criteria_matrix winner or implementation_plan
+  let solutionSelected: string | null = null
+  const criteriaForm = forms.find((f) => f.form_type === 'criteria_matrix')
+  if (criteriaForm) {
+    const d = criteriaForm.data as CriteriaMatrixData
+    const solutions = Array.isArray(d.solutions) ? d.solutions : []
+    const criteria = Array.isArray(d.criteria) ? d.criteria : []
+    if (solutions.length > 0 && criteria.length > 0) {
+      const totals = solutions.map((sol) =>
+        criteria.reduce((sum, c) => sum + (sol.scores?.[c.name] ?? 0) * (c.weight ?? 0), 0),
+      )
+      const maxIdx = totals.indexOf(Math.max(...totals))
+      solutionSelected = solutions[maxIdx]?.name ?? null
+    }
+  }
+  if (!solutionSelected) {
+    const ipForm = forms.find((f) => f.form_type === 'implementation_plan')
+    if (ipForm) {
+      const d = ipForm.data as ImplementationPlanData
+      solutionSelected = d.selectedSolution?.trim() || null
+    }
+  }
+
+  // Outcome — from evaluation or before_after summary
+  let outcome: string | null = null
+  const evalForm = forms.find((f) => f.form_type === 'evaluation')
+  if (evalForm) {
+    const d = evalForm.data as EvaluationData
+    if (d.goalDetails?.trim()) {
+      outcome = d.goalDetails.trim()
+    }
+  }
+  if (!outcome) {
+    const baForm = forms.find((f) => f.form_type === 'before_after')
+    if (baForm) {
+      const d = baForm.data as BeforeAfterData
+      if (d.summary?.trim()) {
+        outcome = d.summary.trim()
+      }
+    }
+  }
+
+  // Lessons count
+  const llForm = forms.find((f) => f.form_type === 'lessons_learned')
+  let lessonsCount = 0
+  if (llForm) {
+    const d = llForm.data as LessonsLearnedData
+    const wellCount = Array.isArray(d.wentWell) ? d.wentWell.filter((s) => s?.trim()).length : 0
+    const improveCount = Array.isArray(d.improvements)
+      ? d.improvements.filter((s) => s?.trim()).length
+      : 0
+    lessonsCount = wellCount + improveCount
+    if (lessonsCount === 0 && d.keyTakeaways?.trim()) lessonsCount = 1
+  }
+
+  // Tools used (display names for all form types present)
+  const toolsUsed = forms.map((f) => TOOL_DISPLAY_NAMES[f.form_type] ?? f.form_type).filter(Boolean)
+
+  // Forms completed and methodology depth
+  const formsCompleted = forms.length
+  const distinctFormTypes = new Set(forms.map((f) => f.form_type)).size
+  const methodologyDepthPercent = Math.round((distinctFormTypes / TOTAL_FORM_TYPES) * 100)
+
+  // Build narrative string
+  const parts: string[] = []
+
+  if (problemStatement) {
+    const truncated =
+      problemStatement.length > 120
+        ? problemStatement.slice(0, 120).trimEnd() + '...'
+        : problemStatement
+    parts.push(`Identified: ${truncated}.`)
+  }
+
+  const analysisTools = forms
+    .filter(
+      (f) =>
+        f.form_type === 'fishbone' || f.form_type === 'five_why' || f.form_type === 'force_field',
+    )
+    .map((f) => TOOL_DISPLAY_NAMES[f.form_type] ?? f.form_type)
+
+  if (rootCausesCount > 0 && analysisTools.length > 0) {
+    parts.push(
+      `Analyzed ${rootCausesCount} root cause${rootCausesCount !== 1 ? 's' : ''} using ${analysisTools.join(' and ')}.`,
+    )
+  } else if (analysisTools.length > 0) {
+    parts.push(`Conducted root cause analysis using ${analysisTools.join(' and ')}.`)
+  }
+
+  if (ideasGenerated > 0) {
+    parts.push(`Generated ${ideasGenerated} solution idea${ideasGenerated !== 1 ? 's' : ''}.`)
+  }
+
+  if (solutionSelected) {
+    parts.push(`Selected solution: "${solutionSelected}".`)
+  }
+
+  if (outcome) {
+    const truncatedOutcome =
+      outcome.length > 150 ? outcome.slice(0, 150).trimEnd() + '...' : outcome
+    parts.push(truncatedOutcome)
+  }
+
+  if (lessonsCount > 0) {
+    parts.push(`${lessonsCount} lesson${lessonsCount !== 1 ? 's' : ''} documented.`)
+  }
+
+  const narrative =
+    parts.length > 0 ? parts.join(' ') : `${formsCompleted} methodology forms completed.`
+
+  return {
+    narrative,
+    problemStatement,
+    rootCausesCount,
+    toolsUsed,
+    ideasGenerated,
+    solutionSelected,
+    outcome,
+    lessonsCount,
+    formsCompleted,
+    totalFormTypes: TOTAL_FORM_TYPES,
+    methodologyDepthPercent,
+  }
+}
+
 export const getStepSummaries = async (projectId: string): Promise<Record<number, StepSummary>> => {
   const membership = await getUserOrg()
   if (!membership) return {}
