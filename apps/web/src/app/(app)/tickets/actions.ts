@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { createTicketSchema, updateTicketSchema, ticketFiltersSchema } from '@/lib/validations'
@@ -52,21 +52,12 @@ export const createTicket = async (
     return { fieldErrors }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  if (!user) {
-    return { error: 'You must be signed in to create a ticket' }
-  }
-
-  if (!orgId) {
-    return { error: 'You must belong to an organization' }
-  }
-
-  try {
-    await requirePermission(orgId, 'ticket.create', { supabase, userId: user.id })
-  } catch {
-    return { error: 'You do not have permission to create tickets' }
-  }
+  const permError = await checkPermission(orgId, 'ticket.create', { supabase, userId: user.id })
+  if (permError) return { error: 'You do not have permission to create tickets' }
 
   // FIX 2: Validate assignee belongs to the same org
   if (result.data.assignee_id) {
@@ -159,11 +150,9 @@ export const updateTicket = async (
     return { fieldErrors }
   }
 
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase } = auth.ctx
 
   // Verify ticket exists and user has access
   // FIX 4: fetch started_at and status so we can avoid overwriting them
@@ -276,11 +265,9 @@ export const updateTicketStatus = async (
    ============================================================ */
 
 export const deleteTicket = async (ticketId: string): Promise<TicketActionState> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase } = auth.ctx
 
   const { data: ticket } = await supabase
     .from('tickets')
@@ -516,22 +503,13 @@ export const bulkUpdateTickets = async (
     return { error: 'No tickets selected' }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
-
-  if (!orgId) {
-    return { error: 'You must belong to an organization' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
   // FIX 1: wrap requirePermission in try/catch
-  try {
-    await requirePermission(orgId, 'ticket.update', { supabase, userId: user.id })
-  } catch {
-    return { error: 'You do not have permission to update tickets' }
-  }
+  const permError = await checkPermission(orgId, 'ticket.update', { supabase, userId: user.id })
+  if (permError) return { error: 'You do not have permission to update tickets' }
 
   // Validate assignee belongs to the same org if provided
   if (data.assignee_id !== undefined && data.assignee_id !== null) {
@@ -651,11 +629,9 @@ export const setParentTicket = async (
     return { error: 'A ticket cannot be its own parent' }
   }
 
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase } = auth.ctx
 
   // Verify both tickets exist and belong to same org
   const { data: ticket } = await supabase
@@ -757,11 +733,9 @@ export const setParentTicket = async (
    ============================================================ */
 
 export const removeParentTicket = async (ticketId: string): Promise<TicketActionState> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase } = auth.ctx
 
   const { data: ticket } = await supabase
     .from('tickets')
@@ -808,22 +782,13 @@ export const bulkDeleteTickets = async (ticketIds: string[]): Promise<TicketActi
     return { error: 'No tickets selected' }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
-
-  if (!orgId) {
-    return { error: 'You must belong to an organization' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
   // FIX 1: wrap requirePermission in try/catch
-  try {
-    await requirePermission(orgId, 'ticket.delete', { supabase, userId: user.id })
-  } catch {
-    return { error: 'You do not have permission to delete tickets' }
-  }
+  const permError = await checkPermission(orgId, 'ticket.delete', { supabase, userId: user.id })
+  if (permError) return { error: 'You do not have permission to delete tickets' }
 
   const { error: deleteError } = await supabase
     .from('tickets')

@@ -1,6 +1,6 @@
 'use server'
 
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth } from '@/lib/action-utils'
 import type {
   Notification,
   NotificationQueryOptions,
@@ -20,11 +20,9 @@ export const getNotifications = async (
   const offset = options?.offset ?? 0
   const unreadOnly = options?.unread_only ?? false
 
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { notifications: [], total: 0 }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { notifications: [], total: 0 }
+  const { supabase, user } = auth.ctx
 
   let query = supabase
     .from('notifications')
@@ -57,11 +55,9 @@ export const getNotifications = async (
    ============================================================ */
 
 export const markAsRead = async (notificationId: string): Promise<NotificationActionResult> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user } = auth.ctx
 
   const { error } = await supabase
     .from('notifications')
@@ -83,11 +79,9 @@ export const markAsRead = async (notificationId: string): Promise<NotificationAc
    ============================================================ */
 
 export const markAllAsRead = async (): Promise<NotificationActionResult> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user } = auth.ctx
 
   const { error } = await supabase
     .from('notifications')
@@ -109,11 +103,9 @@ export const markAllAsRead = async (): Promise<NotificationActionResult> => {
    ============================================================ */
 
 export const getUnreadCount = async (): Promise<number> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return 0
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return 0
+  const { supabase, user } = auth.ctx
 
   const { count, error } = await supabase
     .from('notifications')
