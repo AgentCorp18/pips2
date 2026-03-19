@@ -1,9 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { createClient } from '@/lib/supabase/server'
-import { requirePermission } from '@/lib/permissions'
 import {
   createInitiativeSchema,
   updateInitiativeSchema,
@@ -56,21 +55,12 @@ export const createInitiative = async (
     return { fieldErrors }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
-
-  if (!orgId) {
-    return { error: 'You must belong to an organization' }
-  }
-
-  try {
-    await requirePermission(orgId, 'initiative.create')
-  } catch {
-    return { error: 'You do not have permission to create initiatives' }
-  }
+  const permError = await checkPermission(orgId, 'initiative.create')
+  if (permError) return { error: 'You do not have permission to create initiatives' }
 
   const tags = result.data.tags
     ? result.data.tags
@@ -120,11 +110,9 @@ export const getInitiatives = async (): Promise<{
   })[]
   error?: string
 }> => {
-  const { supabase, user, orgId } = await getAuthContext()
-
-  if (!user) return { initiatives: [], error: 'Not authenticated' }
-
-  if (!orgId) return { initiatives: [], error: 'No organization' }
+  const auth = await requireAuth()
+  if (!auth.success) return { initiatives: [], error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
   const { data, error } = await supabase
     .from('initiatives')
@@ -185,11 +173,9 @@ export const getInitiatives = async (): Promise<{
 export const getInitiativeDetail = async (
   initiativeId: string,
 ): Promise<{ initiative: InitiativeWithRelations | null; error?: string }> => {
-  const { supabase, user, orgId } = await getAuthContext()
-
-  if (!user) return { initiative: null, error: 'Not authenticated' }
-
-  if (!orgId) return { initiative: null, error: 'No organization' }
+  const auth = await requireAuth()
+  if (!auth.success) return { initiative: null, error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
   const { data, error } = await supabase
     .from('initiatives')
@@ -325,17 +311,12 @@ export const updateInitiative = async (
     return { error: result.error.issues[0]?.message ?? 'Invalid data' }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
-  if (!user) return { error: 'Not authenticated' }
-
-  if (!orgId) return { error: 'No organization' }
-
-  try {
-    await requirePermission(orgId, 'initiative.update')
-  } catch {
-    return { error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'initiative.update')
+  if (permError) return { error: permError }
 
   const { error } = await supabase
     .from('initiatives')
@@ -355,17 +336,12 @@ export const updateInitiative = async (
    ============================================================ */
 
 export const archiveInitiative = async (initiativeId: string): Promise<{ error?: string }> => {
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
-  if (!user) return { error: 'Not authenticated' }
-
-  if (!orgId) return { error: 'No organization' }
-
-  try {
-    await requirePermission(orgId, 'initiative.delete')
-  } catch {
-    return { error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'initiative.delete')
+  if (permError) return { error: permError }
 
   const { error } = await supabase
     .from('initiatives')
@@ -397,17 +373,12 @@ export const addProjectToInitiative = async (
     return { error: result.error.issues[0]?.message ?? 'Invalid data' }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  if (!user) return { error: 'Not authenticated' }
-
-  if (!orgId) return { error: 'No organization' }
-
-  try {
-    await requirePermission(orgId, 'initiative.update')
-  } catch {
-    return { error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'initiative.update')
+  if (permError) return { error: permError }
 
   // Cross-org validation: ensure both initiative and project belong to this org
   const { data: initiative } = await supabase
@@ -452,17 +423,12 @@ export const removeProjectFromInitiative = async (
   initiativeId: string,
   projectId: string,
 ): Promise<{ error?: string }> => {
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
-  if (!user) return { error: 'Not authenticated' }
-
-  if (!orgId) return { error: 'No organization' }
-
-  try {
-    await requirePermission(orgId, 'initiative.update')
-  } catch {
-    return { error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'initiative.update')
+  if (permError) return { error: permError }
 
   const { error } = await supabase
     .from('initiative_projects')

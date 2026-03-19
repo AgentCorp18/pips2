@@ -1,10 +1,9 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { createProjectSchema } from '@/lib/validations'
 import { trackServerEvent } from '@/lib/analytics'
-import { requirePermission } from '@/lib/permissions'
 
 export type CreateProjectActionState = {
   error?: string
@@ -35,21 +34,12 @@ export const createProject = async (
     return { fieldErrors }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  if (!user) {
-    return { error: 'You must be signed in to create a project' }
-  }
-
-  if (!orgId) {
-    return { error: 'You must belong to an organization to create a project' }
-  }
-
-  try {
-    await requirePermission(orgId, 'project.create')
-  } catch {
-    return { error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'project.create')
+  if (permError) return { error: permError }
 
   // Create project
   const { data: project, error: projectError } = await supabase

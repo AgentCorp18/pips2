@@ -1,6 +1,6 @@
 'use server'
 
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth } from '@/lib/action-utils'
 
 /* ============================================================
    Types
@@ -33,15 +33,9 @@ export type NotificationPreferencesActionResult = {
 
 export const getNotificationPreferences =
   async (): Promise<NotificationPreferencesActionResult> => {
-    const { supabase, user, orgId } = await getAuthContext()
-
-    if (!user) {
-      return { error: 'You must be signed in' }
-    }
-
-    if (!orgId) {
-      return { error: 'You are not a member of any organization' }
-    }
+    const auth = await requireAuth()
+    if (!auth.success) return { error: auth.error }
+    const { supabase, user, orgId } = auth.ctx
 
     // Try to fetch existing preferences
     const { data: existing } = await supabase
@@ -110,11 +104,9 @@ export const updateNotificationPreferences = async (
     return { error: 'Invalid preference key' }
   }
 
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { error: 'You must be signed in' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user } = auth.ctx
 
   const { data, error } = await supabase
     .from('notification_preferences')

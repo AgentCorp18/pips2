@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
@@ -16,11 +16,9 @@ export const advanceStep = async (
   projectId: string,
   stepNumber: number,
 ): Promise<StepActionResult> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase, user } = auth.ctx
 
   // Verify project exists and get org_id
   const { data: project } = await supabase
@@ -116,11 +114,9 @@ export const overrideStep = async (
   projectId: string,
   stepNumber: number,
 ): Promise<StepActionResult> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase, user } = auth.ctx
 
   // Verify project and get org_id
   const { data: project } = await supabase
@@ -204,11 +200,9 @@ export const updateProjectStatus = async (
   projectId: string,
   status: 'active' | 'completed' | 'on_hold' | 'cancelled',
 ): Promise<StepActionResult> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase } = auth.ctx
 
   // Verify project exists and check permissions
   const { data: project } = await supabase

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum, stepEnumToNumber } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
@@ -72,11 +72,9 @@ export const saveFormData = async (
     }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
-
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
   // Verify project exists and belongs to the user's current org (defense-in-depth)
   const { data: project } = await supabase
@@ -141,11 +139,9 @@ export const loadFormData = async (
   stepNumber: number,
   formType: string,
 ): Promise<Record<string, unknown> | null> => {
-  const { supabase, user } = await getAuthContext()
-
-  if (!user) {
-    return null
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return null
+  const { supabase } = auth.ctx
 
   const stepEnum = stepNumberToEnum(stepNumber)
   const { data } = await supabase
@@ -212,8 +208,9 @@ export const listProjectsWithForm = async (
   formType: string,
   excludeProjectId: string,
 ): Promise<Array<{ id: string; title: string }>> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user || !orgId) return []
+  const auth = await requireAuth()
+  if (!auth.success) return []
+  const { supabase, orgId } = auth.ctx
 
   const stepEnum = stepNumberToEnum(stepNumber)
   const { data } = await supabase
@@ -245,9 +242,9 @@ export const copyFormFromProject = async (
   stepNumber: number,
   formType: string,
 ): Promise<FormActionResult> => {
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return { success: false, error: 'Not authenticated' }
-  if (!orgId) return { success: false, error: 'No organization' }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
   const stepEnum = stepNumberToEnum(stepNumber)
 
@@ -263,11 +260,8 @@ export const copyFormFromProject = async (
   }
 
   // Check permission — copying form data requires project.create (member+)
-  try {
-    await requirePermission(orgId, 'project.create')
-  } catch {
-    return { success: false, error: 'Insufficient permissions to copy form data' }
-  }
+  const permError = await checkPermission(orgId, 'project.create')
+  if (permError) return { success: false, error: 'Insufficient permissions to copy form data' }
 
   // Load source form data
   const { data: sourceForm } = await supabase

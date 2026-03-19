@@ -1,8 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getAuthContext } from '@/lib/auth-context'
-import { requirePermission } from '@/lib/permissions'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { trackServerEvent } from '@/lib/analytics'
 import { SYSTEM_TEMPLATES } from '@/lib/form-templates'
 import { stepNumberToEnum } from '@pips/shared'
@@ -45,21 +44,12 @@ export const applyTemplate = async (
     return { error: 'Template not found' }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
-  if (!user) {
-    return { error: 'You must be signed in to create a project' }
-  }
-
-  if (!orgId) {
-    return { error: 'You must belong to an organization to create a project' }
-  }
-
-  try {
-    await requirePermission(orgId, 'project.create')
-  } catch {
-    return { error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'project.create')
+  if (permError) return { error: permError }
 
   // Create project
   const { data: project, error: projectError } = await supabase
@@ -80,7 +70,14 @@ export const applyTemplate = async (
   }
 
   // Create 6 project steps
-  const pipsSteps = ['identify', 'analyze', 'generate', 'select_plan', 'implement', 'evaluate'] as const
+  const pipsSteps = [
+    'identify',
+    'analyze',
+    'generate',
+    'select_plan',
+    'implement',
+    'evaluate',
+  ] as const
   const steps = pipsSteps.map((step, i) => ({
     project_id: project.id,
     step,

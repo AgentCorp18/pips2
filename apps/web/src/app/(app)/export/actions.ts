@@ -1,7 +1,6 @@
 'use server'
 
-import { getAuthContext } from '@/lib/auth-context'
-import { requirePermission } from '@/lib/permissions'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { generateCSV } from '@/lib/csv'
 
 /* ============================================================
@@ -18,17 +17,12 @@ type ExportResult = {
    ============================================================ */
 
 export const exportProjectsCSV = async (): Promise<ExportResult> => {
-  const { supabase, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
-  if (!orgId) {
-    return { error: 'You must be signed in to an organization' }
-  }
-
-  try {
-    await requirePermission(orgId, 'data.view')
-  } catch {
-    return { error: 'You do not have permission to export data' }
-  }
+  const permError = await checkPermission(orgId, 'data.view')
+  if (permError) return { error: 'You do not have permission to export data' }
 
   const { data: projects, error } = await supabase
     .from('projects')
@@ -79,17 +73,12 @@ export const exportProjectsCSV = async (): Promise<ExportResult> => {
    ============================================================ */
 
 export const exportTicketsCSV = async (projectId?: string): Promise<ExportResult> => {
-  const { supabase, orgId } = await getAuthContext()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
-  if (!orgId) {
-    return { error: 'You must be signed in to an organization' }
-  }
-
-  try {
-    await requirePermission(orgId, 'data.view')
-  } catch {
-    return { error: 'You do not have permission to export data' }
-  }
+  const permError = await checkPermission(orgId, 'data.view')
+  if (permError) return { error: 'You do not have permission to export data' }
 
   let query = supabase
     .from('tickets')

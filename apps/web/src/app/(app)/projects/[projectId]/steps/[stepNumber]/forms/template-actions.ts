@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { getAuthContext } from '@/lib/auth-context'
+import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
 import { FORM_SCHEMAS } from '@/lib/form-schemas'
@@ -106,8 +106,9 @@ export const listTemplates = async (
   const parsed = listTemplatesSchema.safeParse({ stepNumber, formType })
   if (!parsed.success) return []
 
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) return []
+  const auth = await requireAuth()
+  if (!auth.success) return []
+  const { supabase, orgId } = auth.ctx
 
   const stepEnum = stepNumberToEnum(parsed.data.stepNumber)
 
@@ -167,10 +168,9 @@ export const applyTemplate = async (
     return { success: false, error: 'Invalid input' }
   }
 
-  const { supabase, user } = await getAuthContext()
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase, user } = auth.ctx
 
   // Verify project exists and belongs to an org the user is in
   const { data: project } = await supabase
@@ -280,13 +280,9 @@ export const saveAsTemplate = async (
     return { success: false, error: 'Invalid input' }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
-  if (!orgId) {
-    return { success: false, error: 'No active organization' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase, user, orgId } = auth.ctx
 
   // Verify project access
   const { data: project } = await supabase
@@ -304,11 +300,8 @@ export const saveAsTemplate = async (
     return { success: false, error: 'Project does not belong to your active organization' }
   }
 
-  try {
-    await requirePermission(orgId, 'data.view')
-  } catch {
-    return { success: false, error: 'Insufficient permissions' }
-  }
+  const permError = await checkPermission(orgId, 'data.view')
+  if (permError) return { success: false, error: permError }
 
   // Load the saved form data from the project
   const stepEnum = stepNumberToEnum(parsed.data.stepNumber)
@@ -379,13 +372,9 @@ export const deleteTemplate = async (templateId: string): Promise<TemplateAction
     return { success: false, error: 'Invalid template ID' }
   }
 
-  const { supabase, user, orgId } = await getAuthContext()
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
-  if (!orgId) {
-    return { success: false, error: 'No active organization' }
-  }
+  const auth = await requireAuth()
+  if (!auth.success) return { success: false, error: auth.error }
+  const { supabase, orgId } = auth.ctx
 
   // Load the template to verify it belongs to the user's org and is not a system template
   const { data: template } = await supabase
@@ -406,11 +395,8 @@ export const deleteTemplate = async (templateId: string): Promise<TemplateAction
     return { success: false, error: 'Template does not belong to your active organization' }
   }
 
-  try {
-    await requirePermission(orgId, 'ticket.delete')
-  } catch {
-    return { success: false, error: 'Only managers and above can delete templates' }
-  }
+  const permError = await checkPermission(orgId, 'ticket.delete')
+  if (permError) return { success: false, error: 'Only managers and above can delete templates' }
 
   const { error: deleteError } = await supabase
     .from('form_templates')
