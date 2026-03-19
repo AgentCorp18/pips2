@@ -29,3 +29,18 @@ export const formatDateTime = (dateStr: string): string => {
 export const formatDateOnly = (dateStr: string): string => {
   return new Date(dateStr).toLocaleString(undefined, DATE_ONLY_OPTIONS)
 }
+
+/**
+ * Parses a date string safely, handling both date-only strings ("YYYY-MM-DD") and
+ * full ISO timestamps ("YYYY-MM-DDTHH:mm:ssZ").
+ *
+ * For date-only strings, appends "T12:00:00" so the local date is preserved when
+ * converting to a Date object (avoids off-by-one errors from UTC midnight rollback).
+ * For ISO timestamps, parses directly.
+ */
+export const parseDateSafe = (dateStr: string): Date => {
+  if (dateStr.includes('T')) {
+    return new Date(dateStr)
+  }
+  return new Date(dateStr + 'T12:00:00')
+}

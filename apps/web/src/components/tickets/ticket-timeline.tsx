@@ -5,28 +5,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ZoomIn, ZoomOut } from 'lucide-react'
 import type { TimelineTicket } from '@/app/(app)/tickets/timeline/actions'
-
-/* ============================================================
-   Constants
-   ============================================================ */
-
-const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#F59E0B',
-  low: '#3B82F6',
-  none: 'var(--color-text-tertiary)',
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  backlog: 'var(--color-text-tertiary)',
-  todo: '#6366F1',
-  in_progress: '#3B82F6',
-  in_review: '#8B5CF6',
-  blocked: '#EF4444',
-  done: '#22C55E',
-  cancelled: 'var(--color-text-tertiary)',
-}
+import { STATUS_COLORS, PRIORITY_COLORS } from '@/lib/status-colors'
+import { parseDateSafe } from '@/lib/format-date'
 
 const ROW_HEIGHT = 40
 const HEADER_HEIGHT = 48
@@ -44,14 +24,6 @@ const ZOOM_CONFIG: Record<ZoomLevel, { dayWidth: number; label: string }> = {
 /* ============================================================
    Helpers
    ============================================================ */
-
-const parseDate = (dateStr: string): Date => {
-  // Handle both date-only and ISO timestamp formats
-  if (dateStr.includes('T')) {
-    return new Date(dateStr)
-  }
-  return new Date(dateStr + 'T00:00:00')
-}
 
 const formatDate = (date: Date): string =>
   date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -88,11 +60,11 @@ export const TicketTimeline = ({ tickets, prefix }: TicketTimelineProps) => {
     let latest = now
 
     for (const t of tickets) {
-      const start = parseDate(t.started_at ?? t.created_at)
+      const start = parseDateSafe(t.started_at ?? t.created_at)
       const end = t.due_date
-        ? parseDate(t.due_date)
+        ? parseDateSafe(t.due_date)
         : t.resolved_at
-          ? parseDate(t.resolved_at)
+          ? parseDateSafe(t.resolved_at)
           : now
 
       if (start < earliest) earliest = start
@@ -111,11 +83,11 @@ export const TicketTimeline = ({ tickets, prefix }: TicketTimelineProps) => {
   const dateColumns = useMemo(() => {
     const cols: { date: Date; label: string; isToday: boolean; isMonthStart: boolean }[] = []
     const today = new Date()
-    const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
     for (let i = 0; i < totalDays; i++) {
       const date = addDays(timelineStart, i)
-      const dateStr = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
       cols.push({
         date,
         label: formatDate(date),
@@ -300,11 +272,11 @@ export const TicketTimeline = ({ tickets, prefix }: TicketTimelineProps) => {
 
               {/* Rows */}
               {tickets.map((ticket) => {
-                const start = parseDate(ticket.started_at ?? ticket.created_at)
+                const start = parseDateSafe(ticket.started_at ?? ticket.created_at)
                 const end = ticket.due_date
-                  ? parseDate(ticket.due_date)
+                  ? parseDateSafe(ticket.due_date)
                   : ticket.resolved_at
-                    ? parseDate(ticket.resolved_at)
+                    ? parseDateSafe(ticket.resolved_at)
                     : addDays(start, 7) // default 7-day bar for no end date
 
                 const startOffset = daysBetween(timelineStart, start)

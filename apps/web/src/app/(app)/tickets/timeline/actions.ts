@@ -69,7 +69,8 @@ export const getTicketsForTimeline = async (
     `,
     )
     .eq('org_id', orgId)
-    .not('status', 'in', '("cancelled")')
+    // Include done tickets (show actual duration) but exclude cancelled (no useful timeline data)
+    .neq('status', 'cancelled')
     .order('due_date', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: true })
     .limit(500)

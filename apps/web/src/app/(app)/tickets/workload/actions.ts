@@ -73,7 +73,6 @@ export const getWorkloadData = async (
     )
     .eq('org_id', orgId)
     .in('status', activeStatuses)
-    .order('priority', { ascending: true })
     .limit(1000)
 
   if (filters?.project_id) {
@@ -87,7 +86,19 @@ export const getWorkloadData = async (
     return { members: [], unassignedCount: 0 }
   }
 
-  const tickets = ticketsRaw ?? []
+  // Sort by severity order rather than alphabetically.
+  // Supabase JS client doesn't support CASE in ORDER BY, so we sort in-memory.
+  const PRIORITY_RANK: Record<string, number> = {
+    critical: 0,
+    high: 1,
+    medium: 2,
+    low: 3,
+    backlog: 4,
+  }
+
+  const tickets = (ticketsRaw ?? []).sort(
+    (a, b) => (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99),
+  )
 
   // Group tickets by assignee
   const ticketsByAssignee = new Map<string | null, typeof tickets>()

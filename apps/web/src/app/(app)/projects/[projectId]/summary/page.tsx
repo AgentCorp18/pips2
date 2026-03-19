@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { ExportOnePagerButton } from '@/components/pips/export-one-pager-button'
 import { getStepSummaries, getProjectStats, getProjectMembers } from '../overview-actions'
 import { formatDateOnly } from '@/lib/format-date'
+import { STEP_STATUS_COLORS } from '@/lib/status-colors'
 
 type SummaryPageProps = {
   params: Promise<{ projectId: string }>
@@ -217,12 +218,7 @@ const ProjectSummaryPage = async ({ params }: SummaryPageProps) => {
                     <StepIcon
                       size={14}
                       style={{
-                        color:
-                          status === 'completed'
-                            ? '#22C55E'
-                            : status === 'in_progress'
-                              ? '#3B82F6'
-                              : 'var(--color-text-tertiary)',
+                        color: STEP_STATUS_COLORS[status] ?? 'var(--color-text-tertiary)',
                       }}
                       aria-hidden="true"
                     />

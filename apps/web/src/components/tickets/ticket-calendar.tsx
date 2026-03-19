@@ -7,28 +7,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { CalendarTicket } from '@/app/(app)/tickets/calendar/actions'
-
-/* ============================================================
-   Constants
-   ============================================================ */
-
-const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#F59E0B',
-  low: '#3B82F6',
-  none: 'var(--color-text-tertiary)',
-}
-
-const STATUS_DOT: Record<string, string> = {
-  backlog: 'var(--color-text-tertiary)',
-  todo: '#6366F1',
-  in_progress: '#3B82F6',
-  in_review: '#8B5CF6',
-  blocked: '#EF4444',
-  done: '#22C55E',
-  cancelled: 'var(--color-text-tertiary)',
-}
+import { STATUS_COLORS, PRIORITY_COLORS } from '@/lib/status-colors'
+import { parseDateSafe } from '@/lib/format-date'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -275,7 +255,7 @@ export const TicketCalendar = ({ tickets, year, month, prefix }: TicketCalendarP
                         className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
                         style={{
                           backgroundColor:
-                            STATUS_DOT[ticket.status] ?? 'var(--color-text-tertiary)',
+                            STATUS_COLORS[ticket.status] ?? 'var(--color-text-tertiary)',
                         }}
                       />
                       <span className="truncate">{ticket.title}</span>
@@ -303,7 +283,7 @@ export const TicketCalendar = ({ tickets, year, month, prefix }: TicketCalendarP
           data-testid="calendar-detail-panel"
         >
           <h3 className="mb-3 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', {
+            {parseDateSafe(selectedDate).toLocaleDateString('en-US', {
               weekday: 'long',
               month: 'long',
               day: 'numeric',

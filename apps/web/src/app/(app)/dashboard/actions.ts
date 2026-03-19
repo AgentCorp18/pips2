@@ -245,13 +245,19 @@ export const getDashboardMetrics = async (orgId: string): Promise<DashboardMetri
   const ninetyDaysAgo = new Date()
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
+  // Fetch project IDs first so we can include project_forms count in the parallel block.
+  // project_forms has no org_id column, so we must join through project IDs.
+  const { data: orgProjectsData } = await supabase.from('projects').select('id').eq('org_id', orgId)
+
+  const projectIds = (orgProjectsData ?? []).map((p) => p.id)
+
   const [
     allProjectsRes,
     completedProjectsRes,
     completedTicketsRes,
     closedThisWeekRes,
     createdThisWeekRes,
-    orgProjectsRes,
+    formsRes,
   ] = await Promise.all([
     supabase
       .from('projects')
@@ -287,7 +293,14 @@ export const getDashboardMetrics = async (orgId: string): Promise<DashboardMetri
       .eq('org_id', orgId)
       .gte('created_at', weekAgo.toISOString()),
 
-    supabase.from('projects').select('id').eq('org_id', orgId),
+    // project_forms has no org_id — scope by project IDs fetched above.
+    // Empty projectIds produces count=0 without hitting the DB unnecessarily.
+    projectIds.length > 0
+      ? supabase
+          .from('project_forms')
+          .select('id', { count: 'exact', head: true })
+          .in('project_id', projectIds)
+      : Promise.resolve({ count: 0, data: null, error: null }),
   ])
 
   // Completion rate
@@ -312,16 +325,8 @@ export const getDashboardMetrics = async (orgId: string): Promise<DashboardMetri
     }
   }
 
-  // Forms completed count
-  let formsCompletedCount = 0
-  if (orgProjectsRes.data && orgProjectsRes.data.length > 0) {
-    const projectIds = orgProjectsRes.data.map((p) => p.id)
-    const { count } = await supabase
-      .from('project_forms')
-      .select('id', { count: 'exact', head: true })
-      .in('project_id', projectIds)
-    formsCompletedCount = count ?? 0
-  }
+  // Forms completed count (now resolved in parallel above)
+  const formsCompletedCount = formsRes.count ?? 0
 
   return {
     completionRate,

@@ -1,31 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { makeSupabaseMock } from '@/test-utils/supabase-mock'
 
 /* ============================================================
    Mocks
    ============================================================ */
 
-let fromCallIndex = 0
-let fromResults: Array<{ data?: unknown; count?: number | null; error?: unknown }> = []
-
-const createChainForIndex = (idx: number) => {
-  const terminal = () => {
-    const result = fromResults[idx] ?? { data: null, error: null }
-    return Promise.resolve(result)
-  }
-
-  const chain: Record<string, unknown> = {}
-  const proxy = new Proxy(chain, {
-    get(_target, prop) {
-      if (prop === 'then') {
-        const p = terminal()
-        return p.then.bind(p)
-      }
-      return (..._args: unknown[]) => proxy
-    },
-  })
-
-  return proxy
-}
+const supabaseMock = makeSupabaseMock()
 
 vi.mock('@/lib/permissions', () => ({
   requirePermission: vi.fn().mockResolvedValue('admin'),
@@ -33,10 +13,7 @@ vi.mock('@/lib/permissions', () => ({
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn().mockResolvedValue({
-    from: () => {
-      const idx = fromCallIndex++
-      return createChainForIndex(idx)
-    },
+    from: () => supabaseMock.next(),
   }),
 }))
 
@@ -45,8 +22,7 @@ import { requirePermission } from '@/lib/permissions'
 
 describe('getWorkloadData', () => {
   beforeEach(() => {
-    fromCallIndex = 0
-    fromResults = []
+    supabaseMock.reset()
     vi.clearAllMocks()
   })
 
@@ -58,7 +34,7 @@ describe('getWorkloadData', () => {
 
   it('returns members with their tickets', async () => {
     // First call: org_members
-    fromResults.push({
+    supabaseMock.results.push({
       data: [
         {
           user_id: 'u-1',
@@ -76,7 +52,7 @@ describe('getWorkloadData', () => {
     })
 
     // Second call: tickets
-    fromResults.push({
+    supabaseMock.results.push({
       data: [
         {
           id: 't-1',
@@ -132,17 +108,17 @@ describe('getWorkloadData', () => {
 
   it('returns empty on database error for tickets', async () => {
     // First call: org_members
-    fromResults.push({ data: [] })
+    supabaseMock.results.push({ data: [] })
     // Second call: tickets — error
-    fromResults.push({ data: null, error: { message: 'DB error' } })
+    supabaseMock.results.push({ data: null, error: { message: 'DB error' } })
 
     const result = await getWorkloadData('org-1')
     expect(result).toEqual({ members: [], unassignedCount: 0 })
   })
 
   it('handles null members data', async () => {
-    fromResults.push({ data: null })
-    fromResults.push({ data: [] })
+    supabaseMock.results.push({ data: null })
+    supabaseMock.results.push({ data: [] })
 
     const result = await getWorkloadData('org-1')
     expect(result.members).toEqual([])
@@ -150,22 +126,22 @@ describe('getWorkloadData', () => {
   })
 
   it('passes project_id filter', async () => {
-    fromResults.push({ data: [] })
-    fromResults.push({ data: [] })
+    supabaseMock.results.push({ data: [] })
+    supabaseMock.results.push({ data: [] })
 
     const result = await getWorkloadData('org-1', { project_id: 'p-1' })
     expect(result.members).toEqual([])
   })
 
   it('sorts members by ticket count descending', async () => {
-    fromResults.push({
+    supabaseMock.results.push({
       data: [
         { user_id: 'u-1', profiles: { full_name: 'Alice', display_name: null, avatar_url: null } },
         { user_id: 'u-2', profiles: { full_name: 'Bob', display_name: null, avatar_url: null } },
       ],
     })
 
-    fromResults.push({
+    supabaseMock.results.push({
       data: [
         {
           id: 't-1',
@@ -209,13 +185,13 @@ describe('getWorkloadData', () => {
   })
 
   it('maps ticket project_title correctly', async () => {
-    fromResults.push({
+    supabaseMock.results.push({
       data: [
         { user_id: 'u-1', profiles: { full_name: 'Alice', display_name: 'Ali', avatar_url: null } },
       ],
     })
 
-    fromResults.push({
+    supabaseMock.results.push({
       data: [
         {
           id: 't-1',
