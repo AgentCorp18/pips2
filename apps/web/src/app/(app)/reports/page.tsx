@@ -99,6 +99,41 @@ const ReportsPage = async () => {
               : `${data.totalMeasurablesTracked} measurables tracked`,
         },
         {
+          title: 'Executive Summary',
+          description: 'One-click printable report with hero KPIs for stakeholders.',
+          href: '/reports/executive-summary',
+          icon: FileText,
+          iconColor: '#0891B2',
+          iconBg: 'rgba(8, 145, 178, 0.12)',
+          preview: `${data.totalProjectsCompleted + data.activeProjects} total projects tracked`,
+        },
+        {
+          title: 'Savings Trend',
+          description:
+            'Monthly projected vs actual savings with category breakdown and period filtering.',
+          href: '/reports/savings-trend',
+          icon: TrendingUp,
+          iconColor: '#059669',
+          iconBg: 'rgba(5, 150, 105, 0.12)',
+          preview:
+            data.projectedAnnualSavings > 0
+              ? `${formatCurrency(data.projectedAnnualSavings)} projected`
+              : 'Track savings over time',
+        },
+        {
+          title: 'Time Savings Calculator',
+          description:
+            'Convert time-based measurables to annualised hours and labour value. Configurable rate.',
+          href: '/reports/time-savings',
+          icon: Clock,
+          iconColor: '#3B82F6',
+          iconBg: 'rgba(59, 130, 246, 0.12)',
+          preview:
+            data.hoursSavedAnnually > 0
+              ? `${formatHours(data.hoursSavedAnnually)} saved/yr`
+              : 'Calculate time savings',
+        },
+        {
           title: 'Portfolio Value',
           description: 'View all projects with value narratives and outcome summaries.',
           href: '/reports/portfolio-value',
@@ -109,15 +144,6 @@ const ReportsPage = async () => {
             data.totalProjectsCompleted > 0
               ? `${data.totalProjectsCompleted} projects completed`
               : `${data.activeProjects} active projects`,
-        },
-        {
-          title: 'Executive Summary',
-          description: 'One-click printable report with hero KPIs for stakeholders.',
-          href: '/reports/executive-summary',
-          icon: FileText,
-          iconColor: '#0891B2',
-          iconBg: 'rgba(8, 145, 178, 0.12)',
-          preview: `${data.totalProjectsCompleted + data.activeProjects} total projects tracked`,
         },
       ],
     },
