@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAuth, checkPermission } from '@/lib/action-utils'
+import { requireAuth } from '@/lib/action-utils'
 import { requirePermission } from '@/lib/permissions'
 import { stepNumberToEnum } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
