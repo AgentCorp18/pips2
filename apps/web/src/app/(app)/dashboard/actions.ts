@@ -13,6 +13,7 @@ export type DashboardStats = {
   activeProjects: number
   openTickets: number
   overdueTickets: number
+  blockedTickets: number
   completedThisMonth: number
   teamMembers: number
 }
@@ -47,6 +48,7 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
       activeProjects: 0,
       openTickets: 0,
       overdueTickets: 0,
+      blockedTickets: 0,
       completedThisMonth: 0,
       teamMembers: 0,
     }
@@ -59,31 +61,38 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
 
   // Consolidate: fetch project statuses in one query and count in-memory (replaces 2 queries).
   // Ticket queries still need separate round trips due to different column filters.
-  const [projectsRes, openTicketsRes, overdueRes, completedRes, membersRes] = await Promise.all([
-    supabase.from('projects').select('status').eq('org_id', orgId),
+  const [projectsRes, openTicketsRes, overdueRes, completedRes, membersRes, blockedRes] =
+    await Promise.all([
+      supabase.from('projects').select('status').eq('org_id', orgId),
 
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked']),
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked']),
 
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
-      .lt('due_date', today),
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
+        .lt('due_date', today),
 
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .eq('status', 'done')
-      .gte('resolved_at', startOfMonth),
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('status', 'done')
+        .gte('resolved_at', startOfMonth),
 
-    supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
-  ])
+      supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
+
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('status', 'blocked'),
+    ])
 
   // Count project stats in-memory from the single projects query
   const projectRows = projectsRes.data ?? []
@@ -97,6 +106,7 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
     activeProjects,
     openTickets: openTicketsRes.count ?? 0,
     overdueTickets: overdueRes.count ?? 0,
+    blockedTickets: blockedRes.count ?? 0,
     completedThisMonth: completedRes.count ?? 0,
     teamMembers: membersRes.count ?? 0,
   }
@@ -160,6 +170,7 @@ export type AgingTicketRow = {
   title: string
   assigneeName: string | null
   daysOpen: number
+  status: 'in_progress' | 'in_review' | 'blocked'
 }
 
 export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingTicketRow[]> => {
@@ -178,7 +189,7 @@ export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingT
       .from('tickets')
       .select(
         `
-      id, title, sequence_number, started_at,
+      id, title, sequence_number, started_at, status,
       assignee:profiles!tickets_assignee_id_fkey ( display_name, full_name )
     `,
       )
@@ -209,6 +220,7 @@ export const getAgingTickets = async (orgId: string, limit = 10): Promise<AgingT
       title: t.title as string,
       assigneeName: assignee?.display_name ?? assignee?.full_name ?? null,
       daysOpen: Math.round(daysOpen * 10) / 10,
+      status: t.status as AgingTicketRow['status'],
     }
   })
 }

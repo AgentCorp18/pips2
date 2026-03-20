@@ -12,6 +12,7 @@ const defaultStats: DashboardStats = {
   activeProjects: 5,
   openTickets: 23,
   overdueTickets: 3,
+  blockedTickets: 0,
   completedThisMonth: 12,
   teamMembers: 4,
 }
@@ -61,12 +62,44 @@ describe('StatCards', () => {
       activeProjects: 0,
       openTickets: 0,
       overdueTickets: 0,
+      blockedTickets: 0,
       completedThisMonth: 0,
       teamMembers: 0,
     }
     render(<StatCards stats={zeroStats} />)
     const zeros = screen.getAllByText('0')
     expect(zeros).toHaveLength(6)
+  })
+
+  it('does not show the blockers banner when blockedTickets is 0', () => {
+    render(<StatCards stats={defaultStats} />)
+    expect(screen.queryByTestId('stat-blocked-tickets-banner')).not.toBeInTheDocument()
+  })
+
+  it('shows the blockers banner when blockedTickets is > 0', () => {
+    const statsWithBlockers: DashboardStats = { ...defaultStats, blockedTickets: 3 }
+    render(<StatCards stats={statsWithBlockers} />)
+    expect(screen.getByTestId('stat-blocked-tickets-banner')).toBeInTheDocument()
+    expect(screen.getByText('3 Blocked Tickets')).toBeInTheDocument()
+  })
+
+  it('uses singular label when exactly 1 ticket is blocked', () => {
+    const statsWithBlockers: DashboardStats = { ...defaultStats, blockedTickets: 1 }
+    render(<StatCards stats={statsWithBlockers} />)
+    expect(screen.getByText('1 Blocked Ticket')).toBeInTheDocument()
+  })
+
+  it('blockers banner links to tickets filtered by blocked status', () => {
+    const statsWithBlockers: DashboardStats = { ...defaultStats, blockedTickets: 2 }
+    render(<StatCards stats={statsWithBlockers} />)
+    const banner = screen.getByTestId('stat-blocked-tickets-banner')
+    expect(banner).toHaveAttribute('href', '/tickets?status=blocked')
+  })
+
+  it('shows blocked chip inside open tickets card when blockedTickets > 0', () => {
+    const statsWithBlockers: DashboardStats = { ...defaultStats, blockedTickets: 5 }
+    render(<StatCards stats={statsWithBlockers} />)
+    expect(screen.getByText('5 blocked')).toBeInTheDocument()
   })
 
   it('renders data-testid on each card', () => {

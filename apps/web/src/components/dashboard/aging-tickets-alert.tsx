@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { AlertTriangle, Clock } from 'lucide-react'
+import { AlertTriangle, Clock, ShieldAlert } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDuration, getAgingLevel, AGING_COLORS } from '@/lib/cycle-time'
 
@@ -11,6 +11,7 @@ export type AgingTicket = {
   title: string
   assigneeName: string | null
   daysOpen: number
+  status: 'in_progress' | 'in_review' | 'blocked'
 }
 
 type AgingTicketsAlertProps = {
@@ -20,6 +21,8 @@ type AgingTicketsAlertProps = {
 export const AgingTicketsAlert = ({ tickets }: AgingTicketsAlertProps) => {
   if (tickets.length === 0) return null
 
+  const blockedCount = tickets.filter((t) => t.status === 'blocked').length
+
   return (
     <Card className="border-[var(--color-border)]" data-testid="aging-tickets-alert">
       <CardHeader className="flex flex-row items-center gap-2 pb-2">
@@ -27,6 +30,12 @@ export const AgingTicketsAlert = ({ tickets }: AgingTicketsAlertProps) => {
         <CardTitle className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           Aging Tickets
         </CardTitle>
+        {blockedCount > 0 && (
+          <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+            <ShieldAlert size={11} />
+            {blockedCount} blocked
+          </span>
+        )}
         <span className="ml-auto text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
           In progress {'>'} 7 days
         </span>
@@ -36,6 +45,7 @@ export const AgingTicketsAlert = ({ tickets }: AgingTicketsAlertProps) => {
           {tickets.map((t) => {
             const level = getAgingLevel(t.daysOpen)
             const color = AGING_COLORS[level]
+            const isBlocked = t.status === 'blocked'
             return (
               <Link
                 key={t.id}
@@ -49,6 +59,16 @@ export const AgingTicketsAlert = ({ tickets }: AgingTicketsAlertProps) => {
                   >
                     {t.sequenceId}
                   </span>
+                  {isBlocked && (
+                    <span
+                      className="inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide"
+                      style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
+                      data-testid="blocked-badge"
+                    >
+                      <ShieldAlert size={10} />
+                      Blocked
+                    </span>
+                  )}
                   <span className="truncate text-sm" style={{ color: 'var(--color-text-primary)' }}>
                     {t.title}
                   </span>

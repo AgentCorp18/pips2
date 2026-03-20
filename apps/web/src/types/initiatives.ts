@@ -79,3 +79,20 @@ export type InitiativeProgress = {
   completed_tickets: number
   weighted_progress: number // 0-100, weighted by project priority
 }
+
+/* ============================================================
+   Initiative Financials (projected vs realised savings)
+   ============================================================ */
+
+export type InitiativeFinancials = {
+  projectedSavings: number
+  realisedSavings: number
+  realisationRate: number // 0-100 percentage
+  projectCount: number
+}
+
+/* ============================================================
+   Deadline Status (derived from target_end + progress)
+   ============================================================ */
+
+export type DeadlineStatus = 'on_track' | 'at_risk' | 'overdue'

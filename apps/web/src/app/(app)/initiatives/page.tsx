@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { InitiativeCard } from '@/components/initiatives/initiative-card'
 import { InitiativesFilters } from '@/components/initiatives/initiatives-filters'
 import { Plus } from 'lucide-react'
-import type { InitiativeStatus } from '@/types/initiatives'
+import type { InitiativeStatus, DeadlineStatus } from '@/types/initiatives'
 import { InitiativesEmptyState } from '@/components/initiatives/initiatives-empty-state'
 
 export const metadata: Metadata = {
@@ -17,6 +17,28 @@ export const metadata: Metadata = {
 
 type InitiativesPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+/* ============================================================
+   Deadline Status Helpers
+   ============================================================ */
+
+const computeDeadlineStatus = (
+  targetEnd: string | null,
+  stepProgress: number,
+): DeadlineStatus | undefined => {
+  if (!targetEnd) return undefined
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const end = new Date(targetEnd)
+  end.setHours(0, 0, 0, 0)
+
+  if (end < today) return 'overdue'
+
+  const daysUntilEnd = (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  if (daysUntilEnd <= 14 && stepProgress < 80) return 'at_risk'
+
+  return 'on_track'
 }
 
 const InitiativesPage = async ({ searchParams }: InitiativesPageProps) => {
@@ -46,6 +68,7 @@ const InitiativesPage = async ({ searchParams }: InitiativesPageProps) => {
       owner:profiles!initiatives_owner_id_fkey ( id, display_name, avatar_url ),
       initiative_projects (
         id,
+        project_id,
         project:projects!initiative_projects_project_id_fkey (
           project_steps ( status )
         )
@@ -76,6 +99,34 @@ const InitiativesPage = async ({ searchParams }: InitiativesPageProps) => {
 
   const { data: initiatives } = await query
 
+  // Collect all project IDs to batch-fetch savings data
+  const allProjectIds = (initiatives ?? []).flatMap((i) =>
+    (i.initiative_projects ?? [])
+      .map((ip: Record<string, unknown>) => ip.project_id as string)
+      .filter(Boolean),
+  )
+
+  // Batch-fetch realised savings (results_metrics) for all linked projects
+  const savingsMap = new Map<string, number>()
+  if (allProjectIds.length > 0) {
+    const { data: savingsForms } = await supabase
+      .from('project_forms')
+      .select('project_id, data')
+      .in('project_id', allProjectIds)
+      .eq('form_type', 'results_metrics')
+
+    for (const form of savingsForms ?? []) {
+      const data = form.data as Record<string, unknown> | null
+      const val = Number(data?.financial_savings_annual ?? 0)
+      if (!isNaN(val) && val > 0) {
+        savingsMap.set(
+          form.project_id as string,
+          (savingsMap.get(form.project_id as string) ?? 0) + val,
+        )
+      }
+    }
+  }
+
   const items = (initiatives ?? []).map((i) => {
     const links = i.initiative_projects ?? []
     const project_count = links.length
@@ -95,10 +146,19 @@ const InitiativesPage = async ({ searchParams }: InitiativesPageProps) => {
       step_progress = Math.round(totalProgress / project_count)
     }
 
+    // Sum realised savings across linked projects
+    const totalSavings = links.reduce((sum: number, link: Record<string, unknown>) => {
+      return sum + (savingsMap.get(link.project_id as string) ?? 0)
+    }, 0)
+
+    const deadlineStatus = computeDeadlineStatus(i.target_end, step_progress)
+
     return {
       ...i,
       project_count,
       step_progress,
+      totalSavings,
+      deadlineStatus,
       owner: i.owner ?? { id: i.owner_id, display_name: 'Unknown', avatar_url: null },
     }
   })

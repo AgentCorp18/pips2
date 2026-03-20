@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Users,
+  ShieldAlert,
 } from 'lucide-react'
 import type { DashboardStats } from '@/app/(app)/dashboard/actions'
 
@@ -77,51 +78,79 @@ const CARDS: CardDef[] = [
 ]
 
 export const StatCards = ({ stats }: StatCardsProps) => {
+  const hasBlockers = stats.blockedTickets > 0
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-      {CARDS.map((card) => {
-        const Icon = card.icon
-        const value = stats[card.key]
-        const isOverduePositive = card.key === 'overdueTickets' && value > 0
-        const iconColor = isOverduePositive ? card.accentWhenPositive : card.color
+    <div className="space-y-4">
+      {/* Blockers banner — only shown when blocked tickets exist */}
+      {hasBlockers && (
+        <Link
+          href="/tickets?status=blocked"
+          className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 transition-colors hover:bg-red-100"
+          data-testid="stat-blocked-tickets-banner"
+        >
+          <ShieldAlert size={18} className="shrink-0 text-red-600" />
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-red-700">
+              {stats.blockedTickets} Blocked Ticket{stats.blockedTickets !== 1 ? 's' : ''}
+            </span>
+            <span className="text-xs text-red-500">These need attention — click to view</span>
+          </div>
+        </Link>
+      )}
 
-        const inner = (
-          <Card data-testid={card.testId}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle
-                className="text-sm font-medium"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
-                {card.title}
-              </CardTitle>
-              <Icon size={18} style={{ color: iconColor }} />
-            </CardHeader>
-            <CardContent>
-              <div
-                className="text-2xl font-bold"
-                style={{
-                  color: isOverduePositive
-                    ? 'var(--color-signal-red)'
-                    : 'var(--color-text-primary)',
-                }}
-              >
-                {value}
-              </div>
-            </CardContent>
-          </Card>
-        )
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+        {CARDS.map((card) => {
+          const Icon = card.icon
+          const value = stats[card.key]
+          const isOverduePositive = card.key === 'overdueTickets' && value > 0
+          const iconColor = isOverduePositive ? card.accentWhenPositive : card.color
 
-        if (card.href) {
-          return (
-            <Link key={card.key} href={card.href} className="transition-opacity hover:opacity-80">
-              {inner}
-            </Link>
+          const inner = (
+            <Card data-testid={card.testId}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle
+                  className="text-sm font-medium"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  {card.title}
+                </CardTitle>
+                <Icon size={18} style={{ color: iconColor }} />
+              </CardHeader>
+              <CardContent>
+                <div
+                  className="text-2xl font-bold"
+                  style={{
+                    color: isOverduePositive
+                      ? 'var(--color-signal-red)'
+                      : 'var(--color-text-primary)',
+                  }}
+                >
+                  {value}
+                </div>
+                {/* Show blocked chip inside the Open Tickets card */}
+                {card.key === 'openTickets' && hasBlockers && (
+                  <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                    <ShieldAlert size={10} />
+                    {stats.blockedTickets} blocked
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )
-        }
 
-        // For non-linked cards, wrap in a fragment with key
-        return <div key={card.key}>{inner}</div>
-      })}
+          if (card.href) {
+            return (
+              <Link key={card.key} href={card.href} className="transition-opacity hover:opacity-80">
+                {inner}
+              </Link>
+            )
+          }
+
+          // For non-linked cards, wrap in a fragment with key
+          return <div key={card.key}>{inner}</div>
+        })}
+      </div>
     </div>
   )
 }
