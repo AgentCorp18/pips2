@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { KpiCard } from '@/components/reports/kpi-card'
 import { MethodologyCorrelation } from '@/components/reports/methodology-correlation'
 import { LazyRoiTrendChart as RoiTrendChart } from '@/components/reports/lazy-charts'
+import { PeriodSelector } from '@/components/reports/period-selector'
 import {
   ArrowLeft,
   DollarSign,
@@ -18,9 +19,16 @@ import {
   ListChecks,
   FolderKanban,
   ListTodo,
+  Target,
+  CheckCircle2,
 } from 'lucide-react'
 import { TeamPerformanceTable } from '@/components/reports/team-performance-table'
-import { getROIDashboardData, getMethodologyCorrelation, getTeamPerformance } from './actions'
+import {
+  getROIDashboardData,
+  getMethodologyCorrelation,
+  getTeamPerformance,
+  parsePeriod,
+} from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
@@ -51,7 +59,11 @@ const depthColor = (pct: number): string => {
    Page
    ============================================================ */
 
-const ROIDashboardPage = async () => {
+type ROIDashboardPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
   const supabase = await createClient()
 
   const {
@@ -70,8 +82,13 @@ const ROIDashboardPage = async () => {
 
   const orgId = currentOrg.orgId
 
+  const params = await searchParams
+  const period = parsePeriod(typeof params.period === 'string' ? params.period : undefined)
+
+  const buildUrl = (p: string) => `/reports/roi-dashboard?period=${p}`
+
   const [roiData, correlation, teamPerformance] = await Promise.all([
-    getROIDashboardData(orgId),
+    getROIDashboardData(orgId, period),
     getMethodologyCorrelation(orgId),
     getTeamPerformance(orgId),
   ])
@@ -127,7 +144,15 @@ const ROIDashboardPage = async () => {
       </div>
 
       {/* Step stripe */}
-      <div className="step-gradient-stripe mb-8 rounded-full" />
+      <div className="step-gradient-stripe mb-6 rounded-full" />
+
+      {/* Period selector */}
+      <div className="mb-8">
+        <PeriodSelector activePeriod={period} buildUrl={buildUrl} />
+        <p className="mt-2 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+          Showing data for: <span className="font-medium">{roiData.periodLabel}</span>
+        </p>
+      </div>
 
       {/* No-projects guard */}
       {noProjects && (
@@ -154,105 +179,170 @@ const ROIDashboardPage = async () => {
         </div>
       )}
 
-      {/* Hero KPI strip */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
-          title="Total Annual Savings"
-          value={formatCurrency(roiData.totalAnnualSavings)}
-          icon={DollarSign}
-          color="#10B981"
-          subtitle={
-            roiData.totalAnnualSavings === 0
-              ? 'Add results metrics to projects'
-              : 'across all projects'
-          }
-        />
-        <KpiCard
-          title="Weekly Hours Saved"
-          value={
-            roiData.totalWeeklyHoursSaved > 0
-              ? `${roiData.totalWeeklyHoursSaved.toFixed(1)}h`
-              : '--'
-          }
-          icon={Clock}
-          color="#3B82F6"
-          subtitle={
-            roiData.totalWeeklyHoursSaved === 0
-              ? 'No time savings recorded'
-              : 'per week across all projects'
-          }
-        />
-        <KpiCard
-          title="Average ROI"
-          value={roiData.avgRoiPercent !== null ? `${roiData.avgRoiPercent}%` : '--'}
-          icon={TrendingUp}
-          color="#F59E0B"
-          subtitle={
-            roiData.avgRoiPercent === null ? 'No ROI data yet' : 'across projects with data'
-          }
-        />
-        <KpiCard
-          title="Projects with ROI Data"
-          value={roiData.projectsWithRoiData}
-          icon={BarChart2}
-          color="#6366F1"
-          subtitle={
-            roiData.projectsWithRoiData === 0
-              ? 'No results metrics filled'
-              : `of ${correlation.dataPoints.length} total project${correlation.dataPoints.length !== 1 ? 's' : ''}`
-          }
-        />
-      </div>
-
-      {/* Measurables-based projected savings */}
-      {(roiData.measurablesCount > 0 || roiData.totalProjectedSavings > 0) && (
-        <section className="mb-8">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              Projected Savings from Measurables
-            </h2>
-            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Based on problem statement targets
+      {/* ============================================================
+          REALISED SAVINGS SECTION — green accent
+          From results_metrics (Step 6)
+          ============================================================ */}
+      <section className="mb-8">
+        {/* Section header with color-coded badge */}
+        <div className="mb-3 flex items-center gap-3">
+          <div
+            className="flex h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{ backgroundColor: '#10B981' }}
+            aria-hidden="true"
+          />
+          <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Realised Savings
+            <span
+              className="ml-2 text-xs font-normal"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              from Results Metrics (Step 6)
             </span>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          </h2>
+        </div>
+        <div
+          className="rounded-xl border-l-4 p-1"
+          style={{ borderLeftColor: '#10B981' }}
+          aria-label="Realised savings section"
+        >
+          <div className="grid gap-4 p-3 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard
-              title="Projected Annual Savings"
-              value={formatCurrency(roiData.totalProjectedSavings)}
+              title="Total Annual Savings"
+              value={formatCurrency(roiData.totalAnnualSavings)}
               icon={DollarSign}
-              color="#059669"
+              color="#10B981"
               subtitle={
-                roiData.totalProjectedSavings === 0
-                  ? 'No cost measurables set'
-                  : 'from measurables targets'
+                roiData.totalAnnualSavings === 0
+                  ? 'Add results metrics to projects'
+                  : 'across all projects'
               }
             />
             <KpiCard
-              title="Hours Saved Annually"
+              title="Weekly Hours Saved"
               value={
-                roiData.totalProjectedHoursSaved > 0
-                  ? `${roiData.totalProjectedHoursSaved.toLocaleString()}h`
+                roiData.totalWeeklyHoursSaved > 0
+                  ? `${roiData.totalWeeklyHoursSaved.toFixed(1)}h`
                   : '--'
               }
               icon={Clock}
-              color="#0891B2"
+              color="#3B82F6"
               subtitle={
-                roiData.totalProjectedHoursSaved === 0
-                  ? 'No time measurables set'
-                  : 'per year from time targets'
+                roiData.totalWeeklyHoursSaved === 0
+                  ? 'No time savings recorded'
+                  : 'per week across all projects'
               }
             />
             <KpiCard
-              title="Measurables Tracked"
-              value={roiData.measurablesCount}
-              icon={ListChecks}
-              color="#4338CA"
+              title="Average ROI"
+              value={roiData.avgRoiPercent !== null ? `${roiData.avgRoiPercent}%` : '--'}
+              icon={TrendingUp}
+              color="#F59E0B"
               subtitle={
-                roiData.projectsWithMeasurables === 0
-                  ? 'Add measurables in Step 1'
-                  : `across ${roiData.projectsWithMeasurables} project${roiData.projectsWithMeasurables !== 1 ? 's' : ''}`
+                roiData.avgRoiPercent === null ? 'No ROI data yet' : 'across projects with data'
               }
             />
+            <KpiCard
+              title="Projects with ROI Data"
+              value={roiData.projectsWithRoiData}
+              icon={BarChart2}
+              color="#6366F1"
+              subtitle={
+                roiData.projectsWithRoiData === 0
+                  ? 'No results metrics filled'
+                  : `of ${correlation.dataPoints.length} total project${correlation.dataPoints.length !== 1 ? 's' : ''}`
+              }
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          PROJECTED SAVINGS SECTION — amber accent
+          From problem_statement measurables (Step 1)
+          ============================================================ */}
+      {(roiData.measurablesCount > 0 || roiData.totalProjectedSavings > 0) && (
+        <section className="mb-8">
+          <div className="mb-3 flex items-center gap-3">
+            <div
+              className="flex h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: '#F59E0B' }}
+              aria-hidden="true"
+            />
+            <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Projected Savings
+              <span
+                className="ml-2 text-xs font-normal"
+                style={{ color: 'var(--color-text-tertiary)' }}
+              >
+                from Measurable Targets (Step 1)
+              </span>
+            </h2>
+          </div>
+          <div
+            className="rounded-xl border-l-4 p-1"
+            style={{ borderLeftColor: '#F59E0B' }}
+            aria-label="Projected savings section"
+          >
+            <div className="grid gap-4 p-3 sm:grid-cols-2 lg:grid-cols-4">
+              <KpiCard
+                title="Projected Annual Savings"
+                value={formatCurrency(roiData.totalProjectedSavings)}
+                icon={Target}
+                color="#F59E0B"
+                subtitle={
+                  roiData.totalProjectedSavings === 0
+                    ? 'No cost measurables set'
+                    : 'from measurables targets'
+                }
+              />
+              <KpiCard
+                title="Hours Saved Annually"
+                value={
+                  roiData.totalProjectedHoursSaved > 0
+                    ? `${roiData.totalProjectedHoursSaved.toLocaleString()}h`
+                    : '--'
+                }
+                icon={Clock}
+                color="#D97706"
+                subtitle={
+                  roiData.totalProjectedHoursSaved === 0
+                    ? 'No time measurables set'
+                    : 'per year from time targets'
+                }
+              />
+              <KpiCard
+                title="Measurables Tracked"
+                value={roiData.measurablesCount}
+                icon={ListChecks}
+                color="#B45309"
+                subtitle={
+                  roiData.projectsWithMeasurables === 0
+                    ? 'Add measurables in Step 1'
+                    : `across ${roiData.projectsWithMeasurables} project${roiData.projectsWithMeasurables !== 1 ? 's' : ''}`
+                }
+              />
+              {/* Realisation Rate — bridge card */}
+              <KpiCard
+                title="Realisation Rate"
+                value={roiData.realisationRate !== null ? `${roiData.realisationRate}%` : '--'}
+                icon={CheckCircle2}
+                color={
+                  roiData.realisationRate === null
+                    ? '#6B7280'
+                    : roiData.realisationRate >= 80
+                      ? '#10B981'
+                      : roiData.realisationRate >= 50
+                        ? '#F59E0B'
+                        : '#EF4444'
+                }
+                subtitle={
+                  roiData.realisationRate === null
+                    ? 'Need both projected + realised data'
+                    : 'realised ÷ projected savings'
+                }
+              />
+            </div>
           </div>
         </section>
       )}
@@ -321,7 +411,7 @@ const ROIDashboardPage = async () => {
                           {project.annualSavings > 0 ? formatCurrency(project.annualSavings) : '--'}
                         </span>
                         <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                          annual savings
+                          realised savings
                         </span>
                       </div>
                       <div className="hidden flex-col items-end lg:flex">

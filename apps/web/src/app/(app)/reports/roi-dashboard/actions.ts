@@ -12,6 +12,70 @@ import type {
    Types
    ============================================================ */
 
+export type Period = 'this-quarter' | 'last-quarter' | 'ytd' | 'last-12-months' | 'all-time'
+
+export const VALID_PERIODS: Period[] = [
+  'this-quarter',
+  'last-quarter',
+  'ytd',
+  'last-12-months',
+  'all-time',
+]
+
+export const PERIOD_LABELS: Record<Period, string> = {
+  'this-quarter': 'This Quarter',
+  'last-quarter': 'Last Quarter',
+  ytd: 'Year to Date',
+  'last-12-months': 'Last 12 Months',
+  'all-time': 'All Time',
+}
+
+export const parsePeriod = (raw: string | undefined): Period =>
+  VALID_PERIODS.includes(raw as Period) ? (raw as Period) : 'this-quarter'
+
+/**
+ * Returns { start, end } date boundaries for a given period.
+ * Returns null for 'all-time' (no filtering).
+ */
+export const getPeriodBounds = (
+  period: Period,
+): { start: Date; end: Date; label: string } | null => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const quarter = Math.floor(month / 3)
+
+  if (period === 'all-time') return null
+
+  if (period === 'this-quarter') {
+    const start = new Date(year, quarter * 3, 1)
+    const end = new Date(year, quarter * 3 + 3, 0, 23, 59, 59)
+    return { start, end, label: `Q${quarter + 1} ${year}` }
+  }
+
+  if (period === 'last-quarter') {
+    const prevQ = quarter === 0 ? 3 : quarter - 1
+    const prevYear = quarter === 0 ? year - 1 : year
+    const start = new Date(prevYear, prevQ * 3, 1)
+    const end = new Date(prevYear, prevQ * 3 + 3, 0, 23, 59, 59)
+    return { start, end, label: `Q${prevQ + 1} ${prevYear}` }
+  }
+
+  if (period === 'ytd') {
+    const start = new Date(year, 0, 1)
+    const end = now
+    return { start, end, label: `Year to Date ${year}` }
+  }
+
+  if (period === 'last-12-months') {
+    const start = new Date(year, month - 12, 1)
+    const end = now
+    return { start, end, label: 'Last 12 Months' }
+  }
+
+  return null
+}
+
 export type CorrelationDataPoint = {
   projectId: string
   projectTitle: string
@@ -37,10 +101,18 @@ export type MethodologyCorrelation = {
 }
 
 export type ROIDashboardData = {
+  /** Realised savings — from results_metrics forms (Step 6) */
   totalAnnualSavings: number
   totalWeeklyHoursSaved: number
   avgRoiPercent: number | null
   projectsWithRoiData: number
+  /** Projected savings — from problem_statement measurables (Step 1) */
+  totalProjectedSavings: number
+  totalProjectedHoursSaved: number
+  measurablesCount: number
+  projectsWithMeasurables: number
+  /** Realisation rate: realised / projected * 100 */
+  realisationRate: number | null
   topProjectsByImpact: Array<{
     id: string
     title: string
@@ -54,10 +126,7 @@ export type ROIDashboardData = {
     cumulativeSavings: number
     projectsCompleted: number
   }>
-  totalProjectedSavings: number
-  totalProjectedHoursSaved: number
-  measurablesCount: number
-  projectsWithMeasurables: number
+  periodLabel: string
 }
 
 /* ============================================================
@@ -293,13 +362,19 @@ export const getMethodologyCorrelation = async (orgId: string): Promise<Methodol
    getROIDashboardData
    ============================================================ */
 
-export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardData> => {
+export const getROIDashboardData = async (
+  orgId: string,
+  period: Period = 'this-quarter',
+): Promise<ROIDashboardData> => {
   await requirePermission(orgId, 'data.view')
 
   const supabase = await createClient()
 
-  // Fetch all projects
-  const { data: projects } = await supabase
+  const periodBounds = getPeriodBounds(period)
+  const periodLabel = periodBounds?.label ?? 'All Time'
+
+  // Fetch all projects (for measurables/depth, no period filter)
+  let projectsQuery = supabase
     .from('projects')
     .select('id, title, status, completed_at, created_at')
     .eq('org_id', orgId)
@@ -308,19 +383,34 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
     .order('created_at', { ascending: false })
     .limit(200)
 
+  // For period-filtered KPIs: only projects completed within the period
+  // For measurables (projected): use all projects (targets exist regardless of completion)
+  // Apply period filter to completed_at when not all-time
+  if (periodBounds) {
+    projectsQuery = projectsQuery
+      .gte('completed_at', periodBounds.start.toISOString())
+      .lte('completed_at', periodBounds.end.toISOString())
+  }
+
+  const { data: projects } = await projectsQuery
+
+  const emptyResult: ROIDashboardData = {
+    totalAnnualSavings: 0,
+    totalWeeklyHoursSaved: 0,
+    avgRoiPercent: null,
+    projectsWithRoiData: 0,
+    topProjectsByImpact: [],
+    monthlyTrend: [],
+    totalProjectedSavings: 0,
+    totalProjectedHoursSaved: 0,
+    measurablesCount: 0,
+    projectsWithMeasurables: 0,
+    realisationRate: null,
+    periodLabel,
+  }
+
   if (!projects || projects.length === 0) {
-    return {
-      totalAnnualSavings: 0,
-      totalWeeklyHoursSaved: 0,
-      avgRoiPercent: null,
-      projectsWithRoiData: 0,
-      topProjectsByImpact: [],
-      monthlyTrend: [],
-      totalProjectedSavings: 0,
-      totalProjectedHoursSaved: 0,
-      measurablesCount: 0,
-      projectsWithMeasurables: 0,
-    }
+    return emptyResult
   }
 
   const projectIds = projects.map((p) => p.id)
@@ -540,6 +630,11 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
       }
     })
 
+  const realisationRate =
+    totalProjectedSavings > 0 && totalAnnualSavings > 0
+      ? Math.round((totalAnnualSavings / totalProjectedSavings) * 100 * 10) / 10
+      : null
+
   return {
     totalAnnualSavings,
     totalWeeklyHoursSaved,
@@ -551,6 +646,8 @@ export const getROIDashboardData = async (orgId: string): Promise<ROIDashboardDa
     totalProjectedHoursSaved,
     measurablesCount,
     projectsWithMeasurables,
+    realisationRate,
+    periodLabel,
   }
 }
 
@@ -769,6 +866,7 @@ export type ExecutiveSummaryData = {
   periodLabel: string
   projectsCompleted: number
   ticketsResolved: number
+  /** Realised savings — from results_metrics (Step 6) */
   totalAnnualSavings: number
   totalWeeklyHoursSaved: number
   avgRoiPercent: number | null
@@ -779,38 +877,32 @@ export type ExecutiveSummaryData = {
   avgRoiHighDepth: number | null
   avgRoiLowDepth: number | null
   monthlyCompletions: Array<{ month: string; count: number }>
+  /** Projected savings — from problem_statement measurables (Step 1) */
   totalProjectedSavings: number
   totalProjectedHoursSaved: number
   measurablesCount: number
   topMeasurables: TopMeasurable[]
+  /** Realisation rate: realised / projected * 100 */
+  realisationRate: number | null
 }
 
-const getCurrentQuarterLabel = (): { label: string; start: Date; end: Date } => {
-  const now = new Date()
-  const quarter = Math.floor(now.getMonth() / 3) + 1
-  const year = now.getFullYear()
-  const quarterStart = new Date(year, (quarter - 1) * 3, 1)
-  const quarterEnd = new Date(year, quarter * 3, 0, 23, 59, 59)
-  return {
-    label: `Q${quarter} ${year}`,
-    start: quarterStart,
-    end: quarterEnd,
-  }
-}
-
-export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveSummaryData> => {
+export const getExecutiveSummaryData = async (
+  orgId: string,
+  period: Period = 'this-quarter',
+): Promise<ExecutiveSummaryData> => {
   await requirePermission(orgId, 'data.view')
 
   const supabase = await createClient()
+
+  const periodBounds = getPeriodBounds(period)
 
   // Get org name
   const { data: org } = await supabase.from('organizations').select('name').eq('id', orgId).single()
 
   const orgName = org?.name ?? 'Your Organization'
+  const periodLabel = periodBounds?.label ?? 'All Time'
 
-  const { label: periodLabel, start: periodStart } = getCurrentQuarterLabel()
-
-  // Fetch all org projects (all time for methodology stats, filter by period for KPIs)
+  // Fetch all org projects (all time for methodology stats; period filtering done in JS below)
   const { data: allProjects } = await supabase
     .from('projects')
     .select('id, title, status, created_at, completed_at')
@@ -840,24 +932,35 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
       totalProjectedHoursSaved: 0,
       measurablesCount: 0,
       topMeasurables: [],
+      realisationRate: null,
     }
   }
 
   const allProjectIds = allProjects.map((p) => p.id)
 
-  // Period-filtered projects (completed in the current quarter)
-  const periodProjects = allProjects.filter(
-    (p) => p.status === 'completed' && p.completed_at && new Date(p.completed_at) >= periodStart,
-  )
+  // Period-filtered projects (completed within the selected period)
+  const periodProjects = allProjects.filter((p) => {
+    if (p.status !== 'completed' || !p.completed_at) return false
+    if (!periodBounds) return true // all-time
+    const completed = new Date(p.completed_at)
+    return completed >= periodBounds.start && completed <= periodBounds.end
+  })
 
   // Fetch tickets resolved in the period
-  const { data: periodTickets } = await supabase
+  let ticketsQuery = supabase
     .from('tickets')
     .select('id')
     .eq('org_id', orgId)
     .eq('status', 'done')
-    .gte('resolved_at', periodStart.toISOString())
     .limit(5000)
+
+  if (periodBounds) {
+    ticketsQuery = ticketsQuery
+      .gte('resolved_at', periodBounds.start.toISOString())
+      .lte('resolved_at', periodBounds.end.toISOString())
+  }
+
+  const { data: periodTickets } = await ticketsQuery
 
   const ticketsResolved = periodTickets?.length ?? 0
 
@@ -1085,6 +1188,11 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
     )
     .slice(0, 3)
 
+  const execRealisationRate =
+    execTotalProjectedSavings > 0 && totalAnnualSavings > 0
+      ? Math.round((totalAnnualSavings / execTotalProjectedSavings) * 100 * 10) / 10
+      : null
+
   return {
     orgName,
     periodLabel,
@@ -1104,5 +1212,6 @@ export const getExecutiveSummaryData = async (orgId: string): Promise<ExecutiveS
     totalProjectedHoursSaved: execTotalProjectedHoursSaved,
     measurablesCount: execMeasurablesCount,
     topMeasurables,
+    realisationRate: execRealisationRate,
   }
 }
