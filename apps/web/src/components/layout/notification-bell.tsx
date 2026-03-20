@@ -19,13 +19,14 @@ import {
   markAsRead,
   markAllAsRead,
 } from '@/app/(app)/notifications/actions'
+import { createClient } from '@/lib/supabase/client'
+import { useNotificationRealtime } from '@/hooks/use-notification-realtime'
 import type { Notification, NotificationType } from '@/types/notifications'
 
 /* ============================================================
    Constants
    ============================================================ */
 
-const POLL_INTERVAL_MS = 30_000
 const NOTIFICATIONS_LIMIT = 10
 
 const NOTIFICATION_ICONS: Record<NotificationType, typeof Bell> = {
@@ -75,17 +76,54 @@ const formatTimeAgo = (dateStr: string): string => {
 
 export const NotificationBell = () => {
   const router = useRouter()
+  const [userId, setUserId] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const supabaseRef = useRef(createClient())
 
-  // Fetch unread count
-  const fetchUnreadCount = useCallback(async () => {
+  // Resolve the current user ID on mount (needed for realtime filter)
+  useEffect(() => {
+    void supabaseRef.current.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? null)
+    })
+  }, [])
+
+  // Keep a stable ref to the count-refresh function so the realtime callback
+  // can call it without needing it as a reactive dependency.
+  const refreshUnreadCount = useRef(async () => {
     const count = await getUnreadCount()
     setUnreadCount(count)
+  })
+
+  // Fetch unread count once on mount; realtime keeps it up-to-date after that
+  useEffect(() => {
+    const refresh = async () => {
+      const count = await getUnreadCount()
+      setUnreadCount(count)
+    }
+    void refresh()
   }, [])
+
+  // Realtime subscription — replaces the 30-second polling interval
+  useNotificationRealtime(userId, {
+    onInsert: (notification) => {
+      // Increment badge counter immediately
+      setUnreadCount((prev) => prev + 1)
+
+      // Prepend to the open dropdown list if it is currently visible
+      setNotifications((prev) => [notification, ...prev].slice(0, NOTIFICATIONS_LIMIT))
+    },
+    onUpdate: (notification) => {
+      // Sync read state if this notification was marked as read in another tab
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notification.id ? { ...n, read_at: notification.read_at } : n)),
+      )
+      // Re-sync the count from server to stay accurate
+      void refreshUnreadCount.current()
+    },
+  })
 
   // Fetch notifications when dropdown opens
   const fetchNotifications = useCallback(async () => {
@@ -96,24 +134,6 @@ export const NotificationBell = () => {
     setNotifications(result.notifications)
     setIsLoading(false)
   }, [])
-
-  // Poll for unread count (initial fetch + interval)
-  useEffect(() => {
-    const initialTimer = setTimeout(() => {
-      void fetchUnreadCount()
-    }, 0)
-
-    pollRef.current = setInterval(() => {
-      void fetchUnreadCount()
-    }, POLL_INTERVAL_MS)
-
-    return () => {
-      clearTimeout(initialTimer)
-      if (pollRef.current) {
-        clearInterval(pollRef.current)
-      }
-    }
-  }, [fetchUnreadCount])
 
   // Fetch notifications when dropdown opens
   const handleOpenChange = useCallback(
@@ -268,6 +288,21 @@ export const NotificationBell = () => {
             })}
           </div>
         </DropdownMenuGroup>
+
+        {/* Footer: View all notifications link */}
+        <DropdownMenuSeparator />
+        <div className="px-3 py-2">
+          <button
+            type="button"
+            onClick={() => {
+              setIsOpen(false)
+              router.push('/notifications')
+            }}
+            className="w-full rounded px-2 py-1.5 text-center text-xs text-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            View all notifications
+          </button>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   )

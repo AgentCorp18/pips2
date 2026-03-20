@@ -32,6 +32,27 @@ vi.mock('@/app/(app)/notifications/actions', () => ({
   markAllAsRead: () => mockMarkAllAsRead(),
 }))
 
+// Mock Supabase client — used to resolve userId for realtime subscription
+const mockGetUser = vi.fn()
+const mockUnsubscribe = vi.fn()
+const mockRemoveChannel = vi.fn()
+const mockOn = vi.fn()
+const mockSubscribe = vi.fn()
+const mockChannel = vi.fn()
+
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: { getUser: mockGetUser },
+    channel: mockChannel,
+    removeChannel: mockRemoveChannel,
+  }),
+}))
+
+// Mock the realtime hook so tests don't need to wire up Supabase channel machinery
+vi.mock('@/hooks/use-notification-realtime', () => ({
+  useNotificationRealtime: vi.fn(),
+}))
+
 /* ============================================================
    Helpers
    ============================================================ */
@@ -90,6 +111,16 @@ describe('NotificationBell', () => {
     })
     mockMarkAsRead.mockResolvedValue({})
     mockMarkAllAsRead.mockResolvedValue({})
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    // Channel mock: return a chainable object
+    const channelObj = {
+      on: mockOn,
+      subscribe: mockSubscribe,
+      unsubscribe: mockUnsubscribe,
+    }
+    mockOn.mockReturnValue(channelObj)
+    mockSubscribe.mockReturnValue(channelObj)
+    mockChannel.mockReturnValue(channelObj)
   })
 
   afterEach(() => {
@@ -294,7 +325,7 @@ describe('NotificationBell', () => {
     })
   })
 
-  /* ---- Polling ---- */
+  /* ---- Initial fetch (replaces polling test) ---- */
 
   it('calls getUnreadCount on initial mount', async () => {
     await act(async () => {
@@ -303,5 +334,44 @@ describe('NotificationBell', () => {
     await waitFor(() => {
       expect(mockGetUnreadCount).toHaveBeenCalled()
     })
+  })
+
+  /* ---- View all link ---- */
+
+  it('shows "View all notifications" link in the footer', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    mockGetNotifications.mockResolvedValue({ notifications: [], total: 0 })
+
+    await act(async () => {
+      render(<NotificationBell />)
+    })
+
+    const button = screen.getByRole('button', { name: /notifications/i })
+    await user.click(button)
+
+    await waitFor(() => {
+      expect(screen.getByText('View all notifications')).toBeInTheDocument()
+    })
+  })
+
+  it('navigates to /notifications when "View all notifications" is clicked', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    mockGetNotifications.mockResolvedValue({ notifications: [], total: 0 })
+
+    await act(async () => {
+      render(<NotificationBell />)
+    })
+
+    const bellButton = screen.getByRole('button', { name: /notifications/i })
+    await user.click(bellButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('View all notifications')).toBeInTheDocument()
+    })
+
+    const viewAllButton = screen.getByText('View all notifications')
+    await user.click(viewAllButton)
+
+    expect(mockPush).toHaveBeenCalledWith('/notifications')
   })
 })

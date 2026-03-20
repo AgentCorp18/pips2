@@ -15,14 +15,30 @@ import {
   getAgingTickets,
   getDashboardMetrics,
   getOrgImpactSummary,
+  getDashboardPersonalSummary,
 } from './actions'
 import { MetricsWidgets } from '@/components/dashboard/metrics-widgets'
-import type { DashboardMetrics, OrgImpactSummary } from './actions'
+import type { DashboardMetrics, OrgImpactSummary, PersonalSummary } from './actions'
 import { OrgImpactSummary as OrgImpactSummaryWidget } from '@/components/dashboard/org-impact-summary'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { WelcomeCards } from '@/components/dashboard/welcome-cards'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
 import type { ProductContext } from '@pips/shared'
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+
+const getTimeOfDayGreeting = (): string => {
+  const hour = new Date().getHours()
+  if (hour >= 5 && hour < 12) return 'Good morning'
+  if (hour >= 12 && hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+/* ============================================================
+   Metadata
+   ============================================================ */
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -49,14 +65,26 @@ const DashboardPage = async () => {
 
   const { orgId, orgName, role } = currentOrg
 
-  // Fetch org plan separately — getCurrentOrg only returns id/name/role
-  const { data: org } = await supabase.from('organizations').select('plan').eq('id', orgId).single()
+  // Fetch org plan + user profile in parallel
+  const [orgResult, profileResult] = await Promise.all([
+    supabase.from('organizations').select('plan').eq('id', orgId).single(),
+    supabase.from('profiles').select('display_name, full_name').eq('id', user.id).single(),
+  ])
+
+  const { data: org } = orgResult
 
   if (!org) {
     redirect('/onboarding')
   }
 
   const roleLabel = role as string
+
+  // Resolve display name: prefer display_name, fall back to full_name, then email prefix
+  const profile = profileResult.data
+  const displayName =
+    profile?.display_name ?? profile?.full_name ?? (user.email ? user.email.split('@')[0] : 'there')
+
+  const greeting = getTimeOfDayGreeting()
 
   let stats: Awaited<ReturnType<typeof getDashboardStats>> = {
     totalProjects: 0,
@@ -86,16 +114,23 @@ const DashboardPage = async () => {
     solutionsEvaluated: 0,
     lessonsDocumented: 0,
   }
+  let personalSummary: PersonalSummary = {
+    assignedTickets: 0,
+    overdueTickets: 0,
+    pendingNotifications: 0,
+  }
 
   try {
-    ;[stats, stepData, activity, agingTickets, metrics, impactSummary] = await Promise.all([
-      getDashboardStats(orgId),
-      getProjectsByStep(orgId),
-      getRecentActivity(orgId, 10),
-      getAgingTickets(orgId),
-      getDashboardMetrics(orgId),
-      getOrgImpactSummary(orgId),
-    ])
+    ;[stats, stepData, activity, agingTickets, metrics, impactSummary, personalSummary] =
+      await Promise.all([
+        getDashboardStats(orgId),
+        getProjectsByStep(orgId),
+        getRecentActivity(orgId, 10),
+        getAgingTickets(orgId),
+        getDashboardMetrics(orgId),
+        getOrgImpactSummary(orgId),
+        getDashboardPersonalSummary(user.id, orgId),
+      ])
   } catch (err) {
     console.error('[DashboardPage] Error fetching data:', err)
   }
@@ -112,14 +147,21 @@ const DashboardPage = async () => {
     <div className="mx-auto max-w-[var(--content-max-width)]">
       {/* Welcome header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <h1
-            className="text-2xl font-semibold"
-            style={{ color: 'var(--color-text-primary)' }}
-            data-testid="dashboard-heading"
+        <h1
+          className="text-2xl font-semibold"
+          style={{ color: 'var(--color-text-primary)' }}
+          data-testid="dashboard-heading"
+        >
+          {greeting}, {displayName}
+        </h1>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <span
+            className="text-sm"
+            style={{ color: 'var(--color-text-secondary)' }}
+            data-testid="dashboard-org-context"
           >
             {orgName}
-          </h1>
+          </span>
           <Badge variant="secondary" data-testid="dashboard-role-badge">
             {roleLabel.charAt(0).toUpperCase() + roleLabel.slice(1)}
           </Badge>
@@ -128,11 +170,30 @@ const DashboardPage = async () => {
           </Badge>
         </div>
         <p
-          className="mt-1 text-sm"
+          className="mt-2 text-sm"
           style={{ color: 'var(--color-text-secondary)' }}
-          data-testid="dashboard-welcome-text"
+          data-testid="dashboard-personal-summary"
         >
-          Welcome to your PIPS dashboard. Here is an overview of your workspace.
+          {personalSummary.assignedTickets === 0 ? (
+            'No tickets assigned to you right now.'
+          ) : (
+            <>
+              You have{' '}
+              <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                {personalSummary.assignedTickets} ticket
+                {personalSummary.assignedTickets !== 1 ? 's' : ''} assigned
+              </span>
+              {personalSummary.overdueTickets > 0 && (
+                <>
+                  ,{' '}
+                  <span className="font-medium" style={{ color: 'var(--color-danger, #dc2626)' }}>
+                    {personalSummary.overdueTickets} overdue
+                  </span>
+                </>
+              )}
+              .
+            </>
+          )}
         </p>
       </div>
 

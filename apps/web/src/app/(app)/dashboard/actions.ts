@@ -468,6 +468,59 @@ export const getOrgImpactSummary = async (orgId: string): Promise<OrgImpactSumma
 }
 
 /* ============================================================
+   getDashboardPersonalSummary
+   ============================================================ */
+
+export type PersonalSummary = {
+  assignedTickets: number
+  overdueTickets: number
+  pendingNotifications: number
+}
+
+export const getDashboardPersonalSummary = async (
+  userId: string,
+  orgId: string,
+): Promise<PersonalSummary> => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return { assignedTickets: 0, overdueTickets: 0, pendingNotifications: 0 }
+  }
+
+  const supabase = await createClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  const [assignedRes, overdueRes, notificationsRes] = await Promise.all([
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('assignee_id', userId)
+      .not('status', 'in', '("done","cancelled")'),
+
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('assignee_id', userId)
+      .not('status', 'in', '("done","cancelled")')
+      .lt('due_date', today),
+
+    supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .is('read_at', null),
+  ])
+
+  return {
+    assignedTickets: assignedRes.count ?? 0,
+    overdueTickets: overdueRes.count ?? 0,
+    pendingNotifications: notificationsRes.count ?? 0,
+  }
+}
+
+/* ============================================================
    getRecentActivity
    ============================================================ */
 
