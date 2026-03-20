@@ -41,18 +41,30 @@ export const getOrgWithSettings = async () => {
     .eq('org_id', org.id)
     .single()
 
+  const defaultSettings = {
+    timezone: 'America/Chicago',
+    date_format: 'MM/dd/yyyy',
+    week_start: 'monday',
+    default_ticket_priority: 'medium',
+    ticket_prefix: 'PIPS',
+    notification_settings: { email_digest: 'daily', in_app: true },
+    branding: {},
+  }
+
+  const resolvedSettings = settings ?? defaultSettings
+  // min_methodology_depth is stored in notification_settings JSONB
+  const notifSettings =
+    (resolvedSettings.notification_settings as Record<string, unknown> | null) ?? {}
+  const minMethodologyDepth =
+    typeof notifSettings.min_methodology_depth === 'number'
+      ? notifSettings.min_methodology_depth
+      : 0
+
   return {
     org,
     role: currentOrg.role as string,
-    settings: settings ?? {
-      timezone: 'America/Chicago',
-      date_format: 'MM/dd/yyyy',
-      week_start: 'monday',
-      default_ticket_priority: 'medium',
-      ticket_prefix: 'PIPS',
-      notification_settings: { email_digest: 'daily', in_app: true },
-      branding: {},
-    },
+    settings: resolvedSettings,
+    minMethodologyDepth,
   }
 }
 
@@ -67,6 +79,7 @@ export const updateOrgSettings = async (
     week_start: formData.get('week_start'),
     default_ticket_priority: formData.get('default_ticket_priority'),
     ticket_prefix: formData.get('ticket_prefix'),
+    min_methodology_depth: formData.get('min_methodology_depth') ?? '0',
   }
 
   const result = updateOrgSettingsSchema.safeParse(raw)
@@ -112,6 +125,21 @@ export const updateOrgSettings = async (
     return { error: 'Failed to update organization name' }
   }
 
+  // Fetch current notification_settings to merge in new fields
+  const { data: currentSettings } = await supabase
+    .from('org_settings')
+    .select('notification_settings')
+    .eq('org_id', currentOrg.orgId)
+    .single()
+
+  const existingNotifSettings =
+    (currentSettings?.notification_settings as Record<string, unknown> | null) ?? {}
+
+  const updatedNotifSettings = {
+    ...existingNotifSettings,
+    min_methodology_depth: result.data.min_methodology_depth,
+  }
+
   // Upsert org_settings (trigger auto-creates row, but upsert handles edge cases)
   const { error: settingsError } = await supabase.from('org_settings').upsert(
     {
@@ -121,6 +149,7 @@ export const updateOrgSettings = async (
       week_start: result.data.week_start,
       default_ticket_priority: result.data.default_ticket_priority,
       ticket_prefix: result.data.ticket_prefix,
+      notification_settings: updatedNotifSettings,
       updated_at: new Date().toISOString(),
     },
     { onConflict: 'org_id' },

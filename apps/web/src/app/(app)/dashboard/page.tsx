@@ -10,16 +10,25 @@ import { AgingTicketsAlert } from '@/components/dashboard/aging-tickets-alert'
 import { CreateSampleProject } from './create-sample-project'
 import {
   getDashboardStats,
+  getDashboardDeltas,
   getProjectsByStep,
   getRecentActivity,
   getAgingTickets,
   getDashboardMetrics,
   getOrgImpactSummary,
   getDashboardPersonalSummary,
+  getComplianceAlerts,
 } from './actions'
 import { MetricsWidgets } from '@/components/dashboard/metrics-widgets'
-import type { DashboardMetrics, OrgImpactSummary, PersonalSummary } from './actions'
+import type {
+  DashboardMetrics,
+  DashboardDeltas,
+  OrgImpactSummary,
+  PersonalSummary,
+  ComplianceAlert,
+} from './actions'
 import { OrgImpactSummary as OrgImpactSummaryWidget } from '@/components/dashboard/org-impact-summary'
+import { MethodologyComplianceAlert } from '@/components/dashboard/methodology-compliance-alert'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
 import { WelcomeCards } from '@/components/dashboard/welcome-cards'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
@@ -120,18 +129,36 @@ const DashboardPage = async () => {
     overdueTickets: 0,
     pendingNotifications: 0,
   }
+  let complianceAlert: ComplianceAlert | null = null
+  let deltas: DashboardDeltas = {
+    openTickets: { current: 0, previousWeek: 0, delta: 0, direction: 'flat' },
+    overdueTickets: { current: 0, previousWeek: 0, delta: 0, direction: 'flat' },
+    completedThisMonth: { current: 0, previousWeek: 0, delta: 0, direction: 'flat' },
+    activeProjects: { current: 0, previousWeek: 0, delta: 0, direction: 'flat' },
+  }
 
   try {
-    ;[stats, stepData, activity, agingTickets, metrics, impactSummary, personalSummary] =
-      await Promise.all([
-        getDashboardStats(orgId),
-        getProjectsByStep(orgId),
-        getRecentActivity(orgId, 10),
-        getAgingTickets(orgId),
-        getDashboardMetrics(orgId),
-        getOrgImpactSummary(orgId),
-        getDashboardPersonalSummary(user.id, orgId),
-      ])
+    ;[
+      stats,
+      stepData,
+      activity,
+      agingTickets,
+      metrics,
+      impactSummary,
+      personalSummary,
+      complianceAlert,
+      deltas,
+    ] = await Promise.all([
+      getDashboardStats(orgId),
+      getProjectsByStep(orgId),
+      getRecentActivity(orgId, 10),
+      getAgingTickets(orgId),
+      getDashboardMetrics(orgId),
+      getOrgImpactSummary(orgId),
+      getDashboardPersonalSummary(user.id, orgId),
+      getComplianceAlerts(orgId),
+      getDashboardDeltas(orgId),
+    ])
   } catch (err) {
     console.error('[DashboardPage] Error fetching data:', err)
   }
@@ -217,7 +244,7 @@ const DashboardPage = async () => {
       ) : (
         <>
           {/* Stats cards */}
-          <StatCards stats={stats} />
+          <StatCards stats={stats} deltas={deltas} />
 
           {/* Metrics widgets — completion rate, cycle time, velocity, forms */}
           <div className="mt-6">
@@ -245,6 +272,13 @@ const DashboardPage = async () => {
           {agingTickets.length > 0 && (
             <div className="mt-8">
               <AgingTicketsAlert tickets={agingTickets} />
+            </div>
+          )}
+
+          {/* Methodology Compliance Alert */}
+          {complianceAlert && (
+            <div className="mt-8">
+              <MethodologyComplianceAlert alert={complianceAlert} />
             </div>
           )}
 

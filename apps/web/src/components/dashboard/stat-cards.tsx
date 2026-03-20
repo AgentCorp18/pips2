@@ -9,10 +9,55 @@ import {
   Users,
   ShieldAlert,
 } from 'lucide-react'
-import type { DashboardStats } from '@/app/(app)/dashboard/actions'
+import type { DashboardStats, DashboardDeltas, StatDelta } from '@/app/(app)/dashboard/actions'
+
+/* ============================================================
+   Delta indicator
+   ============================================================ */
+
+type DeltaIndicatorProps = {
+  delta: StatDelta
+  upIsGood: boolean
+}
+
+const DeltaIndicator = ({ delta, upIsGood }: DeltaIndicatorProps) => {
+  if (delta.direction === 'flat') {
+    return (
+      <span
+        className="mt-1 block text-xs"
+        style={{ color: 'var(--color-text-tertiary)' }}
+        data-testid="delta-flat"
+      >
+        — vs last week
+      </span>
+    )
+  }
+
+  const isPositive =
+    (delta.direction === 'up' && upIsGood) || (delta.direction === 'down' && !upIsGood)
+  const color = isPositive ? '#16A34A' : '#DC2626'
+  const arrow = delta.direction === 'up' ? '↑' : '↓'
+  const absValue = Math.abs(delta.delta)
+
+  return (
+    <span
+      className="mt-1 block text-xs font-medium"
+      style={{ color }}
+      data-testid={`delta-${delta.direction}`}
+    >
+      {arrow}
+      {absValue} vs last week
+    </span>
+  )
+}
+
+/* ============================================================
+   Card definitions
+   ============================================================ */
 
 type StatCardsProps = {
   stats: DashboardStats
+  deltas?: DashboardDeltas
 }
 
 type CardDef = {
@@ -23,6 +68,8 @@ type CardDef = {
   testId: string
   accentWhenPositive?: string
   href?: string
+  deltaKey?: keyof DashboardDeltas
+  deltaUpIsGood?: boolean
 }
 
 const CARDS: CardDef[] = [
@@ -41,6 +88,8 @@ const CARDS: CardDef[] = [
     color: 'var(--color-step-1)',
     testId: 'stat-active-projects',
     href: '/projects?status=active',
+    deltaKey: 'activeProjects',
+    deltaUpIsGood: true,
   },
   {
     key: 'openTickets',
@@ -49,6 +98,8 @@ const CARDS: CardDef[] = [
     color: 'var(--color-step-2)',
     testId: 'stat-open-tickets',
     href: '/tickets?status=todo&status=in_progress&status=in_review&status=blocked',
+    deltaKey: 'openTickets',
+    deltaUpIsGood: false,
   },
   {
     key: 'overdueTickets',
@@ -58,6 +109,8 @@ const CARDS: CardDef[] = [
     accentWhenPositive: 'var(--color-signal-red)',
     testId: 'stat-overdue',
     href: '/tickets?quick=overdue',
+    deltaKey: 'overdueTickets',
+    deltaUpIsGood: false,
   },
   {
     key: 'completedThisMonth',
@@ -66,6 +119,8 @@ const CARDS: CardDef[] = [
     color: 'var(--color-step-3)',
     testId: 'stat-completed',
     href: '/tickets?status=done',
+    deltaKey: 'completedThisMonth',
+    deltaUpIsGood: true,
   },
   {
     key: 'teamMembers',
@@ -77,7 +132,7 @@ const CARDS: CardDef[] = [
   },
 ]
 
-export const StatCards = ({ stats }: StatCardsProps) => {
+export const StatCards = ({ stats, deltas }: StatCardsProps) => {
   const hasBlockers = stats.blockedTickets > 0
 
   return (
@@ -105,6 +160,7 @@ export const StatCards = ({ stats }: StatCardsProps) => {
           const value = stats[card.key]
           const isOverduePositive = card.key === 'overdueTickets' && value > 0
           const iconColor = isOverduePositive ? card.accentWhenPositive : card.color
+          const statDelta = card.deltaKey && deltas ? deltas[card.deltaKey] : undefined
 
           const inner = (
             <Card data-testid={card.testId}>
@@ -134,6 +190,10 @@ export const StatCards = ({ stats }: StatCardsProps) => {
                     <ShieldAlert size={10} />
                     {stats.blockedTickets} blocked
                   </div>
+                )}
+                {/* Week-over-week delta indicator */}
+                {statDelta !== undefined && card.deltaUpIsGood !== undefined && (
+                  <DeltaIndicator delta={statDelta} upIsGood={card.deltaUpIsGood} />
                 )}
               </CardContent>
             </Card>

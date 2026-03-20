@@ -11,6 +11,7 @@ const defaultSettings: OrgSettings = {
   week_start: 'monday',
   default_ticket_priority: 'medium',
   ticket_prefix: 'PIPS',
+  min_methodology_depth: 0,
   notification_settings: {
     email_digest: 'daily',
     in_app: true,

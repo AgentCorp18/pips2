@@ -47,6 +47,7 @@ const SettingsPage = async () => {
           default_ticket_priority: data.settings.default_ticket_priority,
           ticket_prefix: data.settings.ticket_prefix,
         }}
+        minMethodologyDepth={data.minMethodologyDepth}
         canEdit={canEdit}
       />
     </div>

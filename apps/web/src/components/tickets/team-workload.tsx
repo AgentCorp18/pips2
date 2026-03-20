@@ -34,12 +34,24 @@ const WORKLOAD_THRESHOLDS = {
   heavy: 10,
 }
 
+const DEFAULT_CAPACITY_THRESHOLD = 8
+
 const getWorkloadLevel = (count: number): { label: string; color: string } => {
   if (count === 0) return { label: 'Idle', color: 'var(--color-text-tertiary)' }
   if (count <= WORKLOAD_THRESHOLDS.light) return { label: 'Light', color: '#22C55E' }
   if (count <= WORKLOAD_THRESHOLDS.moderate) return { label: 'Moderate', color: '#F59E0B' }
   if (count <= WORKLOAD_THRESHOLDS.heavy) return { label: 'Heavy', color: '#F97316' }
   return { label: 'Overloaded', color: '#EF4444' }
+}
+
+/* ============================================================
+   Capacity bar colour
+   ============================================================ */
+
+const getCapacityBarColor = (ratio: number): string => {
+  if (ratio >= 1) return '#EF4444'
+  if (ratio >= 0.75) return '#F59E0B'
+  return '#22C55E'
 }
 
 /* ============================================================
@@ -76,6 +88,7 @@ type TeamWorkloadProps = {
 
 export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadProps) => {
   const [expandedMember, setExpandedMember] = useState<string | null>(null)
+  const [capacityThreshold, setCapacityThreshold] = useState<number>(DEFAULT_CAPACITY_THRESHOLD)
 
   // Summary stats
   const stats = useMemo(() => {
@@ -98,6 +111,13 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
 
   // Max tickets for bar scaling
   const maxTickets = useMemo(() => Math.max(...members.map((m) => m.tickets.length), 1), [members])
+
+  const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10)
+    if (!isNaN(val) && val > 0) {
+      setCapacityThreshold(val)
+    }
+  }
 
   return (
     <div data-testid="team-workload">
@@ -122,6 +142,34 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
           color={stats.overdueCount > 0 ? '#F97316' : undefined}
           testId="workload-overdue"
         />
+      </div>
+
+      {/* Capacity threshold control */}
+      <div
+        className="mb-4 flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5"
+        data-testid="capacity-threshold-control"
+      >
+        <label
+          htmlFor="capacity-threshold"
+          className="text-xs font-medium"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          Capacity threshold (tickets/person):
+        </label>
+        <input
+          id="capacity-threshold"
+          type="number"
+          min={1}
+          max={99}
+          value={capacityThreshold}
+          onChange={handleThresholdChange}
+          className="w-16 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-center text-sm font-semibold"
+          style={{ color: 'var(--color-text-primary)' }}
+          data-testid="capacity-threshold-input"
+        />
+        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+          Red when &gt; threshold · Amber 75–100% · Green &lt; 75%
+        </span>
       </div>
 
       {/* Workload bars */}
@@ -150,6 +198,12 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
             Count
           </span>
           <span
+            className="w-[130px] text-center text-xs font-medium"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            Capacity
+          </span>
+          <span
             className="w-[90px] text-center text-xs font-medium"
             style={{ color: 'var(--color-text-secondary)' }}
           >
@@ -163,6 +217,14 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
           const isExpanded = expandedMember === member.user_id
           const statusGroups = isExpanded ? groupByStatus(member.tickets) : {}
 
+          const ticketCount = member.tickets.length
+          const capacityRatio = ticketCount / capacityThreshold
+          const barColor = getCapacityBarColor(capacityRatio)
+          const barWidthPct = Math.min(capacityRatio * 100, 100)
+
+          const isOverloaded = ticketCount > capacityThreshold
+          const isAvailable = ticketCount < capacityThreshold / 2 && ticketCount > 0
+
           return (
             <div key={member.user_id}>
               <button
@@ -171,7 +233,7 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
                 className="flex w-full items-center border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors hover:bg-[var(--color-surface-secondary)]"
                 data-testid={`workload-member-${member.user_id}`}
                 aria-expanded={isExpanded}
-                aria-label={`${member.display_name}: ${member.tickets.length} tickets, ${level.label} workload`}
+                aria-label={`${member.display_name}: ${ticketCount} tickets, ${level.label} workload`}
               >
                 {/* Avatar + name */}
                 <div className="flex w-[200px] items-center gap-2">
@@ -199,7 +261,7 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
                   </span>
                 </div>
 
-                {/* Bar */}
+                {/* Priority bar */}
                 <div className="flex flex-1 items-center gap-2 px-2">
                   <div
                     className="h-6 w-full overflow-hidden rounded-[var(--radius-sm)]"
@@ -208,7 +270,7 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
                     <div
                       className="flex h-full items-center gap-[1px] transition-all"
                       style={{
-                        width: `${Math.max((member.tickets.length / maxTickets) * 100, member.tickets.length > 0 ? 5 : 0)}%`,
+                        width: `${Math.max((ticketCount / maxTickets) * 100, ticketCount > 0 ? 5 : 0)}%`,
                       }}
                     >
                       {/* Stacked priority segments */}
@@ -236,18 +298,75 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
                   className="w-[80px] text-center text-sm font-semibold"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
-                  {member.tickets.length}
+                  {ticketCount}
                 </span>
 
-                {/* Level badge */}
-                <div className="w-[90px] text-center">
-                  <Badge
-                    variant="outline"
-                    className="text-[10px]"
-                    style={{ borderColor: level.color, color: level.color }}
-                  >
-                    {level.label}
-                  </Badge>
+                {/* Capacity bar */}
+                <div className="w-[130px] px-2" data-testid={`capacity-bar-${member.user_id}`}>
+                  {ticketCount === 0 ? (
+                    <span
+                      className="block text-center text-[10px]"
+                      style={{ color: 'var(--color-text-tertiary)' }}
+                    >
+                      —
+                    </span>
+                  ) : (
+                    <div className="space-y-0.5">
+                      <div
+                        className="h-2 w-full overflow-hidden rounded-full"
+                        style={{ backgroundColor: 'var(--color-surface-secondary)' }}
+                        aria-label={`${ticketCount} of ${capacityThreshold} capacity`}
+                      >
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            width: `${barWidthPct}%`,
+                            backgroundColor: barColor,
+                          }}
+                          data-testid={`capacity-fill-${member.user_id}`}
+                        />
+                      </div>
+                      <span
+                        className="block text-center text-[10px]"
+                        style={{ color: 'var(--color-text-tertiary)' }}
+                      >
+                        {ticketCount}/{capacityThreshold}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Level badge + capacity status */}
+                <div className="w-[90px] space-y-0.5 text-center">
+                  {isOverloaded && (
+                    <Badge
+                      variant="outline"
+                      className="block text-[10px]"
+                      style={{ borderColor: '#EF4444', color: '#EF4444' }}
+                      data-testid={`capacity-overloaded-${member.user_id}`}
+                    >
+                      Overloaded
+                    </Badge>
+                  )}
+                  {isAvailable && !isOverloaded && (
+                    <Badge
+                      variant="outline"
+                      className="block text-[10px]"
+                      style={{ borderColor: '#22C55E', color: '#22C55E' }}
+                      data-testid={`capacity-available-${member.user_id}`}
+                    >
+                      Available
+                    </Badge>
+                  )}
+                  {!isOverloaded && !isAvailable && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px]"
+                      style={{ borderColor: level.color, color: level.color }}
+                    >
+                      {level.label}
+                    </Badge>
+                  )}
                 </div>
               </button>
 
@@ -336,6 +455,7 @@ export const TeamWorkload = ({ members, unassignedCount, prefix }: TeamWorkloadP
             >
               {unassignedCount}
             </span>
+            <div className="w-[130px]" />
             <div className="w-[90px] text-center">
               <Badge
                 variant="outline"

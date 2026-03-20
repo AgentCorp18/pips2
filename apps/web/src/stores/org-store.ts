@@ -9,6 +9,7 @@ export type OrgSettings = {
   week_start: string
   default_ticket_priority: string
   ticket_prefix: string
+  min_methodology_depth: number
   notification_settings: {
     email_digest: string
     in_app: boolean

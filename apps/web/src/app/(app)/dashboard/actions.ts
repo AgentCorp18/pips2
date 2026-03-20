@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
-import { PIPS_STEPS } from '@pips/shared'
+import { PIPS_STEPS, calculateMethodologyDepth } from '@pips/shared'
 
 /* ============================================================
    Types
@@ -16,6 +16,20 @@ export type DashboardStats = {
   blockedTickets: number
   completedThisMonth: number
   teamMembers: number
+}
+
+export type StatDelta = {
+  current: number
+  previousWeek: number
+  delta: number
+  direction: 'up' | 'down' | 'flat'
+}
+
+export type DashboardDeltas = {
+  openTickets: StatDelta
+  overdueTickets: StatDelta
+  completedThisMonth: StatDelta
+  activeProjects: StatDelta
 }
 
 export type StepDistribution = {
@@ -109,6 +123,126 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
     blockedTickets: blockedRes.count ?? 0,
     completedThisMonth: completedRes.count ?? 0,
     teamMembers: membersRes.count ?? 0,
+  }
+}
+
+/* ============================================================
+   getDashboardDeltas — week-over-week stat deltas
+   ============================================================ */
+
+const buildDelta = (current: number, previousWeek: number): StatDelta => {
+  const delta = current - previousWeek
+  const direction: StatDelta['direction'] = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat'
+  return { current, previousWeek, delta, direction }
+}
+
+export const getDashboardDeltas = async (orgId: string): Promise<DashboardDeltas> => {
+  const empty: DashboardDeltas = {
+    openTickets: buildDelta(0, 0),
+    overdueTickets: buildDelta(0, 0),
+    completedThisMonth: buildDelta(0, 0),
+    activeProjects: buildDelta(0, 0),
+  }
+
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return empty
+  }
+
+  const supabase = await createClient()
+
+  const now = new Date()
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const sevenDaysAgoStr = sevenDaysAgo.toISOString()
+
+  const today = now.toISOString().split('T')[0]!
+  const sevenDaysAgoDate = sevenDaysAgo.toISOString().split('T')[0]!
+
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+  const [
+    openNowRes,
+    overdueNowRes,
+    completedNowRes,
+    projectsNowRes,
+    openPrevRes,
+    overduePrevRes,
+    completedPrevRes,
+    projectsPrevRes,
+  ] = await Promise.all([
+    // Current: open tickets
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked']),
+
+    // Current: overdue tickets
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
+      .lt('due_date', today),
+
+    // Current: completed this month
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('status', 'done')
+      .gte('resolved_at', startOfMonth),
+
+    // Current: active projects
+    supabase.from('projects').select('status').eq('org_id', orgId),
+
+    // Previous (7d ago): open tickets created before 7 days ago and not yet resolved
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
+      .lt('created_at', sevenDaysAgoStr),
+
+    // Previous (7d ago): overdue tickets — due before 7d ago date and open
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
+      .lt('due_date', sevenDaysAgoDate),
+
+    // Previous (7d ago): completed this month but resolved before 7d ago
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('status', 'done')
+      .gte('resolved_at', startOfMonth)
+      .lt('resolved_at', sevenDaysAgoStr),
+
+    // Previous (7d ago): projects — created before 7d ago
+    supabase
+      .from('projects')
+      .select('status, created_at')
+      .eq('org_id', orgId)
+      .lt('created_at', sevenDaysAgoStr),
+  ])
+
+  const activeProjectsNow = (projectsNowRes.data ?? []).filter(
+    (p) => p.status === 'active' || p.status === 'draft',
+  ).length
+
+  const activeProjectsPrev = (projectsPrevRes.data ?? []).filter(
+    (p) => p.status === 'active' || p.status === 'draft',
+  ).length
+
+  return {
+    openTickets: buildDelta(openNowRes.count ?? 0, openPrevRes.count ?? 0),
+    overdueTickets: buildDelta(overdueNowRes.count ?? 0, overduePrevRes.count ?? 0),
+    completedThisMonth: buildDelta(completedNowRes.count ?? 0, completedPrevRes.count ?? 0),
+    activeProjects: buildDelta(activeProjectsNow, activeProjectsPrev),
   }
 }
 
@@ -621,4 +755,81 @@ export const getRecentActivity = async (orgId: string, limit = 10): Promise<Acti
       userName,
     }
   })
+}
+
+/* ============================================================
+   getComplianceAlerts
+   Returns active projects that fall below the org's minimum
+   methodology depth threshold. Returns null when no threshold is set.
+   ============================================================ */
+
+export type ComplianceAlert = {
+  /** Number of active projects below the threshold */
+  belowCount: number
+  /** The configured threshold (0 = disabled) */
+  threshold: number
+}
+
+export const getComplianceAlerts = async (orgId: string): Promise<ComplianceAlert | null> => {
+  try {
+    await requirePermission(orgId, 'data.view')
+  } catch {
+    return null
+  }
+  const supabase = await createClient()
+
+  // Read the threshold from notification_settings JSONB
+  const { data: orgSettings } = await supabase
+    .from('org_settings')
+    .select('notification_settings')
+    .eq('org_id', orgId)
+    .single()
+
+  const notifSettings = (orgSettings?.notification_settings as Record<string, unknown> | null) ?? {}
+  const threshold =
+    typeof notifSettings.min_methodology_depth === 'number'
+      ? notifSettings.min_methodology_depth
+      : 0
+
+  // Threshold of 0 means disabled — skip the check
+  if (threshold === 0) return null
+
+  // Fetch active project IDs
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('org_id', orgId)
+    .eq('status', 'active')
+    .is('archived_at', null)
+
+  if (!projects || projects.length === 0) return null
+
+  const projectIds = projects.map((p) => p.id)
+
+  // Fetch all form types for these projects
+  const { data: forms } = await supabase
+    .from('project_forms')
+    .select('project_id, form_type')
+    .in('project_id', projectIds)
+
+  // Calculate methodology depth per project
+  const formsByProject = new Map<string, Set<string>>()
+  for (const f of forms ?? []) {
+    const existing = formsByProject.get(f.project_id) ?? new Set<string>()
+    existing.add(f.form_type)
+    formsByProject.set(f.project_id, existing)
+  }
+
+  let belowCount = 0
+  for (const projectId of projectIds) {
+    const completedTypes = formsByProject.get(projectId) ?? new Set<string>()
+    const result = calculateMethodologyDepth(completedTypes)
+    if (result.score < threshold) {
+      belowCount++
+    }
+  }
+
+  if (belowCount === 0) return null
+
+  return { belowCount, threshold }
 }

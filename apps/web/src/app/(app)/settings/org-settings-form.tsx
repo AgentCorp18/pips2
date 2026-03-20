@@ -21,6 +21,7 @@ type OrgSettingsFormProps = {
     default_ticket_priority: string
     ticket_prefix: string
   }
+  minMethodologyDepth: number
   canEdit: boolean
 }
 
@@ -56,7 +57,12 @@ const PRIORITIES = [
 
 const initialState: SettingsActionState = {}
 
-export const OrgSettingsForm = ({ org, settings, canEdit }: OrgSettingsFormProps) => {
+export const OrgSettingsForm = ({
+  org,
+  settings,
+  minMethodologyDepth,
+  canEdit,
+}: OrgSettingsFormProps) => {
   const [state, formAction, isPending] = useActionState(updateOrgSettings, initialState)
 
   return (
@@ -240,6 +246,38 @@ export const OrgSettingsForm = ({ org, settings, canEdit }: OrgSettingsFormProps
             {state.fieldErrors?.ticket_prefix && (
               <p className="text-sm" style={{ color: 'var(--color-error)' }}>
                 {state.fieldErrors.ticket_prefix}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Methodology Compliance */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Methodology Compliance</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="min_methodology_depth">Minimum Methodology Depth Threshold (%)</Label>
+            <Input
+              id="min_methodology_depth"
+              name="min_methodology_depth"
+              type="number"
+              min={0}
+              max={100}
+              defaultValue={minMethodologyDepth}
+              disabled={isPending || !canEdit}
+              className="max-w-[200px]"
+              data-testid="min-methodology-depth-input"
+            />
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              Set to 0 to disable. When set (e.g. 60), active projects below this score will show a
+              warning on the dashboard.
+            </p>
+            {state.fieldErrors?.min_methodology_depth && (
+              <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+                {state.fieldErrors.min_methodology_depth}
               </p>
             )}
           </div>

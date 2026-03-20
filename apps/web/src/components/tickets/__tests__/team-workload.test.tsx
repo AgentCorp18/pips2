@@ -156,10 +156,10 @@ describe('TeamWorkload', () => {
 
   it('shows workload level badges', () => {
     render(<TeamWorkload members={SAMPLE_MEMBERS} unassignedCount={0} prefix="TKT" />)
-    // Alice: 4 tickets → Moderate
+    // Alice: 4 tickets, not overloaded (4 < 8), not available (4 >= 8/2=4) → Moderate
     expect(screen.getByText('Moderate')).toBeTruthy()
-    // Bob: 1 ticket → Light
-    expect(screen.getByText('Light')).toBeTruthy()
+    // Bob: 1 ticket, available (1 < 8/2=4) → Available badge
+    expect(screen.getByText('Available')).toBeTruthy()
     // Charlie: 0 tickets → Idle
     expect(screen.getByText('Idle')).toBeTruthy()
   })
@@ -239,5 +239,116 @@ describe('TeamWorkload', () => {
     render(<TeamWorkload members={SAMPLE_MEMBERS} unassignedCount={0} prefix="TKT" />)
     // Alice Smith → "AS"
     expect(screen.getByText('AS')).toBeTruthy()
+  })
+})
+
+/* ============================================================
+   Capacity model tests
+   ============================================================ */
+
+describe('TeamWorkload capacity model', () => {
+  it('renders the capacity threshold control', () => {
+    render(<TeamWorkload members={SAMPLE_MEMBERS} unassignedCount={0} prefix="TKT" />)
+    expect(screen.getByTestId('capacity-threshold-control')).toBeTruthy()
+  })
+
+  it('renders capacity threshold input with default value of 8', () => {
+    render(<TeamWorkload members={SAMPLE_MEMBERS} unassignedCount={0} prefix="TKT" />)
+    const input = screen.getByTestId('capacity-threshold-input') as HTMLInputElement
+    expect(input.value).toBe('8')
+  })
+
+  it('shows capacity bar for members with tickets', () => {
+    render(<TeamWorkload members={SAMPLE_MEMBERS} unassignedCount={0} prefix="TKT" />)
+    // Alice has 4 tickets — capacity bar should exist
+    expect(screen.getByTestId('capacity-bar-u-1')).toBeTruthy()
+    expect(screen.getByTestId('capacity-fill-u-1')).toBeTruthy()
+  })
+
+  it('shows overloaded badge when member ticket count exceeds threshold', () => {
+    const overloadedMembers: WorkloadMember[] = [
+      {
+        user_id: 'u-ol',
+        display_name: 'Overloaded Worker',
+        avatar_url: null,
+        tickets: Array.from({ length: 10 }, (_, i) => ({
+          id: `t-ol-${i}`,
+          title: `Ticket ${i}`,
+          status: 'in_progress' as const,
+          priority: 'medium' as const,
+          type: 'task' as const,
+          due_date: null,
+          sequence_number: i + 1,
+          project_title: null,
+        })),
+      },
+    ]
+    render(<TeamWorkload members={overloadedMembers} unassignedCount={0} prefix="TKT" />)
+    // 10 tickets > default threshold of 8
+    expect(screen.getByTestId('capacity-overloaded-u-ol')).toBeTruthy()
+  })
+
+  it('shows available badge when member has few tickets (< threshold/2)', () => {
+    const lightMembers: WorkloadMember[] = [
+      {
+        user_id: 'u-av',
+        display_name: 'Light Worker',
+        avatar_url: null,
+        tickets: [
+          {
+            id: 't-av-1',
+            title: 'One ticket',
+            status: 'todo' as const,
+            priority: 'low' as const,
+            type: 'task' as const,
+            due_date: null,
+            sequence_number: 1,
+            project_title: null,
+          },
+        ],
+      },
+    ]
+    render(<TeamWorkload members={lightMembers} unassignedCount={0} prefix="TKT" />)
+    // 1 ticket < 8/2 = 4 — should show Available
+    expect(screen.getByTestId('capacity-available-u-av')).toBeTruthy()
+  })
+
+  it('does not show overloaded or available for members at mid-range capacity', () => {
+    const midMembers: WorkloadMember[] = [
+      {
+        user_id: 'u-mid',
+        display_name: 'Mid Worker',
+        avatar_url: null,
+        tickets: Array.from({ length: 5 }, (_, i) => ({
+          id: `t-mid-${i}`,
+          title: `Ticket ${i}`,
+          status: 'todo' as const,
+          priority: 'medium' as const,
+          type: 'task' as const,
+          due_date: null,
+          sequence_number: i + 1,
+          project_title: null,
+        })),
+      },
+    ]
+    render(<TeamWorkload members={midMembers} unassignedCount={0} prefix="TKT" />)
+    // 5 tickets: not > 8 (threshold), not < 4 (threshold/2) — no overloaded/available badge
+    expect(screen.queryByTestId('capacity-overloaded-u-mid')).toBeNull()
+    expect(screen.queryByTestId('capacity-available-u-mid')).toBeNull()
+  })
+
+  it('updates threshold when input changes', () => {
+    render(<TeamWorkload members={SAMPLE_MEMBERS} unassignedCount={0} prefix="TKT" />)
+    const input = screen.getByTestId('capacity-threshold-input') as HTMLInputElement
+    fireEvent.change(input, { target: { value: '3' } })
+    expect(input.value).toBe('3')
+  })
+
+  it('shows Overloaded badge after threshold is lowered below member count', () => {
+    render(<TeamWorkload members={SAMPLE_MEMBERS} unassignedCount={0} prefix="TKT" />)
+    // Alice has 4 tickets — lower threshold to 3 so she becomes overloaded
+    const input = screen.getByTestId('capacity-threshold-input')
+    fireEvent.change(input, { target: { value: '3' } })
+    expect(screen.getByTestId('capacity-overloaded-u-1')).toBeTruthy()
   })
 })

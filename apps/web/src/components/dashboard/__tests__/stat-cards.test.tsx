@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { StatCards } from '../stat-cards'
-import type { DashboardStats } from '@/app/(app)/dashboard/actions'
+import type { DashboardStats, DashboardDeltas } from '@/app/(app)/dashboard/actions'
 
 /* ============================================================
    StatCards
@@ -173,5 +173,106 @@ describe('StatCards', () => {
     const activeCard = screen.getByTestId('stat-active-projects')
     const link = activeCard.closest('a')
     expect(link).toHaveAttribute('href', '/projects?status=active')
+  })
+})
+
+/* ============================================================
+   Delta indicator tests
+   ============================================================ */
+
+const flatDeltas: DashboardDeltas = {
+  openTickets: { current: 23, previousWeek: 23, delta: 0, direction: 'flat' },
+  overdueTickets: { current: 3, previousWeek: 3, delta: 0, direction: 'flat' },
+  completedThisMonth: { current: 12, previousWeek: 12, delta: 0, direction: 'flat' },
+  activeProjects: { current: 5, previousWeek: 5, delta: 0, direction: 'flat' },
+}
+
+const upDeltas: DashboardDeltas = {
+  openTickets: { current: 26, previousWeek: 23, delta: 3, direction: 'up' },
+  overdueTickets: { current: 5, previousWeek: 3, delta: 2, direction: 'up' },
+  completedThisMonth: { current: 15, previousWeek: 12, delta: 3, direction: 'up' },
+  activeProjects: { current: 7, previousWeek: 5, delta: 2, direction: 'up' },
+}
+
+const downDeltas: DashboardDeltas = {
+  openTickets: { current: 20, previousWeek: 23, delta: -3, direction: 'down' },
+  overdueTickets: { current: 1, previousWeek: 3, delta: -2, direction: 'down' },
+  completedThisMonth: { current: 9, previousWeek: 12, delta: -3, direction: 'down' },
+  activeProjects: { current: 3, previousWeek: 5, delta: -2, direction: 'down' },
+}
+
+describe('StatCards delta indicators', () => {
+  it('renders flat indicator when all deltas are flat', () => {
+    render(<StatCards stats={defaultStats} deltas={flatDeltas} />)
+    const flatIndicators = screen.getAllByTestId('delta-flat')
+    // 4 cards have deltas: openTickets, overdueTickets, completedThisMonth, activeProjects
+    expect(flatIndicators.length).toBe(4)
+  })
+
+  it('renders up arrow when delta direction is up', () => {
+    render(<StatCards stats={defaultStats} deltas={upDeltas} />)
+    const upIndicators = screen.getAllByTestId('delta-up')
+    expect(upIndicators.length).toBe(4)
+  })
+
+  it('renders down arrow when delta direction is down', () => {
+    render(<StatCards stats={defaultStats} deltas={downDeltas} />)
+    const downIndicators = screen.getAllByTestId('delta-down')
+    expect(downIndicators.length).toBe(4)
+  })
+
+  it('shows green colour when completed goes up (up is good)', () => {
+    render(<StatCards stats={defaultStats} deltas={upDeltas} />)
+    const completedCard = screen.getByTestId('stat-completed')
+    const deltaEl = completedCard.querySelector('[data-testid="delta-up"]')
+    expect(deltaEl).toBeTruthy()
+    expect(deltaEl).toHaveStyle({ color: '#16A34A' })
+  })
+
+  it('shows red colour when overdue goes up (up is bad)', () => {
+    render(<StatCards stats={defaultStats} deltas={upDeltas} />)
+    const overdueCard = screen.getByTestId('stat-overdue')
+    const deltaEl = overdueCard.querySelector('[data-testid="delta-up"]')
+    expect(deltaEl).toBeTruthy()
+    expect(deltaEl).toHaveStyle({ color: '#DC2626' })
+  })
+
+  it('shows green colour when overdue goes down (down is good)', () => {
+    render(<StatCards stats={defaultStats} deltas={downDeltas} />)
+    const overdueCard = screen.getByTestId('stat-overdue')
+    const deltaEl = overdueCard.querySelector('[data-testid="delta-down"]')
+    expect(deltaEl).toBeTruthy()
+    expect(deltaEl).toHaveStyle({ color: '#16A34A' })
+  })
+
+  it('shows absolute value in delta text', () => {
+    render(<StatCards stats={defaultStats} deltas={downDeltas} />)
+    // open tickets delta = -3 → should show "3" (absolute)
+    const openCard = screen.getByTestId('stat-open-tickets')
+    const deltaEl = openCard.querySelector('[data-testid="delta-down"]')
+    expect(deltaEl?.textContent).toContain('3')
+  })
+
+  it('does not render delta when deltas prop is omitted', () => {
+    render(<StatCards stats={defaultStats} />)
+    expect(screen.queryByTestId('delta-flat')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('delta-up')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('delta-down')).not.toBeInTheDocument()
+  })
+
+  it('shows "vs last week" label in each delta indicator', () => {
+    render(<StatCards stats={defaultStats} deltas={flatDeltas} />)
+    const allFlat = screen.getAllByTestId('delta-flat')
+    for (const el of allFlat) {
+      expect(el.textContent).toContain('vs last week')
+    }
+  })
+
+  it('does not show delta on totalProjects and teamMembers cards', () => {
+    render(<StatCards stats={defaultStats} deltas={flatDeltas} />)
+    const totalProjectsCard = screen.getByTestId('stat-total-projects')
+    const teamCard = screen.getByTestId('stat-team-members')
+    expect(totalProjectsCard.querySelector('[data-testid^="delta-"]')).toBeNull()
+    expect(teamCard.querySelector('[data-testid^="delta-"]')).toBeNull()
   })
 })
