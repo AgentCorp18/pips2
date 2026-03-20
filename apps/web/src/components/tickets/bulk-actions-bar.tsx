@@ -185,7 +185,12 @@ export const BulkActionsBar = ({ selectedIds, onClear, members = [] }: BulkActio
       {/* Delete with confirmation */}
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="sm" disabled={isPending} className="gap-1">
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={isPending}
+            className="min-h-[44px] gap-1 sm:min-h-0"
+          >
             <Trash2 size={14} />
             Delete
           </Button>
@@ -209,7 +214,13 @@ export const BulkActionsBar = ({ selectedIds, onClear, members = [] }: BulkActio
       </AlertDialog>
 
       {/* Clear selection */}
-      <Button variant="ghost" size="sm" onClick={onClear} disabled={isPending} className="gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClear}
+        disabled={isPending}
+        className="min-h-[44px] gap-1 sm:min-h-0"
+      >
         <X size={14} />
         Clear
       </Button>

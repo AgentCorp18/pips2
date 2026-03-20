@@ -57,42 +57,44 @@ export const getDashboardStats = async (orgId: string): Promise<DashboardStats> 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const today = now.toISOString().split('T')[0]
 
-  const [totalProjectsRes, projectsRes, openTicketsRes, overdueRes, completedRes, membersRes] =
-    await Promise.all([
-      supabase.from('projects').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
+  // Consolidate: fetch project statuses in one query and count in-memory (replaces 2 queries).
+  // Ticket queries still need separate round trips due to different column filters.
+  const [projectsRes, openTicketsRes, overdueRes, completedRes, membersRes] = await Promise.all([
+    supabase.from('projects').select('status').eq('org_id', orgId),
 
-      supabase
-        .from('projects')
-        .select('id', { count: 'exact', head: true })
-        .eq('org_id', orgId)
-        .in('status', ['active', 'draft']),
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked']),
 
-      supabase
-        .from('tickets')
-        .select('id', { count: 'exact', head: true })
-        .eq('org_id', orgId)
-        .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked']),
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
+      .lt('due_date', today),
 
-      supabase
-        .from('tickets')
-        .select('id', { count: 'exact', head: true })
-        .eq('org_id', orgId)
-        .in('status', ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'])
-        .lt('due_date', today),
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('status', 'done')
+      .gte('resolved_at', startOfMonth),
 
-      supabase
-        .from('tickets')
-        .select('id', { count: 'exact', head: true })
-        .eq('org_id', orgId)
-        .eq('status', 'done')
-        .gte('resolved_at', startOfMonth),
+    supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
+  ])
 
-      supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
-    ])
+  // Count project stats in-memory from the single projects query
+  const projectRows = projectsRes.data ?? []
+  const totalProjects = projectRows.length
+  const activeProjects = projectRows.filter(
+    (p) => p.status === 'active' || p.status === 'draft',
+  ).length
 
   return {
-    totalProjects: totalProjectsRes.count ?? 0,
-    activeProjects: projectsRes.count ?? 0,
+    totalProjects,
+    activeProjects,
     openTickets: openTicketsRes.count ?? 0,
     overdueTickets: overdueRes.count ?? 0,
     completedThisMonth: completedRes.count ?? 0,
@@ -243,67 +245,55 @@ export const getDashboardMetrics = async (orgId: string): Promise<DashboardMetri
   const ninetyDaysAgo = new Date()
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
-  // Fetch project IDs first so we can include project_forms count in the parallel block.
-  // project_forms has no org_id column, so we must join through project IDs.
-  const { data: orgProjectsData } = await supabase.from('projects').select('id').eq('org_id', orgId)
+  // Consolidate: fetch project statuses + IDs in one query instead of two serial/parallel
+  // project queries + a pre-fetch for project IDs (was 3 separate DB calls, now 1).
+  const [projectsRes, completedTicketsRes, closedThisWeekRes, createdThisWeekRes] =
+    await Promise.all([
+      supabase
+        .from('projects')
+        .select('id, status')
+        .eq('org_id', orgId)
+        .in('status', ['active', 'draft', 'completed']),
 
-  const projectIds = (orgProjectsData ?? []).map((p) => p.id)
+      supabase
+        .from('tickets')
+        .select('started_at, resolved_at')
+        .eq('org_id', orgId)
+        .not('started_at', 'is', null)
+        .not('resolved_at', 'is', null)
+        .in('status', ['done', 'cancelled'])
+        .gte('resolved_at', ninetyDaysAgo.toISOString()),
 
-  const [
-    allProjectsRes,
-    completedProjectsRes,
-    completedTicketsRes,
-    closedThisWeekRes,
-    createdThisWeekRes,
-    formsRes,
-  ] = await Promise.all([
-    supabase
-      .from('projects')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .in('status', ['active', 'draft', 'completed']),
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('status', 'done')
+        .gte('resolved_at', weekAgo.toISOString()),
 
-    supabase
-      .from('projects')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .eq('status', 'completed'),
+      supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .gte('created_at', weekAgo.toISOString()),
+    ])
 
-    supabase
-      .from('tickets')
-      .select('started_at, resolved_at')
-      .eq('org_id', orgId)
-      .not('started_at', 'is', null)
-      .not('resolved_at', 'is', null)
-      .in('status', ['done', 'cancelled'])
-      .gte('resolved_at', ninetyDaysAgo.toISOString()),
+  // Count project stats and collect IDs in-memory from the single projects query
+  const projectRows = projectsRes.data ?? []
+  const projectIds = projectRows.map((p) => p.id)
+  const total = projectRows.length
+  const completed = projectRows.filter((p) => p.status === 'completed').length
 
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .eq('status', 'done')
-      .gte('resolved_at', weekAgo.toISOString()),
-
-    supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .gte('created_at', weekAgo.toISOString()),
-
-    // project_forms has no org_id — scope by project IDs fetched above.
-    // Empty projectIds produces count=0 without hitting the DB unnecessarily.
+  // Fetch project_forms count scoped by project IDs (project_forms has no org_id column)
+  const formsRes =
     projectIds.length > 0
-      ? supabase
+      ? await supabase
           .from('project_forms')
           .select('id', { count: 'exact', head: true })
           .in('project_id', projectIds)
-      : Promise.resolve({ count: 0, data: null, error: null }),
-  ])
+      : { count: 0, data: null, error: null }
 
   // Completion rate
-  const total = allProjectsRes.count ?? 0
-  const completed = completedProjectsRes.count ?? 0
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
 
   // Average cycle time
@@ -370,42 +360,38 @@ export const getOrgImpactSummary = async (orgId: string): Promise<OrgImpactSumma
 
   const supabase = await createClient()
 
-  // Fetch org project IDs first — project_forms has no org_id column
-  const { data: orgProjectsData } = await supabase.from('projects').select('id').eq('org_id', orgId)
+  // Consolidate: fetch project IDs + status in one query instead of a serial pre-fetch
+  // followed by a separate completed-count query (was 2 serial/parallel calls, now 1).
+  const [projectsRes, resolvedTicketsRes, cycleTimeTicketsRes] = await Promise.all([
+    supabase.from('projects').select('id, status').eq('org_id', orgId),
 
-  const projectIds = (orgProjectsData ?? []).map((p) => p.id)
+    supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('status', 'done'),
 
-  const [completedProjectsRes, resolvedTicketsRes, cycleTimeTicketsRes, formsRes] =
-    await Promise.all([
-      supabase
-        .from('projects')
-        .select('id', { count: 'exact', head: true })
-        .eq('org_id', orgId)
-        .eq('status', 'completed'),
+    supabase
+      .from('tickets')
+      .select('created_at, resolved_at')
+      .eq('org_id', orgId)
+      .eq('status', 'done')
+      .not('resolved_at', 'is', null),
+  ])
 
-      supabase
-        .from('tickets')
-        .select('id', { count: 'exact', head: true })
-        .eq('org_id', orgId)
-        .eq('status', 'done'),
+  // Derive project IDs and completed count in-memory
+  const projectRows = projectsRes.data ?? []
+  const projectIds = projectRows.map((p) => p.id)
+  const completedProjectsCount = projectRows.filter((p) => p.status === 'completed').length
 
-      supabase
-        .from('tickets')
-        .select('created_at, resolved_at')
-        .eq('org_id', orgId)
-        .eq('status', 'done')
-        .not('resolved_at', 'is', null),
-
-      projectIds.length > 0
-        ? supabase
-            .from('project_forms')
-            .select('project_id, form_type')
-            .in('project_id', projectIds)
-        : Promise.resolve({
-            data: [] as Array<{ project_id: string; form_type: string }>,
-            error: null,
-          }),
-    ])
+  // Fetch all project_forms for this org's projects in one query (project_forms has no org_id)
+  const formsRes =
+    projectIds.length > 0
+      ? await supabase
+          .from('project_forms')
+          .select('project_id, form_type')
+          .in('project_id', projectIds)
+      : { data: [] as Array<{ project_id: string; form_type: string }>, error: null }
 
   const forms = formsRes.data ?? []
 
@@ -470,7 +456,7 @@ export const getOrgImpactSummary = async (orgId: string): Promise<OrgImpactSumma
   }
 
   return {
-    projectsCompleted: completedProjectsRes.count ?? 0,
+    projectsCompleted: completedProjectsCount,
     ticketsResolved: resolvedTicketsRes.count ?? 0,
     formsCompleted,
     avgMethodologyDepth,
