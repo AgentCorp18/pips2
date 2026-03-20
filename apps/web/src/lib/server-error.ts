@@ -2,8 +2,10 @@
  * Centralized server error logging utility.
  *
  * Provides structured error logging for server actions with consistent
- * format and future Sentry integration point.
+ * format and Sentry integration.
  */
+
+import * as Sentry from '@sentry/nextjs'
 
 type ServerErrorContext = {
   action: string
@@ -12,6 +14,7 @@ type ServerErrorContext = {
 
 /**
  * Log a server-side error with structured context.
+ * Captures to Sentry and logs to console.
  * Returns the error message for inclusion in action results.
  */
 export const captureServerError = (error: unknown, context: ServerErrorContext): string => {
@@ -19,7 +22,7 @@ export const captureServerError = (error: unknown, context: ServerErrorContext):
 
   console.error(`[${context.action}]`, message, context.detail ? `| ${context.detail}` : '')
 
-  // Future: Sentry.captureException(error, { tags: { action: context.action } })
+  Sentry.captureException(error, { extra: context })
 
   return message
 }

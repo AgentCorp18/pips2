@@ -21,6 +21,7 @@ import {
   Shield,
   TrendingUp,
   Briefcase,
+  ListTodo,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
 import { NotificationBell } from '@/components/layout/notification-bell'
@@ -44,6 +45,7 @@ const NAV_GROUPS: NavGroup[] = [
     section: 'Work',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, shortcut: 'g d' },
+      { label: 'My Work', href: '/my-work', icon: ListTodo, shortcut: 'g m' },
       { label: 'Initiatives', href: '/initiatives', icon: Target, shortcut: 'g i' },
       { label: 'Projects', href: '/projects', icon: FolderKanban, shortcut: 'g p' },
       { label: 'Tickets', href: '/tickets', icon: Ticket, shortcut: 'g t' },
@@ -271,7 +273,7 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
                     ? pathname === item.href
                     : pathname === item.href || pathname.startsWith(item.href + '/')
                   return (
-                    <a
+                    <Link
                       key={item.href}
                       href={item.href}
                       onClick={mounted && isMobile ? closeSidebar : undefined}
@@ -288,7 +290,7 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
                           {item.shortcut}
                         </kbd>
                       )}
-                    </a>
+                    </Link>
                   )
                 })}
               </div>
@@ -304,23 +306,23 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
             data-testid="shortcut-overlay"
             aria-live="polite"
           >
-            Press a key: <strong>d</strong>=Dashboard <strong>p</strong>=Projects <strong>t</strong>
-            =Tickets <strong>i</strong>=Initiatives <strong>k</strong>=Knowledge <strong>c</strong>
-            =Chat
+            Press a key: <strong>d</strong>=Dashboard <strong>m</strong>=My Work <strong>i</strong>
+            =Initiatives <strong>p</strong>=Projects <strong>t</strong>=Tickets <strong>k</strong>
+            =Knowledge <strong>c</strong>=Chat
           </div>
         )}
 
         {/* Admin link — only shown to system admins */}
         {isAdmin && (
           <div className="border-t border-[var(--sidebar-border)] px-3 py-2">
-            <a
+            <Link
               href="/admin"
               data-testid="nav-link-admin"
               className="flex min-h-[44px] items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium opacity-70 transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 md:min-h-0"
             >
               <Shield size={20} aria-hidden="true" />
               Admin
-            </a>
+            </Link>
           </div>
         )}
 
