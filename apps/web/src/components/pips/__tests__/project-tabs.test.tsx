@@ -98,4 +98,34 @@ describe('ProjectTabs', () => {
     const svgs = document.querySelectorAll('svg')
     expect(svgs).toHaveLength(3)
   })
+
+  /* ---- projectType prop ---- */
+
+  it('shows all 3 tabs when projectType is pips', () => {
+    mockPathname.mockReturnValue('/projects/proj-1')
+    render(<ProjectTabs projectId="proj-1" projectType="pips" />)
+    const links = screen.getAllByRole('link')
+    expect(links).toHaveLength(3)
+    expect(screen.getByText('Overview')).toBeInTheDocument()
+    expect(screen.getByText('Board')).toBeInTheDocument()
+    expect(screen.getByText('Forms')).toBeInTheDocument()
+  })
+
+  it('hides Forms tab when projectType is simple', () => {
+    mockPathname.mockReturnValue('/projects/proj-1')
+    render(<ProjectTabs projectId="proj-1" projectType="simple" />)
+    const links = screen.getAllByRole('link')
+    expect(links).toHaveLength(2)
+    expect(screen.getByText('Overview')).toBeInTheDocument()
+    expect(screen.getByText('Board')).toBeInTheDocument()
+    expect(screen.queryByText('Forms')).not.toBeInTheDocument()
+  })
+
+  it('shows all 3 tabs when projectType is omitted (default pips)', () => {
+    mockPathname.mockReturnValue('/projects/proj-1')
+    render(<ProjectTabs projectId="proj-1" />)
+    expect(screen.getByText('Overview')).toBeInTheDocument()
+    expect(screen.getByText('Board')).toBeInTheDocument()
+    expect(screen.getByText('Forms')).toBeInTheDocument()
+  })
 })
