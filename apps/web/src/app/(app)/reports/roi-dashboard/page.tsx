@@ -16,10 +16,13 @@ import {
   ChevronRight,
   PlusCircle,
   ListChecks,
+  FolderKanban,
+  ListTodo,
 } from 'lucide-react'
 import { TeamPerformanceTable } from '@/components/reports/team-performance-table'
 import { getROIDashboardData, getMethodologyCorrelation, getTeamPerformance } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
+import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
   title: 'ROI Dashboard',
@@ -74,6 +77,8 @@ const ROIDashboardPage = async () => {
   ])
 
   const noRoiData = roiData.projectsWithRoiData === 0
+  const noProjects = correlation.dataPoints.length === 0
+  const noMeasurables = roiData.measurablesCount === 0 && !noProjects
 
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
@@ -123,6 +128,31 @@ const ROIDashboardPage = async () => {
 
       {/* Step stripe */}
       <div className="step-gradient-stripe mb-8 rounded-full" />
+
+      {/* No-projects guard */}
+      {noProjects && (
+        <ReportEmptyState
+          icon={FolderKanban}
+          title="Start your first project to see ROI data"
+          description="Create a project and fill in Impact Metrics (Step 1) and Results Metrics (Step 6) to unlock this dashboard."
+          actionLabel="Create Project"
+          actionHref="/projects/new"
+        />
+      )}
+
+      {/* No-measurables nudge */}
+      {noMeasurables && (
+        <div className="mb-6">
+          <ReportEmptyState
+            icon={ListTodo}
+            title="Add measurables to track ROI"
+            description="Open a Problem Statement form (Step 1) and add measurables to start projecting savings and tracking outcomes."
+            actionLabel="Learn How"
+            actionHref="/knowledge"
+            note="You have projects — add measurables to unlock financial projections."
+          />
+        </div>
+      )}
 
       {/* Hero KPI strip */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

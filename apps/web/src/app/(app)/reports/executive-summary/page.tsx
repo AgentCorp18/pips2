@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, FolderKanban } from 'lucide-react'
 import { getExecutiveSummaryData } from '../roi-dashboard/actions'
 import { PrintButton } from './print-button'
+import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
   title: 'Executive Summary',
@@ -103,6 +104,8 @@ const ExecutiveSummaryPage = async () => {
   const data = await getExecutiveSummaryData(currentOrg.orgId)
 
   const maxMonthlyCount = Math.max(...data.monthlyCompletions.map((m) => m.count), 1)
+  const noProjects =
+    data.projectsCompleted === 0 && data.topProjects.length === 0 && data.measurablesCount === 0
 
   return (
     <>
@@ -126,6 +129,19 @@ const ExecutiveSummaryPage = async () => {
         {/* ============================================================
             PRINT BODY — everything below renders in both screen + print
             ============================================================ */}
+
+        {/* No-projects guard — only shown on screen */}
+        {noProjects && (
+          <div className="mb-8 print:hidden">
+            <ReportEmptyState
+              icon={FolderKanban}
+              title="No project data yet"
+              description="Complete projects and add Results Metrics (Step 6) to generate a meaningful executive summary."
+              actionLabel="Create Project"
+              actionHref="/projects/new"
+            />
+          </div>
+        )}
 
         {/* Header */}
         <div className="mb-8" data-print-card>

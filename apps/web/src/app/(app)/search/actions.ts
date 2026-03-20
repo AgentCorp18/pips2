@@ -98,6 +98,35 @@ export const globalSearch = async (
     .ilike('title', `%${sanitized}%`)
     .limit(LIMIT_PER_TYPE)
 
+  // Search org members: ilike on display_name / full_name via profiles
+  const membersPromise = supabase
+    .from('org_members')
+    .select(
+      'id, user_id, profile:profiles!org_members_user_id_fkey(display_name, full_name, email)',
+    )
+    .eq('org_id', resolvedOrgId)
+    .or(
+      `profile.display_name.ilike.%${sanitized}%,profile.full_name.ilike.%${sanitized}%,profile.email.ilike.%${sanitized}%`,
+    )
+    .limit(LIMIT_PER_TYPE)
+
+  // Search chat channels: ilike on name
+  const channelsPromise = supabase
+    .from('chat_channels')
+    .select('id, name, description')
+    .eq('org_id', resolvedOrgId)
+    .ilike('name', `%${sanitized}%`)
+    .limit(LIMIT_PER_TYPE)
+
+  // Search archived projects: ilike on title
+  const archivedProjectsPromise = supabase
+    .from('projects')
+    .select('id, title, current_step')
+    .eq('org_id', resolvedOrgId)
+    .eq('status', 'archived')
+    .ilike('title', `%${sanitized}%`)
+    .limit(LIMIT_PER_TYPE)
+
   // Get org ticket prefix for display
   const prefixPromise = supabase
     .from('org_settings')
@@ -105,10 +134,21 @@ export const globalSearch = async (
     .eq('org_id', resolvedOrgId)
     .single()
 
-  const [projectsResult, ticketsResult, formsResult, prefixResult] = await Promise.all([
+  const [
+    projectsResult,
+    ticketsResult,
+    formsResult,
+    membersResult,
+    channelsResult,
+    archivedResult,
+    prefixResult,
+  ] = await Promise.all([
     projectsPromise,
     ticketsPromise,
     formsPromise,
+    membersPromise,
+    channelsPromise,
+    archivedProjectsPromise,
     prefixPromise,
   ])
 
@@ -161,6 +201,42 @@ export const globalSearch = async (
     }
   })
 
+  // Map members to search results
+  type ProfileRow = { display_name: string | null; full_name: string | null; email: string | null }
+  const memberResults: SearchResult[] = (membersResult.data ?? []).map((m) => {
+    const rawProfile = m.profile as unknown
+    const profile = Array.isArray(rawProfile)
+      ? ((rawProfile[0] as ProfileRow | undefined) ?? null)
+      : (rawProfile as ProfileRow | null)
+    const name = profile?.display_name ?? profile?.full_name ?? profile?.email ?? 'Team Member'
+    const subtitle = profile?.email ? profile.email : 'Team Member'
+    return {
+      id: m.id as string,
+      type: 'member' as const,
+      title: name,
+      subtitle,
+      url: '/settings/members',
+    }
+  })
+
+  // Map channels to search results
+  const channelResults: SearchResult[] = (channelsResult.data ?? []).map((c) => ({
+    id: c.id as string,
+    type: 'channel' as const,
+    title: `#${c.name as string}`,
+    subtitle: (c.description as string | null) ?? 'Chat channel',
+    url: `/chat/${c.id}`,
+  }))
+
+  // Map archived projects to search results
+  const archivedProjectResults: SearchResult[] = (archivedResult.data ?? []).map((p) => ({
+    id: p.id as string,
+    type: 'archived_project' as const,
+    title: p.title as string,
+    subtitle: `Step ${p.current_step}: ${PIPS_STEP_LABELS[p.current_step as number] ?? 'Unknown'} · Archived`,
+    url: `/projects/${p.id}`,
+  }))
+
   const groups: SearchResultGroup[] = []
 
   if (projectResults.length > 0) {
@@ -179,7 +255,29 @@ export const globalSearch = async (
     groups.push({ type: 'form', label: 'Forms', results: formResults })
   }
 
-  const total = projectResults.length + ticketResults.length + formResults.length
+  if (memberResults.length > 0) {
+    groups.push({ type: 'member', label: 'Team Members', results: memberResults })
+  }
+
+  if (channelResults.length > 0) {
+    groups.push({ type: 'channel', label: 'Channels', results: channelResults })
+  }
+
+  if (archivedProjectResults.length > 0) {
+    groups.push({
+      type: 'archived_project',
+      label: 'Archived Projects',
+      results: archivedProjectResults,
+    })
+  }
+
+  const total =
+    projectResults.length +
+    ticketResults.length +
+    formResults.length +
+    memberResults.length +
+    channelResults.length +
+    archivedProjectResults.length
 
   trackServerEvent('search.executed', {
     query_text: trimmed.slice(0, 100),

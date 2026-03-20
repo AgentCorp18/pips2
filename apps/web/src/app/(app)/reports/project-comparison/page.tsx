@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
-import { ArrowLeft, GitCompare } from 'lucide-react'
+import { ArrowLeft, GitCompare, FolderKanban } from 'lucide-react'
 import { ProjectComparisonClient } from '@/components/reports/project-comparison-client'
 import { getProjectComparison, getProjectListForComparison } from '../actions'
+import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
   title: 'Project Comparison',
@@ -92,12 +93,29 @@ const ProjectComparisonPage = async ({ searchParams }: PageProps) => {
       {/* Step stripe */}
       <div className="step-gradient-stripe mb-8 rounded-full" />
 
-      {/* Client-side interactive comparison */}
-      <ProjectComparisonClient
-        projectList={projectList}
-        initialComparison={comparisonData.projects}
-        initialSelectedIds={selectedIds}
-      />
+      {/* Fewer than 2 projects guard */}
+      {projectList.length < 2 ? (
+        <ReportEmptyState
+          icon={FolderKanban}
+          title={
+            projectList.length === 0 ? 'No projects yet' : 'Need at least 2 projects to compare'
+          }
+          description={
+            projectList.length === 0
+              ? 'Create at least two projects to use the comparison tool.'
+              : 'Create one more project to start comparing side-by-side.'
+          }
+          actionLabel="Create Project"
+          actionHref="/projects/new"
+        />
+      ) : (
+        /* Client-side interactive comparison */
+        <ProjectComparisonClient
+          projectList={projectList}
+          initialComparison={comparisonData.projects}
+          initialSelectedIds={selectedIds}
+        />
+      )}
     </div>
   )
 }

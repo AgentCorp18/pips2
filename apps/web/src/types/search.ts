@@ -2,7 +2,13 @@
  * Global search result types for the command palette (Cmd+K).
  */
 
-export type SearchResultType = 'project' | 'ticket' | 'form'
+export type SearchResultType =
+  | 'project'
+  | 'ticket'
+  | 'form'
+  | 'member'
+  | 'channel'
+  | 'archived_project'
 
 export type SearchResult = {
   id: string
