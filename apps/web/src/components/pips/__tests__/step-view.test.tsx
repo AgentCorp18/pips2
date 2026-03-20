@@ -96,7 +96,9 @@ describe('StepView', () => {
 
   it('renders step number', () => {
     render(<StepView {...defaultProps} />)
-    expect(screen.getByText('1')).toBeTruthy()
+    // Use getAllByText to handle multiple elements containing '1' (step circle + recommended count)
+    const elements = screen.getAllByText('1')
+    expect(elements.length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders step objective', () => {

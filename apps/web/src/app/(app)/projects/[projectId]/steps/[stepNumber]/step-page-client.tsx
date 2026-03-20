@@ -1,13 +1,21 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PipsStepNumber } from '@pips/shared'
-import { hasPermission, type OrgRole } from '@pips/shared'
+import { hasPermission, type OrgRole, STEP_CONTENT } from '@pips/shared'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { StepView } from '@/components/pips/step-view'
 import { advanceStep, overrideStep } from '../../actions'
 
@@ -18,6 +26,17 @@ const STEP_NAMES: Record<number, string> = {
   4: 'Select & Plan',
   5: 'Implement',
   6: 'Evaluate',
+}
+
+const ADVANCE_THRESHOLD = 60
+
+const RECOMMENDED_FORMS: Record<number, Set<string>> = {
+  1: new Set(['problem_statement']),
+  2: new Set(['fishbone', 'five_why']),
+  3: new Set(['brainstorming']),
+  4: new Set(['criteria_matrix', 'implementation_plan']),
+  5: new Set(['milestone_tracker']),
+  6: new Set(['before_after', 'lessons_learned']),
 }
 
 type StepPageClientProps = {
@@ -39,13 +58,24 @@ export const StepPageClient = ({
 }: StepPageClientProps) => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [showAdvanceDialog, setShowAdvanceDialog] = useState(false)
 
   const isCurrent = stepNumber === currentStep
   const canAdvance = isCurrent && stepStatus !== 'completed' && stepStatus !== 'skipped'
   const canOverride =
     isCurrent && orgRole !== null && hasPermission(orgRole as OrgRole, 'step.override')
 
-  const handleAdvance = () => {
+  // Compute recommended completion % for the threshold dialog
+  const recommendedFormTypes = RECOMMENDED_FORMS[stepNumber] ?? new Set<string>()
+  const recommendedCount = recommendedFormTypes.size
+  const stepContent = STEP_CONTENT[stepNumber as PipsStepNumber]
+  const recommendedCompletedCount = formStatuses.filter(
+    (fs) => fs.started && recommendedFormTypes.has(fs.form_type),
+  ).length
+  const recommendedPercent =
+    recommendedCount > 0 ? Math.round((recommendedCompletedCount / recommendedCount) * 100) : 100
+
+  const doAdvance = () => {
     startTransition(async () => {
       const result = await advanceStep(projectId, stepNumber)
       if (result.success) {
@@ -59,6 +89,14 @@ export const StepPageClient = ({
         toast.error(result.error ?? 'Failed to advance step')
       }
     })
+  }
+
+  const handleAdvance = () => {
+    if (recommendedPercent < ADVANCE_THRESHOLD) {
+      setShowAdvanceDialog(true)
+    } else {
+      doAdvance()
+    }
   }
 
   const handleOverride = () => {
@@ -91,6 +129,50 @@ export const StepPageClient = ({
         isPending={isPending}
         currentProjectStep={currentStep as PipsStepNumber}
       />
+
+      {/* Low-completion confirmation dialog */}
+      <Dialog open={showAdvanceDialog} onOpenChange={setShowAdvanceDialog}>
+        <DialogContent data-testid="advance-confirmation-dialog">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle size={18} className="text-[var(--color-warning)]" />
+              Advance with incomplete forms?
+            </DialogTitle>
+            <DialogDescription>
+              You&apos;ve completed{' '}
+              <strong>
+                {recommendedCompletedCount} of {recommendedCount} recommended forms
+              </strong>{' '}
+              ({recommendedPercent}%) for Step {stepNumber}: {stepContent?.title}.
+            </DialogDescription>
+          </DialogHeader>
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            Advancing early may result in shallow analysis. We recommend completing at least{' '}
+            {ADVANCE_THRESHOLD}% of the recommended forms before advancing.
+          </p>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowAdvanceDialog(false)}
+              disabled={isPending}
+              data-testid="advance-dialog-keep-working"
+            >
+              Keep Working
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                setShowAdvanceDialog(false)
+                doAdvance()
+              }}
+              disabled={isPending}
+              data-testid="advance-dialog-advance-anyway"
+            >
+              Advance Anyway
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Previous / Next step navigation */}
       <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-4">

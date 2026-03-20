@@ -25,6 +25,7 @@ import {
   Home,
   HelpCircle,
   User,
+  ListChecks,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KnowledgeCadenceBar } from '@/components/knowledge-cadence/knowledge-cadence-bar'
@@ -85,10 +86,15 @@ export const StepView = ({
   const requiredForms = content.forms.filter((f) => f.required)
   const optionalForms = content.forms.filter((f) => !f.required)
 
-  // Step completion progress
+  // Step completion progress — uses recommended forms as the target
+  const recommendedFormTypes = RECOMMENDED_FORMS[stepNumber] ?? new Set<string>()
+  const recommendedCount = recommendedFormTypes.size
   const totalForms = content.forms.length
-  const completedFormsCount = formStatuses.filter((fs) => fs.started).length
-  const progressPercent = totalForms > 0 ? Math.round((completedFormsCount / totalForms) * 100) : 0
+  const recommendedCompletedCount = formStatuses.filter(
+    (fs) => fs.started && recommendedFormTypes.has(fs.form_type),
+  ).length
+  const progressPercent =
+    recommendedCount > 0 ? Math.round((recommendedCompletedCount / recommendedCount) * 100) : 0
 
   // Build set of completed form types for StepAdvisor
   const completedFormTypes = new Set(
@@ -134,17 +140,33 @@ export const StepView = ({
       {/* Objective */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div
-              className={`step-${stepNumber} flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white`}
-              style={{ backgroundColor: `var(--color-step-${stepNumber})` }}
-            >
-              {stepNumber}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div
+                className={`step-${stepNumber} flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white`}
+                style={{ backgroundColor: `var(--color-step-${stepNumber})` }}
+              >
+                {stepNumber}
+              </div>
+              <div>
+                <CardTitle className="text-lg">{content.title}</CardTitle>
+                <StatusBadge status={status} />
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-lg">{content.title}</CardTitle>
-              <StatusBadge status={status} />
-            </div>
+            {recommendedCount > 0 && (
+              <div
+                className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+                style={{
+                  borderColor: `var(--color-step-${stepNumber})`,
+                  color: `var(--color-step-${stepNumber})`,
+                  backgroundColor: `color-mix(in srgb, var(--color-step-${stepNumber}) 8%, transparent)`,
+                }}
+                data-testid="recommended-form-count"
+              >
+                <ListChecks size={12} />
+                Recommended: {recommendedCount} form{recommendedCount !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -156,8 +178,9 @@ export const StepView = ({
 
       {/* Step completion progress */}
       <StepProgressBar
-        completed={completedFormsCount}
-        total={totalForms}
+        completed={recommendedCompletedCount}
+        total={recommendedCount}
+        totalForms={totalForms}
         percent={progressPercent}
         stepNumber={stepNumber}
       />
@@ -409,46 +432,64 @@ const StepNavigation = ({
 const StepProgressBar = ({
   completed,
   total,
+  totalForms,
   percent,
   stepNumber,
 }: {
   completed: number
   total: number
+  totalForms: number
   percent: number
   stepNumber: PipsStepNumber
-}) => (
-  <div className="space-y-1.5" data-testid="step-progress-bar">
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-[var(--color-text-secondary)]">
-        <span className="font-medium">{completed}</span> of{' '}
-        <span className="font-medium">{total}</span> forms completed
-      </span>
-      <span
-        className="text-xs font-semibold"
-        style={{ color: `var(--color-step-${stepNumber})` }}
-        data-testid="step-progress-percent"
-      >
-        {percent}%
-      </span>
-    </div>
-    <div
-      className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-secondary)]"
-      role="progressbar"
-      aria-valuenow={percent}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-label={`Step ${stepNumber} progress: ${percent}%`}
-    >
+}) => {
+  const barColor =
+    percent >= 80
+      ? 'var(--color-success)'
+      : percent >= 40
+        ? 'var(--color-warning)'
+        : percent > 0
+          ? 'var(--color-error, #ef4444)'
+          : `var(--color-step-${stepNumber})`
+
+  return (
+    <div className="space-y-1.5" data-testid="step-progress-bar">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-[var(--color-text-secondary)]">
+          <span className="font-medium">{completed}</span> of{' '}
+          <span className="font-medium">{total}</span> recommended forms completed
+          {totalForms > total && (
+            <span className="ml-1 text-[var(--color-text-tertiary)]">
+              ({totalForms} total available)
+            </span>
+          )}
+        </span>
+        <span
+          className="text-xs font-semibold"
+          style={{ color: barColor }}
+          data-testid="step-progress-percent"
+        >
+          {percent}%
+        </span>
+      </div>
       <div
-        className="h-full rounded-full transition-all duration-300"
-        style={{
-          width: `${percent}%`,
-          backgroundColor: `var(--color-step-${stepNumber})`,
-        }}
-      />
+        className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-secondary)]"
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Step ${stepNumber} progress: ${percent}%`}
+      >
+        <div
+          className="h-full rounded-full transition-all duration-300"
+          style={{
+            width: `${percent}%`,
+            backgroundColor: barColor,
+          }}
+        />
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 /** 1.1: Compact context banner — time estimate, top pitfall */
 const StepContextBanner = ({
