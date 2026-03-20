@@ -15,13 +15,13 @@ describe('NotFound (root)', () => {
     expect(screen.getByText('Page not found')).toBeTruthy()
   })
 
-  it('renders a Go Home link', () => {
+  it('renders a Go to Dashboard link', () => {
     render(<NotFound />)
-    expect(screen.getByText('Go Home')).toBeTruthy()
+    expect(screen.getByText('Go to Dashboard')).toBeTruthy()
   })
 
-  it('renders a Sign In link', () => {
+  it('renders the descriptive sub-text', () => {
     render(<NotFound />)
-    expect(screen.getByText('Sign In')).toBeTruthy()
+    expect(screen.getByText(/doesn't exist or has been moved/i)).toBeTruthy()
   })
 })

@@ -167,6 +167,7 @@ const ProjectCard = ({ project }: { project: PortfolioProject }) => {
           <div
             className="flex flex-col items-center rounded-[var(--radius-md)] px-2 py-2"
             style={{ backgroundColor: depth.bg }}
+            title="Methodology depth shows what percentage of the 25 PIPS tools have been used for this project. Higher depth = more rigorous analysis."
           >
             <span className="text-lg font-bold" style={{ color: depth.color }}>
               {project.methodologyDepthPercent}%
