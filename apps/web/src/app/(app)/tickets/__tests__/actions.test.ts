@@ -206,7 +206,7 @@ describe('createTicket', () => {
       assignee_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
     })
     const result = await createTicket({}, fd)
-    expect(result).toEqual({ error: 'Assignee is not an active member of this organization' })
+    expect(result).toEqual({ error: 'Assignee is not a member of this organization' })
   })
 
   it('creates ticket successfully with all fields', async () => {
@@ -363,7 +363,7 @@ describe('updateTicket', () => {
     const result = await updateTicket('ticket-1', {
       assignee_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
     })
-    expect(result).toEqual({ error: 'Assignee is not an active member of this organization' })
+    expect(result).toEqual({ error: 'Assignee is not a member of this organization' })
   })
 
   it('does not overwrite started_at when already set', async () => {

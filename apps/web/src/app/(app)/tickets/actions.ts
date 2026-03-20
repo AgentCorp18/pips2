@@ -66,11 +66,10 @@ export const createTicket = async (
       .select('user_id')
       .eq('user_id', result.data.assignee_id)
       .eq('org_id', orgId)
-      .eq('status', 'active')
       .maybeSingle()
 
     if (!assigneeMembership) {
-      return { error: 'Assignee is not an active member of this organization' }
+      return { error: 'Assignee is not a member of this organization' }
     }
   }
 
@@ -180,11 +179,10 @@ export const updateTicket = async (
       .select('user_id')
       .eq('user_id', result.data.assignee_id)
       .eq('org_id', ticket.org_id)
-      .eq('status', 'active')
       .maybeSingle()
 
     if (!assigneeMembership) {
-      return { error: 'Assignee is not an active member of this organization' }
+      return { error: 'Assignee is not a member of this organization' }
     }
   }
 
@@ -518,11 +516,10 @@ export const bulkUpdateTickets = async (
       .select('user_id')
       .eq('user_id', data.assignee_id)
       .eq('org_id', orgId)
-      .eq('status', 'active')
       .maybeSingle()
 
     if (!assigneeMembership) {
-      return { error: 'Assignee is not an active member of this organization' }
+      return { error: 'Assignee is not a member of this organization' }
     }
   }
 
