@@ -137,6 +137,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
 
   // Calculate health scores per project
   const healthByProject = new Map<string, HealthScore>()
+  // eslint-disable-next-line react-hooks/purity -- Date.now() is safe in async Server Components
   const now = Date.now()
   for (const project of projectList) {
     const formSet = formsByProject.get(project.id) ?? new Set<string>()

@@ -198,6 +198,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
   // Load recent items from localStorage when palette opens
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reading localStorage on open is idiomatic
       setRecentItems(getRecentItems())
     }
   }, [open])
