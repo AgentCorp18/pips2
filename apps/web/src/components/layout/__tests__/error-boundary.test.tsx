@@ -99,4 +99,36 @@ describe('ErrorBoundaryCard', () => {
     const svgs = document.querySelectorAll('svg')
     expect(svgs.length).toBeGreaterThan(0)
   })
+
+  it('displays error digest reference when digest is present', () => {
+    const reset = vi.fn()
+    render(<ErrorBoundaryCard error={makeError('Boom', 'abc-123')} reset={reset} />)
+    expect(screen.getByTestId('error-boundary-digest')).toBeInTheDocument()
+    expect(screen.getByText(/Error ref: abc-123/)).toBeInTheDocument()
+  })
+
+  it('does not display digest section when digest is absent', () => {
+    const reset = vi.fn()
+    render(<ErrorBoundaryCard error={makeError('Boom')} reset={reset} />)
+    expect(screen.queryByTestId('error-boundary-digest')).not.toBeInTheDocument()
+  })
+
+  it('shows "Still having trouble?" message after 2 retries', () => {
+    const reset = vi.fn()
+    render(<ErrorBoundaryCard error={makeError('Boom')} reset={reset} />)
+
+    const retryButton = screen.getByTestId('error-boundary-retry')
+
+    // Should not be shown yet
+    expect(screen.queryByTestId('error-boundary-still-having-trouble')).not.toBeInTheDocument()
+
+    // First retry
+    fireEvent.click(retryButton)
+    expect(screen.queryByTestId('error-boundary-still-having-trouble')).not.toBeInTheDocument()
+
+    // Second retry — message should now appear
+    fireEvent.click(retryButton)
+    expect(screen.getByTestId('error-boundary-still-having-trouble')).toBeInTheDocument()
+    expect(screen.getByText(/Still having trouble/)).toBeInTheDocument()
+  })
 })
