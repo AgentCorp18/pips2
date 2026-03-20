@@ -54,10 +54,10 @@ export const addComment = async (ticketId: string, body: string): Promise<Commen
     return { error: 'You must be signed in' }
   }
 
-  // Get ticket to verify access
+  // Get ticket to verify access — also fetch title for mention notifications
   const { data: ticket } = await supabase
     .from('tickets')
-    .select('org_id')
+    .select('org_id, title')
     .eq('id', ticketId)
     .single()
 
@@ -88,6 +88,36 @@ export const addComment = async (ticketId: string, body: string): Promise<Commen
   if (insertError || !inserted) {
     console.error('Failed to add comment:', insertError?.message)
     return { error: 'Failed to add comment. Please try again.' }
+  }
+
+  // Create mention notifications for each mentioned user (excluding the commenter)
+  const mentionedUsers = mentions.filter((uid) => uid !== user.id)
+  if (mentionedUsers.length > 0) {
+    // Fetch commenter display name for the notification title
+    const { data: commenterProfile } = await supabase
+      .from('profiles')
+      .select('display_name, full_name')
+      .eq('id', user.id)
+      .single()
+
+    const commenterName = commenterProfile?.display_name || commenterProfile?.full_name || 'Someone'
+
+    const notifications = mentionedUsers.map((userId) => ({
+      org_id: ticket.org_id,
+      user_id: userId,
+      type: 'mention' as const,
+      title: `${commenterName} mentioned you`,
+      body: `In ticket: ${ticket.title}`,
+      entity_type: 'ticket',
+      entity_id: ticketId,
+    }))
+
+    const { error: notifError } = await supabase.from('notifications').insert(notifications)
+
+    if (notifError) {
+      // Non-fatal — comment was already saved successfully
+      console.error('Failed to create mention notifications:', notifError.message)
+    }
   }
 
   revalidatePath(`/tickets/${ticketId}`)
