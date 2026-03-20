@@ -15,7 +15,7 @@ import {
 import { FormUsageHeatmap } from '@/components/reports/form-usage-heatmap'
 import { AdoptionFunnelChart } from '@/components/reports/adoption-funnel-chart'
 import { StepBreakdownTable } from '@/components/reports/step-breakdown-table'
-import { BookOpen, Clock, TrendingUp, ArrowLeft, BarChart2 } from 'lucide-react'
+import { BookOpen, Clock, TrendingUp, ArrowLeft, BarChart2, FolderKanban } from 'lucide-react'
 import {
   getMethodologyKpis,
   getFormCompletionByStep,
@@ -24,6 +24,7 @@ import {
   getStepBreakdownTable,
   getMethodologyAdoption,
 } from '../actions'
+import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
   title: 'Methodology Adoption',
@@ -88,6 +89,17 @@ const MethodologyInsightsPage = async () => {
 
       {/* Step stripe */}
       <div className="step-gradient-stripe mb-8 rounded-full" />
+
+      {/* No-projects guard */}
+      {totalProjects === 0 && (
+        <ReportEmptyState
+          icon={FolderKanban}
+          title="Start your first project to see methodology insights"
+          description="Create a project and fill out PIPS step forms to see depth scores, adoption funnels, and tool effectiveness."
+          actionLabel="Create Project"
+          actionHref="/projects/new"
+        />
+      )}
 
       {/* KPI Cards */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -22,6 +22,9 @@ import {
   TrendingUp,
   Briefcase,
   Clock,
+  UserCircle,
+  Hash,
+  Archive,
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { globalSearch } from '@/app/(app)/search/actions'
@@ -152,11 +155,14 @@ const QUICK_ACTIONS = [
   },
 ]
 
-const RESULT_TYPE_ICONS = {
+const RESULT_TYPE_ICONS: Record<string, typeof FolderKanban> = {
   project: FolderKanban,
   ticket: Ticket,
   form: ClipboardList,
-} as const
+  member: UserCircle,
+  channel: Hash,
+  archived_project: Archive,
+}
 
 /** Colored pill badges for search result types */
 const TYPE_BADGE_STYLES: Record<string, string> = {
@@ -167,6 +173,12 @@ const TYPE_BADGE_STYLES: Record<string, string> = {
   initiative:
     'bg-[color-mix(in_srgb,#D97706_12%,transparent)] text-[#D97706] border border-[color-mix(in_srgb,#D97706_25%,transparent)]',
   form: 'bg-[color-mix(in_srgb,#0891B2_12%,transparent)] text-[#0891B2] border border-[color-mix(in_srgb,#0891B2_25%,transparent)]',
+  member:
+    'bg-[color-mix(in_srgb,#7C3AED_12%,transparent)] text-[#7C3AED] border border-[color-mix(in_srgb,#7C3AED_25%,transparent)]',
+  channel:
+    'bg-[color-mix(in_srgb,#2563EB_12%,transparent)] text-[#2563EB] border border-[color-mix(in_srgb,#2563EB_25%,transparent)]',
+  archived_project:
+    'bg-[color-mix(in_srgb,#6B7280_12%,transparent)] text-[#6B7280] border border-[color-mix(in_srgb,#6B7280_25%,transparent)]',
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -174,6 +186,9 @@ const TYPE_LABELS: Record<string, string> = {
   ticket: 'Ticket',
   initiative: 'Initiative',
   form: 'Form',
+  member: 'Team Member',
+  channel: 'Channel',
+  archived_project: 'Archived',
 }
 
 const RECENT_ITEM_ICONS: Record<string, typeof FolderKanban> = {
@@ -274,7 +289,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
             <Command.Input
               value={query}
               onValueChange={handleSearch}
-              placeholder="Search projects, tickets, forms..."
+              placeholder="Search projects, tickets, members, channels..."
               className="flex h-11 w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-text-tertiary)]"
             />
             <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-tertiary)] sm:inline-block">
@@ -307,7 +322,7 @@ export const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
                   className={GROUP_HEADING_CLASS}
                 >
                   {group.results.map((result) => {
-                    const Icon = RESULT_TYPE_ICONS[result.type]
+                    const Icon = RESULT_TYPE_ICONS[result.type] ?? FileText
                     const badgeClass = TYPE_BADGE_STYLES[result.type] ?? ''
                     const badgeLabel = TYPE_LABELS[result.type] ?? result.type
                     return (

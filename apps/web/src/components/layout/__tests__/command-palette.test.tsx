@@ -95,13 +95,15 @@ describe('CommandPalette', () => {
 
   it('renders the search input when open', () => {
     render(<CommandPalette {...defaultProps} />)
-    expect(screen.getByPlaceholderText('Search projects, tickets, forms...')).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText('Search projects, tickets, members, channels...'),
+    ).toBeInTheDocument()
   })
 
   it('does not render search input when closed', () => {
     render(<CommandPalette {...defaultProps} open={false} />)
     expect(
-      screen.queryByPlaceholderText('Search projects, tickets, forms...'),
+      screen.queryByPlaceholderText('Search projects, tickets, members, channels...'),
     ).not.toBeInTheDocument()
   })
 
@@ -142,7 +144,7 @@ describe('CommandPalette', () => {
     mockGlobalSearch.mockResolvedValue(mockSearchResponse)
 
     render(<CommandPalette {...defaultProps} />)
-    const input = screen.getByPlaceholderText('Search projects, tickets, forms...')
+    const input = screen.getByPlaceholderText('Search projects, tickets, members, channels...')
     await user.type(input, 'cycle')
 
     // Advance past the 300ms debounce
@@ -163,7 +165,7 @@ describe('CommandPalette', () => {
     mockGlobalSearch.mockResolvedValue(mockSearchResponse)
 
     render(<CommandPalette {...defaultProps} />)
-    const input = screen.getByPlaceholderText('Search projects, tickets, forms...')
+    const input = screen.getByPlaceholderText('Search projects, tickets, members, channels...')
     await user.type(input, 'cycle')
 
     await act(async () => {
@@ -184,7 +186,7 @@ describe('CommandPalette', () => {
     mockGlobalSearch.mockResolvedValue(mockSearchResponse)
 
     render(<CommandPalette {...defaultProps} />)
-    const input = screen.getByPlaceholderText('Search projects, tickets, forms...')
+    const input = screen.getByPlaceholderText('Search projects, tickets, members, channels...')
     await user.type(input, 'cycle')
 
     await act(async () => {
@@ -205,7 +207,7 @@ describe('CommandPalette', () => {
     mockGlobalSearch.mockResolvedValue(mockSearchResponse)
 
     render(<CommandPalette {...defaultProps} />)
-    const input = screen.getByPlaceholderText('Search projects, tickets, forms...')
+    const input = screen.getByPlaceholderText('Search projects, tickets, members, channels...')
     await user.type(input, 'cycle')
 
     await act(async () => {
@@ -228,7 +230,7 @@ describe('CommandPalette', () => {
     mockGlobalSearch.mockResolvedValue({ groups: [], total: 0 })
 
     render(<CommandPalette {...defaultProps} />)
-    const input = screen.getByPlaceholderText('Search projects, tickets, forms...')
+    const input = screen.getByPlaceholderText('Search projects, tickets, members, channels...')
     await user.type(input, 'nonexistent')
 
     await act(async () => {
@@ -249,7 +251,9 @@ describe('CommandPalette', () => {
     render(<CommandPalette open={true} onOpenChange={onOpenChange} />)
 
     // The Dialog component renders — its existence confirms correct prop passing
-    expect(screen.getByPlaceholderText('Search projects, tickets, forms...')).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText('Search projects, tickets, members, channels...'),
+    ).toBeInTheDocument()
   })
 
   /* ---- Reset on close ---- */
@@ -265,7 +269,7 @@ describe('CommandPalette', () => {
 
     // Type something in the search
     const user = userEvent.setup()
-    const input = screen.getByPlaceholderText('Search projects, tickets, forms...')
+    const input = screen.getByPlaceholderText('Search projects, tickets, members, channels...')
     await user.type(input, 'test')
     expect(input).toHaveValue('test')
 
@@ -283,7 +287,7 @@ describe('CommandPalette', () => {
     // The query won't auto-reset via rerender because handleOpenChange(false)
     // was never called internally. This is expected: the parent controls open.
     // Just verify the component renders again without error.
-    const newInput = screen.getByPlaceholderText('Search projects, tickets, forms...')
+    const newInput = screen.getByPlaceholderText('Search projects, tickets, members, channels...')
     expect(newInput).toBeInTheDocument()
   })
 })

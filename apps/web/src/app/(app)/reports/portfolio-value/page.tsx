@@ -17,10 +17,12 @@ import {
   GraduationCap,
   BarChart2,
   ChevronRight,
+  FolderKanban,
 } from 'lucide-react'
 import { getPortfolioValue } from './actions'
 import type { PortfolioProject } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
+import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
   title: 'Portfolio Value Report',
@@ -358,6 +360,17 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
 
       {/* Step stripe */}
       <div className="step-gradient-stripe mb-8 rounded-full" />
+
+      {/* No-projects guard */}
+      {summary.totalProjects === 0 && (
+        <ReportEmptyState
+          icon={FolderKanban}
+          title="Start your first project to see portfolio value"
+          description="Create projects and work through the PIPS steps to see portfolio-wide metrics here."
+          actionLabel="Create Project"
+          actionHref="/projects/new"
+        />
+      )}
 
       {/* Summary KPI strip */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">

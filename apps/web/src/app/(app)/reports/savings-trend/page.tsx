@@ -6,9 +6,18 @@ import { getCurrentOrg } from '@/lib/get-current-org'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { KpiCard } from '@/components/reports/kpi-card'
 import { LazySavingsTrendChart } from '@/components/reports/lazy-charts'
-import { ArrowLeft, TrendingUp, DollarSign, Clock, Target, CheckCircle2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  TrendingUp,
+  DollarSign,
+  Clock,
+  Target,
+  CheckCircle2,
+  ListTodo,
+} from 'lucide-react'
 import { getSavingsTrend } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
+import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
   title: 'Savings Trend Report',
@@ -430,21 +439,14 @@ const SavingsTrendPage = async ({ searchParams }: SavingsTrendPageProps) => {
 
       {/* Empty state */}
       {data.monthly.length === 0 && (
-        <Card>
-          <CardContent className="py-16 text-center">
-            <DollarSign
-              size={36}
-              className="mx-auto mb-4"
-              style={{ color: 'var(--color-text-tertiary)' }}
-            />
-            <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-              No savings data yet
-            </p>
-            <p className="mt-1 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Add measurables to Problem Statement forms to see projected savings.
-            </p>
-          </CardContent>
-        </Card>
+        <ReportEmptyState
+          icon={ListTodo}
+          title="No savings data yet"
+          description="Add measurables to your Problem Statement forms (Step 1) to start projecting savings over time."
+          actionLabel="Learn How"
+          actionHref="/knowledge"
+          note="Measurables with cost or time units generate savings projections automatically."
+        />
       )}
     </div>
   )

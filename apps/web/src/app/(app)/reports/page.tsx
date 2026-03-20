@@ -18,9 +18,11 @@ import {
   CheckCircle2,
   Layers,
   GitCompare,
+  FolderKanban,
 } from 'lucide-react'
 import { getReportsHubData, getRecentAchievements } from './actions'
 import { RecentAchievements } from '@/components/reports/recent-achievements'
+import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
   title: 'Reports',
@@ -203,6 +205,9 @@ const ReportsPage = async () => {
     },
   ]
 
+  const totalProjects = data.totalProjectsCompleted + data.activeProjects
+  const noProjects = totalProjects === 0
+
   return (
     <div className="mx-auto max-w-[var(--content-max-width)]">
       {/* Page header */}
@@ -218,6 +223,19 @@ const ReportsPage = async () => {
           ROI tracking, methodology insights, and performance analytics for your organization.
         </p>
       </div>
+
+      {/* Empty state guard — no projects yet */}
+      {noProjects && (
+        <div className="mb-8">
+          <ReportEmptyState
+            icon={FolderKanban}
+            title="Start your first project to see reports"
+            description="Reports show ROI, methodology insights, and team performance once you have projects with data."
+            actionLabel="Create Project"
+            actionHref="/projects/new"
+          />
+        </div>
+      )}
 
       {/* Hero KPI banner */}
       <div
