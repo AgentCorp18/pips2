@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -157,6 +158,26 @@ export const TicketDetailClient = ({
   const saveField = (field: string, value: unknown) => {
     startTransition(async () => {
       await updateTicket(ticket.id, { [field]: value })
+    })
+  }
+
+  const saveStatus = (newStatus: TicketStatus) => {
+    const previousStatus = ticket.status
+    // Apply immediately (optimistic) then show undo toast
+    startTransition(async () => {
+      await updateTicket(ticket.id, { status: newStatus })
+    })
+    const label = STATUS_OPTIONS.find((o) => o.value === newStatus)?.label ?? newStatus
+    toast(`Status changed to ${label}`, {
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          startTransition(async () => {
+            await updateTicket(ticket.id, { status: previousStatus })
+          })
+        },
+      },
+      duration: 5000,
     })
   }
 
@@ -365,7 +386,7 @@ export const TicketDetailClient = ({
         <SidebarField label="Status">
           <Select
             value={ticket.status}
-            onValueChange={(v) => saveField('status', v)}
+            onValueChange={(v) => saveStatus(v as TicketStatus)}
             disabled={isPending}
           >
             <SelectTrigger className="w-full" size="sm">

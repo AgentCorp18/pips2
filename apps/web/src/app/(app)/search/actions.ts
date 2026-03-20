@@ -57,9 +57,59 @@ export const globalSearch = async (
 
   const supabase = await createClient()
 
+  // Check if query looks like a ticket sequence ID (e.g. "TKT-123", "TKT123", or just "123")
+  const ticketIdMatch = trimmed.match(/^(?:[A-Za-z]+-?)?(\d+)$/)
+  let ticketBySeqResult: SearchResult | null = null
+  if (ticketIdMatch?.[1]) {
+    const seqNum = parseInt(ticketIdMatch[1], 10)
+    // Get prefix first to validate the prefix portion if given
+    const { data: prefixData } = await supabase
+      .from('org_settings')
+      .select('ticket_prefix')
+      .eq('org_id', resolvedOrgId)
+      .single()
+    const prefix = (prefixData?.ticket_prefix as string | undefined) ?? 'TKT'
+    const prefixMatch = trimmed.match(/^([A-Za-z]+)-?(\d+)$/)
+    const isValidTicketId = !prefixMatch || prefixMatch[1]?.toUpperCase() === prefix.toUpperCase()
+    if (isValidTicketId) {
+      const { data: ticketBySeq } = await supabase
+        .from('tickets')
+        .select(
+          'id, title, sequence_number, status, project:projects!tickets_project_id_fkey(title)',
+        )
+        .eq('org_id', resolvedOrgId)
+        .eq('sequence_number', seqNum)
+        .maybeSingle()
+      if (ticketBySeq) {
+        const rawProject = ticketBySeq.project as unknown
+        const projectData = Array.isArray(rawProject)
+          ? ((rawProject[0] as { title: string } | undefined) ?? null)
+          : (rawProject as { title: string } | null)
+        const subtitle = projectData
+          ? `${prefix}-${ticketBySeq.sequence_number as number} · ${projectData.title}`
+          : `${prefix}-${ticketBySeq.sequence_number as number}`
+        ticketBySeqResult = {
+          id: ticketBySeq.id as string,
+          type: 'ticket' as const,
+          title: ticketBySeq.title as string,
+          subtitle,
+          url: `/tickets/${ticketBySeq.id as string}`,
+        }
+      }
+    }
+  }
+
   // Sanitize input: strip PostgREST special characters to prevent filter injection
   const sanitized = trimmed.replace(/[%_(),.\\'"]/g, '')
   if (!sanitized) {
+    // If we found a ticket by sequence number, return it even if sanitized is empty
+    if (ticketBySeqResult) {
+      trackServerEvent('search.executed', { query_text: trimmed.slice(0, 100), result_count: 1 })
+      return {
+        groups: [{ type: 'ticket', label: 'Tickets', results: [ticketBySeqResult] }],
+        total: 1,
+      }
+    }
     return { groups: [], total: 0 }
   }
 
@@ -164,7 +214,7 @@ export const globalSearch = async (
   }))
 
   // Map tickets to search results
-  const ticketResults: SearchResult[] = (ticketsResult.data ?? []).map((t) => {
+  const ticketResultsMapped: SearchResult[] = (ticketsResult.data ?? []).map((t) => {
     const rawProject = t.project as unknown
     const projectData = Array.isArray(rawProject)
       ? ((rawProject[0] as { title: string } | undefined) ?? null)
@@ -180,6 +230,10 @@ export const globalSearch = async (
       url: `/tickets/${t.id}`,
     }
   })
+  // Prepend sequence-ID match as first result, deduplicating if already in text results
+  const ticketResults: SearchResult[] = ticketBySeqResult
+    ? [ticketBySeqResult, ...ticketResultsMapped.filter((r) => r.id !== ticketBySeqResult!.id)]
+    : ticketResultsMapped
 
   // Map forms to search results
   const formResults: SearchResult[] = (formsResult.data ?? []).map((f) => {

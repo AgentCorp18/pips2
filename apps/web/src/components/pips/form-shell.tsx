@@ -18,7 +18,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { saveFormData } from '@/app/(app)/projects/[projectId]/steps/[stepNumber]/forms/actions'
+import {
+  saveFormData,
+  getProjectTitle,
+} from '@/app/(app)/projects/[projectId]/steps/[stepNumber]/forms/actions'
 import type { ProductContext } from '@pips/shared'
 import { buildProductContext, STEP_CONTENT } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
@@ -53,6 +56,8 @@ type DataDrivenProps = {
   onSaveSuccess?: () => void
   onSave?: never
   isDirty?: never
+  /** Optional project title for the breadcrumb — fetched automatically if omitted */
+  projectTitle?: string
 }
 
 /* Callback mode (Steps 4-6): form handles save, FormShell triggers it */
@@ -69,6 +74,8 @@ type CallbackProps = {
   onSaveSuccess?: never
   onSave: () => Promise<{ success?: boolean; error?: string }>
   isDirty: boolean
+  /** Optional project title for the breadcrumb — fetched automatically if omitted */
+  projectTitle?: string
 }
 
 export type FormShellProps = DataDrivenProps | CallbackProps
@@ -80,6 +87,7 @@ export const FormShell = (props: FormShellProps) => {
   const { title, description, stepNumber, required = false, cadenceContext, children } = props
   const formType = 'formType' in props ? (props.formType as string | undefined) : undefined
   const derivedCadenceContext = cadenceContext ?? buildProductContext(stepNumber, formType)
+  const propProjectTitle = 'projectTitle' in props ? props.projectTitle : undefined
 
   // 1.2: Derive time estimate and tips from STEP_CONTENT for this form
   const stepContent =
@@ -147,6 +155,19 @@ export const FormShell = (props: FormShellProps) => {
   const data = props.data
   const projectId = 'projectId' in props ? props.projectId : undefined
   const onSaveSuccess = 'onSaveSuccess' in props ? props.onSaveSuccess : undefined
+
+  // Fetch project title for breadcrumb if not passed as prop
+  const [fetchedProjectTitle, setFetchedProjectTitle] = useState<string | null>(
+    propProjectTitle ?? null,
+  )
+  useEffect(() => {
+    if (propProjectTitle || !projectId || isSandbox) return
+    void getProjectTitle(projectId).then((t) => {
+      if (t) setFetchedProjectTitle(t)
+    })
+  }, [projectId, isSandbox, propProjectTitle])
+
+  const breadcrumbProjectTitle = propProjectTitle ?? fetchedProjectTitle
 
   /* Unified save function — returns true on success, false on failure */
   const doSave = useCallback(async (): Promise<boolean> => {
@@ -313,12 +334,16 @@ export const FormShell = (props: FormShellProps) => {
                 <li className="hidden sm:block">
                   <GuardedLink
                     href={`/projects/${projectId}`}
-                    className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                    className="max-w-[160px] truncate text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
                     isDirty={hasPendingChanges}
                     guardNavigation={guardNavigation}
                     router={router}
                   >
-                    Project
+                    {breadcrumbProjectTitle
+                      ? breadcrumbProjectTitle.length > 30
+                        ? `${breadcrumbProjectTitle.slice(0, 30)}…`
+                        : breadcrumbProjectTitle
+                      : 'Project'}
                   </GuardedLink>
                 </li>
                 <li className="hidden sm:block">
