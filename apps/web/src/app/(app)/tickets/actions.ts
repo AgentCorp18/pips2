@@ -573,7 +573,9 @@ export const bulkUpdateTickets = async (
    ============================================================ */
 
 export const getChildTickets = async (ticketId: string) => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return []
+  const { supabase } = auth.ctx
 
   const { data, error } = await supabase
     .from('tickets')
@@ -602,7 +604,9 @@ export const getChildTickets = async (ticketId: string) => {
    ============================================================ */
 
 export const getParentTicket = async (parentId: string) => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return null
+  const { supabase } = auth.ctx
 
   const { data, error } = await supabase
     .from('tickets')
