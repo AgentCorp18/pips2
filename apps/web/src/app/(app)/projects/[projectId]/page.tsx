@@ -24,6 +24,7 @@ import { ActivityFeed } from './activity-feed'
 import { MembersList } from './members-list'
 import { ExportPDFButton } from '@/components/export-pdf-button'
 import { ExportOnePagerButton } from '@/components/pips/export-one-pager-button'
+import { CloneProjectDialog } from '@/components/pips/clone-project-dialog'
 import { Button } from '@/components/ui/button'
 import { StepSummaryCard } from '@/components/pips/step-summary-card'
 import { Calendar, User, BarChart3, ClipboardList, HeartPulse } from 'lucide-react'
@@ -150,6 +151,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
             View Summary
           </Link>
         </Button>
+        <CloneProjectDialog projectId={project.id} projectName={project.title as string} />
         <ExportOnePagerButton projectId={project.id} projectName={project.title as string} />
         <ExportPDFButton projectId={project.id} projectName={project.title as string} />
       </div>
