@@ -26,6 +26,7 @@ const { mockSaveFormData, mockToast } = vi.hoisted(() => ({
 
 vi.mock('@/app/(app)/projects/[projectId]/steps/[stepNumber]/forms/actions', () => ({
   saveFormData: (...args: unknown[]) => mockSaveFormData(...args),
+  getProjectTitle: vi.fn().mockResolvedValue(null),
 }))
 
 vi.mock('sonner', () => ({

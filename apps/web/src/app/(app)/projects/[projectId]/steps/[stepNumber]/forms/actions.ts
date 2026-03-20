@@ -109,6 +109,22 @@ export const saveFormData = async (
   return { success: true }
 }
 
+/** Fetch only the title of a project (used by FormShell breadcrumb) */
+export const getProjectTitle = async (projectId: string): Promise<string | null> => {
+  const auth = await requireAuth()
+  if (!auth.success) return null
+  const { supabase, orgId } = auth.ctx
+
+  const { data } = await supabase
+    .from('projects')
+    .select('title, org_id')
+    .eq('id', projectId)
+    .single()
+
+  if (!data || (orgId && data.org_id !== orgId)) return null
+  return data.title as string
+}
+
 /** Load form data from project_forms */
 export const loadFormData = async (
   projectId: string,
