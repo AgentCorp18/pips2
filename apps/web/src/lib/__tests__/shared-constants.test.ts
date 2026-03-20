@@ -213,8 +213,8 @@ describe('getRequiredForms', () => {
 })
 
 describe('ALL_FORM_TYPES', () => {
-  it('contains all 27 form types', () => {
-    expect(ALL_FORM_TYPES).toHaveLength(27)
+  it('contains all 26 unique form types (balance_sheet deduplicated from steps 4 and 6)', () => {
+    expect(ALL_FORM_TYPES).toHaveLength(26)
   })
 
   it('includes form types from all steps', () => {
