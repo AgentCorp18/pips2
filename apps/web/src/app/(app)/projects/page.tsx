@@ -17,6 +17,7 @@ import { Plus, Columns3, Rows3, LayoutTemplate } from 'lucide-react'
 import { ExportProjectsButton } from '@/components/pips/export-projects-button'
 import { QuickCreateFab } from '@/components/ui/quick-create-fab'
 import { ProjectsEmptyState } from '@/components/pips/projects-empty-state'
+import { ProjectsFilterBar } from '@/components/pips/projects-filter-bar'
 
 export const metadata: Metadata = {
   title: 'Projects',
@@ -178,6 +179,16 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
           : 'cards'
   const boardLayout = viewParam === 'swimlanes' ? ('swimlanes' as const) : ('columns' as const)
 
+  // Sort + filter params (cards view only)
+  const sortParam = typeof params.sort === 'string' ? params.sort : ''
+  const filterParam = typeof params.filter === 'string' ? params.filter : ''
+
+  // Count at-risk projects for the filter badge (health < 40)
+  const AT_RISK_THRESHOLD = 40
+  const atRiskCount = projectList.filter(
+    (p) => (healthByProject.get(p.id)?.score ?? 100) < AT_RISK_THRESHOLD,
+  ).length
+
   // Transform projects for reuse across views
   const transformedProjects = projectList.map((project) => {
     const profilesRaw = project.profiles as unknown
@@ -207,6 +218,21 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       projectType: (project.project_type ?? 'pips') as 'pips' | 'simple',
     }
   })
+
+  // Apply health sort + at-risk filter to the card view
+  let displayProjects = transformedProjects
+
+  if (filterParam === 'at-risk') {
+    displayProjects = displayProjects.filter(
+      (p) => (healthByProject.get(p.id)?.score ?? 100) < AT_RISK_THRESHOLD,
+    )
+  }
+
+  if (sortParam === 'health') {
+    displayProjects = [...displayProjects].sort(
+      (a, b) => (healthByProject.get(a.id)?.score ?? 0) - (healthByProject.get(b.id)?.score ?? 0),
+    )
+  }
 
   // Build typed arrays for table and board views
   const projectRows: ProjectRow[] = transformedProjects
@@ -265,24 +291,45 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
             <ProjectListTable projects={projectRows} />
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {transformedProjects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                id={project.id}
-                name={project.name}
-                description={project.description}
-                status={project.status}
-                currentStep={project.currentStep}
-                ownerName={project.ownerName}
-                stepsCompleted={project.stepsCompleted}
-                targetDate={project.targetDate}
-                completedFormTypes={formsByProject.get(project.id) ?? new Set()}
-                health={healthByProject.get(project.id)}
-                projectType={project.projectType}
-              />
-            ))}
-          </div>
+          <>
+            <ProjectsFilterBar
+              currentSort={sortParam}
+              currentFilter={filterParam}
+              atRiskCount={atRiskCount}
+            />
+            {displayProjects.length === 0 && filterParam === 'at-risk' ? (
+              <div
+                className="rounded-xl border px-6 py-12 text-center"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                  No at-risk projects
+                </p>
+                <p className="mt-1 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                  All projects have a health score of {AT_RISK_THRESHOLD} or above.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {displayProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    name={project.name}
+                    description={project.description}
+                    status={project.status}
+                    currentStep={project.currentStep}
+                    ownerName={project.ownerName}
+                    stepsCompleted={project.stepsCompleted}
+                    targetDate={project.targetDate}
+                    completedFormTypes={formsByProject.get(project.id) ?? new Set()}
+                    health={healthByProject.get(project.id)}
+                    projectType={project.projectType}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )
       ) : (
         <ProjectsEmptyState />

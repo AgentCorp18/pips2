@@ -7,6 +7,7 @@ import { ArrowLeft, FolderKanban } from 'lucide-react'
 import { getExecutiveSummaryData, parsePeriod } from '../roi-dashboard/actions'
 import { PeriodSelector } from '@/components/reports/period-selector'
 import { PrintButton } from './print-button'
+import { ShareButton } from './share-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
 
 export const metadata: Metadata = {
@@ -137,7 +138,10 @@ const ExecutiveSummaryPage = async ({ searchParams }: ExecutiveSummaryPageProps)
             <ArrowLeft size={14} />
             Back to Reports
           </Link>
-          <PrintButton />
+          <div className="flex items-center gap-2">
+            <ShareButton period={period} />
+            <PrintButton />
+          </div>
         </div>
 
         {/* Period selector — screen only (not printed) */}
