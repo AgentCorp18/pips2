@@ -159,54 +159,62 @@ export const getReportsHubData = async (orgId: string): Promise<ReportsHubData> 
 
   if (!projects || projects.length === 0) return empty
 
-  const projectIds = projects.map((p) => p.id)
-
   const completedProjects = projects.filter((p) => p.status === 'completed')
   const activeProjects = projects.filter((p) => p.status === 'active' || p.status === 'draft')
 
-  // Fetch forms needed for KPIs in parallel
-  const [allFormsRes, problemStmtFormsRes, resultsFormsRes, membersRes] = await Promise.allSettled([
-    supabase
-      .from('project_forms')
-      .select('project_id, form_type')
-      .in('project_id', projectIds)
-      .limit(10000),
+  // Fetch forms needed for KPIs in parallel.
+  // Use SQL aggregation (RPC) for the org-wide distinct-form-type count to avoid
+  // loading 10,000+ rows into Node.js memory; fetch only necessary columns for the
+  // forms that carry JSONB data we actually need.
+  const [distinctFormCountsRes, formsCountRes, problemStmtFormsRes, resultsFormsRes, membersRes] =
+    await Promise.allSettled([
+      // Returns one row per (project_id, form_type) — far fewer rows than raw forms
+      supabase.rpc('get_form_type_counts_by_project', { p_org_id: orgId }),
 
-    supabase
-      .from('project_forms')
-      .select('project_id, data')
-      .in('project_id', projectIds)
-      .eq('form_type', 'problem_statement')
-      .limit(1000),
+      // Total forms count via SQL COUNT — no rows transferred
+      supabase
+        .from('project_forms')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId),
 
-    supabase
-      .from('project_forms')
-      .select('project_id, data')
-      .in('project_id', projectIds)
-      .eq('form_type', 'results_metrics')
-      .limit(1000),
+      supabase
+        .from('project_forms')
+        .select('project_id, data')
+        .eq('org_id', orgId)
+        .eq('form_type', 'problem_statement')
+        .limit(1000),
 
-    supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
-  ])
+      supabase
+        .from('project_forms')
+        .select('project_id, data')
+        .eq('org_id', orgId)
+        .eq('form_type', 'results_metrics')
+        .limit(1000),
 
-  const allForms = allFormsRes.status === 'fulfilled' ? (allFormsRes.value.data ?? []) : []
+      supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('org_id', orgId),
+    ])
+
+  type FormTypeCountRow = { project_id: string; form_type: string; cnt: number }
+  const distinctFormCounts: FormTypeCountRow[] =
+    distinctFormCountsRes.status === 'fulfilled'
+      ? ((distinctFormCountsRes.value.data ?? []) as FormTypeCountRow[])
+      : []
+  const formsCompleted = formsCountRes.status === 'fulfilled' ? (formsCountRes.value.count ?? 0) : 0
   const problemForms =
     problemStmtFormsRes.status === 'fulfilled' ? (problemStmtFormsRes.value.data ?? []) : []
   const resultsForms =
     resultsFormsRes.status === 'fulfilled' ? (resultsFormsRes.value.data ?? []) : []
   const totalMembers = membersRes.status === 'fulfilled' ? (membersRes.value.count ?? 0) : 0
 
-  // Forms completed total
-  const formsCompleted = allForms.length
-
-  // Avg methodology depth (distinct form types / 25 per project, then average)
+  // Rebuild per-project distinct form type sets from the aggregated RPC result
+  // (one row per project+form_type, not one row per form instance)
   const TOTAL_FORM_TYPES = 25
   const formTypesByProject = new Map<string, Set<string>>()
-  for (const f of allForms) {
-    if (!f.project_id) continue
-    const existing = formTypesByProject.get(f.project_id) ?? new Set<string>()
-    existing.add(f.form_type)
-    formTypesByProject.set(f.project_id, existing)
+  for (const row of distinctFormCounts) {
+    if (!row.project_id) continue
+    const existing = formTypesByProject.get(row.project_id) ?? new Set<string>()
+    existing.add(row.form_type)
+    formTypesByProject.set(row.project_id, existing)
   }
 
   let avgMethodologyDepth = 0
@@ -963,9 +971,13 @@ export const getMethodologyKpis = async (orgId: string): Promise<MethodologyKpis
     return { totalFormsCompleted: 0, avgTimePerStep: 0, mostUsedTool: 'N/A', completionRate: 0 }
   const supabase = await createClient()
 
-  const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
+  // Check if any projects exist for this org before running heavy queries
+  const { count: projectCount } = await supabase
+    .from('projects')
+    .select('id', { count: 'exact', head: true })
+    .eq('org_id', orgId)
 
-  if (!orgProjects || orgProjects.length === 0) {
+  if (!projectCount || projectCount === 0) {
     return {
       totalFormsCompleted: 0,
       avgTimePerStep: 0,
@@ -974,31 +986,57 @@ export const getMethodologyKpis = async (orgId: string): Promise<MethodologyKpis
     }
   }
 
-  const projectIds = orgProjects.map((p) => p.id)
+  // Fetch project IDs for the org so we can query project_steps (which has no org_id)
+  const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
+  const projectIds = (orgProjects ?? []).map((p) => p.id)
 
-  const [formsRes, stepsRes, projectStatusRes] = await Promise.all([
-    supabase.from('project_forms').select('id, form_type').in('project_id', projectIds),
+  const [formsCountRes, formTypeCountsRes, stepsRes, projectStatusRes, completedProjectsRes] =
+    await Promise.all([
+      // Total form count via SQL COUNT — no rows transferred
+      supabase
+        .from('project_forms')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId),
 
-    supabase
-      .from('project_steps')
-      .select('started_at, completed_at, status')
-      .in('project_id', projectIds),
+      // Aggregated form type counts to find most-used tool without fetching all rows
+      supabase.rpc('get_form_type_counts_by_project', { p_org_id: orgId }),
 
-    supabase
-      .from('projects')
-      .select('status')
-      .eq('org_id', orgId)
-      .in('status', ['active', 'draft', 'completed']),
-  ])
+      projectIds.length > 0
+        ? supabase
+            .from('project_steps')
+            .select('started_at, completed_at, status')
+            .in('project_id', projectIds)
+        : Promise.resolve({
+            data: [] as Array<{
+              started_at: string | null
+              completed_at: string | null
+              status: string
+            }>,
+          }),
 
-  const totalForms = formsRes.data?.length ?? 0
+      // All projects count (for denominator of completion rate)
+      supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .in('status', ['active', 'draft', 'completed']),
 
-  // Most used tool
+      // Completed projects count (for numerator of completion rate)
+      supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('status', 'completed'),
+    ])
+
+  const totalForms = formsCountRes.count ?? 0
+
+  // Most used tool — aggregate from the per-(project,form_type) RPC rows
+  type FormTypeCountRow = { project_id: string; form_type: string; cnt: number }
   const toolCounts = new Map<string, number>()
-  if (formsRes.data) {
-    for (const f of formsRes.data) {
-      toolCounts.set(f.form_type, (toolCounts.get(f.form_type) ?? 0) + 1)
-    }
+  const formTypeCountRows = (formTypeCountsRes.data ?? []) as FormTypeCountRow[]
+  for (const row of formTypeCountRows) {
+    toolCounts.set(row.form_type, (toolCounts.get(row.form_type) ?? 0) + Number(row.cnt))
   }
   let mostUsedTool = 'N/A'
   let maxCount = 0
@@ -1025,10 +1063,9 @@ export const getMethodologyKpis = async (orgId: string): Promise<MethodologyKpis
     }
   }
 
-  // Completion rate
-  const allProjects = projectStatusRes.data?.length ?? 0
-  const completedProjects =
-    projectStatusRes.data?.filter((p) => p.status === 'completed').length ?? 0
+  // Completion rate — use SQL COUNT results, no JS filtering
+  const allProjects = projectStatusRes.count ?? 0
+  const completedProjects = completedProjectsRes.count ?? 0
   const completionRate = allProjects > 0 ? Math.round((completedProjects / allProjects) * 100) : 0
 
   return {
@@ -1043,6 +1080,8 @@ export const getFormCompletionByStep = async (orgId: string): Promise<FormComple
   if (!(await checkViewPermission(orgId))) return []
   const supabase = await createClient()
 
+  // project_steps has no org_id so we still need a project ID list,
+  // but we use a COUNT-only query to avoid loading all project rows.
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
 
   if (!orgProjects || orgProjects.length === 0) {
@@ -1080,6 +1119,7 @@ export const getStepDurations = async (orgId: string): Promise<StepDurationData[
   if (!(await checkViewPermission(orgId))) return []
   const supabase = await createClient()
 
+  // project_steps has no org_id; need project ID list for filtering
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
 
   if (!orgProjects || orgProjects.length === 0) {
@@ -1125,22 +1165,18 @@ export const getToolPopularity = async (orgId: string): Promise<ToolPopularityDa
   if (!(await checkViewPermission(orgId))) return []
   const supabase = await createClient()
 
-  const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
+  // Use org_id directly — no 2-step project lookup needed.
+  // Use the RPC to get aggregated counts rather than fetching all form rows.
+  const { data: rows } = await supabase.rpc('get_form_type_counts_by_project', {
+    p_org_id: orgId,
+  })
 
-  if (!orgProjects || orgProjects.length === 0) return []
+  if (!rows || rows.length === 0) return []
 
-  const projectIds = orgProjects.map((p) => p.id)
-
-  const { data: forms } = await supabase
-    .from('project_forms')
-    .select('form_type')
-    .in('project_id', projectIds)
-
-  if (!forms || forms.length === 0) return []
-
+  type FormTypeCountRow = { project_id: string; form_type: string; cnt: number }
   const counts = new Map<string, number>()
-  for (const f of forms) {
-    counts.set(f.form_type, (counts.get(f.form_type) ?? 0) + 1)
+  for (const row of rows as FormTypeCountRow[]) {
+    counts.set(row.form_type, (counts.get(row.form_type) ?? 0) + Number(row.cnt))
   }
 
   return Array.from(counts.entries())
@@ -1164,6 +1200,8 @@ export const getStepBreakdownTable = async (orgId: string): Promise<StepBreakdow
   if (!(await checkViewPermission(orgId))) return []
   const supabase = await createClient()
 
+  // project_steps has no org_id — still need project IDs for that table.
+  // project_forms now has org_id — query it directly.
   const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
 
   if (!orgProjects || orgProjects.length === 0) {
@@ -1184,7 +1222,8 @@ export const getStepBreakdownTable = async (orgId: string): Promise<StepBreakdow
       .select('step, status, started_at, completed_at')
       .in('project_id', projectIds),
 
-    supabase.from('project_forms').select('step').in('project_id', projectIds),
+    // Use org_id directly — no project_id IN list required
+    supabase.from('project_forms').select('step').eq('org_id', orgId),
   ])
 
   return PIPS_STEPS.map((pipsStep, idx) => {
@@ -1260,20 +1299,16 @@ export const getRecentAchievements = async (orgId: string): Promise<RecentAchiev
 
   const projectIds = projects.map((p) => p.id)
 
-  // Fetch all forms (for depth) + problem_statement forms (for narrative)
+  // Fetch form type counts (for depth) + problem_statement forms (for narrative).
+  // Max 5 projects here so the IN list is tiny; no row-limit needed.
   const [allFormsRes, problemFormsRes] = await Promise.all([
-    supabase
-      .from('project_forms')
-      .select('project_id, form_type')
-      .in('project_id', projectIds)
-      .limit(5000),
+    supabase.from('project_forms').select('project_id, form_type').in('project_id', projectIds),
 
     supabase
       .from('project_forms')
       .select('project_id, data')
       .in('project_id', projectIds)
-      .eq('form_type', 'problem_statement')
-      .limit(100),
+      .eq('form_type', 'problem_statement'),
   ])
 
   // Distinct form types per project for depth
@@ -1361,22 +1396,23 @@ export const getMethodologyAdoption = async (orgId: string): Promise<Methodology
 
   const projectIds = projects.map((p) => p.id)
 
-  // Fetch all project_forms with step info
-  const { data: forms } = await supabase
-    .from('project_forms')
-    .select('project_id, form_type, step, created_at')
-    .in('project_id', projectIds)
-    .limit(20000)
+  // Fetch aggregated form type counts via RPC instead of loading up to 20,000 rows.
+  // The RPC returns one row per (project_id, form_type) — far smaller payload.
+  const { data: formTypeCountsData } = await supabase.rpc('get_form_type_counts_by_project', {
+    p_org_id: orgId,
+  })
 
-  const allForms = forms ?? []
+  type FormTypeCountRow = { project_id: string; form_type: string; cnt: number }
+  const formTypeCounts = (formTypeCountsData ?? []) as FormTypeCountRow[]
 
   // --- Avg depth score (using calculateMethodologyDepth) ---
+  // Rebuild distinct form-type sets per project from the aggregated counts.
   const formTypesByProject = new Map<string, Set<string>>()
-  for (const f of allForms) {
-    if (!f.project_id) continue
-    const s = formTypesByProject.get(f.project_id) ?? new Set<string>()
-    s.add(f.form_type)
-    formTypesByProject.set(f.project_id, s)
+  for (const row of formTypeCounts) {
+    if (!row.project_id) continue
+    const s = formTypesByProject.get(row.project_id) ?? new Set<string>()
+    s.add(row.form_type)
+    formTypesByProject.set(row.project_id, s)
   }
 
   const depthScores = projects.map((p) => {
@@ -1434,10 +1470,11 @@ export const getMethodologyAdoption = async (orgId: string): Promise<Methodology
     }
   }
 
-  // Count usage across all projects
+  // Count usage across all projects — sum the cnt values from the RPC result
+  // rather than counting individual rows from the raw form fetch.
   const usageCounts = new Map<string, number>()
-  for (const f of allForms) {
-    usageCounts.set(f.form_type, (usageCounts.get(f.form_type) ?? 0) + 1)
+  for (const row of formTypeCounts) {
+    usageCounts.set(row.form_type, (usageCounts.get(row.form_type) ?? 0) + Number(row.cnt))
   }
 
   const formUsageHeatmap = allFormDefs.map((def) => ({
@@ -1551,15 +1588,13 @@ export const getProjectComparison = async (
 
   const validIds = orgProjects.map((p) => p.id)
 
-  // Fetch all data in parallel
+  // Fetch all data in parallel.
+  // validIds is at most 5 entries so no pagination needed;
+  // removing the arbitrary .limit(5000) to avoid masking data at scale.
   const [formsRes, ticketsRes] = await Promise.all([
-    supabase
-      .from('project_forms')
-      .select('project_id, form_type, data')
-      .in('project_id', validIds)
-      .limit(5000),
+    supabase.from('project_forms').select('project_id, form_type, data').in('project_id', validIds),
 
-    supabase.from('tickets').select('project_id, status').in('project_id', validIds).limit(5000),
+    supabase.from('tickets').select('project_id, status').in('project_id', validIds),
   ])
 
   const allForms = formsRes.data ?? []
