@@ -238,7 +238,7 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
             <button
               type="button"
               onClick={closeSidebar}
-              className="rounded-[var(--radius-md)] p-1.5 opacity-70 hover:opacity-100"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-[var(--radius-md)] p-2.5 opacity-70 hover:opacity-100"
               aria-label="Close sidebar"
             >
               <X size={20} />
@@ -277,7 +277,7 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
                       onClick={mounted && isMobile ? closeSidebar : undefined}
                       aria-current={isActive ? 'page' : undefined}
                       data-testid={`nav-link-${item.label.toLowerCase()}`}
-                      className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 ${
+                      className={`flex min-h-[44px] items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 md:min-h-0 ${
                         isActive ? 'bg-[var(--sidebar-accent)] opacity-100' : 'opacity-70'
                       }`}
                     >
@@ -316,7 +316,7 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
             <a
               href="/admin"
               data-testid="nav-link-admin"
-              className="flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium opacity-70 transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100"
+              className="flex min-h-[44px] items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium opacity-70 transition-all hover:bg-[var(--sidebar-accent)] hover:opacity-100 md:min-h-0"
             >
               <Shield size={20} aria-hidden="true" />
               Admin

@@ -58,11 +58,25 @@ describe('getDashboardStats', () => {
   })
 
   it('returns all counts when queries succeed', async () => {
+    // Consolidated: projects query now returns data rows (status field) counted in-memory.
+    // 5 queries total (down from 6): projects(data), openTickets, overdue, completedThisMonth, members
     fromResults = [
-      // total projects count
-      { count: 10, error: null },
-      // active projects count
-      { count: 5, error: null },
+      // projects — 10 total, 5 active/draft
+      {
+        data: [
+          { status: 'active' },
+          { status: 'active' },
+          { status: 'active' },
+          { status: 'draft' },
+          { status: 'draft' },
+          { status: 'completed' },
+          { status: 'completed' },
+          { status: 'completed' },
+          { status: 'cancelled' },
+          { status: 'on_hold' },
+        ],
+        error: null,
+      },
       // open tickets count
       { count: 12, error: null },
       // overdue tickets count
@@ -86,8 +100,8 @@ describe('getDashboardStats', () => {
 
   it('returns zeros when counts are null', async () => {
     fromResults = [
-      { count: null, error: null },
-      { count: null, error: null },
+      // projects — empty data, null counts for tickets/members
+      { data: null, error: null },
       { count: null, error: null },
       { count: null, error: null },
       { count: null, error: null },
@@ -107,8 +121,7 @@ describe('getDashboardStats', () => {
 
   it('returns zeros on query errors', async () => {
     fromResults = [
-      { count: null, error: { message: 'error' } },
-      { count: null, error: { message: 'error' } },
+      { data: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },

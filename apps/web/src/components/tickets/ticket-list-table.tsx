@@ -205,6 +205,7 @@ export const TicketListTable = ({
           onClick={() => setIsFullScreen(!isFullScreen)}
           aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
           data-testid="table-fullscreen-toggle"
+          className="min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0"
         >
           {isFullScreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </Button>
@@ -277,6 +278,7 @@ export const TicketListTable = ({
               disabled={page <= 1}
               onClick={() => handlePageChange(page - 1)}
               aria-label="Previous page"
+              className="min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0"
             >
               <ChevronLeft size={16} />
             </Button>
@@ -286,6 +288,7 @@ export const TicketListTable = ({
               disabled={page >= totalPages}
               onClick={() => handlePageChange(page + 1)}
               aria-label="Next page"
+              className="min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0"
             >
               <ChevronRight size={16} />
             </Button>
