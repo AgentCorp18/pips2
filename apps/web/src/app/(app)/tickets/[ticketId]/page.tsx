@@ -8,6 +8,7 @@ import { getTicket, getChildTickets, getParentTicket } from '../actions'
 import { getComments } from './comment-actions'
 import { getTicketAuditLog } from './audit-log-actions'
 import { getAttachments, getTicketCommentAttachments } from './attachment-actions'
+import { getTicketLinks } from './link-actions'
 import { TicketDetailClient } from '@/components/tickets/ticket-detail-client'
 import { CommentSection } from '@/components/tickets/comment-section'
 import { TicketAttachments } from '@/components/tickets/ticket-attachments'
@@ -15,6 +16,7 @@ import { ParentTicketLink } from '@/components/tickets/parent-ticket-link'
 import { SubTickets } from '@/components/tickets/sub-tickets'
 import { TicketChangeLog } from '@/components/tickets/ticket-change-log'
 import { TicketProjectForms } from '@/components/tickets/ticket-project-forms'
+import { TicketLinks } from '@/components/tickets/ticket-links'
 import { Separator } from '@/components/ui/separator'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
 import { pipsStepEnumToNumber, buildProductContext } from '@pips/shared'
@@ -116,13 +118,17 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
         .then((r) => r.data ?? [])
     : []
 
-  // Fetch comments, audit log, attachments, and comment attachments in parallel
-  const [commentsRaw, auditEntries, attachmentsRaw, commentAttachmentsRaw] = await Promise.all([
-    getComments(ticketId),
-    getTicketAuditLog(ticketId),
-    getAttachments(ticketId),
-    getTicketCommentAttachments(ticketId),
-  ])
+  // Fetch comments, audit log, attachments, comment attachments, and links in parallel
+  const [commentsRaw, auditEntries, attachmentsRaw, commentAttachmentsRaw, linksResult] =
+    await Promise.all([
+      getComments(ticketId),
+      getTicketAuditLog(ticketId),
+      getAttachments(ticketId),
+      getTicketCommentAttachments(ticketId),
+      getTicketLinks(ticketId),
+    ])
+
+  const ticketLinks = linksResult.data ?? { blocking: [], blockedBy: [], related: [] }
   const comments = commentsRaw.map((c) => {
     const author = c.author as unknown as {
       id: string
@@ -310,6 +316,15 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
       )}
 
       {(!project || projectForms.length === 0) && <Separator className="my-8" />}
+
+      <TicketLinks
+        ticketId={ticketId}
+        orgId={ticket.org_id}
+        ticketPrefix={prefix}
+        initialLinks={ticketLinks}
+      />
+
+      <Separator className="my-8" />
 
       <TicketAttachments
         ticketId={ticketId}

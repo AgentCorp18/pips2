@@ -131,4 +131,20 @@ describe('TicketCard', () => {
       unmount()
     })
   })
+
+  it('does not show Blocked badge by default', () => {
+    render(<TicketCard {...defaultProps} />)
+    expect(screen.queryByTestId('ticket-card-blocked-badge')).not.toBeInTheDocument()
+  })
+
+  it('shows Blocked badge when isBlocked is true', () => {
+    render(<TicketCard {...defaultProps} isBlocked />)
+    expect(screen.getByTestId('ticket-card-blocked-badge')).toBeInTheDocument()
+    expect(screen.getByText('Blocked')).toBeInTheDocument()
+  })
+
+  it('does not show Blocked badge when isBlocked is false', () => {
+    render(<TicketCard {...defaultProps} isBlocked={false} />)
+    expect(screen.queryByTestId('ticket-card-blocked-badge')).not.toBeInTheDocument()
+  })
 })

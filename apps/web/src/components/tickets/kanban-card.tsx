@@ -1,7 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { Bug, CheckSquare, CircleDot, Crown, Lightbulb, FolderKanban, Calendar } from 'lucide-react'
+import {
+  Bug,
+  CheckSquare,
+  CircleDot,
+  Crown,
+  Lightbulb,
+  FolderKanban,
+  Calendar,
+  ShieldAlert,
+} from 'lucide-react'
 import { useMounted } from '@/hooks/use-mounted'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import type { TicketPriority, TicketType } from '@/types/tickets'
@@ -40,6 +49,7 @@ export type KanbanCardProps = {
   assigneeName: string | null
   assigneeAvatar: string | null
   dueDate: string | null
+  isBlocked?: boolean
 }
 
 /* ============================================================
@@ -54,6 +64,7 @@ export const KanbanCard = ({
   type,
   assigneeName,
   dueDate,
+  isBlocked = false,
 }: KanbanCardProps) => {
   const mounted = useMounted()
   const isOverdue = mounted && dueDate ? new Date(dueDate) < new Date() : false
@@ -87,6 +98,20 @@ export const KanbanCard = ({
       >
         {title}
       </p>
+
+      {/* Blocked indicator */}
+      {isBlocked && (
+        <div
+          className="mb-2 flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium"
+          style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}
+          data-testid="kanban-card-blocked-badge"
+          role="status"
+          aria-label="Blocked by another ticket"
+        >
+          <ShieldAlert size={10} aria-hidden="true" />
+          Blocked
+        </div>
+      )}
 
       {/* Bottom row: priority dot, assignee, due date */}
       <div className="flex items-center justify-between text-[11px]">
