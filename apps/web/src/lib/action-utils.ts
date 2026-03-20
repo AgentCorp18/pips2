@@ -75,6 +75,7 @@ export const checkPermission = async (
     await requirePermission(orgId, permission, options)
     return null
   } catch {
-    return 'Insufficient permissions'
+    const actionLabel = permission.replace('.', ' ')
+    return `You don't have permission to ${actionLabel}. Contact your org admin to upgrade your role.`
   }
 }
