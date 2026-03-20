@@ -299,13 +299,10 @@ export const getReportsHubData = async (orgId: string): Promise<ReportsHubData> 
 
   // Use actual savings from results_metrics if available (more accurate than projections)
   let actualAnnualSavings = 0
-  let actualHoursSaved = 0
   for (const f of resultsForms) {
     if (!f.project_id) continue
     const d = f.data as ResultsMetricsFormData
     actualAnnualSavings += d.financialSavingsAnnual ?? 0
-    // weekly hours * 52
-    actualHoursSaved += 0 // results_metrics uses timeSavedWeeklyHours, handled below
   }
 
   // projectedSavingsPreview is the larger of projected vs actual
