@@ -105,7 +105,7 @@ describe('archiveProject', () => {
     mockRequirePermission.mockRejectedValue(new Error('Forbidden'))
     const result = await archiveProject(PROJECT_ID)
     expect(result.error).toBeDefined()
-    expect(result.error).toMatch(/insufficient/i)
+    expect(result.error).toContain("don't have permission")
   })
 
   it('returns error when project is not found in org', async () => {

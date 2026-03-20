@@ -7,7 +7,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 let fromCallIndex = 0
 let fromResults: Array<{ data?: unknown; error?: unknown }> = []
 
-const createChain = (idx: number, results: Array<{ data?: unknown; error?: unknown }> = fromResults) => {
+const createChain = (
+  idx: number,
+  results: Array<{ data?: unknown; error?: unknown }> = fromResults,
+) => {
   const terminal = () => {
     const result = results[idx] ?? { data: null, error: null }
     return Promise.resolve(result)
@@ -113,7 +116,7 @@ describe('applyTemplate', () => {
   it('returns error when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const result = await applyTemplate('manufacturing-defect-reduction', 'My Project')
-    expect(result).toEqual({ error: 'You must be signed in to create a project' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when orgId is null', async () => {
@@ -124,7 +127,7 @@ describe('applyTemplate', () => {
       orgId: null,
     })
     const result = await applyTemplate('manufacturing-defect-reduction', 'My Project')
-    expect(result).toEqual({ error: 'You must belong to an organization to create a project' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   /* ---------- DB error paths ---------- */
@@ -197,16 +200,8 @@ describe('applyTemplate', () => {
 
   it('trims whitespace from project title', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [
-      { data: { id: 'proj-abc' } },
-      { error: null },
-      { error: null },
-    ]
-    adminFromResults = [
-      { error: null },
-      { data: { id: 'chan-1' } },
-      { error: null },
-    ]
+    fromResults = [{ data: { id: 'proj-abc' } }, { error: null }, { error: null }]
+    adminFromResults = [{ error: null }, { data: { id: 'chan-1' } }, { error: null }]
     // Title with surrounding whitespace — should pass validation (len = 15 after trim)
     const result = await applyTemplate('manufacturing-defect-reduction', '  Valid Title  ')
     expect(result).toEqual({ projectId: 'proj-abc' })
@@ -217,17 +212,9 @@ describe('applyTemplate', () => {
     for (const template of SYSTEM_TEMPLATES) {
       vi.clearAllMocks()
       fromCallIndex = 0
-      fromResults = [
-        { data: { id: `proj-${template.id}` } },
-        { error: null },
-        { error: null },
-      ]
+      fromResults = [{ data: { id: `proj-${template.id}` } }, { error: null }, { error: null }]
       adminFromCallIndex = 0
-      adminFromResults = [
-        { error: null },
-        { data: { id: 'chan-1' } },
-        { error: null },
-      ]
+      adminFromResults = [{ error: null }, { data: { id: 'chan-1' } }, { error: null }]
       mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
       const result = await applyTemplate(template.id, 'Test Project Name')

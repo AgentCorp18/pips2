@@ -139,7 +139,7 @@ describe('markAsRead', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
     const result = await markAsRead('notif-1')
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('marks notification as read successfully', async () => {
@@ -175,7 +175,7 @@ describe('markAllAsRead', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
     const result = await markAllAsRead()
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('marks all notifications as read successfully', async () => {

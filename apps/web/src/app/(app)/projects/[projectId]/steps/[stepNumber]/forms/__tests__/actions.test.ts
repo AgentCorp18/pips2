@@ -44,7 +44,7 @@ vi.mock('@/lib/auth-context', () => ({
     return {
       supabase: mockSupabase,
       user: result?.data?.user ?? null,
-      orgId: null,
+      orgId: 'org-1',
     }
   }),
 }))

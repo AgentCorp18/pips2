@@ -36,6 +36,11 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+vi.mock('@/lib/permissions', () => ({
+  getUserOrg: vi.fn().mockResolvedValue({ org_id: 'org-1' }),
+  requirePermission: vi.fn(),
+}))
+
 vi.mock('@pips/shared', async () => {
   const actual = await vi.importActual<typeof import('@pips/shared')>('@pips/shared')
   return {
@@ -61,19 +66,23 @@ describe('getStepSummaries', () => {
   })
 
   it('returns empty object when no forms exist', async () => {
-    fromResults = [{ data: [] }]
+    // Call 0: project lookup — project exists; Call 1: forms query — empty
+    fromResults = [{ data: { id: 'proj-1' } }, { data: [] }]
     const result = await getStepSummaries('proj-1')
     expect(result).toEqual({})
   })
 
   it('returns empty object when query returns null', async () => {
+    // Call 0: project lookup — project not found → early return {}
     fromResults = [{ data: null }]
     const result = await getStepSummaries('proj-1')
     expect(result).toEqual({})
   })
 
   it('extracts problem statement from step 1', async () => {
+    // Call 0: project lookup, Call 1: forms query
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {
@@ -101,7 +110,9 @@ describe('getStepSummaries', () => {
   })
 
   it('extracts fishbone causes from step 2', async () => {
+    // Call 0: project lookup, Call 1: forms query
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {
@@ -136,7 +147,9 @@ describe('getStepSummaries', () => {
   })
 
   it('extracts five-why root cause from step 2', async () => {
+    // Call 0: project lookup, Call 1: forms query
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {
@@ -160,7 +173,9 @@ describe('getStepSummaries', () => {
   })
 
   it('extracts brainstorming ideas from step 3', async () => {
+    // Call 0: project lookup, Call 1: forms query
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {
@@ -193,7 +208,9 @@ describe('getStepSummaries', () => {
   })
 
   it('extracts criteria matrix winner from step 4', async () => {
+    // Call 0: project lookup, Call 1: forms query
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {

@@ -75,7 +75,7 @@ describe('getNotificationPreferences', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
     const result = await getNotificationPreferences()
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when user has no org membership', async () => {
@@ -87,7 +87,7 @@ describe('getNotificationPreferences', () => {
     })
 
     const result = await getNotificationPreferences()
-    expect(result).toEqual({ error: 'You are not a member of any organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns existing preferences when found', async () => {
@@ -174,7 +174,7 @@ describe('updateNotificationPreferences', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
     const result = await updateNotificationPreferences('prefs-1', 'ticket_assigned', false)
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns updated preferences on success', async () => {

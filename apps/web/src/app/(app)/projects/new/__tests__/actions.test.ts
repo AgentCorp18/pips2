@@ -140,7 +140,7 @@ describe('createProject', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const fd = makeFormData({ name: 'My Project', description: '', target_completion_date: '' })
     const result = await createProject(emptyState, fd)
-    expect(result).toEqual({ error: 'You must be signed in to create a project' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when user has no organization', async () => {
@@ -153,7 +153,7 @@ describe('createProject', () => {
 
     const fd = makeFormData({ name: 'My Project', description: '', target_completion_date: '' })
     const result = await createProject(emptyState, fd)
-    expect(result).toEqual({ error: 'You must belong to an organization to create a project' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   /* ---------- DB error paths ---------- */

@@ -154,7 +154,7 @@ describe('createTicket', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const fd = makeFormData(validTicketFields)
     const result = await createTicket({}, fd)
-    expect(result).toEqual({ error: 'You must be signed in to create a ticket' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when user has no organization', async () => {
@@ -167,7 +167,7 @@ describe('createTicket', () => {
 
     const fd = makeFormData(validTicketFields)
     const result = await createTicket({}, fd)
-    expect(result).toEqual({ error: 'You must belong to an organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('checks ticket.create permission', async () => {
@@ -292,7 +292,7 @@ describe('updateTicket', () => {
   it('returns error when user is not signed in', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const result = await updateTicket('ticket-1', { status: 'done' })
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when ticket is not found', async () => {
@@ -437,7 +437,7 @@ describe('updateTicketStatus', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
     const result = await updateTicketStatus('ticket-1', 'done')
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 })
 
@@ -455,7 +455,7 @@ describe('deleteTicket', () => {
   it('returns error when user is not signed in', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const result = await deleteTicket('ticket-1')
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when ticket is not found', async () => {
@@ -713,7 +713,7 @@ describe('bulkUpdateTickets', () => {
   it('returns error when user is not signed in', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const result = await bulkUpdateTickets(['tkt-1'], { status: 'done' })
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when user has no organization', async () => {
@@ -725,7 +725,7 @@ describe('bulkUpdateTickets', () => {
     })
 
     const result = await bulkUpdateTickets(['tkt-1'], { status: 'done' })
-    expect(result).toEqual({ error: 'You must belong to an organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns error when permission is denied', async () => {
@@ -786,7 +786,7 @@ describe('bulkDeleteTickets', () => {
   it('returns error when user is not signed in', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const result = await bulkDeleteTickets(['tkt-1'])
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when user has no organization', async () => {
@@ -798,7 +798,7 @@ describe('bulkDeleteTickets', () => {
     })
 
     const result = await bulkDeleteTickets(['tkt-1'])
-    expect(result).toEqual({ error: 'You must belong to an organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns error when permission is denied', async () => {
@@ -935,7 +935,7 @@ describe('setParentTicket', () => {
   it('returns error when user is not signed in', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const result = await setParentTicket('tkt-1', 'tkt-2')
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when ticket is not found', async () => {
@@ -1142,7 +1142,7 @@ describe('removeParentTicket', () => {
   it('returns error when user is not signed in', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const result = await removeParentTicket('tkt-1')
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when ticket is not found', async () => {
