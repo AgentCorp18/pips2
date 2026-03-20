@@ -20,6 +20,7 @@ export const createProject = async (
     name: formData.get('name'),
     description: formData.get('description') ?? undefined,
     target_completion_date: formData.get('target_completion_date') ?? undefined,
+    project_type: formData.get('project_type') ?? undefined,
   }
 
   const result = createProjectSchema.safeParse(raw)
@@ -41,6 +42,8 @@ export const createProject = async (
   const permError = await checkPermission(orgId, 'project.create')
   if (permError) return { error: permError }
 
+  const projectType = result.data.project_type ?? 'pips'
+
   // Create project
   const { data: project, error: projectError } = await supabase
     .from('projects')
@@ -52,6 +55,7 @@ export const createProject = async (
       target_end: result.data.target_completion_date || null,
       current_step: 'identify',
       status: 'active',
+      project_type: projectType,
     })
     .select('id')
     .single()
@@ -60,32 +64,35 @@ export const createProject = async (
     return { error: 'Failed to create project. Please try again.' }
   }
 
-  // Create 6 project steps
-  const pipsSteps = [
-    'identify',
-    'analyze',
-    'generate',
-    'select_plan',
-    'implement',
-    'evaluate',
-  ] as const
-  const steps = pipsSteps.map((step, i) => ({
-    project_id: project.id,
-    step,
-    status: i === 0 ? 'in_progress' : 'not_started',
-    started_at: i === 0 ? new Date().toISOString() : null,
-  }))
+  // For PIPS projects, create the 6 methodology steps.
+  // Simple projects skip steps — they are just ticket containers.
+  if (projectType === 'pips') {
+    const pipsSteps = [
+      'identify',
+      'analyze',
+      'generate',
+      'select_plan',
+      'implement',
+      'evaluate',
+    ] as const
+    const steps = pipsSteps.map((step, i) => ({
+      project_id: project.id,
+      step,
+      status: i === 0 ? 'in_progress' : 'not_started',
+      started_at: i === 0 ? new Date().toISOString() : null,
+    }))
 
-  // Upsert: trigger auto-creates steps on project INSERT, but we override
-  // Step 1 to 'in_progress' with started_at. ON CONFLICT handles the overlap.
-  const { error: stepsError } = await supabase
-    .from('project_steps')
-    .upsert(steps, { onConflict: 'project_id,step' })
+    // Upsert: trigger auto-creates steps on project INSERT, but we override
+    // Step 1 to 'in_progress' with started_at. ON CONFLICT handles the overlap.
+    const { error: stepsError } = await supabase
+      .from('project_steps')
+      .upsert(steps, { onConflict: 'project_id,step' })
 
-  if (stepsError) {
-    // Clean up
-    await supabase.from('projects').delete().eq('id', project.id)
-    return { error: 'Failed to initialize project steps. Please try again.' }
+    if (stepsError) {
+      // Clean up
+      await supabase.from('projects').delete().eq('id', project.id)
+      return { error: 'Failed to initialize project steps. Please try again.' }
+    }
   }
 
   // Add creator as project lead (use admin client to bypass RLS chicken-and-egg)

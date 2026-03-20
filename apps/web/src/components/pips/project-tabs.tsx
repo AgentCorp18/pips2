@@ -7,15 +7,23 @@ import { LayoutDashboard, Columns3, FileText } from 'lucide-react'
 
 type ProjectTabsProps = {
   projectId: string
+  /** Controls which tabs are shown. Simple projects hide the Forms tab. */
+  projectType?: 'pips' | 'simple'
 }
 
-const TABS = [
-  { key: 'overview', label: 'Overview', icon: LayoutDashboard, href: '' },
-  { key: 'board', label: 'Board', icon: Columns3, href: '/board' },
-  { key: 'forms', label: 'Forms', icon: FileText, href: '/forms' },
+const ALL_TABS = [
+  {
+    key: 'overview',
+    label: 'Overview',
+    icon: LayoutDashboard,
+    href: '',
+    showFor: ['pips', 'simple'],
+  },
+  { key: 'board', label: 'Board', icon: Columns3, href: '/board', showFor: ['pips', 'simple'] },
+  { key: 'forms', label: 'Forms', icon: FileText, href: '/forms', showFor: ['pips'] },
 ] as const
 
-export const ProjectTabs = ({ projectId }: ProjectTabsProps) => {
+export const ProjectTabs = ({ projectId, projectType = 'pips' }: ProjectTabsProps) => {
   const pathname = usePathname()
   const basePath = `/projects/${projectId}`
 
@@ -26,9 +34,13 @@ export const ProjectTabs = ({ projectId }: ProjectTabsProps) => {
     return 'overview'
   })()
 
+  const visibleTabs = ALL_TABS.filter((tab) =>
+    (tab.showFor as readonly string[]).includes(projectType),
+  )
+
   return (
     <nav className="flex gap-1 rounded-[var(--radius-lg)] bg-[var(--color-surface-secondary)] p-1">
-      {TABS.map((tab) => {
+      {visibleTabs.map((tab) => {
         const isActive = activeTab === tab.key
         const Icon = tab.icon
 

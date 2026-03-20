@@ -39,6 +39,7 @@ const ProjectLayout = async ({
       status,
       current_step,
       owner_id,
+      project_type,
       profiles!projects_owner_id_fkey ( display_name )
     `,
     )
@@ -54,6 +55,7 @@ const ProjectLayout = async ({
     ? ((profilesRaw[0] as { display_name: string } | undefined) ?? null)
     : (profilesRaw as { display_name: string } | null)
   const statusLabel = STATUS_LABELS[project.status ?? 'active'] ?? 'Active'
+  const isSimple = project.project_type === 'simple'
 
   return (
     <div>
@@ -73,6 +75,15 @@ const ProjectLayout = async ({
               {project.title}
             </h1>
             <Badge variant="outline">{statusLabel}</Badge>
+            {isSimple && (
+              <Badge
+                variant="secondary"
+                className="bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)]"
+                data-testid="simple-project-badge"
+              >
+                Simple
+              </Badge>
+            )}
           </div>
 
           {ownerProfile && (
@@ -82,12 +93,15 @@ const ProjectLayout = async ({
           )}
         </div>
 
-        {/* Step stripe */}
-        <div className="step-gradient-stripe mb-6 rounded-full" />
+        {/* Step stripe — only for PIPS projects */}
+        {!isSimple && <div className="step-gradient-stripe mb-6 rounded-full" />}
 
         {/* Tab navigation */}
         <div className="mb-6">
-          <ProjectTabs projectId={projectId} />
+          <ProjectTabs
+            projectId={projectId}
+            projectType={isSimple ? ('simple' as const) : ('pips' as const)}
+          />
         </div>
       </div>
 

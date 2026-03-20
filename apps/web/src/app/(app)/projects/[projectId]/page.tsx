@@ -30,6 +30,7 @@ import { StepSummaryCard } from '@/components/pips/step-summary-card'
 import { Calendar, User, BarChart3, ClipboardList, HeartPulse } from 'lucide-react'
 import { StartHereCard } from '@/components/pips/start-here-card'
 import { formatDateTime, formatDateOnly } from '@/lib/format-date'
+import { SimpleProjectView } from './simple-project-view'
 
 const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params
@@ -48,7 +49,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
     .select(
       `
       id, title, description, status, current_step,
-      target_end, created_at, owner_id,
+      target_end, created_at, owner_id, project_type,
       project_steps ( id, step, status, started_at, completed_at ),
       project_members ( id, user_id, role ),
       profiles!projects_owner_id_fkey ( full_name, display_name )
@@ -63,6 +64,54 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
 
   // Get user's active org (respects org switcher cookie)
   const currentOrg = await getCurrentOrg(supabase, user.id)
+
+  // ---- Simple project: fetch tickets and render lightweight view ----
+  if (project.project_type === 'simple') {
+    const { data: orgSettings } = await supabase
+      .from('org_settings')
+      .select('ticket_prefix')
+      .eq('org_id', currentOrg?.orgId ?? '')
+      .single()
+
+    const prefix = orgSettings?.ticket_prefix ?? 'TKT'
+
+    const { data: ticketsRaw } = await supabase
+      .from('tickets')
+      .select('id, title, status, priority, sequence_number')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+
+    const tickets = (ticketsRaw ?? []).map((t) => ({
+      id: t.id,
+      sequenceId: `${prefix}-${t.sequence_number}`,
+      title: t.title as string,
+      status: t.status as string,
+      priority: t.priority as string,
+    }))
+
+    const completedTickets = tickets.filter(
+      (t) => t.status === 'done' || t.status === 'cancelled',
+    ).length
+
+    return (
+      <>
+        <RecentItemTracker
+          id={project.id}
+          title={project.title as string}
+          type="project"
+          path={`/projects/${project.id}`}
+        />
+        <SimpleProjectView
+          projectId={projectId}
+          tickets={tickets}
+          totalTickets={tickets.length}
+          completedTickets={completedTickets}
+        />
+      </>
+    )
+  }
+
+  // ---- PIPS project: full methodology view ----
 
   const stepsRaw = (project.project_steps ?? []) as Array<{
     id: string
@@ -229,8 +278,8 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
               </span>
             </MetaRow>
             {project.description && (
-              <div className="pt-2 border-t border-[var(--color-border)]">
-                <p className="text-xs font-medium text-[var(--color-text-tertiary)] mb-1">
+              <div className="border-t border-[var(--color-border)] pt-2">
+                <p className="mb-1 text-xs font-medium text-[var(--color-text-tertiary)]">
                   Description
                 </p>
                 <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
@@ -270,7 +319,7 @@ const ProjectProgressBar = ({
 }) => (
   <Card data-testid="project-progress-bar">
     <CardContent className="py-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-medium text-[var(--color-text-primary)]">
           Project Progress
         </span>

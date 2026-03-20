@@ -61,6 +61,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       target_end,
       created_at,
       owner_id,
+      project_type,
       profiles!projects_owner_id_fkey ( full_name, display_name ),
       project_steps ( step, status )
     `,
@@ -202,6 +203,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
       stepsCompleted,
       targetDate: project.target_end,
       createdAt: project.created_at,
+      projectType: (project.project_type ?? 'pips') as 'pips' | 'simple',
     }
   })
 
@@ -276,6 +278,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
                 targetDate={project.targetDate}
                 completedFormTypes={formsByProject.get(project.id) ?? new Set()}
                 health={healthByProject.get(project.id)}
+                projectType={project.projectType}
               />
             ))}
           </div>

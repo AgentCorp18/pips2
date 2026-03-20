@@ -158,3 +158,77 @@ export const cloneProject = async (
   revalidatePath('/projects')
   return { data: { projectId: newProject.id } }
 }
+
+/** Convert a simple project to a full PIPS project — initialises 6 step rows */
+export const convertToPips = async (
+  projectId: string,
+): Promise<ActionResult<{ projectId: string }>> => {
+  const auth = await requireAuth()
+  if (!auth.success) return { error: auth.error }
+  const { supabase, orgId } = auth.ctx
+
+  const permError = await checkPermission(orgId, 'project.update')
+  if (permError) return { error: permError }
+
+  // Verify the project belongs to the user's org and is currently 'simple'
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id, org_id, project_type')
+    .eq('id', projectId)
+    .eq('org_id', orgId)
+    .single()
+
+  if (!project) {
+    return { error: 'Project not found' }
+  }
+
+  if (project.project_type !== 'simple') {
+    return { error: 'Project is already a PIPS project' }
+  }
+
+  // Update project_type to 'pips' and set current_step
+  const { error: updateError } = await supabase
+    .from('projects')
+    .update({
+      project_type: 'pips',
+      current_step: 'identify',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', projectId)
+    .eq('org_id', orgId)
+
+  if (updateError) {
+    return { error: 'Failed to convert project' }
+  }
+
+  // Create the 6 PIPS steps
+  const pipsSteps = [
+    'identify',
+    'analyze',
+    'generate',
+    'select_plan',
+    'implement',
+    'evaluate',
+  ] as const
+
+  const steps = pipsSteps.map((step, i) => ({
+    project_id: projectId,
+    step,
+    status: i === 0 ? ('in_progress' as const) : ('not_started' as const),
+    started_at: i === 0 ? new Date().toISOString() : null,
+  }))
+
+  const { error: stepsError } = await supabase
+    .from('project_steps')
+    .upsert(steps, { onConflict: 'project_id,step' })
+
+  if (stepsError) {
+    // Roll back project_type change
+    await supabase.from('projects').update({ project_type: 'simple' }).eq('id', projectId)
+    return { error: 'Failed to initialize project steps' }
+  }
+
+  revalidatePath(`/projects/${projectId}`)
+  revalidatePath('/projects')
+  return { data: { projectId } }
+}

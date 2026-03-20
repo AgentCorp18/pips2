@@ -123,6 +123,7 @@ export const createProjectSchema = z.object({
       },
       { message: 'Target date must be today or in the future' },
     ),
+  project_type: z.enum(['pips', 'simple']).optional().default('pips'),
 })
 
 /* ============================================================

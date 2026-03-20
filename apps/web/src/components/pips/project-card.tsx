@@ -23,6 +23,8 @@ type ProjectCardProps = {
   completedFormTypes?: Set<string>
   /** Pre-calculated health score to show as a compact ring in the card header */
   health?: HealthScore
+  /** Whether this is a simple project (no methodology steps) */
+  projectType?: 'pips' | 'simple'
 }
 
 const STATUS_CONFIG: Record<
@@ -46,10 +48,12 @@ export const ProjectCard = ({
   targetDate,
   completedFormTypes,
   health,
+  projectType = 'pips',
 }: ProjectCardProps) => {
   const currentPipsStep = PIPS_STEPS.find((s) => s.number === currentStep)
   const fallback = { label: 'Active', variant: 'default' as const }
   const statusConfig = STATUS_CONFIG[status] ?? fallback
+  const isSimple = projectType === 'simple'
 
   return (
     <Link href={`/projects/${id}`} className="group block">
@@ -60,9 +64,21 @@ export const ProjectCard = ({
               {name}
             </CardTitle>
             <div className="flex items-center gap-2">
-              {health && <HealthBadge health={health} compact />}
-              {!health && completedFormTypes && completedFormTypes.size > 0 && (
-                <MethodologyDepthBadge completedFormTypes={completedFormTypes} compact />
+              {isSimple ? (
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 text-xs bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)]"
+                  data-testid="simple-badge"
+                >
+                  Simple
+                </Badge>
+              ) : (
+                <>
+                  {health && <HealthBadge health={health} compact />}
+                  {!health && completedFormTypes && completedFormTypes.size > 0 && (
+                    <MethodologyDepthBadge completedFormTypes={completedFormTypes} compact />
+                  )}
+                </>
               )}
               <Badge variant={statusConfig.variant} className="shrink-0 text-xs">
                 {statusConfig.label}
@@ -77,8 +93,8 @@ export const ProjectCard = ({
         </CardHeader>
 
         <CardContent className="space-y-3">
-          {/* Current step indicator */}
-          {currentPipsStep && (
+          {/* Current step indicator — only for PIPS projects */}
+          {!isSimple && currentPipsStep && (
             <div className="flex items-center gap-2">
               <div
                 className={`step-${currentStep} pip-dot`}
@@ -90,8 +106,12 @@ export const ProjectCard = ({
             </div>
           )}
 
-          {/* Progress bar */}
-          <StepProgressBar stepsCompleted={stepsCompleted} currentStep={currentStep} />
+          {/* Progress bar — PIPS shows step segments, simple shows empty bar */}
+          {isSimple ? (
+            <div className="h-1.5 w-full rounded-full bg-[var(--color-border)]" />
+          ) : (
+            <StepProgressBar stepsCompleted={stepsCompleted} currentStep={currentStep} />
+          )}
 
           {/* Meta info */}
           <div className="flex items-center justify-between text-xs text-[var(--color-text-tertiary)]">

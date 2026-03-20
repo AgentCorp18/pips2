@@ -9,10 +9,16 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Lightbulb, Check, FileText, LayoutTemplate, Loader2 } from 'lucide-react'
+import { Lightbulb, Check, FileText, LayoutTemplate, Loader2, Layers, Ticket } from 'lucide-react'
 import { PROJECT_TEMPLATES } from '@pips/shared'
 import { createProject, type CreateProjectActionState } from './actions'
 import { createSampleProject } from '../../dashboard/sample-project-action'
+
+/* ============================================================
+   Project type
+   ============================================================ */
+
+type ProjectType = 'pips' | 'simple'
 
 /* ============================================================
    Step config
@@ -41,6 +47,97 @@ const STEPS: StepConfig[] = [
     tip: 'Once created, PIPS will guide you through each step of the improvement methodology.',
   },
 ]
+
+/* ============================================================
+   Project type selector sub-component
+   ============================================================ */
+
+const ProjectTypeSelector = ({
+  projectType,
+  onProjectTypeChange,
+}: {
+  projectType: ProjectType
+  onProjectTypeChange: (type: ProjectType) => void
+}) => (
+  <div
+    className="mb-6 grid grid-cols-2 gap-3"
+    data-testid="project-type-selector"
+    role="radiogroup"
+    aria-label="Project type"
+  >
+    <button
+      type="button"
+      role="radio"
+      aria-checked={projectType === 'pips'}
+      onClick={() => onProjectTypeChange('pips')}
+      data-testid="project-type-pips"
+      className={`flex flex-col items-start gap-1.5 rounded-[var(--radius-md)] border-2 p-3 text-left transition-all ${
+        projectType === 'pips'
+          ? 'border-[var(--color-primary)] bg-[var(--color-surface)]'
+          : 'border-[var(--color-border)] hover:border-[var(--color-primary-light)]'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <Layers
+          size={16}
+          className={
+            projectType === 'pips'
+              ? 'text-[var(--color-primary)]'
+              : 'text-[var(--color-text-tertiary)]'
+          }
+        />
+        <span
+          className={`text-sm font-semibold ${
+            projectType === 'pips'
+              ? 'text-[var(--color-primary)]'
+              : 'text-[var(--color-text-primary)]'
+          }`}
+        >
+          PIPS Project
+        </span>
+      </div>
+      <p className="text-xs text-[var(--color-text-tertiary)]">
+        Full 6-step methodology with analysis, brainstorming, and evaluation
+      </p>
+    </button>
+
+    <button
+      type="button"
+      role="radio"
+      aria-checked={projectType === 'simple'}
+      onClick={() => onProjectTypeChange('simple')}
+      data-testid="project-type-simple"
+      className={`flex flex-col items-start gap-1.5 rounded-[var(--radius-md)] border-2 p-3 text-left transition-all ${
+        projectType === 'simple'
+          ? 'border-[var(--color-primary)] bg-[var(--color-surface)]'
+          : 'border-[var(--color-border)] hover:border-[var(--color-primary-light)]'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <Ticket
+          size={16}
+          className={
+            projectType === 'simple'
+              ? 'text-[var(--color-primary)]'
+              : 'text-[var(--color-text-tertiary)]'
+          }
+        />
+        <span
+          className={`text-sm font-semibold ${
+            projectType === 'simple'
+              ? 'text-[var(--color-primary)]'
+              : 'text-[var(--color-text-primary)]'
+          }`}
+        >
+          Simple Project
+        </span>
+      </div>
+      <p className="text-xs text-[var(--color-text-tertiary)]">
+        Lightweight ticket container — no methodology steps required
+      </p>
+    </button>
+  </div>
+)
 
 /* ============================================================
    Mode toggle sub-component
@@ -145,14 +242,14 @@ const TemplatePicker = () => {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className="text-sm font-medium line-clamp-1"
+                    className="line-clamp-1 text-sm font-medium"
                     style={{ color: 'var(--color-text-primary)' }}
                   >
                     {t.name}
                   </span>
                 </div>
                 <div className="mt-0.5 flex items-center gap-2">
-                  <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                  <Badge variant="outline" className="px-1.5 py-0 text-[9px]">
                     {t.industry}
                   </Badge>
                   <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -230,6 +327,7 @@ export const ProjectForm = () => {
   const [state, formAction, isPending] = useActionState(createProject, initialState)
   const [isNavigating, startTransition] = useTransition()
   const [mode, setMode] = useState<CreateMode>('blank')
+  const [projectType, setProjectType] = useState<ProjectType>('pips')
   const [currentStep, setCurrentStep] = useState(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -267,10 +365,23 @@ export const ProjectForm = () => {
         <CardTitle className="text-xl" data-testid="create-project-heading">
           Create a new project
         </CardTitle>
-        <CardDescription>Start a PIPS improvement cycle by defining your project</CardDescription>
+        <CardDescription>
+          {projectType === 'simple'
+            ? 'A lightweight project for tracking tickets without methodology steps'
+            : 'Start a PIPS improvement cycle by defining your project'}
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
+        {/* Project type selector — shown above the create mode toggle */}
+        <ProjectTypeSelector
+          projectType={projectType}
+          onProjectTypeChange={(t) => {
+            setProjectType(t)
+            setCurrentStep(1)
+          }}
+        />
+
         <ModeToggle mode={mode} onModeChange={setMode} />
 
         {mode === 'template' ? (
@@ -313,12 +424,15 @@ export const ProjectForm = () => {
               <input type="hidden" name="name" value={name} />
               <input type="hidden" name="description" value={description} />
               <input type="hidden" name="target_completion_date" value={targetDate} />
+              <input type="hidden" name="project_type" value={projectType} />
 
               {/* Step 1: Name & Description */}
               {currentStep === 1 && (
                 <>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="name" required>Project name</Label>
+                    <Label htmlFor="name" required>
+                      Project name
+                    </Label>
                     <Input
                       id="name"
                       type="text"
@@ -399,6 +513,20 @@ export const ProjectForm = () => {
               {/* Step 3: Review & Create */}
               {currentStep === 3 && (
                 <div className="space-y-3" data-testid="review-summary">
+                  <div>
+                    <p
+                      className="text-xs font-medium"
+                      style={{ color: 'var(--color-text-tertiary)' }}
+                    >
+                      Project type
+                    </p>
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: 'var(--color-text-primary)' }}
+                    >
+                      {projectType === 'simple' ? 'Simple Project' : 'PIPS Project'}
+                    </p>
+                  </div>
                   <div>
                     <p
                       className="text-xs font-medium"
