@@ -1,10 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { requireAuth, checkPermission } from '@/lib/action-utils'
 import { requirePermission } from '@/lib/permissions'
-import { stepNumberToEnum, stepEnumToNumber } from '@pips/shared'
+import { stepNumberToEnum, stepEnumToNumber, ALL_FORM_TYPES } from '@pips/shared'
 import { trackServerEvent } from '@/lib/analytics'
 import { FORM_SCHEMAS } from '@/lib/form-schemas'
 
@@ -13,37 +14,12 @@ export type FormActionResult = {
   error?: string
 }
 
+// Derive the Zod enum from the shared ALL_FORM_TYPES constant — single source of truth.
+// ALL_FORM_TYPES is a const tuple from @pips/shared so z.enum() can infer the union type.
 const saveFormDataSchema = z.object({
   projectId: z.string().uuid(),
   stepNumber: z.number().int().min(1).max(6),
-  formType: z.enum([
-    'balance_sheet',
-    'before_after',
-    'brainstorming',
-    'brainwriting',
-    'checksheet',
-    'cost_benefit',
-    'criteria_matrix',
-    'evaluation',
-    'fishbone',
-    'five_why',
-    'force_field',
-    'impact_assessment',
-    'impact_metrics',
-    'implementation_checklist',
-    'implementation_plan',
-    'interviewing',
-    'lessons_learned',
-    'list_reduction',
-    'milestone_tracker',
-    'paired_comparisons',
-    'pareto',
-    'problem_statement',
-    'raci',
-    'results_metrics',
-    'surveying',
-    'weighted_voting',
-  ]),
+  formType: z.enum(ALL_FORM_TYPES as [string, ...string[]]),
   data: z.record(z.string(), z.unknown()),
 })
 
@@ -140,7 +116,9 @@ export const loadFormData = async (
   formType: string,
 ): Promise<Record<string, unknown> | null> => {
   const auth = await requireAuth()
-  if (!auth.success) return null
+  // loadFormData is called from Server Components (page.tsx files) — redirect
+  // to login so users see a clear explanation instead of an empty form.
+  if (!auth.success) redirect('/login')
   const { supabase } = auth.ctx
 
   const stepEnum = stepNumberToEnum(stepNumber)

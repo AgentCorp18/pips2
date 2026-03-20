@@ -53,6 +53,14 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
 
+const mockRedirect = vi.fn((url: string): never => {
+  throw new Error(`NEXT_REDIRECT:${url}`)
+})
+
+vi.mock('next/navigation', () => ({
+  redirect: (url: string) => mockRedirect(url),
+}))
+
 vi.mock('@/lib/permissions', () => ({
   requirePermission: vi.fn().mockResolvedValue('member'),
 }))
@@ -257,11 +265,13 @@ describe('loadFormData', () => {
     fromResults = []
   })
 
-  it('returns null when user is not authenticated', async () => {
+  it('redirects to /login when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
-    const result = await loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')
-    expect(result).toBeNull()
+    await expect(loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')).rejects.toThrow(
+      'NEXT_REDIRECT:/login',
+    )
+    expect(mockRedirect).toHaveBeenCalledWith('/login')
   })
 
   it('returns the form data when found', async () => {

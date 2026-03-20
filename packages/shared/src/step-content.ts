@@ -654,5 +654,7 @@ export const getStepForms = (stepNumber: PipsStepNumber): StepFormDef[] =>
 export const getRequiredForms = (stepNumber: PipsStepNumber): StepFormDef[] =>
   STEP_CONTENT[stepNumber].forms.filter((f) => f.required)
 
-/** Get all unique form types across all steps */
-export const ALL_FORM_TYPES = Object.values(STEP_CONTENT).flatMap((s) => s.forms.map((f) => f.type))
+/** Get all unique form types across all steps (deduplicated — balance_sheet appears in steps 4 and 6) */
+export const ALL_FORM_TYPES = [
+  ...new Set(Object.values(STEP_CONTENT).flatMap((s) => s.forms.map((f) => f.type))),
+] as const
