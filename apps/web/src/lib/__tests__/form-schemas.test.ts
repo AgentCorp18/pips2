@@ -47,8 +47,8 @@ describe('FORM_SCHEMAS', () => {
     'balance_sheet',
   ]
 
-  it('has entries for all 24 form types', () => {
-    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(24)
+  it('has entries for all 26 form types', () => {
+    expect(Object.keys(FORM_SCHEMAS)).toHaveLength(26)
   })
 
   it('contains every expected form type key', () => {

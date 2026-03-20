@@ -192,8 +192,8 @@ describe('CommandPalette', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText('Projects')).toBeInTheDocument()
-      expect(screen.getByText('Tickets')).toBeInTheDocument()
+      expect(screen.getByText('Projects (1)')).toBeInTheDocument()
+      expect(screen.getByText('Tickets (1)')).toBeInTheDocument()
     })
 
     vi.useRealTimers()

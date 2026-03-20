@@ -1655,8 +1655,7 @@ describe('generateSummary', () => {
       }),
     )
 
-    const fetchInit = mockFetch.mock.calls[0]![1] as RequestInit
-    const callBody = JSON.parse(fetchInit.body as string)
+    const callBody = JSON.parse((mockFetch.mock.calls[0]![1] as RequestInit).body as string)
     expect(callBody.model).toBe('claude-haiku-4-5-20251001')
     expect(callBody.max_tokens).toBe(500)
   })

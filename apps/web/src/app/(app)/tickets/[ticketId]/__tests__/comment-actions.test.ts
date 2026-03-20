@@ -157,13 +157,11 @@ describe('addComment', () => {
 
     const [notifRows] = insertNotifMock.mock.calls[0]! as [unknown[]]
     expect(Array.isArray(notifRows)).toBe(true)
-    const notifList = notifRows as Record<string, unknown>[]
-    const firstNotif = notifList[0]
-    expect(firstNotif).toBeDefined()
-    expect(firstNotif!.user_id).toBe(MENTIONED_USER_ID)
-    expect(firstNotif!.type).toBe('mention')
-    expect(firstNotif!.org_id).toBe(ORG_ID)
-    expect(firstNotif!.entity_id).toBe(TICKET_ID)
+    const firstNotif = (notifRows as Record<string, unknown>[])[0]!
+    expect(firstNotif.user_id).toBe(MENTIONED_USER_ID)
+    expect(firstNotif.type).toBe('mention')
+    expect(firstNotif.org_id).toBe(ORG_ID)
+    expect(firstNotif.entity_id).toBe(TICKET_ID)
   })
 
   it('does not create notification for self-mention', async () => {

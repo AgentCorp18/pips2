@@ -154,7 +154,7 @@ describe('createInitiative', () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
     const fd = makeFormData(validInitiativeFields)
     const result = await createInitiative({}, fd)
-    expect(result).toEqual({ error: 'You must be signed in' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when user has no organization', async () => {
@@ -166,7 +166,7 @@ describe('createInitiative', () => {
     })
     const fd = makeFormData(validInitiativeFields)
     const result = await createInitiative({}, fd)
-    expect(result).toEqual({ error: 'You must belong to an organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('checks initiative.create permission', async () => {
@@ -176,7 +176,7 @@ describe('createInitiative', () => {
 
     const fd = makeFormData(validInitiativeFields)
     await createInitiative({}, fd)
-    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.create')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.create', undefined)
   })
 
   it('returns error when permission is denied', async () => {
@@ -268,7 +268,7 @@ describe('getInitiatives', () => {
     })
 
     const result = await getInitiatives()
-    expect(result).toEqual({ initiatives: [], error: 'No organization' })
+    expect(result).toEqual({ initiatives: [], error: 'No organization context' })
   })
 
   it('returns initiatives list with project_count', async () => {
@@ -621,7 +621,7 @@ describe('updateInitiative', () => {
     })
 
     const result = await updateInitiative('init-1', { status: 'active' })
-    expect(result).toEqual({ error: 'No organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns error when permission is denied', async () => {
@@ -629,7 +629,10 @@ describe('updateInitiative', () => {
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const result = await updateInitiative('init-1', { status: 'active' })
-    expect(result).toEqual({ error: 'Insufficient permissions' })
+    expect(result).toEqual({
+      error:
+        "You don't have permission to initiative update. Contact your org admin to upgrade your role.",
+    })
   })
 
   it('checks initiative.update permission', async () => {
@@ -638,7 +641,7 @@ describe('updateInitiative', () => {
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     await updateInitiative('init-1', { status: 'active' })
-    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.update')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.update', undefined)
   })
 
   it('updates initiative successfully', async () => {
@@ -700,7 +703,7 @@ describe('archiveInitiative', () => {
     })
 
     const result = await archiveInitiative('init-1')
-    expect(result).toEqual({ error: 'No organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns error when permission is denied', async () => {
@@ -708,7 +711,10 @@ describe('archiveInitiative', () => {
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
 
     const result = await archiveInitiative('init-1')
-    expect(result).toEqual({ error: 'Insufficient permissions' })
+    expect(result).toEqual({
+      error:
+        "You don't have permission to initiative delete. Contact your org admin to upgrade your role.",
+    })
   })
 
   it('checks initiative.delete permission', async () => {
@@ -717,7 +723,7 @@ describe('archiveInitiative', () => {
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     await archiveInitiative('init-1')
-    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.delete')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.delete', undefined)
   })
 
   it('archives initiative successfully (soft delete)', async () => {
@@ -784,7 +790,7 @@ describe('addProjectToInitiative', () => {
       'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
       'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',
     )
-    expect(result).toEqual({ error: 'No organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns error when permission is denied', async () => {
@@ -794,7 +800,10 @@ describe('addProjectToInitiative', () => {
       'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
       'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',
     )
-    expect(result).toEqual({ error: 'Insufficient permissions' })
+    expect(result).toEqual({
+      error:
+        "You don't have permission to initiative update. Contact your org admin to upgrade your role.",
+    })
   })
 
   it('links project to initiative successfully', async () => {
@@ -888,14 +897,17 @@ describe('removeProjectFromInitiative', () => {
       orgId: null,
     })
     const result = await removeProjectFromInitiative('init-1', 'proj-1')
-    expect(result).toEqual({ error: 'No organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns error when permission is denied', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     vi.mocked(requirePermission).mockRejectedValue(new Error('No permission'))
     const result = await removeProjectFromInitiative('init-1', 'proj-1')
-    expect(result).toEqual({ error: 'Insufficient permissions' })
+    expect(result).toEqual({
+      error:
+        "You don't have permission to initiative update. Contact your org admin to upgrade your role.",
+    })
   })
 
   it('checks initiative.update permission', async () => {
@@ -904,7 +916,7 @@ describe('removeProjectFromInitiative', () => {
     vi.mocked(requirePermission).mockResolvedValue('admin')
 
     await removeProjectFromInitiative('init-1', 'proj-1')
-    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.update')
+    expect(requirePermission).toHaveBeenCalledWith('org-1', 'initiative.update', undefined)
   })
 
   it('removes project from initiative successfully', async () => {

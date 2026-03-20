@@ -18,7 +18,7 @@ describe('TicketEmptyState', () => {
     render(<TicketEmptyState />)
     expect(
       screen.getByText(
-        'Tickets help you track tasks, bugs, and action items across your projects.',
+        'Tickets help you track tasks, bugs, and action items as you work through your PIPS projects.',
       ),
     ).toBeTruthy()
   })

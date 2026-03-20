@@ -135,7 +135,7 @@ describe('exportProjectsCSV', () => {
     })
 
     const result = await exportProjectsCSV()
-    expect(result).toEqual({ error: 'You must be signed in to an organization' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error when user has no org membership', async () => {
@@ -147,7 +147,7 @@ describe('exportProjectsCSV', () => {
     })
 
     const result = await exportProjectsCSV()
-    expect(result).toEqual({ error: 'You must be signed in to an organization' })
+    expect(result).toEqual({ error: 'No organization context' })
   })
 
   it('returns error on DB failure', async () => {
@@ -281,7 +281,7 @@ describe('exportTicketsCSV', () => {
     })
 
     const result = await exportTicketsCSV()
-    expect(result).toEqual({ error: 'You must be signed in to an organization' })
+    expect(result).toEqual({ error: 'Not authenticated' })
   })
 
   it('returns error on DB failure', async () => {
