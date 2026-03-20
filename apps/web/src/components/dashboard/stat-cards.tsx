@@ -1,6 +1,13 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FolderKanban, TicketCheck, AlertTriangle, CheckCircle2, Users } from 'lucide-react'
+import {
+  FolderKanban,
+  FolderOpen,
+  TicketCheck,
+  AlertTriangle,
+  CheckCircle2,
+  Users,
+} from 'lucide-react'
 import type { DashboardStats } from '@/app/(app)/dashboard/actions'
 
 type StatCardsProps = {
@@ -25,6 +32,14 @@ const CARDS: CardDef[] = [
     color: 'var(--color-step-1)',
     testId: 'stat-total-projects',
     href: '/projects',
+  },
+  {
+    key: 'activeProjects',
+    title: 'Active Projects',
+    icon: FolderOpen,
+    color: 'var(--color-step-1)',
+    testId: 'stat-active-projects',
+    href: '/projects?status=active',
   },
   {
     key: 'openTickets',
@@ -63,7 +78,7 @@ const CARDS: CardDef[] = [
 
 export const StatCards = ({ stats }: StatCardsProps) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
       {CARDS.map((card) => {
         const Icon = card.icon
         const value = stats[card.key]

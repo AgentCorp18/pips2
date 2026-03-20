@@ -24,6 +24,7 @@ import {
   FolderKanban,
   ArrowUpRight,
   Layers,
+  ShieldAlert,
 } from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import { RichTextEditorLazy as RichTextEditor } from '@/components/ui/rich-text-editor-lazy'
@@ -262,6 +263,20 @@ export const TicketDetailClient = ({
               {PRIORITY_OPTIONS.find((o) => o.value === ticket.priority)?.label}
             </Badge>
           </div>
+
+          {/* Blocked indicator — prominent callout when ticket is blocked */}
+          {ticket.status === 'blocked' && (
+            <div
+              className="mt-3 flex items-center gap-2 rounded-md border px-3 py-2"
+              style={{ borderColor: '#F87171', backgroundColor: '#FEF2F2' }}
+              data-testid="ticket-blocked-indicator"
+            >
+              <ShieldAlert size={15} style={{ color: '#DC2626' }} aria-hidden="true" />
+              <span className="text-sm font-medium" style={{ color: '#DC2626' }}>
+                This ticket is blocked
+              </span>
+            </div>
+          )}
 
           {/* Cycle Time */}
           <div className="mt-2">

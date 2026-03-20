@@ -17,9 +17,10 @@ const defaultStats: DashboardStats = {
 }
 
 describe('StatCards', () => {
-  it('renders 5 stat cards', () => {
+  it('renders 6 stat cards', () => {
     render(<StatCards stats={defaultStats} />)
     expect(screen.getByText('Total Projects')).toBeInTheDocument()
+    expect(screen.getByText('Active Projects')).toBeInTheDocument()
     expect(screen.getByText('Open Tickets')).toBeInTheDocument()
     expect(screen.getByText('Overdue')).toBeInTheDocument()
     expect(screen.getByText('Completed This Month')).toBeInTheDocument()
@@ -29,6 +30,7 @@ describe('StatCards', () => {
   it('renders correct values', () => {
     render(<StatCards stats={defaultStats} />)
     expect(screen.getByText('8')).toBeInTheDocument()
+    expect(screen.getByText('5')).toBeInTheDocument()
     expect(screen.getByText('23')).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(screen.getByText('12')).toBeInTheDocument()
@@ -64,12 +66,13 @@ describe('StatCards', () => {
     }
     render(<StatCards stats={zeroStats} />)
     const zeros = screen.getAllByText('0')
-    expect(zeros).toHaveLength(5)
+    expect(zeros).toHaveLength(6)
   })
 
   it('renders data-testid on each card', () => {
     render(<StatCards stats={defaultStats} />)
     expect(screen.getByTestId('stat-total-projects')).toBeInTheDocument()
+    expect(screen.getByTestId('stat-active-projects')).toBeInTheDocument()
     expect(screen.getByTestId('stat-open-tickets')).toBeInTheDocument()
     expect(screen.getByTestId('stat-overdue')).toBeInTheDocument()
     expect(screen.getByTestId('stat-completed')).toBeInTheDocument()
@@ -118,6 +121,7 @@ describe('StatCards', () => {
     render(<StatCards stats={defaultStats} />)
     const cards = [
       'stat-total-projects',
+      'stat-active-projects',
       'stat-open-tickets',
       'stat-overdue',
       'stat-completed',
@@ -129,5 +133,12 @@ describe('StatCards', () => {
       expect(link).toBeTruthy()
       expect(link).toHaveAttribute('href')
     }
+  })
+
+  it('renders active projects card as a link to filtered projects', () => {
+    render(<StatCards stats={defaultStats} />)
+    const activeCard = screen.getByTestId('stat-active-projects')
+    const link = activeCard.closest('a')
+    expect(link).toHaveAttribute('href', '/projects?status=active')
   })
 })
