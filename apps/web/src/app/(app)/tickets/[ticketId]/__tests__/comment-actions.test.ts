@@ -157,11 +157,12 @@ describe('addComment', () => {
 
     const [notifRows] = insertNotifMock.mock.calls[0] as [unknown[]]
     expect(Array.isArray(notifRows)).toBe(true)
-    const firstNotif = (notifRows as Record<string, unknown>[])[0]
-    expect(firstNotif.user_id).toBe(MENTIONED_USER_ID)
-    expect(firstNotif.type).toBe('mention')
-    expect(firstNotif.org_id).toBe(ORG_ID)
-    expect(firstNotif.entity_id).toBe(TICKET_ID)
+    const rows = notifRows as Record<string, unknown>[]
+    expect(rows).toHaveLength(1)
+    expect(rows[0]?.user_id).toBe(MENTIONED_USER_ID)
+    expect(rows[0]?.type).toBe('mention')
+    expect(rows[0]?.org_id).toBe(ORG_ID)
+    expect(rows[0]?.entity_id).toBe(TICKET_ID)
   })
 
   it('does not create notification for self-mention', async () => {
@@ -211,12 +212,10 @@ describe('addComment', () => {
       }
       if (table === 'profiles') {
         return buildChain({
-          single: vi
-            .fn()
-            .mockResolvedValue({
-              data: { display_name: 'Bob', full_name: 'Bob Jones' },
-              error: null,
-            }),
+          single: vi.fn().mockResolvedValue({
+            data: { display_name: 'Bob', full_name: 'Bob Jones' },
+            error: null,
+          }),
         })
       }
       if (table === 'notifications') {
