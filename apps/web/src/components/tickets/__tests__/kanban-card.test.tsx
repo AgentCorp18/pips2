@@ -135,4 +135,20 @@ describe('KanbanCard', () => {
       unmount()
     })
   })
+
+  it('does not show Blocked badge by default', () => {
+    render(<KanbanCard {...defaultProps} />)
+    expect(screen.queryByTestId('kanban-card-blocked-badge')).not.toBeInTheDocument()
+  })
+
+  it('shows Blocked badge when isBlocked is true', () => {
+    render(<KanbanCard {...defaultProps} isBlocked />)
+    expect(screen.getByTestId('kanban-card-blocked-badge')).toBeInTheDocument()
+    expect(screen.getByText('Blocked')).toBeInTheDocument()
+  })
+
+  it('does not show Blocked badge when isBlocked is false', () => {
+    render(<KanbanCard {...defaultProps} isBlocked={false} />)
+    expect(screen.queryByTestId('kanban-card-blocked-badge')).not.toBeInTheDocument()
+  })
 })

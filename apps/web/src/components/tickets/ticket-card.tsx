@@ -12,6 +12,7 @@ import {
   FolderKanban,
   Calendar,
   User,
+  ShieldAlert,
 } from 'lucide-react'
 import { FormattedDate } from '@/components/ui/formatted-date'
 import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
@@ -64,6 +65,7 @@ type TicketCardProps = {
   assigneeName: string | null
   assigneeAvatar: string | null
   dueDate: string | null
+  isBlocked?: boolean
 }
 
 /* ============================================================
@@ -79,6 +81,7 @@ export const TicketCard = ({
   type,
   assigneeName,
   dueDate,
+  isBlocked = false,
 }: TicketCardProps) => {
   const statusConfig = STATUS_CONFIG[status]
   const priorityConfig = PRIORITY_CONFIG[priority]
@@ -107,6 +110,20 @@ export const TicketCard = ({
           >
             {title}
           </h3>
+
+          {/* Blocked by link indicator */}
+          {isBlocked && (
+            <div
+              className="mb-2 flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium"
+              style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}
+              data-testid="ticket-card-blocked-badge"
+              role="status"
+              aria-label="Blocked by another ticket"
+            >
+              <ShieldAlert size={10} aria-hidden="true" />
+              Blocked
+            </div>
+          )}
 
           {/* Bottom row: type icon, priority dot, assignee, due date */}
           <div className="flex items-center justify-between text-xs">
