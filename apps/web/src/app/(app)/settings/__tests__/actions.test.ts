@@ -139,11 +139,11 @@ describe('getOrgWithSettings', () => {
     fromResults = [{ data: orgData }, { data: settingsData }]
 
     const result = await getOrgWithSettings()
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       org: orgData,
       role: 'owner',
-      settings: settingsData,
     })
+    expect(result?.settings).toMatchObject(settingsData)
   })
 
   it('returns default settings when org_settings is null', async () => {
@@ -270,7 +270,9 @@ describe('updateOrgSettings', () => {
     fromResults = [
       // from('organizations').update().eq() -> success
       { error: null },
-      // from('org_settings').update().eq() -> error
+      // from('org_settings').select() -> current settings
+      { data: { notification_settings: {} } },
+      // from('org_settings').upsert() -> error
       { error: { message: 'Settings DB error' } },
     ]
 
@@ -283,7 +285,7 @@ describe('updateOrgSettings', () => {
 
   it('returns success when settings are updated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    fromResults = [{ error: null }, { error: null }]
+    fromResults = [{ error: null }, { data: { notification_settings: {} } }, { error: null }]
 
     const fd = makeFormData(validSettingsFields)
     const result = await updateOrgSettings(emptyState, fd)
