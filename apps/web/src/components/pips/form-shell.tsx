@@ -9,7 +9,6 @@ import {
   Check,
   CloudUpload,
   Download,
-  Loader2,
   Clock,
   ChevronDown,
   ChevronRight,
@@ -28,12 +27,13 @@ import { CreateTicketFromForm } from './create-ticket-from-form'
 import { CopyFromProjectDialog } from './copy-from-project-dialog'
 import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
+import { SaveStatusIndicator, type SaveState } from './save-status-indicator'
 import { cn } from '@/lib/utils'
 import type { ZodType } from 'zod'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog'
 
-type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved'
+type DisplayStatus = 'idle' | 'saving' | 'saved' | 'unsaved' | 'error'
 
 /* Data-driven mode (Steps 1-3): FormShell handles save internally */
 type DataDrivenProps = {
@@ -104,12 +104,13 @@ export const FormShell = (props: FormShellProps) => {
     return fallback.success ? fallback.data : props.data
   })()
 
-  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   // 4.1: Track whether this form has ever been saved in this session for first-save celebration
   const hasBeenSavedRef = useRef(!!validatedInitialData)
   const [lastSaved, setLastSaved] = useState<string>(
     validatedInitialData ? JSON.stringify(validatedInitialData) : '',
   )
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   /* BUG 1 FIX: Track the in-flight save with an AbortController ref.
      When a new save is triggered while one is already in-flight, the previous
@@ -123,15 +124,20 @@ export const FormShell = (props: FormShellProps) => {
       ? JSON.stringify(props.data) !== lastSaved
       : false
 
-  /* Compute display status */
+  /* Compute display status.
+     Priority order: saving > error (show retry) > unsaved > saved > idle.
+     Error takes precedence over unsaved so "Save failed" + Retry is shown
+     after a failed auto-save rather than "Unsaved changes". */
   const displayStatus: DisplayStatus =
     saveState === 'saving'
       ? 'saving'
-      : hasPendingChanges
-        ? 'unsaved'
-        : saveState === 'saved'
-          ? 'saved'
-          : 'idle'
+      : saveState === 'error'
+        ? 'error'
+        : hasPendingChanges
+          ? 'unsaved'
+          : saveState === 'saved'
+            ? 'saved'
+            : 'idle'
 
   const isSandbox = 'projectId' in props && props.projectId === SANDBOX_PROJECT_ID
   const onImportData = 'onImportData' in props ? props.onImportData : undefined
@@ -157,11 +163,12 @@ export const FormShell = (props: FormShellProps) => {
       const result = await onSave()
       if (controller.signal.aborted) return false
       if (result.error) {
-        setSaveState('idle')
+        setSaveState('error')
         toast.error(result.error)
         return false
       } else {
         setSaveState('saved')
+        setLastSavedAt(new Date())
         return true
       }
     } else if (isSandbox && data && formType) {
@@ -172,11 +179,12 @@ export const FormShell = (props: FormShellProps) => {
         if (controller.signal.aborted) return false
         setSaveState('saved')
         setLastSaved(JSON.stringify(data))
+        setLastSavedAt(new Date())
         onSaveSuccess?.()
         return true
       } catch {
         if (controller.signal.aborted) return false
-        setSaveState('idle')
+        setSaveState('error')
         toast.error('Failed to save to local storage')
         return false
       }
@@ -186,6 +194,7 @@ export const FormShell = (props: FormShellProps) => {
       if (result.success) {
         setSaveState('saved')
         setLastSaved(JSON.stringify(data))
+        setLastSavedAt(new Date())
         // 4.1: First-save celebration for required forms
         if (!hasBeenSavedRef.current && required) {
           hasBeenSavedRef.current = true
@@ -198,7 +207,7 @@ export const FormShell = (props: FormShellProps) => {
         onSaveSuccess?.()
         return true
       } else {
-        setSaveState('idle')
+        setSaveState('error')
         toast.error(result.error ?? 'Failed to save')
         return false
       }
@@ -365,7 +374,26 @@ export const FormShell = (props: FormShellProps) => {
             />
             {!isViewMode && (
               <>
-                <SaveIndicator status={displayStatus} />
+                {displayStatus === 'unsaved' ? (
+                  <span
+                    data-testid="save-status-indicator"
+                    className="flex items-center gap-1.5 text-xs text-[var(--color-warning)]"
+                  >
+                    <span data-testid="save-indicator-unsaved">Unsaved changes</span>
+                  </span>
+                ) : (
+                  <SaveStatusIndicator
+                    state={
+                      (displayStatus === 'saving' ||
+                      displayStatus === 'saved' ||
+                      displayStatus === 'error'
+                        ? displayStatus
+                        : 'idle') satisfies SaveState
+                    }
+                    lastSavedAt={lastSavedAt}
+                    onRetry={displayStatus === 'error' ? handleManualSave : undefined}
+                  />
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -666,42 +694,4 @@ const GuardedLink = ({
       {children}
     </button>
   )
-}
-
-/* ---- Save status indicator ---- */
-
-const SaveIndicator = ({ status }: { status: DisplayStatus }) => {
-  switch (status) {
-    case 'saving':
-      return (
-        <span
-          data-testid="save-status-indicator"
-          className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]"
-        >
-          <Loader2 size={12} className="animate-spin" />
-          <span data-testid="save-indicator-saving">Saving...</span>
-        </span>
-      )
-    case 'saved':
-      return (
-        <span
-          data-testid="save-status-indicator"
-          className="flex items-center gap-1.5 text-xs text-[var(--color-success)]"
-        >
-          <Check size={12} />
-          <span data-testid="save-indicator-saved">Saved</span>
-        </span>
-      )
-    case 'unsaved':
-      return (
-        <span
-          data-testid="save-status-indicator"
-          className="flex items-center gap-1.5 text-xs text-[var(--color-warning)]"
-        >
-          <span data-testid="save-indicator-unsaved">Unsaved changes</span>
-        </span>
-      )
-    default:
-      return null
-  }
 }

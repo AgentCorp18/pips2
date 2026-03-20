@@ -206,7 +206,8 @@ describe('FormShell auto-save', () => {
       resolveSave({ success: true })
     })
 
-    expect(screen.getByText('Saved')).toBeInTheDocument()
+    // "Saved" indicator now shows relative time — check testid instead of exact text
+    expect(screen.getByTestId('save-indicator-saved')).toBeInTheDocument()
   })
 
   it('save-status-indicator is present and shows "Saving..." during save', async () => {
@@ -270,6 +271,57 @@ describe('FormShell auto-save', () => {
     })
 
     expect(mockToast.error).toHaveBeenCalledWith('Failed to save')
+  })
+
+  it('shows "Save failed" indicator when data-driven save fails', async () => {
+    mockSaveFormData.mockResolvedValue({ success: false, error: 'Server error' })
+
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Fail state' }} />)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100)
+    })
+
+    const indicator = screen.getByTestId('save-status-indicator')
+    expect(indicator).toHaveTextContent('Save failed')
+  })
+
+  it('shows Retry button in the error indicator after a failed save', async () => {
+    mockSaveFormData.mockResolvedValue({ success: false, error: 'Retry me' })
+
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Retry test' }} />)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100)
+    })
+
+    expect(screen.getByTestId('save-indicator-retry')).toBeInTheDocument()
+  })
+
+  it('retries save when Retry button is clicked', async () => {
+    mockSaveFormData
+      .mockResolvedValueOnce({ success: false, error: 'First failure' })
+      .mockResolvedValueOnce({ success: true })
+
+    const { rerender } = render(<FormShell {...dataDrivenProps} />)
+    rerender(<FormShell {...dataDrivenProps} data={{ cause: 'Will retry' }} />)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2100)
+    })
+
+    // First save failed — retry button should be visible
+    const retryButton = screen.getByTestId('save-indicator-retry')
+    expect(retryButton).toBeInTheDocument()
+
+    // Click retry — should trigger another save
+    await act(async () => {
+      retryButton.click()
+    })
+
+    expect(mockSaveFormData).toHaveBeenCalledTimes(2)
   })
 
   it('calls onSaveSuccess callback after successful data-driven save', async () => {
