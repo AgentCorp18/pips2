@@ -238,6 +238,7 @@ describe('getStepSummaries', () => {
 
   it('extracts milestone progress from step 5', async () => {
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {
@@ -282,6 +283,7 @@ describe('getStepSummaries', () => {
 
   it('extracts evaluation data from step 6', async () => {
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {
@@ -328,6 +330,7 @@ describe('getStepSummaries', () => {
 
   it('handles multiple steps in one query', async () => {
     fromResults = [
+      { data: { id: 'proj-1' } },
       {
         data: [
           {
