@@ -58,8 +58,7 @@ describe('getDashboardStats', () => {
   })
 
   it('returns all counts when queries succeed', async () => {
-    // Consolidated: projects query now returns data rows (status field) counted in-memory.
-    // 5 queries total (down from 6): projects(data), openTickets, overdue, completedThisMonth, members
+    // 6 queries total: projects(data), openTickets, overdue, completedThisMonth, members, blocked
     fromResults = [
       // projects — 10 total, 5 active/draft
       {
@@ -85,6 +84,8 @@ describe('getDashboardStats', () => {
       { count: 8, error: null },
       // team members count
       { count: 4, error: null },
+      // blocked tickets count
+      { count: 2, error: null },
     ]
 
     const result = await getDashboardStats('org-1')
@@ -93,6 +94,7 @@ describe('getDashboardStats', () => {
       activeProjects: 5,
       openTickets: 12,
       overdueTickets: 3,
+      blockedTickets: 2,
       completedThisMonth: 8,
       teamMembers: 4,
     })
@@ -100,8 +102,9 @@ describe('getDashboardStats', () => {
 
   it('returns zeros when counts are null', async () => {
     fromResults = [
-      // projects — empty data, null counts for tickets/members
+      // projects — empty data, null counts for tickets/members/blocked
       { data: null, error: null },
+      { count: null, error: null },
       { count: null, error: null },
       { count: null, error: null },
       { count: null, error: null },
@@ -114,6 +117,7 @@ describe('getDashboardStats', () => {
       activeProjects: 0,
       openTickets: 0,
       overdueTickets: 0,
+      blockedTickets: 0,
       completedThisMonth: 0,
       teamMembers: 0,
     })
@@ -126,6 +130,7 @@ describe('getDashboardStats', () => {
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
       { count: null, error: { message: 'error' } },
+      { count: null, error: { message: 'error' } },
     ]
 
     const result = await getDashboardStats('org-1')
@@ -134,9 +139,25 @@ describe('getDashboardStats', () => {
       activeProjects: 0,
       openTickets: 0,
       overdueTickets: 0,
+      blockedTickets: 0,
       completedThisMonth: 0,
       teamMembers: 0,
     })
+  })
+
+  it('returns blockedTickets count separately from openTickets', async () => {
+    fromResults = [
+      { data: [{ status: 'active' }], error: null },
+      { count: 5, error: null }, // open tickets
+      { count: 1, error: null }, // overdue
+      { count: 3, error: null }, // completed this month
+      { count: 2, error: null }, // team members
+      { count: 4, error: null }, // blocked tickets
+    ]
+
+    const result = await getDashboardStats('org-1')
+    expect(result.blockedTickets).toBe(4)
+    expect(result.openTickets).toBe(5)
   })
 })
 

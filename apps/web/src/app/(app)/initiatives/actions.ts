@@ -9,7 +9,12 @@ import {
   addProjectToInitiativeSchema,
 } from '@/lib/validations'
 import { trackServerEvent } from '@/lib/analytics'
-import type { Initiative, InitiativeWithRelations, InitiativeProgress } from '@/types/initiatives'
+import type {
+  Initiative,
+  InitiativeWithRelations,
+  InitiativeProgress,
+  InitiativeFinancials,
+} from '@/types/initiatives'
 
 /* ============================================================
    Types
@@ -440,4 +445,85 @@ export const removeProjectFromInitiative = async (
 
   revalidatePath(`/initiatives/${initiativeId}`)
   return {}
+}
+
+/* ============================================================
+   Get Initiative Financials
+   ============================================================ */
+
+export const getInitiativeFinancials = async (
+  initiativeId: string,
+): Promise<{ financials: InitiativeFinancials; error?: string }> => {
+  const empty: InitiativeFinancials = {
+    projectedSavings: 0,
+    realisedSavings: 0,
+    realisationRate: 0,
+    projectCount: 0,
+  }
+
+  const auth = await requireAuth()
+  if (!auth.success) return { financials: empty, error: auth.error }
+  const { supabase, orgId } = auth.ctx
+
+  // Fetch linked project IDs (with org-scoping via initiative org_id check)
+  const { data: links, error: linksError } = await supabase
+    .from('initiative_projects')
+    .select('project_id, project:projects!initiative_projects_project_id_fkey ( id, org_id )')
+    .eq('initiative_id', initiativeId)
+
+  if (linksError) return { financials: empty, error: linksError.message }
+  if (!links || links.length === 0) return { financials: empty }
+
+  // Filter to projects that belong to this org (defense-in-depth)
+  const projectIds = links
+    .map((l) => {
+      const project = l.project as unknown as { id: string; org_id: string } | null
+      return project?.org_id === orgId ? project.id : null
+    })
+    .filter((id): id is string => id !== null)
+
+  if (projectIds.length === 0) return { financials: empty }
+
+  // Fetch projected savings from measurables forms and realised from results_metrics in parallel
+  const [measurablesRes, resultsRes] = await Promise.all([
+    supabase
+      .from('project_forms')
+      .select('data')
+      .in('project_id', projectIds)
+      .eq('form_type', 'measurables'),
+
+    supabase
+      .from('project_forms')
+      .select('data')
+      .in('project_id', projectIds)
+      .eq('form_type', 'results_metrics'),
+  ])
+
+  // Sum projected savings from measurables forms
+  let projectedSavings = 0
+  for (const form of measurablesRes.data ?? []) {
+    const data = form.data as Record<string, unknown> | null
+    const val = Number(data?.financial_savings_annual ?? 0)
+    if (!isNaN(val)) projectedSavings += val
+  }
+
+  // Sum realised savings from results_metrics forms
+  let realisedSavings = 0
+  for (const form of resultsRes.data ?? []) {
+    const data = form.data as Record<string, unknown> | null
+    const val = Number(data?.financial_savings_annual ?? 0)
+    if (!isNaN(val)) realisedSavings += val
+  }
+
+  const realisationRate =
+    projectedSavings > 0 ? Math.round((realisedSavings / projectedSavings) * 100) : 0
+
+  return {
+    financials: {
+      projectedSavings,
+      realisedSavings,
+      realisationRate,
+      projectCount: projectIds.length,
+    },
+  }
 }

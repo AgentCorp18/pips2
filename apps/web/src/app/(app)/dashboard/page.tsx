@@ -91,6 +91,7 @@ const DashboardPage = async () => {
     activeProjects: 0,
     openTickets: 0,
     overdueTickets: 0,
+    blockedTickets: 0,
     completedThisMonth: 0,
     teamMembers: 0,
   }

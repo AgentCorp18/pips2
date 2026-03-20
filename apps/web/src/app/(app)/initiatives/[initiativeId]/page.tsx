@@ -2,10 +2,23 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getInitiativeDetail, getInitiativeProgress } from '@/app/(app)/initiatives/actions'
+import {
+  getInitiativeDetail,
+  getInitiativeFinancials,
+  getInitiativeProgress,
+} from '@/app/(app)/initiatives/actions'
 import { InitiativeProgressBar } from '@/components/initiatives/initiative-progress-bar'
 import { Button } from '@/components/ui/button'
-import { Target, ArrowLeft, Pencil, FolderKanban, Calendar, User, TrendingUp } from 'lucide-react'
+import {
+  Target,
+  ArrowLeft,
+  Pencil,
+  FolderKanban,
+  Calendar,
+  User,
+  TrendingUp,
+  DollarSign,
+} from 'lucide-react'
 import { formatDateOnly } from '@/lib/format-date'
 import type { InitiativeStatus } from '@/types/initiatives'
 
@@ -25,6 +38,12 @@ const STATUS_STYLES: Record<InitiativeStatus, { label: string; className: string
   archived: { label: 'Archived', className: 'bg-gray-100 text-gray-500' },
 }
 
+const formatCurrency = (amount: number): string => {
+  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`
+  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`
+  return `$${amount.toFixed(0)}`
+}
+
 const InitiativeDetailPage = async ({ params }: Props) => {
   const { initiativeId } = await params
 
@@ -35,9 +54,10 @@ const InitiativeDetailPage = async ({ params }: Props) => {
 
   if (!user) redirect('/login')
 
-  const [{ initiative, error }, progress] = await Promise.all([
+  const [{ initiative, error }, progress, { financials }] = await Promise.all([
     getInitiativeDetail(initiativeId),
     getInitiativeProgress(initiativeId),
+    getInitiativeFinancials(initiativeId),
   ])
 
   if (error || !initiative) notFound()
@@ -164,6 +184,78 @@ const InitiativeDetailPage = async ({ params }: Props) => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Financial Impact */}
+      {(financials.projectedSavings > 0 || financials.realisedSavings > 0) && (
+        <div
+          className="rounded-[var(--radius-lg)] border p-5"
+          style={{ borderColor: 'var(--color-border)' }}
+          data-testid="initiative-financial-impact"
+        >
+          <div className="mb-3 flex items-center gap-1.5">
+            <DollarSign size={14} style={{ color: 'var(--color-text-secondary)' }} />
+            <h2
+              className="text-sm font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Financial Impact
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                Projected Savings
+              </div>
+              <div
+                className="text-lg font-semibold"
+                style={{ color: 'var(--color-text-primary)' }}
+                data-testid="initiative-projected-savings"
+              >
+                {formatCurrency(financials.projectedSavings)}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                per year
+              </div>
+            </div>
+            <div>
+              <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                Realised Savings
+              </div>
+              <div
+                className="text-lg font-semibold text-green-700"
+                data-testid="initiative-realised-savings"
+              >
+                {formatCurrency(financials.realisedSavings)}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                per year
+              </div>
+            </div>
+            <div>
+              <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                Realisation Rate
+              </div>
+              <div
+                className="text-lg font-semibold"
+                style={{
+                  color:
+                    financials.realisationRate >= 80
+                      ? '#16a34a'
+                      : financials.realisationRate >= 40
+                        ? '#ca8a04'
+                        : '#dc2626',
+                }}
+                data-testid="initiative-realisation-rate"
+              >
+                {financials.realisationRate}%
+              </div>
+              <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                of projected
+              </div>
+            </div>
           </div>
         </div>
       )}
