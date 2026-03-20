@@ -100,6 +100,10 @@ const DepthTooltip = ({ result }: { result: MethodologyDepthResult }) => (
       Methodology Depth: {result.score}% — {result.label}
     </div>
     <div className="text-[var(--color-text-tertiary)]">
+      Methodology depth shows what percentage of the 25 PIPS tools have been used for this project.
+      Higher depth = more rigorous analysis.
+    </div>
+    <div className="text-[var(--color-text-tertiary)]">
       {result.completedCount} of {result.totalCount} tools used
     </div>
     <div className="space-y-0.5">

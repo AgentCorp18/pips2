@@ -88,7 +88,10 @@ const METRIC_ROWS: MetricRow[] = [
     label: 'Methodology Depth',
     getValue: (p) => p.methodologyDepth,
     renderCell: (p) => (
-      <span style={{ color: depthColor(p.methodologyDepth), fontWeight: 700 }}>
+      <span
+        style={{ color: depthColor(p.methodologyDepth), fontWeight: 700 }}
+        title="Methodology depth shows what percentage of the 25 PIPS tools have been used for this project. Higher depth = more rigorous analysis."
+      >
         {p.methodologyDepth}%
       </span>
     ),

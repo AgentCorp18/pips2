@@ -98,7 +98,7 @@ export const RecentAchievements = ({ achievements }: RecentAchievementsProps) =>
                   <div
                     className="mt-0.5 flex shrink-0 flex-col items-center rounded-[var(--radius-md)] px-2.5 py-1.5"
                     style={{ backgroundColor: depth.bg }}
-                    title={`Methodology depth: ${achievement.methodologyDepthPercent}%`}
+                    title={`Methodology depth: ${achievement.methodologyDepthPercent}% — Methodology depth shows what percentage of the 25 PIPS tools have been used for this project. Higher depth = more rigorous analysis.`}
                   >
                     <span className="text-sm font-bold leading-none" style={{ color: depth.color }}>
                       {achievement.methodologyDepthPercent}%

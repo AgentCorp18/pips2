@@ -605,7 +605,10 @@ const ExecutiveSummaryPage = async ({ searchParams }: ExecutiveSummaryPageProps)
                         </p>
                       </div>
                     )}
-                    <div className="text-right">
+                    <div
+                      className="text-right"
+                      title="Methodology depth shows what percentage of the 25 PIPS tools have been used for this project. Higher depth = more rigorous analysis."
+                    >
                       <p
                         className="font-semibold"
                         style={{

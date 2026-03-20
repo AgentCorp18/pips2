@@ -422,7 +422,10 @@ const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
                           ROI
                         </span>
                       </div>
-                      <div className="flex flex-col items-end">
+                      <div
+                        className="flex flex-col items-end"
+                        title="Methodology depth shows what percentage of the 25 PIPS tools have been used for this project. Higher depth = more rigorous analysis."
+                      >
                         <span
                           className="font-semibold"
                           style={{ color: depthColor(project.depthPercent) }}
