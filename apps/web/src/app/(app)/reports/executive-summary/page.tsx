@@ -9,6 +9,7 @@ import { PeriodSelector } from '@/components/reports/period-selector'
 import { PrintButton } from './print-button'
 import { ShareButton } from './share-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
+import { formatCurrency } from '@/lib/format-utils'
 
 export const metadata: Metadata = {
   title: 'Executive Summary',
@@ -18,13 +19,6 @@ export const metadata: Metadata = {
 /* ============================================================
    Helpers
    ============================================================ */
-
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  if (value === 0) return '$0'
-  return `$${value.toLocaleString()}`
-}
 
 const formatDate = (): string => {
   return new Date().toLocaleDateString('en-US', {

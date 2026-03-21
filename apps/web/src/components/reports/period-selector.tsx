@@ -37,6 +37,7 @@ const PeriodSelector = ({ activePeriod, buildUrl }: PeriodSelectorProps) => (
                   }
             }
             aria-current={active ? 'page' : undefined}
+            data-testid={`period-selector-${p}`}
           >
             {PERIOD_LABELS[p]}
           </Link>

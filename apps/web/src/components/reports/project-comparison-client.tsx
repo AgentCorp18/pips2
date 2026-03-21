@@ -9,17 +9,11 @@ import { Input } from '@/components/ui/input'
 import { Check, ChevronDown, X, Search } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import type { ProjectListItem, ProjectComparisonItem } from '@/app/(app)/reports/actions'
+import { formatCurrency } from '@/lib/format-utils'
 
 /* ============================================================
    Helpers
    ============================================================ */
-
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  if (value === 0) return '$0'
-  return `$${value.toLocaleString()}`
-}
 
 const depthColor = (pct: number): string => {
   if (pct >= 70) return '#22C55E'

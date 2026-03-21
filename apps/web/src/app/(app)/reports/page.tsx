@@ -23,17 +23,11 @@ import {
 import { getReportsHubData, getRecentAchievements } from './actions'
 import { RecentAchievements } from '@/components/reports/recent-achievements'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
+import { formatCurrency } from '@/lib/format-utils'
 
 export const metadata: Metadata = {
   title: 'Reports',
   description: 'View reporting insights across your projects, team, and methodology usage.',
-}
-
-/** Format a dollar amount with K/M suffix for compact display */
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${Math.round(value / 1_000)}K`
-  return `$${value.toLocaleString()}`
 }
 
 /** Format hours with K suffix if large */

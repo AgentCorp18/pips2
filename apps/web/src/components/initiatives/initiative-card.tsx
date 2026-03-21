@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Target, FolderKanban, Calendar, TrendingUp } from 'lucide-react'
 import type { InitiativeStatus, DeadlineStatus } from '@/types/initiatives'
 import { FormattedDate } from '@/components/ui/formatted-date'
+import { formatCurrency } from '@/lib/format-utils'
 
 type InitiativeCardProps = {
   initiative: {
@@ -40,12 +41,6 @@ const DEADLINE_BADGE: Record<DeadlineStatus, { label: string; className: string 
   on_track: { label: 'On Track', className: 'bg-green-100 text-green-700' },
   at_risk: { label: 'At Risk', className: 'bg-amber-100 text-amber-700' },
   overdue: { label: 'Overdue', className: 'bg-red-100 text-red-700' },
-}
-
-const formatSavings = (amount: number): string => {
-  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`
-  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`
-  return `$${amount.toFixed(0)}`
 }
 
 export const InitiativeCard = ({ initiative }: InitiativeCardProps) => {
@@ -105,7 +100,7 @@ export const InitiativeCard = ({ initiative }: InitiativeCardProps) => {
         <div className="mb-3 flex items-center gap-1 text-xs font-medium text-green-700">
           <TrendingUp size={12} />
           <span data-testid="initiative-savings">
-            {formatSavings(initiative.totalSavings)} savings
+            {formatCurrency(initiative.totalSavings)} savings
           </span>
         </div>
       )}

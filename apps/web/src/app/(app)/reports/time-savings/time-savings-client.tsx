@@ -9,17 +9,7 @@ import { LazyTimeSavingsChart } from '@/components/reports/lazy-charts'
 import { Clock, DollarSign, Settings } from 'lucide-react'
 import type { TimeSavingsData, ProjectTimeSavings } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
-
-/* ============================================================
-   Helpers
-   ============================================================ */
-
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  if (value === 0) return '$0'
-  return `$${value.toLocaleString()}`
-}
+import { formatCurrency } from '@/lib/format-utils'
 
 /* ============================================================
    Component

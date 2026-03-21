@@ -44,6 +44,7 @@ export const ReportEmptyState = ({
             href={actionHref}
             className="mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: 'var(--color-primary)' }}
+            data-testid="report-empty-state-action"
           >
             {actionLabel}
           </Link>
