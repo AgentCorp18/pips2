@@ -34,7 +34,11 @@ export const MetricsWidgets = ({ metrics, loading = false }: MetricsWidgetsProps
   const trendPositive = ticketTrend >= 0
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="metrics-widgets">
+    <div
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      data-testid="metrics-widgets"
+      aria-label="Dashboard performance metrics"
+    >
       {/* Completion Rate */}
       <Card
         data-testid="metric-completion-rate"

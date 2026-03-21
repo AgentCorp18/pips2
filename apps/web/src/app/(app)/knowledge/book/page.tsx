@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'PIPS Book | PIPS',
+  description: 'Read The Never-Ending Quest — the complete PIPS methodology book by Marc Albers.',
+}
 import { BookOpen, Clock, ArrowRight, CheckCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

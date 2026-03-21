@@ -258,7 +258,5 @@ export const GET = async (request: Request) => {
     }
   }
 
-  console.log(`[cron/dispatch-emails] Processed: sent=${sent} skipped=${skipped} failed=${failed}`)
-
   return NextResponse.json({ sent, skipped, failed })
 }

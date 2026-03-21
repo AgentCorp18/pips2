@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Getting Started Guide | PIPS',
+  description:
+    'A step-by-step guide to assembling your team and running your first PIPS improvement cycle.',
+}
 import { Rocket, ArrowRight, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

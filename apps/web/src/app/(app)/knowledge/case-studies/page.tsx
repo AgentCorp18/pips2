@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Case Studies | PIPS',
+  description:
+    'Real-world examples of the PIPS methodology applied to improve processes and ship results.',
+}
 import { FileText, ArrowRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
