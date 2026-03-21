@@ -231,17 +231,19 @@ const StepPage = async ({ params }: StepPageProps) => {
         <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
           Tools Used in This Step
         </h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid auto-rows-fr gap-4 sm:grid-cols-2">
           {content.forms.map((form) => (
             <Link
               key={form.type}
               href={`/methodology/tools/${form.type.replace(/_/g, '-')}`}
-              className="group rounded-lg border border-[var(--color-border)] p-4 transition-all hover:border-[var(--color-primary)] hover:shadow-sm"
+              className="group flex h-full flex-col rounded-lg border border-[var(--color-border)] p-4 transition-all hover:border-[var(--color-primary)] hover:shadow-sm"
             >
               <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
                 {form.name}
               </h3>
-              <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{form.description}</p>
+              <p className="mt-1 line-clamp-2 text-xs text-[var(--color-text-secondary)]">
+                {form.description}
+              </p>
               {form.required && (
                 <span className="mt-2 inline-block rounded-full bg-[var(--color-primary)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--color-primary)]">
                   Required

@@ -129,9 +129,11 @@ export const PricingPage = () => {
               className="relative flex flex-col rounded-[var(--radius-lg)] border border-[var(--color-neutral-200)] bg-white p-8 shadow-[var(--shadow-subtle)]"
             >
               {tier.badge && (
-                <span className="absolute -top-3 right-6 rounded-full bg-[var(--color-primary)] px-3 py-1 text-xs font-semibold text-white">
-                  {tier.badge}
-                </span>
+                <div className="mb-4 flex justify-end">
+                  <span className="rounded-full bg-[var(--color-primary)] px-3 py-1 text-xs font-semibold text-white">
+                    {tier.badge}
+                  </span>
+                </div>
               )}
               <h2 className="mb-2 text-xl font-bold text-[var(--color-neutral-800)]">
                 {tier.name}

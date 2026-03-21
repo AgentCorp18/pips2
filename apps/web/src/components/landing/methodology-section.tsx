@@ -28,7 +28,7 @@ export const MethodologySection = () => {
       <div className="step-gradient-stripe-smooth mx-auto mb-12 max-w-4xl rounded-full" />
 
       {/* Steps grid - 3x2 */}
-      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-[1200px] auto-rows-fr grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {PIPS_STEPS.map((step, i) => {
           const Icon = STEP_ICONS[i]!
           return (
