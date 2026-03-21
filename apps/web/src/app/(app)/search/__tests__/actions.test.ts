@@ -39,6 +39,19 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => ({
+    supabase: {
+      auth: {
+        getUser: vi.fn(async () => ({ data: { user: { id: 'user-1' } } })),
+      },
+      from: mockFrom,
+    },
+    user: { id: 'user-1' },
+    orgId: 'org-1',
+  })),
+}))
+
 // We need to dynamically import after mocks are set up
 const importActions = async () => {
   const mod = await import('../actions')

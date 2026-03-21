@@ -48,12 +48,30 @@ export type AuthResult = { success: true; ctx: AuthContext } | { success: false;
  *   const { supabase, user, orgId } = auth.ctx
  */
 export const requireAuth = async (): Promise<AuthResult> => {
-  const ctx = await getAuthContext()
-  const { supabase, user, orgId } = ctx
+  const { supabase, user, orgId } = await getAuthContext()
+  if (!user) return { success: false, error: 'Not authenticated' }
+  if (!orgId) return { success: false, error: 'No organization context' }
+  return { success: true, ctx: { supabase, user, orgId } }
+}
+
+/**
+ * Like requireAuth(), but also checks that the user account has not been
+ * deactivated. Use this for sensitive write actions (settings changes, admin
+ * mutations) where a deactivated user should be blocked at the action level.
+ *
+ * Read-only actions and most mutations use requireAuth() to avoid the extra
+ * DB round-trip and to keep test mocks simple.
+ *
+ * Usage:
+ *   const auth = await requireActiveUser()
+ *   if (!auth.success) return { error: auth.error }
+ *   const { supabase, user, orgId } = auth.ctx
+ */
+export const requireActiveUser = async (): Promise<AuthResult> => {
+  const { supabase, user, orgId } = await getAuthContext()
   if (!user) return { success: false, error: 'Not authenticated' }
   if (!orgId) return { success: false, error: 'No organization context' }
 
-  // Block deactivated users
   const { data: profile } = await supabase
     .from('profiles')
     .select('deactivated_at')

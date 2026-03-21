@@ -91,7 +91,7 @@ export const updateOrgSettingsSchema = z.object({
     .min(2, 'Ticket prefix must be at least 2 characters')
     .max(10, 'Ticket prefix must be less than 10 characters')
     .regex(/^[A-Z0-9]+$/, 'Ticket prefix must be uppercase letters and numbers only'),
-  min_methodology_depth: z
+  min_methodology_depth: z.coerce
     .number()
     .int()
     .min(0, 'Threshold must be between 0 and 100')

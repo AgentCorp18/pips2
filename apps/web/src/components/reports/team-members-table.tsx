@@ -49,7 +49,7 @@ export const TeamMembersTable = ({ rows }: Props) => {
   }
 
   return (
-    <Table>
+    <Table className="min-w-[700px]">
       <TableHeader>
         <TableRow>
           <SortableHeader

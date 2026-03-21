@@ -120,6 +120,7 @@ describe('getTrainingPaths', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
   })
 
   it('returns active training paths on success', async () => {
@@ -153,6 +154,7 @@ describe('getPathModuleCounts', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
   })
 
   it('returns module counts grouped by path_id', async () => {
@@ -191,6 +193,7 @@ describe('getAllModules', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
   })
 
   it('returns all modules on success', async () => {
@@ -224,6 +227,7 @@ describe('getTrainingModules', () => {
     vi.clearAllMocks()
     fromCallIndex = 0
     fromResults = []
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
   })
 
   it('returns modules for a specific path', async () => {

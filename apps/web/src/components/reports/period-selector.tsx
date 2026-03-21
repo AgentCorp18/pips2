@@ -27,7 +27,7 @@ const PeriodSelector = ({ activePeriod, buildUrl }: PeriodSelectorProps) => (
           <Link
             key={p}
             href={buildUrl(p)}
-            className="rounded-[var(--radius-md)] px-3 py-1.5 text-sm font-medium transition-colors"
+            className="rounded-[var(--radius-md)] px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
             style={
               active
                 ? { backgroundColor: 'var(--color-primary)', color: '#fff' }

@@ -86,7 +86,7 @@ describe('GET /api/health', () => {
     expect(response.status).toBe(503)
     expect(body.status).toBe('degraded')
     expect(body.checks.database.status).toBe('error')
-    expect(body.checks.database.error).toBe('connection refused')
+    expect(body.checks.database.error).toBe('Service unavailable')
     expect(body.checks.auth.status).toBe('ok')
   })
 
@@ -123,7 +123,7 @@ describe('GET /api/health', () => {
     expect(body.status).toBe('degraded')
     expect(body.checks.database.status).toBe('ok')
     expect(body.checks.auth.status).toBe('error')
-    expect(body.checks.auth.error).toBe('auth service unavailable')
+    expect(body.checks.auth.error).toBe('Service unavailable')
   })
 
   it('returns error (503) when both checks fail', async () => {
@@ -168,7 +168,7 @@ describe('GET /api/health', () => {
 
     expect(response.status).toBe(503)
     expect(body.checks.database.status).toBe('error')
-    expect(body.checks.database.error).toBe('network timeout')
+    expect(body.checks.database.error).toBe('Service unavailable')
   })
 
   it('does not expose version or uptime (information disclosure prevention)', async () => {

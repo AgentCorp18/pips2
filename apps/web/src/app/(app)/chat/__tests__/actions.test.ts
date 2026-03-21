@@ -347,6 +347,8 @@ describe('getMessages', () => {
   it('returns error when message fetch fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages
       { data: null, error: { message: 'DB error' } },
     ]
@@ -358,6 +360,8 @@ describe('getMessages', () => {
   it('returns empty messages list', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages
       { data: [], error: null },
       // profiles
@@ -385,6 +389,8 @@ describe('getMessages', () => {
       },
     ]
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages
       { data: messages, error: null },
       // profiles
@@ -415,6 +421,8 @@ describe('getMessages', () => {
       created_at: `2026-01-01T${String(i).padStart(2, '0')}:00:00Z`,
     }))
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages
       { data: messages, error: null },
       // profiles
@@ -442,6 +450,8 @@ describe('getMessages', () => {
       },
     ]
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages
       { data: messages, error: null },
       // profiles — empty (no profile for ghost-user)
@@ -494,6 +504,10 @@ describe('sendMessage', () => {
 
   it('returns error when message body is empty', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
+    ]
 
     const result = await sendMessage('ch-1', '   ')
     expect(result).toEqual({ error: 'Message cannot be empty' })
@@ -502,6 +516,8 @@ describe('sendMessage', () => {
   it('returns error when insert fails', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages insert
       { data: null, error: { message: 'DB error' } },
     ]
@@ -524,6 +540,8 @@ describe('sendMessage', () => {
       created_at: '2026-01-01T12:00:00Z',
     }
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages insert
       { data: newMessage, error: null },
     ]
@@ -546,6 +564,8 @@ describe('sendMessage', () => {
       created_at: '2026-01-01T12:00:00Z',
     }
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages insert
       { data: newMessage, error: null },
     ]
@@ -571,6 +591,8 @@ describe('sendMessage', () => {
       created_at: '2026-01-01T12:00:00Z',
     }
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages insert
       { data: newMessage, error: null },
     ]
@@ -1022,6 +1044,8 @@ describe('addMembers', () => {
     fromResults = [
       // admin: chat_channels select (org verification)
       { data: { org_id: 'org-1' }, error: null },
+      // admin: org_members select (user validation)
+      { data: [{ user_id: 'user-2' }, { user_id: 'user-3' }], error: null },
       // admin: chat_channel_members batch upsert (one call for all members)
       { data: null, error: null },
     ]
@@ -1216,6 +1240,8 @@ describe('getMessages (threading)', () => {
   it('filters reply_to_id IS NULL when no parentMessageId provided', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages — top-level only
       { data: [], error: null },
       // profiles
@@ -1244,6 +1270,8 @@ describe('getMessages (threading)', () => {
       reply_count: 0,
     }
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       // chat_messages — thread replies
       { data: [replyMsg], error: null },
       // profiles
@@ -1286,6 +1314,8 @@ describe('getMessages (threading)', () => {
       },
     ]
     fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
       { data: replies, error: null },
       { data: [{ id: 'user-2', display_name: 'Bob', avatar_url: null }], error: null },
     ]
@@ -1319,6 +1349,8 @@ describe('getThreadReplies', () => {
   it('returns replies for the given parent message', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     fromResults = [
+      // chat_channel_members — membership check (inside getMessages)
+      { data: { channel_id: 'ch-1' }, error: null },
       { data: [], error: null },
       { data: [], error: null },
     ]
@@ -1357,7 +1389,11 @@ describe('sendMessage (threading)', () => {
       reply_to_id: null,
       reply_count: 0,
     }
-    fromResults = [{ data: newMessage, error: null }]
+    fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
+      { data: newMessage, error: null },
+    ]
 
     const result = await sendMessage('ch-1', 'Hello')
     expect(result.error).toBeUndefined()
@@ -1379,7 +1415,11 @@ describe('sendMessage (threading)', () => {
       reply_to_id: 'msg-parent',
       reply_count: 0,
     }
-    fromResults = [{ data: replyMessage, error: null }]
+    fromResults = [
+      // chat_channel_members — membership check
+      { data: { channel_id: 'ch-1' }, error: null },
+      { data: replyMessage, error: null },
+    ]
 
     const result = await sendMessage('ch-1', 'Thread reply', 'msg-parent')
     expect(result.error).toBeUndefined()

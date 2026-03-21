@@ -32,23 +32,37 @@ const mockUpload = vi.fn()
 const mockRemove = vi.fn()
 const mockCreateSignedUrl = vi.fn()
 
+const mockSupabaseClient = {
+  auth: {
+    getUser: () => mockGetUser(),
+  },
+  from: () => {
+    const idx = fromCallIndex++
+    return createChainForIndex(idx)
+  },
+  storage: {
+    from: () => ({
+      upload: (...args: unknown[]) => mockUpload(...args),
+      remove: (...args: unknown[]) => mockRemove(...args),
+      createSignedUrl: (...args: unknown[]) => mockCreateSignedUrl(...args),
+    }),
+  },
+}
+
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
-    auth: {
-      getUser: () => mockGetUser(),
-    },
-    from: () => {
-      const idx = fromCallIndex++
-      return createChainForIndex(idx)
-    },
-    storage: {
-      from: () => ({
-        upload: (...args: unknown[]) => mockUpload(...args),
-        remove: (...args: unknown[]) => mockRemove(...args),
-        createSignedUrl: (...args: unknown[]) => mockCreateSignedUrl(...args),
-      }),
-    },
-  })),
+  createClient: vi.fn(async () => mockSupabaseClient),
+}))
+
+vi.mock('@/lib/auth-context', () => ({
+  getAuthContext: vi.fn(async () => {
+    const result = await mockGetUser()
+    const user = result?.data?.user ?? null
+    return {
+      supabase: mockSupabaseClient,
+      user,
+      orgId: 'org-1',
+    }
+  }),
 }))
 
 vi.mock('@/lib/permissions', () => ({
