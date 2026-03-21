@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Presentations | PIPS',
+  description:
+    'Five principles for communicating PIPS improvement results clearly and compellingly to leadership.',
+}
 import {
   Presentation,
   TrendingUp,

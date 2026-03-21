@@ -124,7 +124,6 @@ export const GET = async (request: Request) => {
   const tickets = (ticketRows ?? []) as unknown as TicketRow[]
 
   if (tickets.length === 0) {
-    console.log('[cron/overdue-digest] No overdue tickets found.')
     return NextResponse.json({ orgsNotified: 0, emailsSent: 0, emailsFailed: 0 })
   }
 
@@ -222,10 +221,6 @@ export const GET = async (request: Request) => {
 
     orgsNotified++
   }
-
-  console.log(
-    `[cron/overdue-digest] Done: orgsNotified=${orgsNotified} emailsSent=${emailsSent} emailsFailed=${emailsFailed}`,
-  )
 
   return NextResponse.json({ orgsNotified, emailsSent, emailsFailed })
 }

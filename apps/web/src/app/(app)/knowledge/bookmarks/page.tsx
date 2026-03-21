@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Bookmarks | PIPS',
+  description: 'Your saved knowledge hub content for quick access.',
+}
 import Link from 'next/link'
 import { getUserBookmarksWithContent } from '../actions'
 import { BookmarkList } from './bookmark-list'

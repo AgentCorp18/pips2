@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Form Sandbox | PIPS',
+  description:
+    'Try out any PIPS methodology form in a no-save sandbox before using it in a real project.',
+}
 import { STEP_CONTENT } from '@pips/shared'
 import type { PipsStepNumber } from '@pips/shared'
 import { SandboxForm } from './sandbox-form'

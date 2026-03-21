@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Closed-Loop Case Study | PIPS',
+  description:
+    'How the PIPS team ran a full 6-step improvement cycle on its own application during beta testing and shipped 5 features in a single session.',
+}
 import {
   ArrowRight,
   CheckCircle,
