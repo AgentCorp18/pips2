@@ -41,6 +41,11 @@ export type PathModuleCounts = Record<string, number>
 /** Get all active training paths */
 export const getTrainingPaths = async (): Promise<TrainingPathRow[]> => {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data, error } = await supabase
     .from('training_paths')
     .select('*')
@@ -57,6 +62,11 @@ export const getTrainingPaths = async (): Promise<TrainingPathRow[]> => {
 /** Get module counts grouped by path_id */
 export const getPathModuleCounts = async (): Promise<PathModuleCounts> => {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return {}
+
   const { data, error } = await supabase.from('training_modules').select('path_id')
 
   if (error) {
@@ -74,6 +84,11 @@ export const getPathModuleCounts = async (): Promise<PathModuleCounts> => {
 /** Get all modules across all paths */
 export const getAllModules = async (): Promise<TrainingModuleRow[]> => {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data, error } = await supabase.from('training_modules').select('*').order('sort_order')
 
   if (error) {
@@ -86,6 +101,11 @@ export const getAllModules = async (): Promise<TrainingModuleRow[]> => {
 /** Get modules for a training path */
 export const getTrainingModules = async (pathId: string): Promise<TrainingModuleRow[]> => {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data, error } = await supabase
     .from('training_modules')
     .select('*')

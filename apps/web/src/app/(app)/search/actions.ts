@@ -1,7 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
-import { getCurrentOrg } from '@/lib/get-current-org'
+import { requireAuth } from '@/lib/action-utils'
 import { trackServerEvent } from '@/lib/analytics'
 import { getFormDisplayName } from '@/lib/form-utils'
 import { stepEnumToNumber } from '@pips/shared'
@@ -18,44 +17,25 @@ const PIPS_STEP_LABELS: Record<number, string> = {
 }
 
 /**
- * Resolve the current user's org ID from their membership.
- * Respects the org switcher cookie.
- * Returns null if not authenticated or not a member.
- */
-const resolveOrgId = async (): Promise<string | null> => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const currentOrg = await getCurrentOrg(supabase, user.id)
-
-  return currentOrg?.orgId ?? null
-}
-
-/**
  * Global search across projects and tickets for the command palette.
  * Uses full-text search (tsvector) for tickets and projects,
  * with ilike fallback for project names.
  *
- * If orgId is not provided, it will be resolved from the current user.
+ * The orgId parameter is ignored — the authenticated user's org context
+ * is always resolved via requireAuth() to prevent cross-org enumeration.
  */
 export const globalSearch = async (
   query: string,
-  orgId?: string,
+  _orgId?: string,
 ): Promise<GlobalSearchResponse> => {
+  const auth = await requireAuth()
+  if (!auth.success) return { groups: [], total: 0 }
+  const { supabase, orgId } = auth.ctx
+
   const trimmed = query.trim()
   if (!trimmed) {
     return { groups: [], total: 0 }
   }
-
-  const resolvedOrgId = orgId ?? (await resolveOrgId())
-  if (!resolvedOrgId) {
-    return { groups: [], total: 0 }
-  }
-
-  const supabase = await createClient()
 
   // Check if query looks like a ticket sequence ID (e.g. "TKT-123", "TKT123", or just "123")
   const ticketIdMatch = trimmed.match(/^(?:[A-Za-z]+-?)?(\d+)$/)
@@ -66,7 +46,7 @@ export const globalSearch = async (
     const { data: prefixData } = await supabase
       .from('org_settings')
       .select('ticket_prefix')
-      .eq('org_id', resolvedOrgId)
+      .eq('org_id', orgId)
       .single()
     const prefix = (prefixData?.ticket_prefix as string | undefined) ?? 'TKT'
     const prefixMatch = trimmed.match(/^([A-Za-z]+)-?(\d+)$/)
@@ -77,7 +57,7 @@ export const globalSearch = async (
         .select(
           'id, title, sequence_number, status, project:projects!tickets_project_id_fkey(title)',
         )
-        .eq('org_id', resolvedOrgId)
+        .eq('org_id', orgId)
         .eq('sequence_number', seqNum)
         .maybeSingle()
       if (ticketBySeq) {
@@ -124,7 +104,7 @@ export const globalSearch = async (
   const projectsPromise = supabase
     .from('projects')
     .select('id, title, current_step, status')
-    .eq('org_id', resolvedOrgId)
+    .eq('org_id', orgId)
     .is('archived_at', null)
     .or(`title.ilike.%${sanitized}%,search_vector.fts.${ftsQuery}`)
     .limit(LIMIT_PER_TYPE)
@@ -133,7 +113,7 @@ export const globalSearch = async (
   const ticketsPromise = supabase
     .from('tickets')
     .select('id, title, sequence_number, status, project:projects!tickets_project_id_fkey(title)')
-    .eq('org_id', resolvedOrgId)
+    .eq('org_id', orgId)
     .textSearch('search_vector', ftsQuery, { type: 'plain' })
     .limit(LIMIT_PER_TYPE)
 
@@ -143,7 +123,7 @@ export const globalSearch = async (
     .select(
       'id, form_type, step, title, project_id, project:projects!inner(id, title, org_id, status)',
     )
-    .eq('project.org_id', resolvedOrgId)
+    .eq('project.org_id', orgId)
     .neq('project.status', 'archived')
     .ilike('title', `%${sanitized}%`)
     .limit(LIMIT_PER_TYPE)
@@ -154,7 +134,7 @@ export const globalSearch = async (
     .select(
       'id, user_id, profile:profiles!org_members_user_id_fkey(display_name, full_name, email)',
     )
-    .eq('org_id', resolvedOrgId)
+    .eq('org_id', orgId)
     .or(
       `profile.display_name.ilike.%${sanitized}%,profile.full_name.ilike.%${sanitized}%,profile.email.ilike.%${sanitized}%`,
     )
@@ -164,7 +144,7 @@ export const globalSearch = async (
   const channelsPromise = supabase
     .from('chat_channels')
     .select('id, name, description')
-    .eq('org_id', resolvedOrgId)
+    .eq('org_id', orgId)
     .ilike('name', `%${sanitized}%`)
     .limit(LIMIT_PER_TYPE)
 
@@ -172,7 +152,7 @@ export const globalSearch = async (
   const archivedProjectsPromise = supabase
     .from('projects')
     .select('id, title, current_step')
-    .eq('org_id', resolvedOrgId)
+    .eq('org_id', orgId)
     .eq('status', 'archived')
     .ilike('title', `%${sanitized}%`)
     .limit(LIMIT_PER_TYPE)
@@ -181,7 +161,7 @@ export const globalSearch = async (
   const prefixPromise = supabase
     .from('org_settings')
     .select('ticket_prefix')
-    .eq('org_id', resolvedOrgId)
+    .eq('org_id', orgId)
     .single()
 
   const [
