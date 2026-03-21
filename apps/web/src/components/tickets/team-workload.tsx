@@ -49,9 +49,9 @@ const getWorkloadLevel = (count: number): { label: string; color: string } => {
    ============================================================ */
 
 const getCapacityBarColor = (ratio: number): string => {
-  if (ratio >= 1) return '#EF4444'
-  if (ratio >= 0.75) return '#F59E0B'
-  return '#22C55E'
+  if (ratio >= 1) return '#EF4444' // > 100% — red
+  if (ratio >= 0.75) return '#F59E0B' // 75-100% — amber
+  return '#22C55E' // < 75% — green
 }
 
 /* ============================================================

@@ -11,6 +11,29 @@ type Props = {
   rows: TeamMemberRow[]
 }
 
+/** Color-coded badge showing methodology engagement level based on forms submitted. */
+const EngagementBadge = ({ formsSubmitted }: { formsSubmitted: number }) => {
+  if (formsSubmitted >= 10) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+        High
+      </span>
+    )
+  }
+  if (formsSubmitted >= 5) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+        Medium
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+      Low
+    </span>
+  )
+}
+
 export const TeamMembersTable = ({ rows }: Props) => {
   const { sortedData, sortKey, sortDirection, handleSort } = useSortable(rows)
 
@@ -58,6 +81,34 @@ export const TeamMembersTable = ({ rows }: Props) => {
             onSort={handleSort}
           />
           <SortableHeader
+            label="Forms"
+            sortKey="formsSubmitted"
+            currentSort={sortKey}
+            currentDirection={sortDirection}
+            onSort={handleSort}
+          />
+          <SortableHeader
+            label="Steps"
+            sortKey="stepsUsed"
+            currentSort={sortKey}
+            currentDirection={sortDirection}
+            onSort={handleSort}
+          />
+          <SortableHeader
+            label="Engagement"
+            sortKey="formsSubmitted"
+            currentSort={sortKey}
+            currentDirection={sortDirection}
+            onSort={handleSort}
+          />
+          <SortableHeader
+            label="Last Form"
+            sortKey="lastFormDate"
+            currentSort={sortKey}
+            currentDirection={sortDirection}
+            onSort={handleSort}
+          />
+          <SortableHeader
             label="Last Active"
             sortKey="lastActive"
             currentSort={sortKey}
@@ -75,6 +126,22 @@ export const TeamMembersTable = ({ rows }: Props) => {
             </TableCell>
             <TableCell>{row.ticketsAssigned}</TableCell>
             <TableCell>{row.ticketsCompleted}</TableCell>
+            <TableCell>{row.formsSubmitted}</TableCell>
+            <TableCell>
+              <span title={`${row.stepsUsed} of 6 PIPS steps`}>{row.stepsUsed}/6</span>
+            </TableCell>
+            <TableCell>
+              <EngagementBadge formsSubmitted={row.formsSubmitted} />
+            </TableCell>
+            <TableCell>
+              {row.lastFormDate ? (
+                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <FormattedDate date={row.lastFormDate} />
+                </span>
+              ) : (
+                <span style={{ color: 'var(--color-text-tertiary)' }}>--</span>
+              )}
+            </TableCell>
             <TableCell>
               {row.lastActive ? (
                 <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>

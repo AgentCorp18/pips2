@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
-import { PIPS_STEPS, calculateMethodologyDepth } from '@pips/shared'
+import { PIPS_STEPS } from '@pips/shared'
 
 /* ============================================================
    Types
@@ -160,12 +160,16 @@ export const getDashboardDeltas = async (orgId: string): Promise<DashboardDeltas
   const sevenDaysAgoDate = sevenDaysAgo.toISOString().split('T')[0]!
 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  // "start of month 7 days ago" — same month start since deltas are week-over-week
+  const startOfMonthPrev = startOfMonth // completed this month is cumulative; compare count 7d ago
 
+  // Current values (same as getDashboardStats)
   const [
     openNowRes,
     overdueNowRes,
     completedNowRes,
     projectsNowRes,
+    // Previous week snapshots: tickets that existed & matched criteria 7 days ago
     openPrevRes,
     overduePrevRes,
     completedPrevRes,
@@ -219,7 +223,7 @@ export const getDashboardDeltas = async (orgId: string): Promise<DashboardDeltas
       .select('id', { count: 'exact', head: true })
       .eq('org_id', orgId)
       .eq('status', 'done')
-      .gte('resolved_at', startOfMonth)
+      .gte('resolved_at', startOfMonthPrev)
       .lt('resolved_at', sevenDaysAgoStr),
 
     // Previous (7d ago): projects — created before 7d ago
@@ -755,81 +759,4 @@ export const getRecentActivity = async (orgId: string, limit = 10): Promise<Acti
       userName,
     }
   })
-}
-
-/* ============================================================
-   getComplianceAlerts
-   Returns active projects that fall below the org's minimum
-   methodology depth threshold. Returns null when no threshold is set.
-   ============================================================ */
-
-export type ComplianceAlert = {
-  /** Number of active projects below the threshold */
-  belowCount: number
-  /** The configured threshold (0 = disabled) */
-  threshold: number
-}
-
-export const getComplianceAlerts = async (orgId: string): Promise<ComplianceAlert | null> => {
-  try {
-    await requirePermission(orgId, 'data.view')
-  } catch {
-    return null
-  }
-  const supabase = await createClient()
-
-  // Read the threshold from notification_settings JSONB
-  const { data: orgSettings } = await supabase
-    .from('org_settings')
-    .select('notification_settings')
-    .eq('org_id', orgId)
-    .single()
-
-  const notifSettings = (orgSettings?.notification_settings as Record<string, unknown> | null) ?? {}
-  const threshold =
-    typeof notifSettings.min_methodology_depth === 'number'
-      ? notifSettings.min_methodology_depth
-      : 0
-
-  // Threshold of 0 means disabled — skip the check
-  if (threshold === 0) return null
-
-  // Fetch active project IDs
-  const { data: projects } = await supabase
-    .from('projects')
-    .select('id')
-    .eq('org_id', orgId)
-    .eq('status', 'active')
-    .is('archived_at', null)
-
-  if (!projects || projects.length === 0) return null
-
-  const projectIds = projects.map((p) => p.id)
-
-  // Fetch all form types for these projects
-  const { data: forms } = await supabase
-    .from('project_forms')
-    .select('project_id, form_type')
-    .in('project_id', projectIds)
-
-  // Calculate methodology depth per project
-  const formsByProject = new Map<string, Set<string>>()
-  for (const f of forms ?? []) {
-    const existing = formsByProject.get(f.project_id) ?? new Set<string>()
-    existing.add(f.form_type)
-    formsByProject.set(f.project_id, existing)
-  }
-
-  let belowCount = 0
-  for (const projectId of projectIds) {
-    const completedTypes = formsByProject.get(projectId) ?? new Set<string>()
-    const result = calculateMethodologyDepth(completedTypes)
-    if (result.score < threshold) {
-      belowCount++
-    }
-  }
-
-  if (belowCount === 0) return null
-
-  return { belowCount, threshold }
 }

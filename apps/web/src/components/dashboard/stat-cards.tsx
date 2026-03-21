@@ -17,6 +17,11 @@ import type { DashboardStats, DashboardDeltas, StatDelta } from '@/app/(app)/das
 
 type DeltaIndicatorProps = {
   delta: StatDelta
+  /**
+   * Whether "up" is considered a good direction for this metric.
+   * - true  → green when up, red when down
+   * - false → red when up, green when down
+   */
   upIsGood: boolean
 }
 

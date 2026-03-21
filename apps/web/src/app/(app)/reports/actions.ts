@@ -884,6 +884,10 @@ export type TeamMemberRow = {
   ticketsAssigned: number
   ticketsCompleted: number
   lastActive: string | null
+  // Methodology engagement (populated by getTeamMembersTable)
+  formsSubmitted: number
+  stepsUsed: number
+  lastFormDate: string | null
 }
 
 export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[]> => {
@@ -899,22 +903,39 @@ export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[
 
   const userIds = members.map((m) => m.user_id)
 
-  const [{ data: profiles }, { data: assignedTickets }, { data: latestLogs }] = await Promise.all([
-    supabase.from('profiles').select('id, full_name, display_name').in('id', userIds),
+  // Fetch project IDs for this org so we can scope project_forms queries
+  const { data: orgProjects } = await supabase.from('projects').select('id').eq('org_id', orgId)
+  const projectIds = (orgProjects ?? []).map((p) => p.id)
 
-    supabase
-      .from('tickets')
-      .select('assignee_id, status')
-      .eq('org_id', orgId)
-      .in('assignee_id', userIds),
+  const [{ data: profiles }, { data: assignedTickets }, { data: latestLogs }, formRows] =
+    await Promise.all([
+      supabase.from('profiles').select('id, full_name, display_name').in('id', userIds),
 
-    supabase
-      .from('audit_log')
-      .select('user_id, created_at')
-      .eq('org_id', orgId)
-      .in('user_id', userIds)
-      .order('created_at', { ascending: false }),
-  ])
+      supabase
+        .from('tickets')
+        .select('assignee_id, status')
+        .eq('org_id', orgId)
+        .in('assignee_id', userIds),
+
+      supabase
+        .from('audit_log')
+        .select('user_id, created_at')
+        .eq('org_id', orgId)
+        .in('user_id', userIds)
+        .order('created_at', { ascending: false }),
+
+      // Methodology engagement: forms submitted per user for this org's projects
+      projectIds.length > 0
+        ? supabase
+            .from('project_forms')
+            .select('created_by, step, created_at')
+            .in('project_id', projectIds)
+            .in('created_by', userIds)
+        : Promise.resolve({
+            data: [] as Array<{ created_by: string | null; step: string; created_at: string }>,
+            error: null,
+          }),
+    ])
 
   const profileMap = new Map<string, string>()
   if (profiles) {
@@ -945,6 +966,26 @@ export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[
     }
   }
 
+  // Build methodology engagement maps per user
+  const formsSubmittedByUser = new Map<string, number>()
+  const stepsUsedByUser = new Map<string, Set<string>>()
+  const lastFormDateByUser = new Map<string, string>()
+
+  const forms = formRows.data ?? []
+  for (const f of forms) {
+    if (!f.created_by) continue
+    formsSubmittedByUser.set(f.created_by, (formsSubmittedByUser.get(f.created_by) ?? 0) + 1)
+
+    const stepSet = stepsUsedByUser.get(f.created_by) ?? new Set<string>()
+    stepSet.add(f.step)
+    stepsUsedByUser.set(f.created_by, stepSet)
+
+    const existing = lastFormDateByUser.get(f.created_by)
+    if (!existing || f.created_at > existing) {
+      lastFormDateByUser.set(f.created_by, f.created_at)
+    }
+  }
+
   return members.map((m) => ({
     id: m.user_id,
     name: profileMap.get(m.user_id) ?? 'Unknown',
@@ -952,6 +993,9 @@ export const getTeamMembersTable = async (orgId: string): Promise<TeamMemberRow[
     ticketsAssigned: assignedByUser.get(m.user_id) ?? 0,
     ticketsCompleted: completedByUser.get(m.user_id) ?? 0,
     lastActive: lastActiveByUser.get(m.user_id) ?? null,
+    formsSubmitted: formsSubmittedByUser.get(m.user_id) ?? 0,
+    stepsUsed: stepsUsedByUser.get(m.user_id)?.size ?? 0,
+    lastFormDate: lastFormDateByUser.get(m.user_id) ?? null,
   }))
 }
 
