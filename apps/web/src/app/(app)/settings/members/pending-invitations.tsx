@@ -77,7 +77,7 @@ export const PendingInvitations = ({ orgId, invitations }: PendingInvitationsPro
                 {isExpired ? (
                   <Badge
                     variant="outline"
-                    className="border-red-200 bg-red-50 text-xs text-red-600"
+                    className="border-red-200 bg-red-50 text-xs text-red-600 dark:border-red-800 dark:bg-red-950 dark:text-red-400"
                   >
                     <Clock size={10} className="mr-1" />
                     Expired
@@ -85,7 +85,7 @@ export const PendingInvitations = ({ orgId, invitations }: PendingInvitationsPro
                 ) : (
                   <Badge
                     variant="outline"
-                    className="border-amber-200 bg-amber-50 text-xs text-amber-600"
+                    className="border-amber-200 bg-amber-50 text-xs text-amber-600 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400"
                   >
                     Pending
                   </Badge>

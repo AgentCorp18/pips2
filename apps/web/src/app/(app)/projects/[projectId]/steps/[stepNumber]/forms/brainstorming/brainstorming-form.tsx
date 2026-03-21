@@ -300,7 +300,7 @@ const BrainstormingFields = ({
               onAccept={(text) => setNewIdea(text)}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Input
               value={newIdea}
               onChange={(e) => setNewIdea(e.target.value)}
@@ -317,7 +317,7 @@ const BrainstormingFields = ({
               value={newAuthor}
               onChange={(e) => setNewAuthor(e.target.value)}
               placeholder="Author (optional)"
-              className="w-40"
+              className="w-full sm:w-40"
             />
             <Button type="button" onClick={addIdea}>
               <Plus size={14} />
@@ -418,6 +418,7 @@ const IdeaCard = ({
     <button
       type="button"
       onClick={onVote}
+      aria-label="Vote for this idea"
       className="flex flex-col items-center gap-0.5 rounded p-1 hover:bg-[var(--color-surface-secondary)]"
     >
       <ThumbsUp size={14} className="text-[var(--color-text-tertiary)]" />
@@ -442,7 +443,14 @@ const IdeaCard = ({
 
     {/* Actions */}
     <div className="flex gap-1">
-      <Button type="button" variant="ghost" size="icon-xs" onClick={onToggleSelected} title="Keep">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-xs"
+        onClick={onToggleSelected}
+        title="Keep"
+        aria-label="Keep this idea"
+      >
         <Check size={12} className={isSelected ? 'text-[var(--color-success)]' : ''} />
       </Button>
       <Button
@@ -451,6 +459,7 @@ const IdeaCard = ({
         size="icon-xs"
         onClick={onToggleEliminated}
         title="Eliminate"
+        aria-label="Eliminate this idea"
       >
         <X size={12} className={eliminated ? 'text-[var(--color-error)]' : ''} />
       </Button>

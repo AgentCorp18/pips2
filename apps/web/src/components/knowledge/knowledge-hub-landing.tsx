@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   BookOpen,
   Compass,
@@ -319,6 +320,7 @@ export const KnowledgeHubLanding = ({
 }
 
 const ContentSearchBar = () => {
+  const router = useRouter()
   return (
     <search className="relative">
       <Search
@@ -335,7 +337,7 @@ const ContentSearchBar = () => {
           if (e.key === 'Enter') {
             const value = (e.target as HTMLInputElement).value.trim()
             if (value) {
-              window.location.href = `/knowledge/search?q=${encodeURIComponent(value)}`
+              router.push(`/knowledge/search?q=${encodeURIComponent(value)}`)
             }
           }
         }}

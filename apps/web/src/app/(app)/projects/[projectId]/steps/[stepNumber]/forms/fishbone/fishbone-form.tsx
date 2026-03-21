@@ -280,6 +280,7 @@ const CategoryBranch = ({
                       variant="ghost"
                       size="icon-xs"
                       onClick={() => onRemoveCause(ci)}
+                      aria-label="Remove cause"
                     >
                       <Trash2 size={12} />
                     </Button>
@@ -299,6 +300,7 @@ const CategoryBranch = ({
                         variant="ghost"
                         size="icon-xs"
                         onClick={() => onRemoveSubCause(ci, si)}
+                        aria-label="Remove sub-cause"
                       >
                         <Trash2 size={10} />
                       </Button>
@@ -307,7 +309,7 @@ const CategoryBranch = ({
                   <button
                     type="button"
                     onClick={() => onAddSubCause(ci)}
-                    className="ml-6 text-xs text-[var(--color-text-link)] hover:underline"
+                    className="ml-6 min-h-[44px] px-2 text-xs text-[var(--color-text-link)] hover:underline sm:min-h-0"
                   >
                     + Add sub-cause
                   </button>
