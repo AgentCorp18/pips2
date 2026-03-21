@@ -1,12 +1,35 @@
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, TrendingDown, Timer, FileCheck, Percent, Minus } from 'lucide-react'
 import type { DashboardMetrics } from '@/app/(app)/dashboard/actions'
 
 type MetricsWidgetsProps = {
   metrics: DashboardMetrics
+  /** When true, renders skeleton placeholder cards instead of real data */
+  loading?: boolean
 }
 
-export const MetricsWidgets = ({ metrics }: MetricsWidgetsProps) => {
+const MetricsWidgetsSkeleton = () => (
+  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="metrics-widgets-skeleton">
+    {Array.from({ length: 4 }).map((_, i) => (
+      <Card key={i}>
+        <CardContent className="flex items-center gap-3 py-4">
+          <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-6 w-16" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)
+
+export const MetricsWidgets = ({ metrics, loading = false }: MetricsWidgetsProps) => {
+  if (loading) {
+    return <MetricsWidgetsSkeleton />
+  }
+
   const ticketTrend = metrics.ticketsClosedThisWeek - metrics.ticketsCreatedThisWeek
   const trendPositive = ticketTrend >= 0
 
