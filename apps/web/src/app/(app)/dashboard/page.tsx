@@ -233,16 +233,24 @@ const DashboardPage = async () => {
         <KnowledgeCadenceBar context={dashboardCadenceContext} defaultCollapsed />
       </div>
 
-      {/* Conditional rendering: welcome experience vs full dashboard */}
-      {stats.totalProjects === 0 ? (
-        <>
+      {/* Onboarding checklist — shown until all 4 steps complete or dismissed */}
+      {stats.totalProjects === 0 && (
+        <div className="mb-8">
           <WelcomeCards />
           <div className="mt-6">
             <CreateSampleProject />
           </div>
-        </>
-      ) : (
+        </div>
+      )}
+
+      {/* Full dashboard — hidden until first project exists */}
+      {stats.totalProjects > 0 && (
         <>
+          {/* Onboarding checklist — persists until all 4 steps complete or dismissed */}
+          <div className="mb-8">
+            <WelcomeCards />
+          </div>
+
           {/* Stats cards */}
           <StatCards stats={stats} deltas={deltas} />
 

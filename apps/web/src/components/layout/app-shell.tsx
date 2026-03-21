@@ -19,8 +19,6 @@ import {
   MessageSquare,
   Target,
   Shield,
-  TrendingUp,
-  Briefcase,
   ListTodo,
 } from 'lucide-react'
 import { CommandPalette } from '@/components/layout/command-palette'
@@ -68,12 +66,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     section: 'Reports',
-    items: [
-      { label: 'Reports Hub', href: '/reports', icon: BarChart3, exactMatch: true },
-      { label: 'ROI Dashboard', href: '/reports/roi-dashboard', icon: TrendingUp },
-      { label: 'Portfolio Value', href: '/reports/portfolio-value', icon: Briefcase },
-      { label: 'Executive Summary', href: '/reports/executive-summary', icon: FileText },
-    ],
+    items: [{ label: 'Reports', href: '/reports', icon: BarChart3 }],
   },
   {
     section: 'Admin',

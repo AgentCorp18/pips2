@@ -31,6 +31,7 @@ import { CopyFromProjectDialog } from './copy-from-project-dialog'
 import { FormViewProvider, type FormMode } from './form-view-context'
 import { FormViewToggle } from './form-view-toggle'
 import { SaveStatusIndicator, type SaveState } from './save-status-indicator'
+import { PostFormNudge } from './post-form-nudge'
 import { cn } from '@/lib/utils'
 import type { ZodType } from 'zod'
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes'
@@ -113,6 +114,8 @@ export const FormShell = (props: FormShellProps) => {
   })()
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  // Track whether to show the PostFormNudge after a successful save
+  const [showNudge, setShowNudge] = useState(false)
   // 4.1: Track whether this form has ever been saved in this session for first-save celebration
   const hasBeenSavedRef = useRef(!!validatedInitialData)
   const [lastSaved, setLastSaved] = useState<string>(
@@ -216,6 +219,7 @@ export const FormShell = (props: FormShellProps) => {
         setSaveState('saved')
         setLastSaved(JSON.stringify(data))
         setLastSavedAt(new Date())
+        setShowNudge(true)
         // 4.1: First-save celebration for required forms
         if (!hasBeenSavedRef.current && required) {
           hasBeenSavedRef.current = true
@@ -481,6 +485,17 @@ export const FormShell = (props: FormShellProps) => {
 
         {/* Knowledge Cadence Bar — contextual content links */}
         <KnowledgeCadenceBar context={derivedCadenceContext} defaultCollapsed />
+
+        {/* Post-save nudge — suggests next form after a successful save (project mode only) */}
+        {!isSandbox && projectId && formType && stepNumber >= 1 && stepNumber <= 6 && (
+          <PostFormNudge
+            projectId={projectId}
+            stepNumber={stepNumber as PipsStepNumber}
+            completedFormTypes={new Set([formType])}
+            justCompletedType={formType}
+            visible={showNudge}
+          />
+        )}
       </div>
 
       {/* Discard changes confirmation dialog */}
