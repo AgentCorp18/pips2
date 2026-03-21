@@ -121,11 +121,11 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
                 Projects Completed
               </p>
             </div>
-            <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full"
-              style={{ backgroundColor: 'var(--color-primary)', opacity: 0.12 }}
-            />
-            <div className="absolute flex h-16 w-16 items-center justify-center">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{ backgroundColor: 'var(--color-primary)', opacity: 0.12 }}
+              />
               <Target size={32} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
             </div>
           </div>

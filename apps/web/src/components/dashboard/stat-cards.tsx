@@ -159,7 +159,7 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
         </Link>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {CARDS.map((card) => {
           const Icon = card.icon
           const value = stats[card.key]
@@ -168,7 +168,7 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
           const statDelta = card.deltaKey && deltas ? deltas[card.deltaKey] : undefined
 
           const inner = (
-            <Card data-testid={card.testId}>
+            <Card data-testid={card.testId} className="flex h-full flex-col">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle
                   className="text-sm font-medium"
