@@ -19,7 +19,11 @@ export const exportUserData = async (): Promise<DataExportResult> => {
   // Collect all user data in parallel
   const [profile, memberships, projects, tickets, forms, comments, notifications, auditLog] =
     await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).single(),
+      supabase
+        .from('profiles')
+        .select('id, email, full_name, display_name, avatar_url, created_at')
+        .eq('id', user.id)
+        .single(),
       supabase.from('org_members').select('*, organizations(name, slug)').eq('user_id', user.id),
       supabase
         .from('projects')

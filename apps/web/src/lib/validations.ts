@@ -370,3 +370,12 @@ export type UpdateInitiativeInput = z.infer<typeof updateInitiativeSchema>
 export type AddProjectToInitiativeInput = z.infer<typeof addProjectToInitiativeSchema>
 export type CreateCommentInput = z.infer<typeof createCommentSchema>
 export type UpdateCommentInput = z.infer<typeof updateCommentSchema>
+
+/* ============================================================
+   UUID Validation Utility
+   ============================================================ */
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** Returns true when str is a well-formed UUID (case-insensitive). */
+export const isValidUUID = (str: string): boolean => UUID_RE.test(str)

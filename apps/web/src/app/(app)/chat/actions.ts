@@ -195,7 +195,9 @@ export const getMessages = async (
 
   let query = supabase
     .from('chat_messages')
-    .select('*')
+    .select(
+      'id, channel_id, org_id, author_id, body, mentions, reply_to_id, reply_count, deleted_at, edited_at, created_at',
+    )
     .eq('channel_id', channelId)
     .is('deleted_at', null)
 
