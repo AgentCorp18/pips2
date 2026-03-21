@@ -182,7 +182,16 @@ export const getMessages = async (
 ): Promise<ActionResult<{ messages: MessageWithAuthor[]; hasMore: boolean }>> => {
   const auth = await requireAuth()
   if (!auth.success) return { error: auth.error }
-  const { supabase } = auth.ctx
+  const { supabase, user } = auth.ctx
+
+  // Verify caller is a member of the channel
+  const { data: membership } = await supabase
+    .from('chat_channel_members')
+    .select('channel_id')
+    .eq('channel_id', channelId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!membership) return { error: 'You are not a member of this channel' }
 
   let query = supabase
     .from('chat_messages')
@@ -269,6 +278,15 @@ export const sendMessage = async (
 
   const permError = await checkPermission(orgId, 'chat.send', { supabase, userId: user.id })
   if (permError) return { error: 'Insufficient permissions to send messages' }
+
+  // Verify caller is a member of the channel
+  const { data: membership } = await supabase
+    .from('chat_channel_members')
+    .select('channel_id')
+    .eq('channel_id', channelId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!membership) return { error: 'You are not a member of this channel' }
 
   // Rate limit: 30 messages per minute per user
   const rateLimitResult = await checkRateLimit(`chat:${user.id}`, 30, 60_000)
@@ -585,6 +603,18 @@ export const addMembers = async (channelId: string, userIds: string[]): Promise<
   }
 
   if (userIds.length > 0) {
+    // Validate all userIds belong to this org before inserting
+    const { data: orgMembers } = await admin
+      .from('org_members')
+      .select('user_id')
+      .eq('org_id', orgId)
+      .in('user_id', userIds)
+    const validIds = new Set((orgMembers ?? []).map((m) => m.user_id))
+    const invalidIds = userIds.filter((id) => !validIds.has(id))
+    if (invalidIds.length > 0) {
+      return { error: 'One or more users are not members of this organization' }
+    }
+
     const memberRows = userIds.map((userId) => ({
       channel_id: channelId,
       user_id: userId,

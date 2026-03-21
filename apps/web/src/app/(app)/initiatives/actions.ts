@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireAuth, checkPermission } from '@/lib/action-utils'
-import { createClient } from '@/lib/supabase/server'
 import {
   createInitiativeSchema,
   updateInitiativeSchema,
@@ -217,7 +216,18 @@ export const getInitiativeDetail = async (
    ============================================================ */
 
 export const getInitiativeProgress = async (initiativeId: string): Promise<InitiativeProgress> => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) {
+    return {
+      total_projects: 0,
+      completed_projects: 0,
+      in_progress_projects: 0,
+      total_tickets: 0,
+      completed_tickets: 0,
+      weighted_progress: 0,
+    }
+  }
+  const { supabase } = auth.ctx
 
   // Get all projects linked to this initiative
   const { data: links } = await supabase

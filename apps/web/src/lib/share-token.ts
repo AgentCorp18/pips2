@@ -15,8 +15,13 @@
 
 import { createHmac } from 'crypto'
 
-const SHARE_SECRET =
-  process.env.NOTIFICATION_EMAIL_SECRET ?? 'pips-share-default-dev-secret-change-in-prod'
+const SHARE_SECRET = process.env.NOTIFICATION_EMAIL_SECRET || process.env.SHARE_TOKEN_SECRET || ''
+// In dev, empty string is acceptable. In production, env vars must be set.
+if (!SHARE_SECRET && process.env.NODE_ENV === 'production') {
+  console.error(
+    '[SECURITY] SHARE_TOKEN_SECRET or NOTIFICATION_EMAIL_SECRET must be set in production',
+  )
+}
 
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 

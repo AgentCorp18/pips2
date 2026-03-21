@@ -398,7 +398,9 @@ export const getTickets = async (orgId: string, rawFilters?: Record<string, unkn
    ============================================================ */
 
 export const getTicket = async (ticketId: string) => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return null
+  const { supabase } = auth.ctx
 
   const { data, error } = await supabase
     .from('tickets')

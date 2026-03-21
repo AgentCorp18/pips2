@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/action-utils'
 
 /* ============================================================
    Types
@@ -102,7 +102,9 @@ const describeUpdate = (oldData: RawData, newData: RawData, actorName: string): 
    ============================================================ */
 
 export const getTicketAuditLog = async (ticketId: string): Promise<TicketChangeEntry[]> => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return []
+  const { supabase } = auth.ctx
 
   const { data: logs, error } = await supabase
     .from('audit_log')

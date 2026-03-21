@@ -48,9 +48,19 @@ export type AuthResult = { success: true; ctx: AuthContext } | { success: false;
  *   const { supabase, user, orgId } = auth.ctx
  */
 export const requireAuth = async (): Promise<AuthResult> => {
-  const { supabase, user, orgId } = await getAuthContext()
+  const ctx = await getAuthContext()
+  const { supabase, user, orgId } = ctx
   if (!user) return { success: false, error: 'Not authenticated' }
   if (!orgId) return { success: false, error: 'No organization context' }
+
+  // Block deactivated users
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('deactivated_at')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (profile?.deactivated_at) return { success: false, error: 'Account has been deactivated' }
+
   return { success: true, ctx: { supabase, user, orgId } }
 }
 

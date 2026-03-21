@@ -37,14 +37,15 @@ const checkDatabase = async (): Promise<CheckResult> => {
     const latency = Math.round(performance.now() - start)
 
     if (error) {
-      return { status: 'error', latency_ms: latency, error: error.message }
+      console.error('[health] database check failed:', error.message)
+      return { status: 'error', latency_ms: latency, error: 'Service unavailable' }
     }
 
     return { status: 'ok', latency_ms: latency }
   } catch (err) {
     const latency = Math.round(performance.now() - start)
-    const message = err instanceof Error ? err.message : 'Unknown database error'
-    return { status: 'error', latency_ms: latency, error: message }
+    console.error('[health] database check threw:', err instanceof Error ? err.message : err)
+    return { status: 'error', latency_ms: latency, error: 'Service unavailable' }
   }
 }
 
@@ -58,14 +59,15 @@ const checkAuth = async (): Promise<CheckResult> => {
     const latency = Math.round(performance.now() - start)
 
     if (error) {
-      return { status: 'error', latency_ms: latency, error: error.message }
+      console.error('[health] auth check failed:', error.message)
+      return { status: 'error', latency_ms: latency, error: 'Service unavailable' }
     }
 
     return { status: 'ok', latency_ms: latency }
   } catch (err) {
     const latency = Math.round(performance.now() - start)
-    const message = err instanceof Error ? err.message : 'Unknown auth error'
-    return { status: 'error', latency_ms: latency, error: message }
+    console.error('[health] auth check threw:', err instanceof Error ? err.message : err)
+    return { status: 'error', latency_ms: latency, error: 'Service unavailable' }
   }
 }
 

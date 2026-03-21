@@ -198,7 +198,8 @@ export const listAllUsers = async (search?: string): Promise<PlatformUser[]> => 
     .order('created_at', { ascending: false })
 
   if (search) {
-    query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`)
+    const safeSearch = search.replace(/[,().%]/g, '')
+    query = query.or(`email.ilike.%${safeSearch}%,full_name.ilike.%${safeSearch}%`)
   }
 
   const { data: profiles, error } = await query

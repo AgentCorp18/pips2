@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { requireAuth } from '@/lib/action-utils'
 import { createClient } from '@/lib/supabase/server'
 import { requirePermission } from '@/lib/permissions'
 import { MAX_FILE_SIZE, BLOCKED_EXTENSIONS } from '@/lib/upload-constants'
@@ -26,7 +27,9 @@ export type AttachmentActionState = {
    ============================================================ */
 
 export const getAttachments = async (ticketId: string) => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return []
+  const { supabase } = auth.ctx
 
   const { data, error } = await supabase
     .from('file_attachments')
@@ -215,7 +218,9 @@ export const deleteAttachment = async (attachmentId: string): Promise<Attachment
    ============================================================ */
 
 export const getCommentAttachments = async (commentId: string) => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return []
+  const { supabase } = auth.ctx
 
   const { data, error } = await supabase
     .from('file_attachments')
@@ -241,7 +246,9 @@ export const getCommentAttachments = async (commentId: string) => {
    ============================================================ */
 
 export const getTicketCommentAttachments = async (ticketId: string) => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return []
+  const { supabase } = auth.ctx
 
   const { data, error } = await supabase
     .from('file_attachments')
@@ -359,7 +366,9 @@ export const uploadCommentAttachment = async (
 export const getAttachmentUrl = async (
   attachmentId: string,
 ): Promise<{ url?: string; error?: string }> => {
-  const supabase = await createClient()
+  const auth = await requireAuth()
+  if (!auth.success) return { error: 'Not authenticated' }
+  const { supabase } = auth.ctx
 
   const { data: attachment } = await supabase
     .from('file_attachments')
