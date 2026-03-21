@@ -13,7 +13,10 @@ export const MetricsWidgets = ({ metrics }: MetricsWidgetsProps) => {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="metrics-widgets">
       {/* Completion Rate */}
-      <Card data-testid="metric-completion-rate">
+      <Card
+        data-testid="metric-completion-rate"
+        title="Percentage of projects that have reached completed status"
+      >
         <CardContent className="flex items-center gap-3 py-4">
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
@@ -33,7 +36,10 @@ export const MetricsWidgets = ({ metrics }: MetricsWidgetsProps) => {
       </Card>
 
       {/* Avg Cycle Time */}
-      <Card data-testid="metric-avg-cycle-time">
+      <Card
+        data-testid="metric-avg-cycle-time"
+        title="Average days from project creation to completion, calculated over the last 90 days"
+      >
         <CardContent className="flex items-center gap-3 py-4">
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"

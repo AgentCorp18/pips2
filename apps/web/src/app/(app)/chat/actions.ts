@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAuth, checkPermission } from '@/lib/action-utils'
+import { checkRateLimit } from '@/lib/rate-limit'
 import type { ChatChannel, ChatMessage, ChatSummary, ChatChannelType } from '@/stores/chat-store'
 
 /* ============================================================
@@ -268,6 +269,12 @@ export const sendMessage = async (
 
   const permError = await checkPermission(orgId, 'chat.send', { supabase, userId: user.id })
   if (permError) return { error: 'Insufficient permissions to send messages' }
+
+  // Rate limit: 30 messages per minute per user
+  const rateLimitResult = await checkRateLimit(`chat:${user.id}`, 30, 60_000)
+  if (!rateLimitResult.allowed) {
+    return { error: 'Too many messages. Please wait a moment.' }
+  }
 
   const trimmedBody = body.trim()
   if (!trimmedBody) return { error: 'Message cannot be empty' }

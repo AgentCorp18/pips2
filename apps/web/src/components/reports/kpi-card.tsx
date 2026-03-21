@@ -7,11 +7,12 @@ export type KpiCardProps = {
   icon: LucideIcon
   color?: string
   subtitle?: string
+  tooltip?: string
 }
 
-export const KpiCard = ({ title, value, icon: Icon, color, subtitle }: KpiCardProps) => {
+export const KpiCard = ({ title, value, icon: Icon, color, subtitle, tooltip }: KpiCardProps) => {
   return (
-    <Card>
+    <Card title={tooltip}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
           {title}

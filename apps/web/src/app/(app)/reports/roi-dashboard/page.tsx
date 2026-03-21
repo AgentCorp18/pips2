@@ -217,6 +217,7 @@ const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
                   ? 'Add results metrics to projects'
                   : 'across all projects'
               }
+              tooltip="Sum of financial savings reported in Step 6 Results Metrics across all projects in this period"
             />
             <KpiCard
               title="Weekly Hours Saved"
@@ -232,6 +233,7 @@ const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
                   ? 'No time savings recorded'
                   : 'per week across all projects'
               }
+              tooltip="Total weekly hours saved as reported in Step 6 Results Metrics across all projects"
             />
             <KpiCard
               title="Average ROI"
@@ -241,6 +243,7 @@ const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
               subtitle={
                 roiData.avgRoiPercent === null ? 'No ROI data yet' : 'across projects with data'
               }
+              tooltip="Average return on investment across projects with results data"
             />
             <KpiCard
               title="Projects with ROI Data"
@@ -252,6 +255,7 @@ const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
                   ? 'No results metrics filled'
                   : `of ${correlation.dataPoints.length} total project${correlation.dataPoints.length !== 1 ? 's' : ''}`
               }
+              tooltip="Number of projects that have ROI data entered in Step 6 Results Metrics"
             />
           </div>
         </div>
@@ -295,6 +299,7 @@ const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
                     ? 'No cost measurables set'
                     : 'from measurables targets'
                 }
+                tooltip="Sum of financial savings projected in Step 1 Problem Statement measurable targets across all projects"
               />
               <KpiCard
                 title="Hours Saved Annually"
@@ -310,6 +315,7 @@ const ROIDashboardPage = async ({ searchParams }: ROIDashboardPageProps) => {
                     ? 'No time measurables set'
                     : 'per year from time targets'
                 }
+                tooltip="Time-based measurable savings converted to annual hours, from Step 1 Problem Statement targets"
               />
               <KpiCard
                 title="Measurables Tracked"
