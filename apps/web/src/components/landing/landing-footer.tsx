@@ -12,7 +12,7 @@ const FOOTER_LINKS = {
   Account: [
     { label: 'Sign Up', href: '/signup' },
     { label: 'Sign In', href: '/login' },
-    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Contact', href: 'mailto:hello@pips-app.com' },
   ],
   Legal: [
     { label: 'Privacy Policy', href: '/privacy' },

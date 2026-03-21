@@ -72,7 +72,7 @@ const MethodologyPage = () => {
         <h2 className="text-center text-2xl font-bold text-[var(--color-text-primary)]">
           Three Core Principles
         </h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
+        <div className="mt-8 grid auto-rows-fr gap-6 md:grid-cols-3">
           {[
             {
               title: 'Data Over Opinions',
@@ -92,7 +92,7 @@ const MethodologyPage = () => {
           ].map((principle) => (
             <div
               key={principle.title}
-              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
+              className="h-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
             >
               <h3 className="text-base font-semibold text-[var(--color-text-primary)]">
                 {principle.title}
