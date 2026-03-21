@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { VALID_PERIODS, PERIOD_LABELS } from '@/app/(app)/reports/roi-dashboard/actions'
-import type { Period } from '@/app/(app)/reports/roi-dashboard/actions'
+import { VALID_PERIODS, PERIOD_LABELS } from '@/lib/report-period'
+import type { Period } from '@/lib/report-period'
 
 /* ============================================================
    PeriodSelector

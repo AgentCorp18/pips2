@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
 import { requirePermission } from '@/lib/permissions'
 import { generateShareToken, validateShareToken } from '@/lib/share-token'
-import { parsePeriod } from '../roi-dashboard/actions'
-import type { Period } from '../roi-dashboard/actions'
+import { parsePeriod } from '@/lib/report-period'
+import type { Period } from '@/lib/report-period'
 import { getBaseUrl } from '@/lib/base-url'
 
 const REPORT_TYPE = 'executive-summary'
@@ -57,7 +57,7 @@ export type ResolvedShareToken =
  * Validate a share token and resolve it to orgId + period.
  * This is used by the public share page — no auth required on the caller side.
  */
-export const resolveShareToken = (token: string): ResolvedShareToken => {
+export const resolveShareToken = async (token: string): Promise<ResolvedShareToken> => {
   const payload = validateShareToken(token)
   if (!payload) {
     return { error: 'Invalid or expired share link' }

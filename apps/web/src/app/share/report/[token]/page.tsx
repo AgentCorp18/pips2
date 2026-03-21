@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { validateShareToken } from '@/lib/share-token'
-import { parsePeriod } from '@/app/(app)/reports/roi-dashboard/actions'
+import { parsePeriod } from '@/lib/report-period'
 import { getExecutiveSummaryPublic } from '@/lib/get-executive-summary-public'
 import { formatCurrency } from '@/lib/format-utils'
 

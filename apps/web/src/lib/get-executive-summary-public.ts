@@ -11,8 +11,8 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { ExecutiveSummaryData } from '@/app/(app)/reports/roi-dashboard/actions'
-import { getPeriodBounds, PERIOD_LABELS } from '@/app/(app)/reports/roi-dashboard/actions'
-import type { Period } from '@/app/(app)/reports/roi-dashboard/actions'
+import { getPeriodBounds, PERIOD_LABELS } from '@/lib/report-period'
+import type { Period } from '@/lib/report-period'
 import type { ResultsMetricsData, ProblemStatementData } from '@/lib/form-schemas'
 
 const TOTAL_FORM_TYPES = 25
@@ -38,11 +38,7 @@ export const getExecutiveSummaryPublic = async (
 
   const periodBounds = getPeriodBounds(period)
 
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('name')
-    .eq('id', orgId)
-    .single()
+  const { data: org } = await supabase.from('organizations').select('name').eq('id', orgId).single()
 
   const orgName = org?.name ?? 'Your Organization'
   const periodLabel = periodBounds?.label ?? PERIOD_LABELS[period] ?? 'All Time'

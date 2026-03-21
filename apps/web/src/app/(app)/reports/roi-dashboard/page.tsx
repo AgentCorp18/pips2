@@ -23,12 +23,8 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import { TeamPerformanceTable } from '@/components/reports/team-performance-table'
-import {
-  getROIDashboardData,
-  getMethodologyCorrelation,
-  getTeamPerformance,
-  parsePeriod,
-} from './actions'
+import { getROIDashboardData, getMethodologyCorrelation, getTeamPerformance } from './actions'
+import { parsePeriod } from '@/lib/report-period'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
 import { formatCurrency } from '@/lib/format-utils'
