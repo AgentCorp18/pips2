@@ -129,7 +129,7 @@ export const OnboardingForm = () => {
                       color: 'var(--color-text-tertiary)',
                     }}
                   >
-                    pips.app/
+                    pips-app.vercel.app/
                   </span>
                   <Input
                     id="slug"

@@ -41,9 +41,9 @@ describe('OnboardingForm', () => {
     expect(screen.getByText('URL slug *')).toBeTruthy()
   })
 
-  it('renders pips.app/ prefix', () => {
+  it('renders pips-app.vercel.app/ prefix', () => {
     render(<OnboardingForm />)
-    expect(screen.getByText('pips.app/')).toBeTruthy()
+    expect(screen.getByText('pips-app.vercel.app/')).toBeTruthy()
   })
 
   it('renders name input with placeholder', () => {

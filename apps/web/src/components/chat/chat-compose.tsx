@@ -85,6 +85,9 @@ export const ChatCompose = ({ channelId, onSend, disabled }: Props) => {
           <Send size={16} />
         </Button>
       </div>
+      <p className="mt-1.5 text-[11px] text-[var(--color-text-tertiary)]">
+        Tip: Type @username to mention someone
+      </p>
     </div>
   )
 }
