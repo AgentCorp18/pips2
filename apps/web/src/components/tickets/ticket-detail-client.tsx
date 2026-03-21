@@ -133,6 +133,7 @@ type TicketDetailClientProps = {
   orgProjects: OrgProject[]
   linkedInitiative: LinkedInitiative | null
   parentTicket?: ParentTicketInfo
+  isAdminOrOwner?: boolean
 }
 
 /* ============================================================
@@ -146,6 +147,7 @@ export const TicketDetailClient = ({
   orgProjects,
   linkedInitiative,
   parentTicket,
+  isAdminOrOwner = false,
 }: TicketDetailClientProps) => {
   const [isPending, startTransition] = useTransition()
 
@@ -154,6 +156,10 @@ export const TicketDetailClient = ({
   const [titleDraft, setTitleDraft] = useState(ticket.title)
   const [editingDesc, setEditingDesc] = useState(false)
   const [descDraft, setDescDraft] = useState(ticket.description ?? '')
+
+  // Tag editing state
+  const [tags, setTags] = useState<string[]>(ticket.tags)
+  const [tagInput, setTagInput] = useState('')
 
   const saveField = (field: string, value: unknown) => {
     startTransition(async () => {
@@ -210,6 +216,25 @@ export const TicketDetailClient = ({
     } else {
       setEditingDesc(false)
     }
+  }
+
+  const saveTags = (nextTags: string[]) => {
+    setTags(nextTags)
+    startTransition(async () => {
+      await updateTicket(ticket.id, { tags: nextTags })
+    })
+  }
+
+  const addTag = () => {
+    const trimmed = tagInput.trim()
+    if (trimmed && !tags.includes(trimmed)) {
+      saveTags([...tags, trimmed])
+    }
+    setTagInput('')
+  }
+
+  const removeTag = (tag: string) => {
+    saveTags(tags.filter((t) => t !== tag))
   }
 
   return (
@@ -433,7 +458,9 @@ export const TicketDetailClient = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {TYPE_OPTIONS.map((o) => (
+              {TYPE_OPTIONS.filter(
+                (o) => o.value !== 'ceo_request' || isAdminOrOwner,
+              ).map((o) => (
                 <SelectItem key={o.value} value={o.value}>
                   {o.label}
                 </SelectItem>
@@ -516,22 +543,63 @@ export const TicketDetailClient = ({
         </SidebarField>
 
         {/* Tags */}
-        {ticket.tags.length > 0 && (
-          <SidebarField label="Tags" icon={<Tag size={14} />}>
-            <div className="flex flex-wrap gap-1" data-testid="ticket-tags">
-              {ticket.tags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="outline"
-                  className="text-xs"
-                  data-testid={`ticket-tag-${tag}`}
-                >
-                  {tag}
-                </Badge>
-              ))}
+        <SidebarField label="Tags" icon={<Tag size={14} />}>
+          <div className="space-y-1.5">
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-1" data-testid="ticket-tags">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs"
+                    style={{
+                      borderColor: 'var(--color-border)',
+                      color: 'var(--color-text-secondary)',
+                    }}
+                    data-testid={`ticket-tag-${tag}`}
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      aria-label={`Remove tag ${tag}`}
+                      onClick={() => removeTag(tag)}
+                      disabled={isPending}
+                      className="rounded-full transition-colors hover:text-[var(--color-error)]"
+                    >
+                      <X size={11} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-1">
+              <Input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    addTag()
+                  }
+                }}
+                placeholder="Add tag..."
+                className="h-6 text-xs"
+                disabled={isPending}
+                data-testid="ticket-tag-input"
+              />
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                onClick={addTag}
+                disabled={isPending || !tagInput.trim()}
+                aria-label="Add tag"
+                data-testid="ticket-tag-add-button"
+              >
+                <Check size={12} />
+              </Button>
             </div>
-          </SidebarField>
-        )}
+          </div>
+        </SidebarField>
 
         {/* Dates */}
         <div

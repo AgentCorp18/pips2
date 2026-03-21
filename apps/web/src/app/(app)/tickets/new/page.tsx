@@ -87,6 +87,8 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
     name: p.title as string,
   }))
 
+  const isAdminOrOwner = currentOrg.role === 'admin' || currentOrg.role === 'owner'
+
   return (
     <div className="mx-auto max-w-2xl">
       <Card>
@@ -108,6 +110,7 @@ const NewTicketPage = async ({ searchParams }: NewTicketPageProps) => {
             projects={projects}
             parentId={parentContext?.id}
             initialExpanded
+            isAdminOrOwner={isAdminOrOwner}
           />
         </CardContent>
       </Card>

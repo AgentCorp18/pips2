@@ -175,6 +175,17 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
     }
   }
 
+  // Fetch current user's role in the ticket's org (for ceo_request visibility)
+  const { data: currentUserMembership } = await supabase
+    .from('org_members')
+    .select('role')
+    .eq('org_id', ticket.org_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdminOrOwner =
+    currentUserMembership?.role === 'admin' || currentUserMembership?.role === 'owner'
+
   // Fetch org members for assignee selector and mentions
   const { data: membersRaw } = await supabase
     .from('org_members')
@@ -294,6 +305,7 @@ const TicketDetailPage = async ({ params }: TicketDetailPageProps) => {
             ? { id: parentData.id, title: parentData.title, sequenceId: parentSequenceId }
             : undefined
         }
+        isAdminOrOwner={isAdminOrOwner}
       />
 
       {cadenceContext && (

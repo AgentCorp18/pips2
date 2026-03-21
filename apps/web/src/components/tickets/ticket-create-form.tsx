@@ -38,6 +38,7 @@ type TicketCreateFormProps = {
   projects: Project[]
   parentId?: string
   initialExpanded?: boolean
+  isAdminOrOwner?: boolean
 }
 
 /* ============================================================
@@ -51,6 +52,7 @@ export const TicketCreateForm = ({
   projects,
   parentId,
   initialExpanded = false,
+  isAdminOrOwner = false,
 }: TicketCreateFormProps) => {
   const router = useRouter()
   const hasRedirected = useRef(false)
@@ -225,7 +227,9 @@ export const TicketCreateForm = ({
                   <SelectItem value="bug">Bug</SelectItem>
                   <SelectItem value="feature">Feature</SelectItem>
                   <SelectItem value="pips_project">PIPS Project</SelectItem>
-                  <SelectItem value="ceo_request">CEO Request</SelectItem>
+                  {isAdminOrOwner && (
+                    <SelectItem value="ceo_request">CEO Request</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -345,7 +349,7 @@ export const TicketCreateForm = ({
               type="button"
               variant="outline"
               disabled={pending}
-              onClick={() => router.back()}
+              onClick={() => router.push('/tickets')}
               data-testid="cancel-ticket-button"
             >
               Cancel
