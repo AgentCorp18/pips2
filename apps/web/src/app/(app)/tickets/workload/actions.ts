@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { checkPermission } from '@/lib/action-utils'
+import { isValidUUID } from '@/lib/validations'
 
 /* ============================================================
    Types
@@ -72,7 +73,7 @@ export const getWorkloadData = async (
     .in('status', activeStatuses)
     .limit(1000)
 
-  if (filters?.project_id) {
+  if (filters?.project_id && isValidUUID(filters.project_id)) {
     query = query.eq('project_id', filters.project_id)
   }
 

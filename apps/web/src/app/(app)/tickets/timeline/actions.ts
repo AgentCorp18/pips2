@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { checkPermission } from '@/lib/action-utils'
+import { isValidUUID } from '@/lib/validations'
 
 /* ============================================================
    Types
@@ -72,10 +73,10 @@ export const getTicketsForTimeline = async (
     .order('created_at', { ascending: true })
     .limit(500)
 
-  if (filters?.assignee_id) {
+  if (filters?.assignee_id && isValidUUID(filters.assignee_id)) {
     query = query.eq('assignee_id', filters.assignee_id)
   }
-  if (filters?.project_id) {
+  if (filters?.project_id && isValidUUID(filters.project_id)) {
     query = query.eq('project_id', filters.project_id)
   }
   if (filters?.priority && filters.priority.length > 0) {
