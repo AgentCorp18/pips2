@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 }
 
 export default async function ChatPage() {
-  const [{ user }, result] = await Promise.all([getAuthContext(), getChannels()])
+  // Sequential to avoid race condition — getChannels uses requireAuth which
+  // reads the org cookie, and parallel execution can get different orgId values.
+  const { user } = await getAuthContext()
+  const result = await getChannels()
   const channels = result.data ?? []
 
   return (

@@ -132,9 +132,9 @@ export const loadFormData = async (
   formType: string,
 ): Promise<Record<string, unknown> | null> => {
   const auth = await requireAuth()
-  // loadFormData is called from Server Components (page.tsx files) — redirect
-  // to login so users see a clear explanation instead of an empty form.
-  if (!auth.success) redirect('/login')
+  // Return null on auth failure — redirect() inside Promise.all corrupts
+  // the async context and causes error pages instead of login redirect.
+  if (!auth.success) return null
   const { supabase } = auth.ctx
 
   const stepEnum = stepNumberToEnum(stepNumber)
