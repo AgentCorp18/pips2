@@ -226,7 +226,7 @@ export const BulkActionsBar = ({ selectedIds, onClear, members = [] }: BulkActio
       </Button>
 
       {error && (
-        <span role="alert" className="text-sm text-red-600">
+        <span role="alert" className="text-sm text-red-600 dark:text-red-400">
           {error}
         </span>
       )}

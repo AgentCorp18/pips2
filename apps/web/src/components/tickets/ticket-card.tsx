@@ -22,16 +22,34 @@ import type { TicketStatus, TicketPriority, TicketType } from '@/types/tickets'
    ============================================================ */
 
 const STATUS_CONFIG: Record<TicketStatus, { label: string; className: string }> = {
-  backlog: { label: 'Backlog', className: 'bg-gray-100 text-gray-700' },
-  todo: { label: 'Todo', className: 'bg-blue-100 text-blue-700' },
+  backlog: {
+    label: 'Backlog',
+    className: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  },
+  todo: {
+    label: 'Todo',
+    className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  },
   in_progress: {
     label: 'In Progress',
-    className: 'bg-amber-100 text-amber-700',
+    className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
   },
-  in_review: { label: 'In Review', className: 'bg-purple-100 text-purple-700' },
-  blocked: { label: 'Blocked', className: 'bg-red-100 text-red-700' },
-  done: { label: 'Done', className: 'bg-green-100 text-green-700' },
-  cancelled: { label: 'Cancelled', className: 'bg-gray-100 text-gray-500' },
+  in_review: {
+    label: 'In Review',
+    className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  },
+  blocked: {
+    label: 'Blocked',
+    className: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  },
+  done: {
+    label: 'Done',
+    className: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    className: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+  },
 }
 
 const PRIORITY_CONFIG: Record<TicketPriority, { label: string; color: string }> = {
@@ -115,7 +133,7 @@ export const TicketCard = ({
           {isBlocked && (
             <div
               className="mb-2 flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium"
-              style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}
+              style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#DC2626' }}
               data-testid="ticket-card-blocked-badge"
               role="status"
               aria-label="Blocked by another ticket"

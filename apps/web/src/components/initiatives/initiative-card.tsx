@@ -30,17 +30,41 @@ const getProgressColor = (progress: number): string => {
 }
 
 const STATUS_STYLES: Record<InitiativeStatus, { label: string; className: string }> = {
-  draft: { label: 'Draft', className: 'bg-gray-100 text-gray-700' },
-  active: { label: 'Active', className: 'bg-green-100 text-green-700' },
-  on_hold: { label: 'On Hold', className: 'bg-amber-100 text-amber-700' },
-  completed: { label: 'Completed', className: 'bg-blue-100 text-blue-700' },
-  archived: { label: 'Archived', className: 'bg-gray-100 text-gray-500' },
+  draft: {
+    label: 'Draft',
+    className: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  },
+  active: {
+    label: 'Active',
+    className: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
+  },
+  on_hold: {
+    label: 'On Hold',
+    className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  },
+  completed: {
+    label: 'Completed',
+    className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  },
+  archived: {
+    label: 'Archived',
+    className: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+  },
 }
 
 const DEADLINE_BADGE: Record<DeadlineStatus, { label: string; className: string }> = {
-  on_track: { label: 'On Track', className: 'bg-green-100 text-green-700' },
-  at_risk: { label: 'At Risk', className: 'bg-amber-100 text-amber-700' },
-  overdue: { label: 'Overdue', className: 'bg-red-100 text-red-700' },
+  on_track: {
+    label: 'On Track',
+    className: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
+  },
+  at_risk: {
+    label: 'At Risk',
+    className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  },
+  overdue: {
+    label: 'Overdue',
+    className: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  },
 }
 
 export const InitiativeCard = ({ initiative }: InitiativeCardProps) => {
@@ -97,7 +121,7 @@ export const InitiativeCard = ({ initiative }: InitiativeCardProps) => {
       )}
 
       {initiative.totalSavings != null && initiative.totalSavings > 0 && (
-        <div className="mb-3 flex items-center gap-1 text-xs font-medium text-green-700">
+        <div className="mb-3 flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
           <TrendingUp size={12} />
           <span data-testid="initiative-savings">
             {formatCurrency(initiative.totalSavings)} savings

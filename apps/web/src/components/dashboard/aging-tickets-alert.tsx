@@ -31,7 +31,7 @@ export const AgingTicketsAlert = ({ tickets }: AgingTicketsAlertProps) => {
           Aging Tickets
         </CardTitle>
         {blockedCount > 0 && (
-          <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+          <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-300">
             <ShieldAlert size={11} />
             {blockedCount} blocked
           </span>
@@ -62,7 +62,7 @@ export const AgingTicketsAlert = ({ tickets }: AgingTicketsAlertProps) => {
                   {isBlocked && (
                     <span
                       className="inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide"
-                      style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}
+                      style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#dc2626' }}
                       data-testid="blocked-badge"
                     >
                       <ShieldAlert size={10} />

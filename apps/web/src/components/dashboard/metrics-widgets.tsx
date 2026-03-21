@@ -43,7 +43,7 @@ export const MetricsWidgets = ({ metrics, loading = false }: MetricsWidgetsProps
         <CardContent className="flex items-center gap-3 py-4">
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: '#DCFCE7' }}
+            style={{ backgroundColor: 'rgba(34, 197, 94, 0.12)' }}
           >
             <Percent size={18} style={{ color: '#22C55E' }} aria-hidden="true" />
           </div>
@@ -66,7 +66,7 @@ export const MetricsWidgets = ({ metrics, loading = false }: MetricsWidgetsProps
         <CardContent className="flex items-center gap-3 py-4">
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: '#DBEAFE' }}
+            style={{ backgroundColor: 'rgba(59, 130, 246, 0.12)' }}
           >
             <Timer size={18} style={{ color: '#3B82F6' }} aria-hidden="true" />
           </div>
@@ -86,7 +86,11 @@ export const MetricsWidgets = ({ metrics, loading = false }: MetricsWidgetsProps
         <CardContent className="flex items-center gap-3 py-4">
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: trendPositive ? '#DCFCE7' : '#FEE2E2' }}
+            style={{
+              backgroundColor: trendPositive
+                ? 'rgba(34, 197, 94, 0.12)'
+                : 'rgba(239, 68, 68, 0.12)',
+            }}
           >
             {ticketTrend > 0 ? (
               <TrendingUp size={18} style={{ color: '#22C55E' }} aria-hidden="true" />
@@ -116,7 +120,7 @@ export const MetricsWidgets = ({ metrics, loading = false }: MetricsWidgetsProps
         <CardContent className="flex items-center gap-3 py-4">
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: '#F3E8FF' }}
+            style={{ backgroundColor: 'rgba(168, 85, 247, 0.12)' }}
           >
             <FileCheck size={18} style={{ color: '#8B5CF6' }} aria-hidden="true" />
           </div>

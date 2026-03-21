@@ -134,7 +134,7 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
           <div className="grid gap-3 pb-4 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard
               icon={CheckCircle2}
-              iconBg="#DCFCE7"
+              iconBg="rgba(34, 197, 94, 0.12)"
               iconColor="#22C55E"
               value={String(data.projectsCompleted)}
               label="Projects Completed"
@@ -142,7 +142,7 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
             />
             <MetricCard
               icon={TicketCheck}
-              iconBg="#DBEAFE"
+              iconBg="rgba(59, 130, 246, 0.12)"
               iconColor="#3B82F6"
               value={String(data.ticketsResolved)}
               label="Tickets Resolved"
@@ -150,7 +150,7 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
             />
             <MetricCard
               icon={FileText}
-              iconBg="#F3E8FF"
+              iconBg="rgba(168, 85, 247, 0.12)"
               iconColor="#8B5CF6"
               value={String(data.formsCompleted)}
               label="Forms Completed"
@@ -160,10 +160,10 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
               icon={Target}
               iconBg={
                 depthScore !== null && depthScore >= 70
-                  ? '#DCFCE7'
+                  ? 'rgba(34, 197, 94, 0.12)'
                   : depthScore !== null && depthScore >= 40
-                    ? '#FEF9C3'
-                    : '#FEE2E2'
+                    ? 'rgba(234, 179, 8, 0.12)'
+                    : 'rgba(239, 68, 68, 0.12)'
               }
               iconColor={depthColor(depthScore)}
               value={depthScore !== null ? `${depthScore}` : '--'}
@@ -173,7 +173,7 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
             />
             <MetricCard
               icon={Brain}
-              iconBg="#FEF3C7"
+              iconBg="rgba(245, 158, 11, 0.12)"
               iconColor="#D97706"
               value={String(data.rootCausesIdentified)}
               label="Root Causes Found"
@@ -181,7 +181,7 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
             />
             <MetricCard
               icon={Lightbulb}
-              iconBg="#ECFDF5"
+              iconBg="rgba(16, 185, 129, 0.12)"
               iconColor="#059669"
               value={String(data.solutionsEvaluated)}
               label="Solutions Evaluated"
@@ -189,7 +189,7 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
             />
             <MetricCard
               icon={BookOpen}
-              iconBg="#E0F2FE"
+              iconBg="rgba(14, 165, 233, 0.12)"
               iconColor="#0891B2"
               value={String(data.lessonsDocumented)}
               label="Lessons Documented"
@@ -197,7 +197,7 @@ export const OrgImpactSummary = ({ data }: OrgImpactSummaryProps) => {
             />
             <MetricCard
               icon={Timer}
-              iconBg="#EDE9FE"
+              iconBg="rgba(139, 92, 246, 0.12)"
               iconColor="#4338CA"
               value={data.avgCycleTimeDays !== null ? `${data.avgCycleTimeDays}d` : '--'}
               label="Avg Cycle Time"

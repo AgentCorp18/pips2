@@ -103,7 +103,7 @@ export const KanbanCard = ({
       {isBlocked && (
         <div
           className="mb-2 flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium"
-          style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}
+          style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#DC2626' }}
           data-testid="kanban-card-blocked-badge"
           role="status"
           aria-label="Blocked by another ticket"

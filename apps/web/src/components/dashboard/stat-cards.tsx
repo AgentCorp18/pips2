@@ -146,15 +146,21 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
       {hasBlockers && (
         <Link
           href="/tickets?status=blocked"
-          className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 transition-colors hover:bg-red-100"
+          className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:hover:bg-red-900"
           data-testid="stat-blocked-tickets-banner"
         >
-          <ShieldAlert size={18} className="shrink-0 text-red-600" aria-hidden="true" />
+          <ShieldAlert
+            size={18}
+            className="shrink-0 text-red-600 dark:text-red-400"
+            aria-hidden="true"
+          />
           <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-            <span className="text-sm font-semibold text-red-700">
+            <span className="text-sm font-semibold text-red-700 dark:text-red-300">
               {stats.blockedTickets} Blocked Ticket{stats.blockedTickets !== 1 ? 's' : ''}
             </span>
-            <span className="text-xs text-red-500">These need attention — click to view</span>
+            <span className="text-xs text-red-500 dark:text-red-400">
+              These need attention — click to view
+            </span>
           </div>
         </Link>
       )}
@@ -191,7 +197,7 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
                 </div>
                 {/* Show blocked chip inside the Open Tickets card */}
                 {card.key === 'openTickets' && hasBlockers && (
-                  <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                  <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">
                     <ShieldAlert size={10} aria-hidden="true" />
                     {stats.blockedTickets} blocked
                   </div>

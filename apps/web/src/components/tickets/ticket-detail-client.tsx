@@ -65,21 +65,21 @@ const TYPE_OPTIONS: { value: TicketType; label: string }[] = [
 ]
 
 const STATUS_COLORS: Record<TicketStatus, string> = {
-  backlog: 'bg-gray-100 text-gray-700',
-  todo: 'bg-blue-100 text-blue-700',
-  in_progress: 'bg-amber-100 text-amber-700',
-  in_review: 'bg-purple-100 text-purple-700',
-  blocked: 'bg-red-100 text-red-700',
-  done: 'bg-green-100 text-green-700',
-  cancelled: 'bg-gray-100 text-gray-500',
+  backlog: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  todo: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  in_progress: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  in_review: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  blocked: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  done: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  cancelled: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
 }
 
 const PRIORITY_COLORS: Record<TicketPriority, string> = {
-  critical: 'bg-red-100 text-red-700',
-  high: 'bg-orange-100 text-orange-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-blue-100 text-blue-700',
-  none: 'bg-gray-100 text-gray-500',
+  critical: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+  low: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  none: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
 }
 
 /* ============================================================
@@ -458,9 +458,7 @@ export const TicketDetailClient = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {TYPE_OPTIONS.filter(
-                (o) => o.value !== 'ceo_request' || isAdminOrOwner,
-              ).map((o) => (
+              {TYPE_OPTIONS.filter((o) => o.value !== 'ceo_request' || isAdminOrOwner).map((o) => (
                 <SelectItem key={o.value} value={o.value}>
                   {o.label}
                 </SelectItem>
