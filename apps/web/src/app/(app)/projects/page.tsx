@@ -353,7 +353,7 @@ const BoardLayoutToggle = ({ currentLayout }: { currentLayout: 'columns' | 'swim
           : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
       }`}
     >
-      <Columns3 size={13} />
+      <Columns3 size={13} aria-hidden="true" />
       Status
     </Link>
     <Link
@@ -364,7 +364,7 @@ const BoardLayoutToggle = ({ currentLayout }: { currentLayout: 'columns' | 'swim
           : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
       }`}
     >
-      <Rows3 size={13} />
+      <Rows3 size={13} aria-hidden="true" />
       By Step
     </Link>
   </div>
