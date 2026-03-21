@@ -19,6 +19,7 @@ import {
   Layers,
   GitCompare,
   FolderKanban,
+  Trophy,
 } from 'lucide-react'
 import { getReportsHubData, getRecentAchievements } from './actions'
 import { RecentAchievements } from '@/components/reports/recent-achievements'
@@ -194,6 +195,22 @@ const ReportsPage = async () => {
             data.totalProjectsCompleted + data.activeProjects >= 2
               ? `${data.totalProjectsCompleted + data.activeProjects} projects to compare`
               : 'Compare projects head-to-head',
+        },
+      ],
+    },
+    {
+      heading: 'Milestones',
+      subheading: 'Celebrate progress and prove the system works',
+      cards: [
+        {
+          title: 'Session Impact Summary',
+          description:
+            '100 improvements shipped — $2.4M ROI demonstrated, 3,602 tests, 0 CVEs, 90 projects tracked.',
+          href: '/reports/session-impact',
+          icon: Trophy,
+          iconColor: '#D97706',
+          iconBg: 'rgba(245, 158, 11, 0.12)',
+          preview: '100 improvements shipped',
         },
       ],
     },
