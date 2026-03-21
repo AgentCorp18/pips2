@@ -69,6 +69,7 @@ export const MarkdownContent = ({ content }: MarkdownContentProps) => {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, rehypeHighlight]}
         components={components}
+        skipHtml={true}
       >
         {content}
       </ReactMarkdown>
