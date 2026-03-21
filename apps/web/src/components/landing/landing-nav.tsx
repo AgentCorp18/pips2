@@ -67,13 +67,13 @@ export const LandingNav = () => {
         <div className="flex items-center gap-2 md:hidden">
           <Link
             href="/login"
-            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+            className="inline-flex min-h-[44px] items-center text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
             Sign In
           </Link>
           <Link
             href="/signup"
-            className="rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 py-1.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)]"
+            className="inline-flex min-h-[44px] items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)]"
           >
             Start Free
           </Link>
@@ -83,7 +83,7 @@ export const LandingNav = () => {
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((prev) => !prev)}
-            className="ml-1 rounded-md p-1.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            className="ml-1 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>

@@ -258,7 +258,7 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
             Manage your process improvement projects
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <ExportProjectsButton />
           <ViewToggle current={view} basePath="/projects" />
           <Button asChild variant="outline" className="gap-2" data-testid="browse-templates-button">

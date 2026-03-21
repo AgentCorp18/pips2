@@ -201,16 +201,16 @@ const MethodologyPage = () => {
         <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
           Start using PIPS today — free for teams getting started.
         </p>
-        <div className="mt-6 flex items-center justify-center gap-4">
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             href="/signup"
-            className="rounded-lg bg-[var(--color-primary)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)]"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-[var(--color-primary)] px-6 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] sm:w-auto"
           >
             Get Started Free
           </Link>
           <Link
             href="/book"
-            className="rounded-lg border border-[var(--color-border)] px-6 py-2.5 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-secondary)]"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-[var(--color-border)] px-6 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-secondary)] sm:w-auto"
           >
             Read the Book
           </Link>

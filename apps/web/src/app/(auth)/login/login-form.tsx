@@ -84,6 +84,7 @@ export const LoginForm = () => {
               defaultValue={state.email ?? ''}
               aria-invalid={!!state.fieldErrors?.email}
               aria-describedby={state.fieldErrors?.email ? 'email-error' : undefined}
+              className="h-11 sm:h-9"
             />
             {state.fieldErrors?.email && (
               <p id="email-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
@@ -113,6 +114,7 @@ export const LoginForm = () => {
               disabled={isPending}
               aria-invalid={!!state.fieldErrors?.password}
               aria-describedby={state.fieldErrors?.password ? 'password-error' : undefined}
+              className="h-11 sm:h-9"
             />
             {state.fieldErrors?.password && (
               <p id="password-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
@@ -121,7 +123,7 @@ export const LoginForm = () => {
             )}
           </div>
 
-          <Button type="submit" className="mt-2 w-full" disabled={isPending}>
+          <Button type="submit" className="mt-2 h-11 w-full sm:h-9" disabled={isPending}>
             {isPending ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>

@@ -73,6 +73,7 @@ export const SignupForm = () => {
               disabled={isPending}
               aria-invalid={!!state.fieldErrors?.displayName}
               aria-describedby={state.fieldErrors?.displayName ? 'name-error' : undefined}
+              className="h-11 sm:h-9"
             />
             {state.fieldErrors?.displayName && (
               <p id="name-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
@@ -93,6 +94,7 @@ export const SignupForm = () => {
               disabled={isPending}
               aria-invalid={!!state.fieldErrors?.email}
               aria-describedby={state.fieldErrors?.email ? 'signup-email-error' : undefined}
+              className="h-11 sm:h-9"
             />
             {state.fieldErrors?.email && (
               <p
@@ -118,6 +120,7 @@ export const SignupForm = () => {
               disabled={isPending}
               aria-invalid={!!state.fieldErrors?.password}
               aria-describedby={state.fieldErrors?.password ? 'signup-password-error' : undefined}
+              className="h-11 sm:h-9"
             />
             {state.fieldErrors?.password ? (
               <p
@@ -134,7 +137,7 @@ export const SignupForm = () => {
             )}
           </div>
 
-          <Button type="submit" className="mt-2 w-full" disabled={isPending}>
+          <Button type="submit" className="mt-2 h-11 w-full sm:h-9" disabled={isPending}>
             {isPending ? 'Creating account...' : 'Create account'}
           </Button>
 
