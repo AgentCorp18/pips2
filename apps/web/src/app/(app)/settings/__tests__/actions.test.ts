@@ -76,6 +76,7 @@ const validSettingsFields = {
   week_start: 'monday',
   default_ticket_priority: 'medium',
   ticket_prefix: 'PIPS',
+  min_methodology_depth: '0',
 }
 
 const emptyState = {}
@@ -299,7 +300,7 @@ describe('updateOrgSettings', () => {
       orgName: 'Test Org',
       role: 'admin',
     })
-    fromResults = [{ error: null }, { error: null }]
+    fromResults = [{ error: null }, { data: { notification_settings: {} } }, { error: null }]
 
     const fd = makeFormData(validSettingsFields)
     const result = await updateOrgSettings(emptyState, fd)

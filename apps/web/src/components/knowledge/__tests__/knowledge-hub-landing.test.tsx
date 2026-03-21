@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { KnowledgeHubLanding } from '../knowledge-hub-landing'
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+  usePathname: () => '/knowledge',
+  useSearchParams: () => new URLSearchParams(),
+}))
 
 describe('KnowledgeHubLanding', () => {
   it('renders the Knowledge Hub heading', () => {
