@@ -24,6 +24,7 @@ import type { PortfolioProject } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
 import { PortfolioPrintButton } from './print-button'
+import { formatDateOnly } from '@/lib/format-date'
 
 export const metadata: Metadata = {
   title: 'Portfolio Value Report',
@@ -65,12 +66,7 @@ const printStyles = `
   }
 `
 
-const formatPrintDate = (): string =>
-  new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+const formatPrintDate = (): string => formatDateOnly(new Date().toISOString())
 
 /* ============================================================
    Filter / sort helpers (URL searchParam driven)
@@ -161,16 +157,8 @@ const ProjectCard = ({ project }: { project: PortfolioProject }) => {
   const depth = depthColor(project.methodologyDepthPercent)
 
   const formattedDate = project.completedAt
-    ? new Date(project.completedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : new Date(project.createdAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
+    ? formatDateOnly(project.completedAt)
+    : formatDateOnly(project.createdAt)
 
   return (
     <Card className="flex flex-col transition-shadow hover:shadow-md" data-print-card>

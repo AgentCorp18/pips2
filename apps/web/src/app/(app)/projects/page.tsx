@@ -263,13 +263,13 @@ const ProjectsPage = async ({ searchParams }: ProjectsPageProps) => {
           <ViewToggle current={view} basePath="/projects" />
           <Button asChild variant="outline" className="gap-2" data-testid="browse-templates-button">
             <Link href="/projects/templates" data-testid="browse-templates-link">
-              <LayoutTemplate size={16} />
+              <LayoutTemplate size={16} aria-hidden="true" />
               Browse Templates
             </Link>
           </Button>
           <Button asChild className="gap-2" data-testid="new-project-button">
             <Link href="/projects/new" data-testid="new-project-link">
-              <Plus size={16} />
+              <Plus size={16} aria-hidden="true" />
               New Project
             </Link>
           </Button>

@@ -35,10 +35,8 @@ const formatRelativeTime = (dateStr: string): string => {
   if (diffHr < 24) return `${diffHr}h ago`
   if (diffDay < 7) return `${diffDay}d ago`
 
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+  return date.toLocaleString(undefined, {
+    dateStyle: 'medium',
   })
 }
 
@@ -160,7 +158,13 @@ export const AuditLogTable = ({ entries }: AuditLogTableProps) => {
         {sortedData.map((entry) => (
           <TableRow key={entry.id}>
             <TableCell>
-              <span className="text-sm" title={new Date(entry.created_at).toLocaleString()}>
+              <span
+                className="text-sm"
+                title={new Date(entry.created_at).toLocaleString(undefined, {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}
+              >
                 {formatRelativeTime(entry.created_at)}
               </span>
             </TableCell>

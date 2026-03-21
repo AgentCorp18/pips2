@@ -134,6 +134,11 @@ const DashboardPage = async () => {
   }
 
   try {
+    // Performance: 8 queries in parallel — stats, step chart, activity, aging tickets,
+    // metrics widgets, org impact summary, personal summary, week-over-week deltas.
+    // All are org-scoped and cached at the Supabase edge. personalSummary is the only
+    // user-scoped query; the rest depend only on orgId and could be deferred to Suspense
+    // boundaries if initial-paint latency becomes a concern.
     ;[stats, stepData, activity, agingTickets, metrics, impactSummary, personalSummary, deltas] =
       await Promise.all([
         getDashboardStats(orgId),

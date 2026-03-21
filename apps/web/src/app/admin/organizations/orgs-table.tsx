@@ -6,6 +6,7 @@ import { ChevronDown, ChevronRight, Plus, X } from 'lucide-react'
 import type { PlatformOrg } from '../actions'
 import { addUserToOrg } from '../actions'
 import type { OrgRole } from '@pips/shared'
+import { FormattedDate } from '@/components/ui/formatted-date'
 
 const ORG_ROLES = ['owner', 'admin', 'manager', 'member', 'viewer'] as const
 type OrgRoleOption = (typeof ORG_ROLES)[number]
@@ -130,7 +131,7 @@ const OrgRow = ({ org, onAddMember, isPending }: OrgRowProps) => {
         {/* Created */}
         <td className="px-4 py-3">
           <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-            {new Date(org.created_at).toLocaleDateString()}
+            <FormattedDate date={org.created_at} showTime={false} />
           </span>
         </td>
       </tr>

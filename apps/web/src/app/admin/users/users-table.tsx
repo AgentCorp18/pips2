@@ -14,6 +14,7 @@ import {
   listAllUsers,
 } from '../actions'
 import type { OrgRole } from '@pips/shared'
+import { FormattedDate } from '@/components/ui/formatted-date'
 
 const ORG_ROLES = ['owner', 'admin', 'manager', 'member', 'viewer'] as const
 type OrgRoleOption = (typeof ORG_ROLES)[number]
@@ -175,7 +176,7 @@ const UserRow = ({
         {/* Joined */}
         <td className="px-4 py-3">
           <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-            {new Date(user.created_at).toLocaleDateString()}
+            <FormattedDate date={user.created_at} showTime={false} />
           </span>
         </td>
 

@@ -257,7 +257,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
           <ViewToggle current={view} />
           <Button asChild className="gap-2" data-testid="new-ticket-button">
             <Link href="/tickets/new" data-testid="new-ticket-link">
-              <Plus size={16} />
+              <Plus size={16} aria-hidden="true" />
               New Ticket
             </Link>
           </Button>

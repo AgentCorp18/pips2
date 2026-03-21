@@ -149,7 +149,7 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
           className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 transition-colors hover:bg-red-100"
           data-testid="stat-blocked-tickets-banner"
         >
-          <ShieldAlert size={18} className="shrink-0 text-red-600" />
+          <ShieldAlert size={18} className="shrink-0 text-red-600" aria-hidden="true" />
           <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
             <span className="text-sm font-semibold text-red-700">
               {stats.blockedTickets} Blocked Ticket{stats.blockedTickets !== 1 ? 's' : ''}
@@ -176,7 +176,7 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
                 >
                   {card.title}
                 </CardTitle>
-                <Icon size={18} style={{ color: iconColor }} />
+                <Icon size={18} style={{ color: iconColor }} aria-hidden="true" />
               </CardHeader>
               <CardContent>
                 <div
@@ -192,7 +192,7 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
                 {/* Show blocked chip inside the Open Tickets card */}
                 {card.key === 'openTickets' && hasBlockers && (
                   <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-                    <ShieldAlert size={10} />
+                    <ShieldAlert size={10} aria-hidden="true" />
                     {stats.blockedTickets} blocked
                   </div>
                 )}

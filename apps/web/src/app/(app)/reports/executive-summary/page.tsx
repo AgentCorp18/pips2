@@ -10,6 +10,7 @@ import { PrintButton } from './print-button'
 import { ShareButton } from './share-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
 import { formatCurrency } from '@/lib/format-utils'
+import { formatDateOnly } from '@/lib/format-date'
 
 export const metadata: Metadata = {
   title: 'Executive Summary',
@@ -21,11 +22,7 @@ export const metadata: Metadata = {
    ============================================================ */
 
 const formatDate = (): string => {
-  return new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  return formatDateOnly(new Date().toISOString())
 }
 
 /* ============================================================

@@ -3,6 +3,7 @@
 import { useActionState, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RichTextEditorLazy as RichTextEditor } from '@/components/ui/rich-text-editor-lazy'
@@ -57,9 +58,14 @@ export const TicketCreateForm = ({
   const router = useRouter()
   const hasRedirected = useRef(false)
   const descriptionRef = useRef<HTMLTextAreaElement>(null)
+  const titleInputRef = useRef<HTMLInputElement>(null)
   const [descriptionValue, setDescriptionValue] = useState('')
+  const [titleValue, setTitleValue] = useState('')
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
   const [state, formAction, pending] = useActionState(createTicket, initialState)
   const [expanded, setExpanded] = useState(initialExpanded)
+
+  const titleError = hasAttemptedSubmit && !titleValue.trim() ? 'Title is required' : null
 
   const handleDescriptionAccept = useCallback((text: string) => {
     setDescriptionValue(text)
@@ -67,6 +73,17 @@ export const TicketCreateForm = ({
       descriptionRef.current.value = text
     }
   }, [])
+
+  const handleFullFormSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      setHasAttemptedSubmit(true)
+      if (!titleValue.trim()) {
+        e.preventDefault()
+        titleInputRef.current?.focus()
+      }
+    },
+    [titleValue],
+  )
 
   useEffect(() => {
     if (state.success && state.redirectTo && !hasRedirected.current) {
@@ -136,7 +153,12 @@ export const TicketCreateForm = ({
 
       {/* Full form */}
       {expanded && (
-        <form action={formAction} className="space-y-5" data-testid="full-create-form">
+        <form
+          action={formAction}
+          onSubmit={handleFullFormSubmit}
+          className="space-y-5"
+          data-testid="full-create-form"
+        >
           {parentId && <input type="hidden" name="parent_id" value={parentId} />}
 
           {state.error && (
@@ -159,18 +181,42 @@ export const TicketCreateForm = ({
               Title
             </Label>
             <Input
+              ref={titleInputRef}
               id="title"
               name="title"
               data-testid="ticket-title-input"
               placeholder="Brief summary of the ticket"
-              aria-invalid={!!state.fieldErrors?.title}
-              aria-describedby={state.fieldErrors?.title ? 'title-error' : undefined}
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.target.value)}
+              aria-invalid={!!(state.fieldErrors?.title ?? titleError)}
+              aria-describedby={
+                state.fieldErrors?.title
+                  ? 'title-error'
+                  : titleError
+                    ? 'title-inline-error'
+                    : undefined
+              }
               aria-required="true"
               required
+              className={cn(
+                titleError
+                  ? 'border-[var(--color-error)] focus-visible:ring-[var(--color-error)]'
+                  : '',
+              )}
             />
             {state.fieldErrors?.title && (
               <p id="title-error" className="text-xs" style={{ color: 'var(--color-error)' }}>
                 {state.fieldErrors.title}
+              </p>
+            )}
+            {!state.fieldErrors?.title && titleError && (
+              <p
+                id="title-inline-error"
+                role="alert"
+                className="text-xs"
+                style={{ color: 'var(--color-error)' }}
+              >
+                {titleError}
               </p>
             )}
           </div>
@@ -227,9 +273,7 @@ export const TicketCreateForm = ({
                   <SelectItem value="bug">Bug</SelectItem>
                   <SelectItem value="feature">Feature</SelectItem>
                   <SelectItem value="pips_project">PIPS Project</SelectItem>
-                  {isAdminOrOwner && (
-                    <SelectItem value="ceo_request">CEO Request</SelectItem>
-                  )}
+                  {isAdminOrOwner && <SelectItem value="ceo_request">CEO Request</SelectItem>}
                 </SelectContent>
               </Select>
             </div>

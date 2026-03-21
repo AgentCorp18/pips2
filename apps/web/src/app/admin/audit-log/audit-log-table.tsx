@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react'
 import type { AdminLogEntry } from '../actions'
 import { getAdminAuditLog } from '../actions'
+import { FormattedDate } from '@/components/ui/formatted-date'
 
 const ACTION_OPTIONS = [
   '',
@@ -242,7 +243,7 @@ export const AuditLogTable = ({
                         className="text-xs tabular-nums"
                         style={{ color: 'var(--color-text-tertiary)' }}
                       >
-                        {new Date(entry.created_at).toLocaleString()}
+                        <FormattedDate date={entry.created_at} />
                       </span>
                     </td>
                     <td className="px-4 py-3">

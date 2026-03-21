@@ -182,6 +182,11 @@ export const NotificationBell = () => {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
+      {/* Visually hidden live region announces unread count changes to screen readers */}
+      <span aria-live="polite" aria-atomic="true" className="sr-only">
+        {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : ''}
+      </span>
+
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -190,7 +195,10 @@ export const NotificationBell = () => {
         >
           <Bell size={20} className="text-[var(--color-text-secondary)]" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-white">
+            <span
+              aria-hidden="true"
+              className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-white"
+            >
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}

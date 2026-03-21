@@ -236,7 +236,7 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
               className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-[var(--radius-md)] p-2.5 opacity-70 hover:opacity-100"
               aria-label="Close sidebar"
             >
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -338,7 +338,11 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
                 className="rounded-[var(--radius-md)] p-2.5 transition-colors hover:bg-[var(--color-surface-secondary)]"
                 aria-label="Open sidebar"
               >
-                <Menu size={20} style={{ color: 'var(--color-text-secondary)' }} />
+                <Menu
+                  size={20}
+                  style={{ color: 'var(--color-text-secondary)' }}
+                  aria-hidden="true"
+                />
               </button>
             )}
 
@@ -350,7 +354,7 @@ export const AppShell = ({ children, orgs, currentOrgId, isAdmin }: AppShellProp
               data-testid="search-trigger"
               className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-1.5 transition-colors hover:border-[var(--color-primary)]"
             >
-              <Search size={16} className="text-[var(--color-text-tertiary)]" />
+              <Search size={16} className="text-[var(--color-text-tertiary)]" aria-hidden="true" />
               <span className="hidden text-sm text-[var(--color-text-tertiary)] sm:inline">
                 Search projects, tickets...
               </span>
