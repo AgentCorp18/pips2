@@ -252,7 +252,7 @@ const TicketsPage = async ({ searchParams }: TicketsPageProps) => {
             {total} ticket{total !== 1 ? 's' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <ExportTicketsButton />
           <ViewToggle current={view} />
           <Button asChild className="gap-2" data-testid="new-ticket-button">

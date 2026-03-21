@@ -142,7 +142,6 @@ const SwimLaneView = ({ projects }: { projects: BoardProject[] }) => {
       <div
         className="pointer-events-none absolute top-0 right-0 z-10 hidden h-full w-8 bg-gradient-to-l from-[var(--color-bg-primary,#fff)] to-transparent sm:hidden"
         aria-hidden="true"
-        style={{ display: 'block' }}
       />
       <div
         className="overflow-x-auto pb-4"

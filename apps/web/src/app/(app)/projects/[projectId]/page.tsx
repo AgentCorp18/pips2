@@ -187,7 +187,7 @@ const ProjectDetailPage = async ({ params }: { params: Promise<{ projectId: stri
       {/* Phase 0B: Value Narrative — below header, above step list, only when forms exist */}
       {valueNarrative !== null && <ProjectValueCard data={valueNarrative} />}
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <Button
           variant="outline"
           size="sm"

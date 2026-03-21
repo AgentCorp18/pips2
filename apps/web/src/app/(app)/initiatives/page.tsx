@@ -175,13 +175,10 @@ const InitiativesPage = async ({ searchParams }: InitiativesPageProps) => {
       : filtered
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6 lg:p-10">
+    <div className="mx-auto max-w-6xl space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1
-            className="font-display text-2xl font-bold md:text-3xl"
-            style={{ color: 'var(--color-text-primary)' }}
-          >
+          <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Initiatives
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>

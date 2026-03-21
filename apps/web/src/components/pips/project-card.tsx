@@ -60,7 +60,7 @@ export const ProjectCard = ({
       <Card className="transition-all hover:shadow-[var(--shadow-medium)] group-hover:border-[var(--color-primary-light)]">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-base leading-snug group-hover:text-[var(--color-primary)]">
+            <CardTitle className="min-w-0 truncate text-base leading-snug group-hover:text-[var(--color-primary)]">
               {name}
             </CardTitle>
             <div className="flex items-center gap-2">

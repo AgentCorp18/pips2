@@ -20,7 +20,7 @@ const SettingsPage = async () => {
   const canEdit = hasPermission(data.role as OrgRole, 'org.members.manage')
 
   return (
-    <div>
+    <div className="mx-auto max-w-[var(--content-max-width)]">
       <div className="mb-6">
         <h1
           className="text-2xl font-semibold"

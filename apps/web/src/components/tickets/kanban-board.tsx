@@ -268,7 +268,7 @@ export const KanbanBoard = ({ initialTickets }: KanbanBoardProps) => {
     return (
       <div
         className="fixed inset-0 z-50 flex flex-col"
-        style={{ backgroundColor: 'var(--color-bg-primary, #FFFFFF)' }}
+        style={{ backgroundColor: 'var(--color-bg)' }}
         data-testid="kanban-expanded-overlay"
       >
         {/* Toolbar */}

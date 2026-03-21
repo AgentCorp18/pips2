@@ -159,7 +159,7 @@ export const StatCards = ({ stats, deltas }: StatCardsProps) => {
         </Link>
       )}
 
-      <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
         {CARDS.map((card) => {
           const Icon = card.icon
           const value = stats[card.key]
