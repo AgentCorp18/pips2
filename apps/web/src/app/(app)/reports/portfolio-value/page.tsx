@@ -23,11 +23,54 @@ import { getPortfolioValue } from './actions'
 import type { PortfolioProject } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
+import { PortfolioPrintButton } from './print-button'
 
 export const metadata: Metadata = {
   title: 'Portfolio Value Report',
   description: 'Executive portfolio view showing aggregate impact of all PIPS work.',
 }
+
+/* ============================================================
+   Print styles
+   ============================================================ */
+
+const printStyles = `
+  @media print {
+    nav, header, aside, [data-sidebar], [data-screen-only] {
+      display: none !important;
+    }
+    @page {
+      margin: 0.75in;
+    }
+    body {
+      background: white !important;
+      color: black !important;
+      font-size: 11pt;
+    }
+    [data-print-container] {
+      max-width: 100% !important;
+      padding: 0 !important;
+    }
+    [data-print-card] {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      background: white !important;
+      border: 1px solid #e5e7eb !important;
+      box-shadow: none !important;
+    }
+    [data-kpi-value] {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+`
+
+const formatPrintDate = (): string =>
+  new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
 
 /* ============================================================
    Filter / sort helpers (URL searchParam driven)
@@ -130,7 +173,7 @@ const ProjectCard = ({ project }: { project: PortfolioProject }) => {
       })
 
   return (
-    <Card className="flex flex-col transition-shadow hover:shadow-md">
+    <Card className="flex flex-col transition-shadow hover:shadow-md" data-print-card>
       <CardHeader className="pb-3">
         {/* Title row */}
         <div className="flex items-start justify-between gap-2">
@@ -301,13 +344,27 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
     return `/reports/portfolio-value?${qs}`
   }
 
+  const printDate = formatPrintDate()
+
   return (
-    <div className="mx-auto max-w-[var(--content-max-width)]">
+    <div className="mx-auto max-w-[var(--content-max-width)]" data-print-container>
+      {/* Inject print styles */}
+      <style dangerouslySetInnerHTML={{ __html: printStyles }} />
+
+      {/* Print-only header (hidden on screen) */}
+      <div className="hidden print:mb-6 print:block">
+        <h1 className="text-xl font-bold">Portfolio Value Report</h1>
+        <p className="text-sm text-gray-500">
+          {currentOrg.orgName} — {printDate}
+        </p>
+        <hr className="mt-2 border-gray-300" />
+      </div>
+
       {/* Header */}
       <div className="mb-8">
         <Link
           href="/reports"
-          className="mb-3 inline-flex items-center gap-1 text-sm transition-colors hover:opacity-80"
+          className="mb-3 inline-flex items-center gap-1 text-sm transition-colors hover:opacity-80 print:hidden"
           style={{ color: 'var(--color-text-secondary)' }}
         >
           <ArrowLeft size={14} />
@@ -327,35 +384,38 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
               impact.
             </p>
           </div>
-          <CsvExportButton
-            data={summary.projects.map((p) => ({
-              title: p.title,
-              status: p.status,
-              completedAt: p.completedAt ?? '',
-              methodologyDepth: `${p.methodologyDepthPercent}%`,
-              cycleTimeDays: p.cycleTimeDays ?? '',
-              formsCompleted: p.formsCompleted,
-              ticketsCompleted: `${p.ticketsCompleted}/${p.ticketCount}`,
-              rootCauses: p.rootCausesCount,
-              ideasGenerated: p.ideasGenerated,
-              lessons: p.lessonsCount,
-              narrative: p.narrative ?? '',
-            }))}
-            filename="portfolio-value"
-            columns={[
-              { key: 'title', label: 'Project' },
-              { key: 'status', label: 'Status' },
-              { key: 'completedAt', label: 'Completed At' },
-              { key: 'methodologyDepth', label: 'Methodology Depth' },
-              { key: 'cycleTimeDays', label: 'Cycle Time (Days)' },
-              { key: 'formsCompleted', label: 'Forms Completed' },
-              { key: 'ticketsCompleted', label: 'Tickets (Done/Total)' },
-              { key: 'rootCauses', label: 'Root Causes' },
-              { key: 'ideasGenerated', label: 'Ideas Generated' },
-              { key: 'lessons', label: 'Lessons Documented' },
-              { key: 'narrative', label: 'Narrative' },
-            ]}
-          />
+          <div className="flex items-center gap-2 print:hidden">
+            <PortfolioPrintButton />
+            <CsvExportButton
+              data={summary.projects.map((p) => ({
+                title: p.title,
+                status: p.status,
+                completedAt: p.completedAt ?? '',
+                methodologyDepth: `${p.methodologyDepthPercent}%`,
+                cycleTimeDays: p.cycleTimeDays ?? '',
+                formsCompleted: p.formsCompleted,
+                ticketsCompleted: `${p.ticketsCompleted}/${p.ticketCount}`,
+                rootCauses: p.rootCausesCount,
+                ideasGenerated: p.ideasGenerated,
+                lessons: p.lessonsCount,
+                narrative: p.narrative ?? '',
+              }))}
+              filename="portfolio-value"
+              columns={[
+                { key: 'title', label: 'Project' },
+                { key: 'status', label: 'Status' },
+                { key: 'completedAt', label: 'Completed At' },
+                { key: 'methodologyDepth', label: 'Methodology Depth' },
+                { key: 'cycleTimeDays', label: 'Cycle Time (Days)' },
+                { key: 'formsCompleted', label: 'Forms Completed' },
+                { key: 'ticketsCompleted', label: 'Tickets (Done/Total)' },
+                { key: 'rootCauses', label: 'Root Causes' },
+                { key: 'ideasGenerated', label: 'Ideas Generated' },
+                { key: 'lessons', label: 'Lessons Documented' },
+                { key: 'narrative', label: 'Narrative' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 
@@ -435,8 +495,8 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
         />
       </div>
 
-      {/* Filter + Sort controls */}
-      <div className="mb-6 flex flex-wrap items-center gap-6">
+      {/* Filter + Sort controls — hidden in print */}
+      <div className="mb-6 flex flex-wrap items-center gap-6 print:hidden">
         {/* Status filter */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -499,7 +559,7 @@ const PortfolioValuePage = async ({ searchParams }: PortfolioValuePageProps) => 
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 print:grid-cols-1">
           {visibleProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
