@@ -31,6 +31,7 @@ import {
 } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
+import { formatCurrency } from '@/lib/format-utils'
 
 export const metadata: Metadata = {
   title: 'ROI Dashboard',
@@ -41,13 +42,6 @@ export const metadata: Metadata = {
 /* ============================================================
    Helpers
    ============================================================ */
-
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  if (value === 0) return '$0'
-  return `$${value.toLocaleString()}`
-}
 
 const depthColor = (pct: number): string => {
   if (pct >= 70) return '#22C55E'

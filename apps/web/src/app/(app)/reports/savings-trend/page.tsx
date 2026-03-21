@@ -18,6 +18,7 @@ import {
 import { getSavingsTrend } from './actions'
 import { CsvExportButton } from '@/components/reports/csv-export-button'
 import { ReportEmptyState } from '@/components/reports/report-empty-state'
+import { formatCurrency } from '@/lib/format-utils'
 
 export const metadata: Metadata = {
   title: 'Savings Trend Report',
@@ -27,13 +28,6 @@ export const metadata: Metadata = {
 /* ============================================================
    Helpers
    ============================================================ */
-
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  if (value === 0) return '$0'
-  return `$${value.toLocaleString()}`
-}
 
 type PeriodOption = '3' | '6' | '12' | 'all'
 const VALID_PERIODS: PeriodOption[] = ['3', '6', '12', 'all']

@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import { TriangleAlert } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import type { ComplianceAlert } from '@/app/(app)/dashboard/actions'
+
+type ComplianceAlert = {
+  belowCount: number
+  threshold: number
+}
 
 type MethodologyComplianceAlertProps = {
   alert: ComplianceAlert

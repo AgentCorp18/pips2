@@ -20,6 +20,7 @@ import {
   DollarSign,
 } from 'lucide-react'
 import { formatDateOnly } from '@/lib/format-date'
+import { formatCurrency } from '@/lib/format-utils'
 import type { InitiativeStatus } from '@/types/initiatives'
 
 type Props = {
@@ -36,12 +37,6 @@ const STATUS_STYLES: Record<InitiativeStatus, { label: string; className: string
   on_hold: { label: 'On Hold', className: 'bg-amber-100 text-amber-700' },
   completed: { label: 'Completed', className: 'bg-blue-100 text-blue-700' },
   archived: { label: 'Archived', className: 'bg-gray-100 text-gray-500' },
-}
-
-const formatCurrency = (amount: number): string => {
-  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`
-  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`
-  return `$${amount.toFixed(0)}`
 }
 
 const InitiativeDetailPage = async ({ params }: Props) => {

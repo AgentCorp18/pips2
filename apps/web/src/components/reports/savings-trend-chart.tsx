@@ -12,18 +12,12 @@ import {
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { MonthlySavings } from '@/app/(app)/reports/savings-trend/actions'
+import { formatCurrency } from '@/lib/format-utils'
 
 export type { MonthlySavings }
 
 type SavingsTrendChartProps = {
   data: MonthlySavings[]
-}
-
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  if (value === 0) return '$0'
-  return `$${value.toLocaleString()}`
 }
 
 export const SavingsTrendChart = ({ data }: SavingsTrendChartProps) => {

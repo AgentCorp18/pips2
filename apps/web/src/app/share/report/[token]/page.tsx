@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { validateShareToken } from '@/lib/share-token'
 import { parsePeriod } from '@/app/(app)/reports/roi-dashboard/actions'
 import { getExecutiveSummaryPublic } from '@/lib/get-executive-summary-public'
+import { formatCurrency } from '@/lib/format-utils'
 
 export const metadata: Metadata = {
   title: 'Executive Summary | PIPS',
@@ -12,15 +13,8 @@ export const metadata: Metadata = {
 }
 
 /* ============================================================
-   Helpers (duplicated from the authenticated page for isolation)
+   Helpers
    ============================================================ */
-
-const formatCurrency = (value: number): string => {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  if (value === 0) return '$0'
-  return `$${value.toLocaleString()}`
-}
 
 const formatDate = (): string =>
   new Date().toLocaleDateString('en-US', {
@@ -148,9 +142,7 @@ const ShareReportPage = async ({ params }: ShareReportPageProps) => {
             <MetricCard
               label="Avg ROI"
               value={data.avgRoiPercent !== null ? `${data.avgRoiPercent}%` : '\u2014'}
-              sub={
-                data.avgRoiPercent !== null ? 'across projects with data' : 'no ROI data yet'
-              }
+              sub={data.avgRoiPercent !== null ? 'across projects with data' : 'no ROI data yet'}
               color="#F59E0B"
             />
           </div>
@@ -305,9 +297,7 @@ const ShareReportPage = async ({ params }: ShareReportPageProps) => {
                 />
                 <MetricCard
                   label="Realisation Rate"
-                  value={
-                    data.realisationRate !== null ? `${data.realisationRate}%` : '\u2014'
-                  }
+                  value={data.realisationRate !== null ? `${data.realisationRate}%` : '\u2014'}
                   sub={
                     data.realisationRate !== null
                       ? 'realised \u00f7 projected savings'
@@ -496,8 +486,7 @@ const ShareReportPage = async ({ params }: ShareReportPageProps) => {
                           height: `${Math.max(heightPct, 4)}px`,
                           minHeight: 4,
                           maxHeight: 80,
-                          backgroundColor:
-                            count > 0 ? '#4F46E5' : 'var(--color-border, #e5e7eb)',
+                          backgroundColor: count > 0 ? '#4F46E5' : 'var(--color-border, #e5e7eb)',
                         }}
                         aria-label={`${month}: ${count} project${count !== 1 ? 's' : ''}`}
                       />
@@ -591,10 +580,7 @@ const MetricCard = ({
     <p className="mt-2 text-3xl font-bold" style={{ color }}>
       {value}
     </p>
-    <p
-      className="mt-0.5 text-xs"
-      style={{ color: 'var(--color-text-secondary, #6b7280)' }}
-    >
+    <p className="mt-0.5 text-xs" style={{ color: 'var(--color-text-secondary, #6b7280)' }}>
       {sub}
     </p>
   </div>
