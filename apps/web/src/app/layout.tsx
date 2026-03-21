@@ -64,6 +64,7 @@ export const metadata: Metadata = {
     siteName: 'PIPS',
     locale: 'en_US',
     type: 'website',
+    url: 'https://pips-app.vercel.app',
   },
   twitter: {
     card: 'summary',
