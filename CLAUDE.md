@@ -22,7 +22,7 @@ PIPS 2.0 — Multi-tenant SaaS embedding a 6-step process improvement methodolog
 ## Commands
 
 - Dev: `pnpm dev`
-- Type check: `pnpm tsc --noEmit`
+- Type check: `pnpm typecheck`
 - Lint: `pnpm lint`
 - Test: `pnpm test`
 - E2E: `pnpm exec playwright test`
@@ -32,7 +32,7 @@ PIPS 2.0 — Multi-tenant SaaS embedding a 6-step process improvement methodolog
 
 IMPORTANT: After every change, run in this order:
 
-1. `pnpm tsc --noEmit` — fix ALL type errors before proceeding
+1. `pnpm typecheck` — fix ALL type errors before proceeding
 2. `pnpm test` — fix failing tests
 3. `pnpm lint` — fix lint errors
 
