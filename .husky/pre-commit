@@ -1,2 +1,40 @@
 #!/usr/bin/env sh
 pnpm exec lint-staged
+
+# --- secret scan -------------------------------------------------------------
+# Added after a service-role key was found committed in two scripts (PIPS-412).
+# Uses gitleaks when installed; otherwise falls back to a built-in pattern scan
+# so the check NEVER silently passes just because a tool is missing.
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --config .gitleaks.toml || {
+    echo ""
+    echo "✖ gitleaks found a secret in staged changes. Commit aborted."
+    echo "  If it is a false positive, add it to .gitleaks.toml allowlist."
+    exit 1
+  }
+else
+  echo "· gitleaks not installed — using built-in fallback scan"
+  echo "  (install for full coverage:  brew install gitleaks  |  scoop install gitleaks)"
+
+  # eyJ...  = base64 '{"' — a JWT header, which is how the leaked key looked.
+  # sb_secret_ = Supabase secret API key. Publishable/anon keys are public by design.
+  hits=$(git diff --cached -U0 -- $staged \
+    | grep -E '^\+' \
+    | grep -vE '^\+\+\+' \
+    | grep -nE 'eyJhbGciOi[A-Za-z0-9_-]{20,}|sb_secret_[A-Za-z0-9_-]{10,}|SUPABASE_SERVICE_ROLE_KEY[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"'$][^"'"'"']{10,}' \
+    || true)
+
+  if [ -n "$hits" ]; then
+    echo ""
+    echo "✖ Possible secret in staged changes. Commit aborted."
+    echo "$hits" | sed 's/\(.\{90\}\).*/\1…/'
+    echo ""
+    echo "  Read credentials from the environment instead of hard-coding them."
+    echo "  To override a false positive:  git commit --no-verify"
+    exit 1
+  fi
+fi

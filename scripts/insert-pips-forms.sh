@@ -2,9 +2,23 @@
 # Insert PIPS forms for 3 continuous improvement cycles
 # Run from PIPS2.0 root
 
-SUPABASE_URL="https://cmrribhjgfybbxhrsxqi.supabase.co"
-SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtcnJpYmhqZ2Z5YmJ4aHJzeHFpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjU0MjM4NCwiZXhwIjoyMDg4MTE4Mzg0fQ.ha76e3SZyOCVSDmSeoK8fwS1OBa7Uone-B4hF3-5vlc"
-USER_ID="8787c5d6-aa93-458e-a77a-a731b34fb69f"
+set -euo pipefail
+
+# Credentials come from the environment — never hard-code them here.
+# The previously committed key was exposed in git history and has been rotated.
+#   export SUPABASE_URL="https://<project-ref>.supabase.co"
+#   export SUPABASE_SERVICE_ROLE_KEY="sb_secret_..."
+SUPABASE_URL="${SUPABASE_URL:-https://cmrribhjgfybbxhrsxqi.supabase.co}"
+SERVICE_KEY="${SUPABASE_SERVICE_ROLE_KEY:-}"
+
+if [ -z "$SERVICE_KEY" ]; then
+  echo "ERROR: SUPABASE_SERVICE_ROLE_KEY is not set." >&2
+  echo "This script writes to the PIPS database and needs a service-role/secret key." >&2
+  echo "Set it in your shell first:  export SUPABASE_SERVICE_ROLE_KEY='sb_secret_...'" >&2
+  exit 1
+fi
+
+USER_ID="${PIPS_USER_ID:-8787c5d6-aa93-458e-a77a-a731b34fb69f}"
 API="$SUPABASE_URL/rest/v1/project_forms"
 HEADERS=(-H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H "Content-Type: application/json" -H "Prefer: return=representation")
 

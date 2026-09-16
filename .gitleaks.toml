@@ -1,0 +1,46 @@
+# gitleaks config for PIPS 2.0
+# Added under PIPS-412 after a service-role JWT was found committed in
+# scripts/insert-pips-forms.sh and scripts/insert-missing-forms.py.
+#
+# Run manually:   gitleaks detect --config .gitleaks.toml --redact
+# Scan history:   gitleaks detect --config .gitleaks.toml --redact --log-opts="--all"
+
+title = "PIPS 2.0"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "supabase-service-role-jwt"
+description = "Supabase service_role JWT (bypasses every RLS policy)"
+regex = '''eyJhbGciOi[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}'''
+tags = ["supabase", "jwt", "critical"]
+
+[[rules]]
+id = "supabase-secret-api-key"
+description = "Supabase secret API key (sb_secret_...)"
+regex = '''sb_secret_[A-Za-z0-9_-]{10,}'''
+tags = ["supabase", "critical"]
+
+[[rules]]
+id = "postgres-connection-string-with-password"
+description = "Postgres URL containing an inline password"
+regex = '''postgres(ql)?://[^:\s]+:[^@\s]{6,}@[^\s/]+'''
+tags = ["database", "critical"]
+
+[allowlist]
+description = "Values that are public by design, or non-secret fixtures"
+paths = [
+  '''\.gitleaks\.toml''',
+  '''pnpm-lock\.yaml''',
+  '''(^|/)\.env\.example$''',
+]
+regexes = [
+  # Publishable and anon keys are meant to be shipped to browsers. They are
+  # safe ONLY while RLS is enabled — see the RLS migration under supabase/.
+  '''sb_publishable_[A-Za-z0-9_-]+''',
+  '''NEXT_PUBLIC_SUPABASE_ANON_KEY''',
+  # Obvious placeholders.
+  '''(your|example|placeholder|dummy|fake|test)[-_]?(key|secret|token|password)''',
+  '''<[^>]*(key|secret|token|password)[^>]*>''',
+]
