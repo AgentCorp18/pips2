@@ -265,13 +265,14 @@ describe('loadFormData', () => {
     fromResults = []
   })
 
-  it('redirects to /login when user is not authenticated', async () => {
+  // loadFormData deliberately returns null rather than calling redirect():
+  // redirect() inside Promise.all corrupts the async context and renders an
+  // error page instead of the login redirect. The caller handles the null.
+  it('returns null when user is not authenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
 
-    await expect(loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')).rejects.toThrow(
-      'NEXT_REDIRECT:/login',
-    )
-    expect(mockRedirect).toHaveBeenCalledWith('/login')
+    await expect(loadFormData(VALID_PROJECT_ID, 1, 'problem_statement')).resolves.toBeNull()
+    expect(mockRedirect).not.toHaveBeenCalled()
   })
 
   it('returns the form data when found', async () => {
