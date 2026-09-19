@@ -5,7 +5,11 @@
 set -euo pipefail
 
 # Credentials come from the environment — never hard-code them here.
-# WARNING: the previously committed key is STILL LIVE and remains in this repo's git# history (commit 40b7ce5). This repo is public. Deleting the key from the working tree# does NOT revoke it — it must be rotated in the Supabase dashboard and the legacy JWT# keys disabled. Until then, treat the project as compromised. Tracked in PIPS-412.
+# WARNING: the previously committed key is STILL LIVE and remains in this repo's
+# git history (commit 40b7ce5). This repo is PUBLIC. Deleting the key from the
+# working tree does NOT revoke it -- it must be rotated in the Supabase dashboard
+# and the legacy JWT keys disabled. Until then, treat the project as compromised.
+# Tracked in PIPS-412.
 #   export SUPABASE_URL="https://<project-ref>.supabase.co"
 #   export SUPABASE_SERVICE_ROLE_KEY="sb_secret_..."
 SUPABASE_URL="${SUPABASE_URL:-https://cmrribhjgfybbxhrsxqi.supabase.co}"
