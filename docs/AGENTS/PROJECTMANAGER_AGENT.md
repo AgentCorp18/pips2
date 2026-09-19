@@ -74,7 +74,7 @@ If there are conflicts, escalate instead of guessing.
 3. Read/update `docs/STATUS.md` (or equivalent status board)
 4. Review open PRs and active branches
 5. Confirm main branch health:
-   - `pnpm tsc --noEmit`
+   - `pnpm typecheck`
    - `pnpm test`
    - `pnpm build`
 

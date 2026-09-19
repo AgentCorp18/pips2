@@ -17,7 +17,9 @@
         "SUPABASE_SERVICE_ROLE_KEY",
         "NOTIFICATION_EMAIL_SECRET",
         "RESEND_API_KEY",
-        "SENTRY_DSN"
+        "SENTRY_DSN",
+        "ANTHROPIC_API_KEY",
+        "CRON_SECRET"
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
