@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { testPassword } from './helpers/supabase-admin'
 
 /**
  * Signup & Onboarding E2E flow
@@ -10,7 +11,7 @@ import { test, expect } from '@playwright/test'
 const TEST_USER = {
   name: 'Test User E2E',
   email: `e2e-${Date.now()}@test.pips.app`,
-  password: 'TestPassword123!',
+  password: testPassword(),
 }
 
 const TEST_ORG = {

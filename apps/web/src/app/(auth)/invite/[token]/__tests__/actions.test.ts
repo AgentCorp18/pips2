@@ -60,6 +60,14 @@ const createAdminChainForIndex = (idx: number) => {
   return proxy
 }
 
+vi.mock('next/headers', () => ({
+  headers: vi.fn(async () => new Map([['x-forwarded-for', '203.0.113.9']])),
+}))
+
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(async () => ({ allowed: true, remaining: 19, resetAt: Date.now() })),
+}))
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
     auth: {
@@ -758,5 +766,25 @@ describe('declineInvitation', () => {
       success: false,
       error: 'Failed to decline invitation. Please try again.',
     })
+  })
+})
+
+/* ============================================================
+   getInvitation — rate limiting
+   ============================================================ */
+
+describe('getInvitation rate limiting', () => {
+  it('returns not_found when the per-IP limit is exhausted', async () => {
+    const { checkRateLimit } = await import('@/lib/rate-limit')
+    vi.mocked(checkRateLimit).mockResolvedValueOnce({
+      allowed: false,
+      remaining: 0,
+      resetAt: Date.now() + 60_000,
+    })
+
+    const result = await getInvitation('a'.repeat(64))
+
+    // Indistinguishable from an unknown token — no oracle.
+    expect(result.status).toBe('not_found')
   })
 })

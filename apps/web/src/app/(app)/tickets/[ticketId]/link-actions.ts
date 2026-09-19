@@ -289,6 +289,19 @@ export const searchTickets = async (
     return { error: 'You must be signed in' }
   }
 
+  // orgId arrives from the client. Verify the caller actually belongs to it
+  // rather than relying on RLS as the only control.
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('org_id')
+    .eq('user_id', user.id)
+    .eq('org_id', orgId)
+    .maybeSingle()
+
+  if (!membership) {
+    return { error: 'Organization not found' }
+  }
+
   if (!query.trim()) {
     return { data: [] }
   }
@@ -306,7 +319,9 @@ export const searchTickets = async (
   if (seqMatch) {
     queryBuilder = queryBuilder.eq('sequence_number', parseInt(seqMatch[1] ?? '0', 10))
   } else {
-    queryBuilder = queryBuilder.ilike('title', `%${query}%`)
+    // Escape LIKE wildcards so a query of '%' does not match every ticket
+    const escaped = query.replace(/[%_\\]/g, '\\$&')
+    queryBuilder = queryBuilder.ilike('title', `%${escaped}%`)
   }
 
   const { data, error } = await queryBuilder.order('sequence_number', { ascending: false })

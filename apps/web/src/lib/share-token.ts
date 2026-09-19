@@ -8,34 +8,82 @@
  * - reportType   — e.g. "executive-summary"
  * - period       — e.g. "this-quarter"
  * - timestamp    — ms since epoch when the token was created
- * - sig          — first 16 hex chars of HMAC-SHA256 over the first four parts
+ * - sig          — full hex HMAC-SHA256 over the first four parts
  *
  * Tokens expire after 7 days by default.
+ *
+ * SECURITY: this module fails closed. In production, if no signing secret is
+ * configured, generateShareToken() throws and validateShareToken() rejects every
+ * token. It must never sign or verify with an empty key, because an empty key is
+ * a key the attacker also has.
  */
 
-import { createHmac } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
 
-const SHARE_SECRET = process.env.NOTIFICATION_EMAIL_SECRET || process.env.SHARE_TOKEN_SECRET || ''
-// In dev, empty string is acceptable. In production, env vars must be set.
-if (!SHARE_SECRET && process.env.NODE_ENV === 'production') {
-  console.error(
-    '[SECURITY] SHARE_TOKEN_SECRET or NOTIFICATION_EMAIL_SECRET must be set in production',
-  )
+/**
+ * Fallback used only outside production so local dev and tests work without
+ * configuration. It is a fixed, publicly known value and is deliberately never
+ * reachable when NODE_ENV === 'production'.
+ */
+const DEV_ONLY_SECRET = 'pips-development-share-token-secret-do-not-use-in-production'
+
+export class ShareTokenSecretMissingError extends Error {
+  constructor() {
+    super('SHARE_TOKEN_SECRET must be set in production to sign share links')
+    this.name = 'ShareTokenSecretMissingError'
+  }
+}
+
+/**
+ * Resolve the signing secret at call time (not module load) so that a missing
+ * secret degrades to a runtime rejection rather than a build/prerender crash.
+ *
+ * SHARE_TOKEN_SECRET is the dedicated key for report links.
+ * NOTIFICATION_EMAIL_SECRET is accepted only as a legacy fallback so existing
+ * deployments keep working; report signing should not share a trust domain with
+ * email dispatch, so set SHARE_TOKEN_SECRET and drop the fallback.
+ */
+const resolveSecret = (): string | null => {
+  const secret = process.env.SHARE_TOKEN_SECRET || process.env.NOTIFICATION_EMAIL_SECRET || ''
+  if (secret) return secret
+  if (process.env.NODE_ENV === 'production') {
+    console.error(
+      '[SECURITY] SHARE_TOKEN_SECRET is not set — share-link signing and validation are disabled',
+    )
+    return null
+  }
+  return DEV_ONLY_SECRET
 }
 
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 const SEPARATOR = ':'
 
-/** Compute HMAC signature over the canonical payload string. */
-const sign = (payload: string): string =>
-  createHmac('sha256', SHARE_SECRET).update(payload).digest('hex').slice(0, 16)
+/** Compute the full hex HMAC signature over the canonical payload string. */
+const sign = (payload: string, secret: string): string =>
+  createHmac('sha256', secret).update(payload).digest('hex')
 
-/** Encode a token for use in a URL. */
+/** Constant-time comparison of two hex signatures. */
+const signaturesMatch = (a: string, b: string): boolean => {
+  if (a.length !== b.length) return false
+  try {
+    return timingSafeEqual(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'))
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Encode a token for use in a URL.
+ * @throws ShareTokenSecretMissingError when no signing secret is configured in production.
+ */
 export const generateShareToken = (orgId: string, reportType: string, period: string): string => {
+  const secret = resolveSecret()
+  if (!secret) throw new ShareTokenSecretMissingError()
+
   const timestamp = String(Date.now())
   const payload = [orgId, reportType, period, timestamp].join(SEPARATOR)
-  const sig = sign(payload)
+  const sig = sign(payload, secret)
   return Buffer.from(`${payload}${SEPARATOR}${sig}`).toString('base64url')
 }
 
@@ -48,8 +96,12 @@ export type ShareTokenPayload = {
 /**
  * Validate a share token.
  * Returns the decoded payload on success, or null on failure.
+ * Returns null (never a payload) when no signing secret is configured.
  */
 export const validateShareToken = (token: string): ShareTokenPayload | null => {
+  const secret = resolveSecret()
+  if (!secret) return null
+
   let decoded: string
   try {
     decoded = Buffer.from(token, 'base64url').toString('utf8')
@@ -71,10 +123,9 @@ export const validateShareToken = (token: string): ShareTokenPayload | null => {
   // Validate all parts are non-empty
   if (!orgId || !reportType || !period || !timestamp || !sig) return null
 
-  // Check signature
+  // Check signature (constant time, full digest)
   const payload = [orgId, reportType, period, timestamp].join(SEPARATOR)
-  const expected = sign(payload)
-  if (sig !== expected) return null
+  if (!signaturesMatch(sig, sign(payload, secret))) return null
 
   // Check expiry
   const age = Date.now() - Number(timestamp)

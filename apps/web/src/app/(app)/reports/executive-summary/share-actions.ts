@@ -43,7 +43,16 @@ export const generateExecutiveSummaryShareLink = async (
   }
 
   const validPeriod: Period = parsePeriod(period)
-  const token = generateShareToken(currentOrg.orgId, REPORT_TYPE, validPeriod)
+
+  // generateShareToken fails closed when no signing secret is configured.
+  // Surface that as an error rather than minting an unsigned link.
+  let token: string
+  try {
+    token = generateShareToken(currentOrg.orgId, REPORT_TYPE, validPeriod)
+  } catch (err) {
+    console.error('Failed to generate share token:', err)
+    return { error: 'Share links are not configured. Contact your administrator.' }
+  }
 
   const baseUrl = getBaseUrl()
   return { url: `${baseUrl}/share/report/${token}` }

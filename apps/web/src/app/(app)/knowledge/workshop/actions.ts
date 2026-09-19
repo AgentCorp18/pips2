@@ -23,13 +23,38 @@ export type { WorkshopSession, TimerState, WorkshopModule, ActionResult } from '
 // Helpers
 // ---------------------------------------------------------------------------
 
-const requireWorkshopPermission = async () => {
+/**
+ * Assert the caller may manage workshops, and — when a sessionId is supplied —
+ * that the session belongs to the caller's organization.
+ *
+ * The ownership half matters: checking only the caller's role lets a facilitator
+ * in org A act on a session in org B (IDOR). The sessionId is always passed by
+ * the client, so it must always be checked against the caller.
+ *
+ * Throws 'Session not found' rather than a permission error for a foreign
+ * session so session ids are not enumerable.
+ */
+const requireWorkshopPermission = async (sessionId?: string) => {
   const org = await getUserOrg()
   if (!org) throw new Error('Not a member of any organization')
   const role = org.role as OrgRole
   if (!hasPermission(role, 'workshop.manage')) {
     throw new Error('Insufficient permissions: requires manager+ role')
   }
+
+  if (sessionId !== undefined) {
+    const supabase = await createClient()
+    const { data: session } = await supabase
+      .from('workshop_sessions')
+      .select('org_id')
+      .eq('id', sessionId)
+      .maybeSingle()
+
+    if (!session || session.org_id !== org.org_id) {
+      throw new Error('Session not found')
+    }
+  }
+
   return { orgId: org.org_id, role }
 }
 
@@ -65,20 +90,28 @@ export const getOrgSessions = async (): Promise<WorkshopSession[]> => {
   return (data ?? []) as WorkshopSession[]
 }
 
-/** Fetch a single session by ID */
+/**
+ * Fetch a single session by ID.
+ * Scoped to the caller's organization — an unauthenticated caller, or one asking
+ * for another org's session, gets null rather than the row.
+ */
 export const getSession = async (sessionId: string): Promise<WorkshopSession | null> => {
+  const org = await getUserOrg()
+  if (!org) return null
+
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('workshop_sessions')
     .select('*')
     .eq('id', sessionId)
-    .single()
+    .eq('org_id', org.org_id)
+    .maybeSingle()
 
   if (error) {
     console.error('getSession error:', error)
     return null
   }
-  return data as WorkshopSession
+  return (data as WorkshopSession | null) ?? null
 }
 
 // ---------------------------------------------------------------------------
@@ -134,7 +167,7 @@ export const startSession = async (sessionId: string): Promise<ActionResult> => 
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
-    await requireWorkshopPermission()
+    const { orgId } = await requireWorkshopPermission(sessionId)
     const supabase = await createClient()
 
     const { error } = await supabase
@@ -145,6 +178,7 @@ export const startSession = async (sessionId: string): Promise<ActionResult> => 
         timer_state: { mode: 'countup', running: true, startedAt: new Date().toISOString() },
       })
       .eq('id', sessionId)
+      .eq('org_id', orgId)
       .eq('status', 'draft')
 
     if (error) return { success: false, error: error.message }
@@ -164,7 +198,7 @@ export const pauseSession = async (sessionId: string): Promise<ActionResult> => 
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
-    await requireWorkshopPermission()
+    const { orgId } = await requireWorkshopPermission(sessionId)
     const supabase = await createClient()
 
     // Get current timer state to calculate remaining
@@ -172,6 +206,7 @@ export const pauseSession = async (sessionId: string): Promise<ActionResult> => 
       .from('workshop_sessions')
       .select('timer_state')
       .eq('id', sessionId)
+      .eq('org_id', orgId)
       .single()
 
     const ts = (current?.timer_state ?? {}) as TimerState
@@ -192,6 +227,7 @@ export const pauseSession = async (sessionId: string): Promise<ActionResult> => 
       .from('workshop_sessions')
       .update({ status: 'paused', timer_state: updatedTimer })
       .eq('id', sessionId)
+      .eq('org_id', orgId)
       .eq('status', 'active')
 
     if (error) return { success: false, error: error.message }
@@ -211,13 +247,14 @@ export const resumeSession = async (sessionId: string): Promise<ActionResult> =>
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
-    await requireWorkshopPermission()
+    const { orgId } = await requireWorkshopPermission(sessionId)
     const supabase = await createClient()
 
     const { data: current } = await supabase
       .from('workshop_sessions')
       .select('timer_state')
       .eq('id', sessionId)
+      .eq('org_id', orgId)
       .single()
 
     const ts = (current?.timer_state ?? {}) as TimerState
@@ -231,6 +268,7 @@ export const resumeSession = async (sessionId: string): Promise<ActionResult> =>
       .from('workshop_sessions')
       .update({ status: 'active', timer_state: updatedTimer })
       .eq('id', sessionId)
+      .eq('org_id', orgId)
       .eq('status', 'paused')
 
     if (error) return { success: false, error: error.message }
@@ -250,7 +288,7 @@ export const completeSession = async (sessionId: string): Promise<ActionResult> 
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
-    await requireWorkshopPermission()
+    const { orgId } = await requireWorkshopPermission(sessionId)
     const supabase = await createClient()
 
     const { error } = await supabase
@@ -261,6 +299,7 @@ export const completeSession = async (sessionId: string): Promise<ActionResult> 
         timer_state: { running: false },
       })
       .eq('id', sessionId)
+      .eq('org_id', orgId)
       .in('status', ['active', 'paused'])
 
     if (error) return { success: false, error: error.message }
@@ -283,7 +322,7 @@ export const setCurrentModule = async (
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
-    await requireWorkshopPermission()
+    const { orgId } = await requireWorkshopPermission(sessionId)
     const supabase = await createClient()
 
     // Bounds check: reject if moduleIndex is out of range
@@ -291,6 +330,7 @@ export const setCurrentModule = async (
       .from('workshop_sessions')
       .select('modules')
       .eq('id', sessionId)
+      .eq('org_id', orgId)
       .single()
 
     if (!session) return { success: false, error: 'Session not found' }
@@ -307,6 +347,7 @@ export const setCurrentModule = async (
       .from('workshop_sessions')
       .update({ current_module_index: moduleIndex })
       .eq('id', sessionId)
+      .eq('org_id', orgId)
 
     if (error) return { success: false, error: error.message }
     return { success: true, data: undefined }
@@ -326,13 +367,14 @@ export const updateTimerState = async (
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
-    await requireWorkshopPermission()
+    const { orgId } = await requireWorkshopPermission(sessionId)
     const supabase = await createClient()
 
     const { error } = await supabase
       .from('workshop_sessions')
       .update({ timer_state: timerState })
       .eq('id', sessionId)
+      .eq('org_id', orgId)
 
     if (error) return { success: false, error: error.message }
     return { success: true, data: undefined }
@@ -352,12 +394,13 @@ export const updateParticipantCount = async (
       return { success: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
     }
 
-    await requireWorkshopPermission()
+    const { orgId } = await requireWorkshopPermission(sessionId)
     const supabase = await createClient()
     const { error } = await supabase
       .from('workshop_sessions')
       .update({ participant_count: count })
       .eq('id', sessionId)
+      .eq('org_id', orgId)
 
     if (error) return { success: false, error: error.message }
     return { success: true, data: undefined }

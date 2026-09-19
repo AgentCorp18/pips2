@@ -7,6 +7,18 @@
  * 3. We intentionally bypass RLS here — same pattern as onboarding.
  *
  * SECURITY: Only call this function after validateShareToken() succeeds.
+ *
+ * Because there is no RLS behind this call, the org scope is enforced here in
+ * application code instead:
+ * - orgId must be a well-formed UUID (isValidShareOrgId) — anything else throws
+ *   before a query is issued, so a malformed token payload cannot reach the DB.
+ * - every query is filtered on org_id, including the project_forms queries that
+ *   are already narrowed by project_id, so a single wrong filter cannot widen
+ *   the result set beyond the named org.
+ * - only the columns the report renders are selected.
+ *
+ * The longer-term fix (an RLS-respecting client plus a share-scoped policy) is
+ * tracked on the same ticket; this keeps the blast radius bounded until then.
  */
 
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -16,6 +28,11 @@ import type { Period } from '@/lib/report-period'
 import type { ResultsMetricsData, ProblemStatementData } from '@/lib/form-schemas'
 
 const TOTAL_FORM_TYPES = 25
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** True when the value is a well-formed UUID and therefore safe to scope admin queries by. */
+export const isValidShareOrgId = (orgId: string): boolean => UUID_RE.test(orgId)
 
 const toYearMonth = (d: Date): string => {
   const y = d.getFullYear()
@@ -34,6 +51,12 @@ export const getExecutiveSummaryPublic = async (
   orgId: string,
   period: Period,
 ): Promise<ExecutiveSummaryData> => {
+  // Fail before touching the RLS-bypassing client if the caller handed us
+  // anything other than a UUID.
+  if (!isValidShareOrgId(orgId)) {
+    throw new Error('Invalid organization identifier')
+  }
+
   const supabase = createAdminClient()
 
   const periodBounds = getPeriodBounds(period)
@@ -105,17 +128,20 @@ export const getExecutiveSummaryPublic = async (
     supabase
       .from('project_forms')
       .select('project_id, form_type')
+      .eq('org_id', orgId)
       .in('project_id', allProjectIds)
       .limit(5000),
     supabase
       .from('project_forms')
       .select('project_id, form_type, data')
+      .eq('org_id', orgId)
       .in('project_id', allProjectIds)
       .eq('form_type', 'results_metrics')
       .limit(1000),
     supabase
       .from('project_forms')
       .select('project_id, form_type, data')
+      .eq('org_id', orgId)
       .in('project_id', allProjectIds)
       .eq('form_type', 'problem_statement')
       .limit(1000),

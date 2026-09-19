@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 
 /**
@@ -24,6 +25,20 @@ const getAdminClient = () => {
   })
 }
 
+/**
+ * Password for throwaway E2E accounts.
+ *
+ * Generated per run rather than hardcoded, so there is no fixed credential in
+ * the repository for anyone to try against a deployed environment. CI can pin
+ * it with E2E_TEST_PASSWORD when a stable value is genuinely needed.
+ */
+export const testPassword = (): string => {
+  const fromEnv = process.env.E2E_TEST_PASSWORD
+  if (fromEnv) return fromEnv
+  // Mixed case + digit + symbol so it always satisfies the signup policy.
+  return `E2e!${randomBytes(12).toString('base64url')}9Aa`
+}
+
 export type TestUser = {
   id: string
   email: string
@@ -41,7 +56,7 @@ export const createTestUser = async (suffix?: string): Promise<TestUser> => {
   const tag = suffix ?? ts.toString()
 
   const email = `e2e-test-${tag}@test.pips.app`
-  const password = 'E2eTestPass123!'
+  const password = testPassword()
   const displayName = `E2E Test ${tag}`
 
   const { data, error } = await admin.auth.admin.createUser({

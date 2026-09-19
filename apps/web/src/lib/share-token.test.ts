@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-import { generateShareToken, validateShareToken } from './share-token'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { generateShareToken, validateShareToken, ShareTokenSecretMissingError } from './share-token'
 
 describe('share-token', () => {
   describe('generateShareToken', () => {
@@ -99,6 +99,61 @@ describe('share-token', () => {
       expect(result).not.toBeNull()
       expect(result?.orgId).toBe('org-id')
       expect(result?.period).toBe('last-quarter')
+    })
+  })
+
+  describe('secret handling (fails closed)', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it('throws when generating in production with no secret configured', () => {
+      vi.stubEnv('NODE_ENV', 'production')
+      vi.stubEnv('SHARE_TOKEN_SECRET', '')
+      vi.stubEnv('NOTIFICATION_EMAIL_SECRET', '')
+
+      expect(() => generateShareToken('org-id', 'executive-summary', 'ytd')).toThrow(
+        ShareTokenSecretMissingError,
+      )
+    })
+
+    it('rejects every token in production when no secret is configured', () => {
+      // Mint a token while a secret IS configured.
+      vi.stubEnv('SHARE_TOKEN_SECRET', 'a-real-secret')
+      const token = generateShareToken('org-id', 'executive-summary', 'ytd')
+      expect(validateShareToken(token)).not.toBeNull()
+
+      // Remove the secret in production — validation must fail closed, not fall
+      // back to signing with the empty string.
+      vi.stubEnv('NODE_ENV', 'production')
+      vi.stubEnv('SHARE_TOKEN_SECRET', '')
+      vi.stubEnv('NOTIFICATION_EMAIL_SECRET', '')
+      expect(validateShareToken(token)).toBeNull()
+    })
+
+    it('rejects a token signed with a different key', () => {
+      vi.stubEnv('SHARE_TOKEN_SECRET', 'key-one')
+      const token = generateShareToken('org-id', 'executive-summary', 'ytd')
+
+      vi.stubEnv('SHARE_TOKEN_SECRET', 'key-two')
+      expect(validateShareToken(token)).toBeNull()
+    })
+
+    it('prefers SHARE_TOKEN_SECRET over the legacy NOTIFICATION_EMAIL_SECRET', () => {
+      vi.stubEnv('SHARE_TOKEN_SECRET', 'dedicated-key')
+      vi.stubEnv('NOTIFICATION_EMAIL_SECRET', 'email-key')
+      const token = generateShareToken('org-id', 'executive-summary', 'ytd')
+
+      // Dropping only the dedicated key changes the effective signing key,
+      // proving it was the one used.
+      vi.stubEnv('SHARE_TOKEN_SECRET', '')
+      expect(validateShareToken(token)).toBeNull()
+    })
+
+    it('signs with the full SHA-256 digest rather than a 64-bit truncation', () => {
+      const token = generateShareToken('org-id', 'executive-summary', 'ytd')
+      const sig = Buffer.from(token, 'base64url').toString('utf8').split(':')[4]
+      expect(sig).toHaveLength(64)
     })
   })
 })

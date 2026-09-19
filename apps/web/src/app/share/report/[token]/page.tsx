@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { validateShareToken } from '@/lib/share-token'
 import { parsePeriod } from '@/lib/report-period'
-import { getExecutiveSummaryPublic } from '@/lib/get-executive-summary-public'
+import { getExecutiveSummaryPublic, isValidShareOrgId } from '@/lib/get-executive-summary-public'
 import { formatCurrency } from '@/lib/format-utils'
 
 export const metadata: Metadata = {
@@ -36,6 +36,12 @@ const ShareReportPage = async ({ params }: ShareReportPageProps) => {
 
   const payload = validateShareToken(token)
   if (!payload || payload.reportType !== 'executive-summary') {
+    notFound()
+  }
+  // This route is unauthenticated and reads through the RLS-bypassing admin
+  // client, so re-check the token payload before it is used as a query scope.
+  // 404 rather than an error page: do not confirm which org ids exist.
+  if (!isValidShareOrgId(payload.orgId)) {
     notFound()
   }
 

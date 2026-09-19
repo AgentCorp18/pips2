@@ -31,7 +31,7 @@ vi.mock('@upstash/ratelimit', () => {
    Import after mocks
    ============================================================ */
 
-import { checkRateLimit } from '../rate-limit'
+import { checkRateLimit, getRateLimitBackend } from '../rate-limit'
 
 /* ============================================================
    In-memory fallback (no env vars set)
@@ -142,5 +142,62 @@ describe('checkRateLimit — Upstash Redis mode', () => {
   it('passes the correct key to Upstash limit()', async () => {
     await checkRateLimit('ai-assist:user-abc', 10, 60_000)
     expect(mockLimit).toHaveBeenCalledWith('ai-assist:user-abc')
+  })
+})
+
+/* ============================================================
+   Production configuration (fails loudly, not silently)
+   ============================================================ */
+
+describe('rate limiter backend selection', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.restoreAllMocks()
+  })
+
+  const clearUpstash = () => {
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', '')
+    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
+  }
+
+  it('reports upstash when both Redis variables are set', () => {
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', 'https://example.upstash.io')
+    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', 'token')
+    expect(getRateLimitBackend()).toBe('upstash')
+  })
+
+  it('reports memory outside production when Redis is absent', () => {
+    clearUpstash()
+    vi.stubEnv('NODE_ENV', 'development')
+    expect(getRateLimitBackend()).toBe('memory')
+  })
+
+  it('reports unconfigured in production when Redis is absent', () => {
+    clearUpstash()
+    vi.stubEnv('NODE_ENV', 'production')
+    expect(getRateLimitBackend()).toBe('unconfigured')
+  })
+
+  it('denies requests in production when the limiter is unconfigured', async () => {
+    clearUpstash()
+    vi.stubEnv('NODE_ENV', 'production')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const result = await checkRateLimit('login:someone@example.com', 5, 60_000)
+
+    expect(result.allowed).toBe(false)
+    expect(result.remaining).toBe(0)
+    expect(consoleError).toHaveBeenCalled()
+  })
+
+  it('allows the in-memory fallback in production only as an explicit opt-out', async () => {
+    clearUpstash()
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('ALLOW_IN_MEMORY_RATE_LIMIT', 'true')
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    expect(getRateLimitBackend()).toBe('memory')
+    const result = await checkRateLimit(`optout:${Date.now()}`, 5, 60_000)
+    expect(result.allowed).toBe(true)
   })
 })
