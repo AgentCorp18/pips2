@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { requirePermission } from '@/lib/permissions'
 import { trackServerEvent } from '@/lib/analytics'
 
 type CreateTicketInput = {
@@ -35,20 +36,27 @@ export const createTicketFromFormContext = async (
     return { error: 'You must be signed in' }
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
+  // projectId comes from the client, so resolve the org from the project itself
+  // and then prove the caller belongs to that org. Taking the caller's first
+  // membership instead would let a project in another org be written to.
+  const { data: project } = await supabase
+    .from('projects')
     .select('org_id')
-    .eq('user_id', user.id)
-    .order('joined_at', { ascending: true })
-    .limit(1)
+    .eq('id', projectId)
     .maybeSingle()
 
-  if (!membership) {
-    return { error: 'You must belong to an organization' }
+  if (!project) {
+    return { error: 'Project not found' }
+  }
+
+  try {
+    await requirePermission(project.org_id, 'ticket.create', { supabase, userId: user.id })
+  } catch {
+    return { error: 'Project not found' }
   }
 
   const { error: insertError } = await supabase.from('tickets').insert({
-    org_id: membership.org_id,
+    org_id: project.org_id,
     title: title.trim(),
     description: description.trim() || null,
     type: 'task',

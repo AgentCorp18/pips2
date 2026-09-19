@@ -1,16 +1,62 @@
 -- ============================================================
--- PIPS 2.0 — Admin Test Account
+-- PIPS 2.0 — Admin Test Account (LOCAL DEVELOPMENT ONLY)
 -- ============================================================
--- Run this in the Supabase SQL Editor (Dashboard → SQL Editor)
--- to create an admin test account you can log into immediately.
+-- Creates a local admin account, a "PIPS Test Org" organization and a sample
+-- project so the full methodology flow can be exercised.
 --
--- Credentials:
---   Email:    admin@pips-test.com
---   Password: PipsAdmin2026!
+-- SECURITY: this script previously carried a plaintext password in the file and
+-- printed it back out. Both are gone. The password now comes from a psql
+-- variable, and the script refuses to run unless the operator explicitly
+-- confirms the target is a local database.
 --
--- This user will be the owner of a "PIPS Test Org" organization
--- with a sample project pre-created.
+-- Usage (psql, against a LOCAL Supabase stack). Both variables are required:
+--
+--   psql "$LOCAL_DATABASE_URL"
+--        -v admin_password="$(openssl rand -base64 18)"
+--        -v confirm_local_database=yes
+--        -f supabase/create-admin-test-account.sql
+--
+-- Do NOT paste this into the hosted Supabase SQL editor: it has no psql
+-- variables, so the checks below abort the run. A fixed-credential owner
+-- account does not belong in a shared database in any case.
 -- ============================================================
+
+\if :{?admin_password}
+\else
+\warn 'ERROR: pass a password with -v admin_password=...'
+\quit
+\endif
+
+\if :{?confirm_local_database}
+\else
+\warn 'ERROR: confirm the target with -v confirm_local_database=yes'
+\quit
+\endif
+
+SET pips.confirm_local_database = :'confirm_local_database';
+
+-- ------------------------------------------------------------
+-- Guard: refuse to run anywhere that looks like a real database
+-- ------------------------------------------------------------
+DO $guard$
+DECLARE
+  foreign_orgs INT;
+BEGIN
+  IF current_setting('pips.confirm_local_database', true) IS DISTINCT FROM 'yes' THEN
+    RAISE EXCEPTION
+      'Refusing to run: pass -v confirm_local_database=yes to confirm this is a local database.';
+  END IF;
+
+  SELECT count(*) INTO foreign_orgs
+  FROM organizations
+  WHERE id <> 'aaaa0000-0000-0000-0000-000000000002';
+
+  IF foreign_orgs > 0 THEN
+    RAISE EXCEPTION
+      'Refusing to run: this database already contains % organization(s) this script did not create.', foreign_orgs;
+  END IF;
+END
+$guard$;
 
 -- Fixed UUIDs for the test account
 -- Admin user:    aaaa0000-0000-0000-0000-000000000001
@@ -26,13 +72,13 @@ INSERT INTO auth.users (
   'aaaa0000-0000-0000-0000-000000000001',
   '00000000-0000-0000-0000-000000000000',
   'admin@pips-test.com',
-  crypt('PipsAdmin2026!', gen_salt('bf')),
+  crypt(:'admin_password', gen_salt('bf')),
   NOW(),
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{"full_name":"Marc Admin"}'::jsonb,
   NOW(), NOW(), 'authenticated', 'authenticated', ''
 ) ON CONFLICT (id) DO UPDATE SET
-  encrypted_password = crypt('PipsAdmin2026!', gen_salt('bf')),
+  encrypted_password = crypt(:'admin_password', gen_salt('bf')),
   email_confirmed_at = NOW(),
   updated_at = NOW();
 
@@ -108,11 +154,9 @@ VALUES (
   'lead'
 ) ON CONFLICT DO NOTHING;
 
--- Done! You can now log in at pips-app.vercel.app/login with:
---   Email:    admin@pips-test.com
---   Password: PipsAdmin2026!
+-- Done. Log in with the email below and the password you supplied via
+-- -v admin_password=... . The password is deliberately not echoed here.
 SELECT 'Admin test account created successfully!' AS result,
        'admin@pips-test.com' AS email,
-       'PipsAdmin2026!' AS password,
        'PIPS Test Org' AS organization,
        'owner' AS role;

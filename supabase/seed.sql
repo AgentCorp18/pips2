@@ -1,5 +1,5 @@
 -- ============================================================
--- PIPS 2.0 — Production Seed Data
+-- PIPS 2.0 — Demo Seed Data (LOCAL DEVELOPMENT ONLY)
 -- ============================================================
 -- Creates a realistic worked example for demos and development.
 --
@@ -14,7 +14,60 @@
 --
 -- All inserts use fixed UUIDs and ON CONFLICT DO NOTHING so
 -- this script is idempotent (safe to run repeatedly).
+--
+-- SECURITY: this file used to hardcode one plaintext password shared by all
+-- three accounts, and repeat it in a footer comment. Fixed credentials plus a
+-- fixed UUID is a known-credential backdoor the moment the script touches a
+-- shared database. The password is now supplied per run, and the script refuses
+-- to run against a database holding organizations it did not create.
+--
+-- Usage (psql, against a LOCAL Supabase stack). Both variables are required:
+--
+--   psql "$LOCAL_DATABASE_URL"
+--        -v demo_password="$(openssl rand -base64 18)"
+--        -v confirm_local_database=yes
+--        -f supabase/seed.sql
+--
+-- Do NOT paste this into the hosted Supabase SQL editor: it has no psql
+-- variables, so the checks below abort the run.
 -- ============================================================
+
+\if :{?demo_password}
+\else
+\warn 'ERROR: pass a password with -v demo_password=...'
+\quit
+\endif
+
+\if :{?confirm_local_database}
+\else
+\warn 'ERROR: confirm the target with -v confirm_local_database=yes'
+\quit
+\endif
+
+SET pips.confirm_local_database = :'confirm_local_database';
+
+-- ------------------------------------------------------------
+-- Guard: refuse to run anywhere that looks like a real database
+-- ------------------------------------------------------------
+DO $guard$
+DECLARE
+  foreign_orgs INT;
+BEGIN
+  IF current_setting('pips.confirm_local_database', true) IS DISTINCT FROM 'yes' THEN
+    RAISE EXCEPTION
+      'Refusing to run: pass -v confirm_local_database=yes to confirm this is a local database.';
+  END IF;
+
+  SELECT count(*) INTO foreign_orgs
+  FROM organizations
+  WHERE id <> 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+
+  IF foreign_orgs > 0 THEN
+    RAISE EXCEPTION
+      'Refusing to run: this database already contains % organization(s) this seed did not create.', foreign_orgs;
+  END IF;
+END
+$guard$;
 
 
 -- ============================================================
@@ -53,7 +106,7 @@ INSERT INTO auth.users (
   '11111111-1111-1111-1111-111111111111',
   '00000000-0000-0000-0000-000000000000',
   'dana.rivera@pips-demo.com',
-  crypt('DemoPassword1!', gen_salt('bf')),
+  crypt(:'demo_password', gen_salt('bf')),
   NOW(),
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{"full_name":"Dana Rivera"}'::jsonb,
@@ -69,7 +122,7 @@ INSERT INTO auth.users (
   '22222222-2222-2222-2222-222222222222',
   '00000000-0000-0000-0000-000000000000',
   'jordan.chen@pips-demo.com',
-  crypt('DemoPassword1!', gen_salt('bf')),
+  crypt(:'demo_password', gen_salt('bf')),
   NOW(),
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{"full_name":"Jordan Chen"}'::jsonb,
@@ -85,7 +138,7 @@ INSERT INTO auth.users (
   '33333333-3333-3333-3333-333333333333',
   '00000000-0000-0000-0000-000000000000',
   'alex.morgan@pips-demo.com',
-  crypt('DemoPassword1!', gen_salt('bf')),
+  crypt(:'demo_password', gen_salt('bf')),
   NOW(),
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{"full_name":"Alex Morgan"}'::jsonb,
@@ -1449,8 +1502,9 @@ VALUES (
 -- ============================================================
 -- SEED COMPLETE
 -- ============================================================
--- Login credentials for demo:
---   dana.rivera@pips-demo.com  / DemoPassword1!  (Owner)
---   jordan.chen@pips-demo.com  / DemoPassword1!  (Manager)
---   alex.morgan@pips-demo.com  / DemoPassword1!  (Member)
+-- Demo accounts (all share the password supplied via -v demo_password=...,
+-- which is deliberately not recorded here):
+--   dana.rivera@pips-demo.com   (Owner)
+--   jordan.chen@pips-demo.com   (Manager)
+--   alex.morgan@pips-demo.com   (Member)
 -- ============================================================

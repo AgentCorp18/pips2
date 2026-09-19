@@ -57,6 +57,7 @@ vi.mock('next/cache', () => ({
    Import after mocks
    ============================================================ */
 
+import { getUserOrg } from '@/lib/permissions'
 import {
   getOrgSessions,
   getSession,
@@ -75,6 +76,14 @@ import {
    ============================================================ */
 
 const VALID_UUID = '00000000-0000-4000-8000-000000000001'
+
+/**
+ * Every session mutation now begins with an ownership lookup
+ * (requireWorkshopPermission -> select org_id from workshop_sessions), so the
+ * first queued result belongs to that check.
+ */
+const OWNED_BY_CALLER = { data: { org_id: 'org-1' }, error: null }
+const OWNED_BY_OTHER_ORG = { data: { org_id: 'org-2' }, error: null }
 
 /* ============================================================
    getOrgSessions
@@ -224,14 +233,14 @@ describe('startSession', () => {
   })
 
   it('starts a draft session', async () => {
-    fromResults = [{ data: null, error: null }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: null }]
 
     const result = await startSession(VALID_UUID)
     expect(result.success).toBe(true)
   })
 
   it('returns error on failure', async () => {
-    fromResults = [{ data: null, error: { message: 'Not in draft' } }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: { message: 'Not in draft' } }]
 
     const result = await startSession(VALID_UUID)
     expect(result.success).toBe(false)
@@ -259,6 +268,7 @@ describe('pauseSession', () => {
 
   it('pauses an active session', async () => {
     fromResults = [
+      OWNED_BY_CALLER,
       {
         data: {
           timer_state: { mode: 'countup', running: true, startedAt: new Date().toISOString() },
@@ -294,6 +304,7 @@ describe('resumeSession', () => {
 
   it('resumes a paused session', async () => {
     fromResults = [
+      OWNED_BY_CALLER,
       { data: { timer_state: { mode: 'countup', running: false } }, error: null },
       { data: null, error: null },
     ]
@@ -323,14 +334,14 @@ describe('completeSession', () => {
   })
 
   it('completes an active session', async () => {
-    fromResults = [{ data: null, error: null }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: null }]
 
     const result = await completeSession(VALID_UUID)
     expect(result.success).toBe(true)
   })
 
   it('returns error on failure', async () => {
-    fromResults = [{ data: null, error: { message: 'Already completed' } }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: { message: 'Already completed' } }]
 
     const result = await completeSession(VALID_UUID)
     expect(result.success).toBe(false)
@@ -360,6 +371,7 @@ describe('setCurrentModule', () => {
     // First query: fetch session modules for bounds check
     // Second query: update current_module_index
     fromResults = [
+      OWNED_BY_CALLER,
       { data: { modules: [{}, {}, {}, {}, {}] }, error: null },
       { data: null, error: null },
     ]
@@ -369,7 +381,7 @@ describe('setCurrentModule', () => {
   })
 
   it('returns error when session is not found', async () => {
-    fromResults = [{ data: null, error: { message: 'Not found' } }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: { message: 'Not found' } }]
 
     const result = await setCurrentModule(VALID_UUID, 0)
     expect(result.success).toBe(false)
@@ -379,7 +391,7 @@ describe('setCurrentModule', () => {
   })
 
   it('returns error when moduleIndex is out of range', async () => {
-    fromResults = [{ data: { modules: [{}, {}] }, error: null }]
+    fromResults = [OWNED_BY_CALLER, { data: { modules: [{}, {}] }, error: null }]
 
     const result = await setCurrentModule(VALID_UUID, 5)
     expect(result.success).toBe(false)
@@ -425,7 +437,7 @@ describe('updateTimerState', () => {
   })
 
   it('sets countdown timer', async () => {
-    fromResults = [{ data: null, error: null }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: null }]
 
     const result = await updateTimerState(VALID_UUID, {
       mode: 'countdown',
@@ -438,7 +450,7 @@ describe('updateTimerState', () => {
   })
 
   it('resets timer', async () => {
-    fromResults = [{ data: null, error: null }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: null }]
 
     const result = await updateTimerState(VALID_UUID, {})
     expect(result.success).toBe(true)
@@ -465,7 +477,7 @@ describe('updateParticipantCount', () => {
   })
 
   it('updates count', async () => {
-    fromResults = [{ data: null, error: null }]
+    fromResults = [OWNED_BY_CALLER, { data: null, error: null }]
 
     const result = await updateParticipantCount(VALID_UUID, 5)
     expect(result.success).toBe(true)
@@ -493,5 +505,54 @@ describe('updateParticipantCount', () => {
     if (!result.success) {
       expect(result.error).toContain('integer')
     }
+  })
+})
+
+/* ============================================================
+   Cross-org access (IDOR)
+   ============================================================ */
+
+describe('cross-org session access', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    fromCallIndex = 0
+    fromResults = []
+  })
+
+  const mutations: Array<[string, () => Promise<{ success: boolean; error?: string }>]> = [
+    ['startSession', () => startSession(VALID_UUID)],
+    ['pauseSession', () => pauseSession(VALID_UUID)],
+    ['resumeSession', () => resumeSession(VALID_UUID)],
+    ['completeSession', () => completeSession(VALID_UUID)],
+    ['setCurrentModule', () => setCurrentModule(VALID_UUID, 0)],
+    ['updateTimerState', () => updateTimerState(VALID_UUID, { mode: 'countup', running: true })],
+    ['updateParticipantCount', () => updateParticipantCount(VALID_UUID, 5)],
+  ]
+
+  it.each(mutations)('%s refuses a session owned by another org', async (_name, call) => {
+    fromResults = [OWNED_BY_OTHER_ORG, { data: null, error: null }]
+
+    const result = await call()
+    expect(result.success).toBe(false)
+    // Not-found rather than forbidden, so session ids are not enumerable.
+    expect(result.error).toBe('Session not found')
+  })
+
+  it.each(mutations)('%s refuses a session id that does not exist', async (_name, call) => {
+    fromResults = [
+      { data: null, error: null },
+      { data: null, error: null },
+    ]
+
+    const result = await call()
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('Session not found')
+  })
+
+  it('getSession returns null for a caller with no organization', async () => {
+    vi.mocked(getUserOrg).mockResolvedValueOnce(null)
+    fromResults = [{ data: { id: VALID_UUID, org_id: 'org-2' }, error: null }]
+
+    await expect(getSession(VALID_UUID)).resolves.toBeNull()
   })
 })

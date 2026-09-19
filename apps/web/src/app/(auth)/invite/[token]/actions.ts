@@ -1,9 +1,11 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /* ============================================================
    Types
@@ -38,12 +40,46 @@ export interface ActionResult {
 const tokenSchema = z.string().min(1).max(128)
 
 /* ============================================================
+   Rate limiting
+   ============================================================ */
+
+/**
+ * getInvitation is unauthenticated and reads through the RLS-bypassing admin
+ * client, so throttle it per client IP. The token is 32 random bytes, which
+ * already makes brute force impractical; this closes the "unthrottled endpoint
+ * that confirms token validity" oracle.
+ */
+const INVITE_LOOKUP_LIMIT = 20
+const INVITE_LOOKUP_WINDOW_MS = 60_000
+
+const getClientIp = async (): Promise<string> => {
+  try {
+    const headerList = await headers()
+    const forwardedFor = headerList.get('x-forwarded-for')
+    if (forwardedFor) return forwardedFor.split(',')[0]?.trim() || 'unknown'
+    return headerList.get('x-real-ip')?.trim() || 'unknown'
+  } catch {
+    // Outside a request scope (e.g. unit tests) — fall back to a shared bucket.
+    return 'unknown'
+  }
+}
+
+/* ============================================================
    getInvitation — Fetch invitation details by token
    ============================================================ */
 
 export const getInvitation = async (token: string): Promise<InvitationResult> => {
   const parsed = tokenSchema.safeParse(token)
   if (!parsed.success) return { status: 'not_found' }
+
+  const ip = await getClientIp()
+  const limit = await checkRateLimit(
+    `invite-lookup:${ip}`,
+    INVITE_LOOKUP_LIMIT,
+    INVITE_LOOKUP_WINDOW_MS,
+  )
+  // Indistinguishable from an unknown token, so the response is not an oracle.
+  if (!limit.allowed) return { status: 'not_found' }
 
   const admin = createAdminClient()
 

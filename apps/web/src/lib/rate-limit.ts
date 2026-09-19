@@ -5,12 +5,20 @@
  * in Redis using a sliding-window algorithm — persistent across serverless cold starts and
  * multiple instances.
  *
- * When those env vars are absent (local development), the module falls back to a simple
- * in-memory Map with the same semantics.
+ * When those env vars are absent, the module falls back to an in-memory Map with the same
+ * semantics. That is fine locally and close to useless on serverless, where each invocation
+ * may get a fresh instance — an attacker spreading login attempts across instances is
+ * effectively unthrottled.
+ *
+ * SECURITY: the fallback therefore does not apply in production. With no Upstash
+ * configuration, checkRateLimit() denies instead of allowing, so the failure is visible
+ * rather than silent. Setting ALLOW_IN_MEMORY_RATE_LIMIT=true restores the old behaviour
+ * as a deliberate, logged opt-out.
  *
  * Setup (production):
  *   1. Create a Redis database at console.upstash.com
  *   2. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel env vars
+ *   3. Confirm both names are in the turbo.json env allowlist, or they never reach the app
  */
 
 import { Ratelimit } from '@upstash/ratelimit'
@@ -20,6 +28,23 @@ export type RateLimitResult = {
   allowed: boolean
   remaining: number
   resetAt: number
+}
+
+/**
+ * Which backend checkRateLimit() will use.
+ * - 'upstash'      — Redis-backed, correct across instances
+ * - 'memory'       — per-instance counter; development, or an explicit production opt-out
+ * - 'unconfigured' — production with no Redis and no opt-out; the limiter denies
+ */
+export type RateLimitBackend = 'upstash' | 'memory' | 'unconfigured'
+
+export const getRateLimitBackend = (): RateLimitBackend => {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return 'upstash'
+  }
+  if (process.env.NODE_ENV !== 'production') return 'memory'
+  if (process.env.ALLOW_IN_MEMORY_RATE_LIMIT === 'true') return 'memory'
+  return 'unconfigured'
 }
 
 /* ============================================================
@@ -129,10 +154,27 @@ export const checkRateLimit = async (
   limit: number,
   windowMs: number,
 ): Promise<RateLimitResult> => {
-  const useUpstash = !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN
+  const backend = getRateLimitBackend()
 
-  if (useUpstash) {
+  if (backend === 'upstash') {
     return checkRateLimitUpstash(key, limit, windowMs)
+  }
+
+  if (backend === 'unconfigured') {
+    console.error(
+      '[SECURITY] Rate limiting is not configured (UPSTASH_REDIS_REST_URL / ' +
+        'UPSTASH_REDIS_REST_TOKEN missing in production). Denying the request rather than ' +
+        'silently degrading to a per-instance counter. Set ALLOW_IN_MEMORY_RATE_LIMIT=true ' +
+        'to accept the weaker guarantee.',
+    )
+    return { allowed: false, remaining: 0, resetAt: Date.now() + windowMs }
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    console.warn(
+      '[SECURITY] Rate limiting is using the in-memory fallback in production ' +
+        '(ALLOW_IN_MEMORY_RATE_LIMIT=true). Limits are per-instance and easily evaded.',
+    )
   }
 
   return checkRateLimitInMemory(key, limit, windowMs)

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getRateLimitBackend } from '@/lib/rate-limit'
 
 /* ============================================================
    Types
@@ -13,12 +14,15 @@ type CheckResult = {
   error?: string
 }
 
+type RateLimitCheck = CheckResult & { backend: ReturnType<typeof getRateLimitBackend> }
+
 type HealthResponse = {
   status: HealthStatus
   timestamp: string
   checks: {
     database: CheckResult
     auth: CheckResult
+    rate_limit: RateLimitCheck
   }
 }
 
@@ -71,14 +75,32 @@ const checkAuth = async (): Promise<CheckResult> => {
   }
 }
 
-const deriveStatus = (checks: HealthResponse['checks']): HealthStatus => {
-  const results = Object.values(checks)
-  const allOk = results.every((c) => c.status === 'ok')
-  const allError = results.every((c) => c.status === 'error')
+/**
+ * Surface the limiter backend so a silent degradation is visible in monitoring
+ * instead of only in logs. 'unconfigured' means brute-force protection is not
+ * actually running.
+ */
+const checkRateLimiter = (): RateLimitCheck => {
+  const backend = getRateLimitBackend()
+  return {
+    backend,
+    status: backend === 'unconfigured' ? 'error' : 'ok',
+    latency_ms: 0,
+    ...(backend === 'unconfigured' ? { error: 'Rate limiting is not configured' } : {}),
+  }
+}
 
-  if (allOk) return 'ok'
+const deriveStatus = (checks: HealthResponse['checks']): HealthStatus => {
+  // Connectivity to the backing services decides ok/degraded/error.
+  const dependencies = [checks.database, checks.auth]
+  const allOk = dependencies.every((c) => c.status === 'ok')
+  const allError = dependencies.every((c) => c.status === 'error')
+
   if (allError) return 'error'
-  return 'degraded'
+  if (!allOk) return 'degraded'
+
+  // Everything reachable, but a misconfigured limiter is not a healthy service.
+  return checks.rate_limit.status === 'ok' ? 'ok' : 'degraded'
 }
 
 /* ============================================================
@@ -92,7 +114,7 @@ export const dynamic = 'force-dynamic'
 export const GET = async () => {
   const [database, auth] = await Promise.all([checkDatabase(), checkAuth()])
 
-  const checks = { database, auth }
+  const checks = { database, auth, rate_limit: checkRateLimiter() }
   const status = deriveStatus(checks)
 
   const body: HealthResponse = {

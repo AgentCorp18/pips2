@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentOrg } from '@/lib/get-current-org'
+import { requirePermission } from '@/lib/permissions'
 
 type ChecklistItem = {
   text: string
@@ -38,6 +39,25 @@ export const createTicketsFromChecklist = async (
 
   if (!currentOrg) {
     return { created: 0, error: 'You must belong to an organization' }
+  }
+
+  // projectId comes from the client. Confirm it belongs to the caller's active
+  // org and that they may create tickets there, instead of relying on RLS alone.
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('id', projectId)
+    .eq('org_id', currentOrg.orgId)
+    .maybeSingle()
+
+  if (!project) {
+    return { created: 0, error: 'Project not found' }
+  }
+
+  try {
+    await requirePermission(currentOrg.orgId, 'ticket.create', { supabase, userId: user.id })
+  } catch {
+    return { created: 0, error: 'Project not found' }
   }
 
   // Filter to incomplete items with text

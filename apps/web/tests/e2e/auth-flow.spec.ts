@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { createTestUser, deleteTestUser, getUserOrgs } from './helpers/supabase-admin'
+import { createTestUser, deleteTestUser, getUserOrgs, testPassword } from './helpers/supabase-admin'
 import type { TestUser } from './helpers/supabase-admin'
 
 /**
@@ -137,7 +137,7 @@ test.describe('Login error for unconfirmed email', () => {
     )
 
     const email = `e2e-unconfirmed-${Date.now()}@test.pips.app`
-    const password = 'TestPass123!'
+    const password = testPassword()
 
     // Create user WITHOUT confirming email
     const { data } = await admin.auth.admin.createUser({

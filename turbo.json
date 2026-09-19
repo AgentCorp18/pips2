@@ -19,7 +19,11 @@
         "RESEND_API_KEY",
         "SENTRY_DSN",
         "ANTHROPIC_API_KEY",
-        "CRON_SECRET"
+        "CRON_SECRET",
+        "SHARE_TOKEN_SECRET",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "ALLOW_IN_MEMORY_RATE_LIMIT"
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
